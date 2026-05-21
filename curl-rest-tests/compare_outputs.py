@@ -21,7 +21,7 @@ def parse_date(date_str):
 def map_legacy_status(legacy_status, reasons):
     if legacy_status == 'COMPLETE':
         return 'Complete'
-    if legacy_status == 'CONDITIONAL' and any('COMPLETE' in r for r in reasons):
+    if any('COMPLETE' in r for r in reasons):
         return 'Complete'
     if legacy_status == 'CONDITIONAL':
         return 'ConditionallyRecommended'
@@ -40,7 +40,7 @@ def map_legacy_dose_status(status):
         return 'Accepted'
     return status
 
-def parse_legacy_xml(xml_content):
+def parse_legacy_xml(xml_content, focus_code='400'):
     root = ET.fromstring(xml_content)
     
     # 1. Parse patient birth time
@@ -113,7 +113,7 @@ def parse_legacy_xml(xml_content):
                                 if obs_child.tag.endswith('observationFocus'):
                                     focus_el = obs_child
                                     break
-                            if focus_el is not None and focus_el.attrib.get('code') == '400':
+                            if focus_el is not None and focus_el.attrib.get('code') == focus_code:
                                 has_polio_focus = True
                                 
                                 # Extract status
@@ -172,7 +172,7 @@ def parse_legacy_xml(xml_content):
             if child.tag.endswith('substanceCode'):
                 sub_code_el = child
                 break
-        if sub_code_el is not None and sub_code_el.attrib.get('code') == '400':
+        if sub_code_el is not None and sub_code_el.attrib.get('code') == focus_code:
             earliest_date = None
             recommended_date = None
             overdue_date = None
@@ -197,7 +197,7 @@ def parse_legacy_xml(xml_content):
                         if obs_child.tag.endswith('observationFocus'):
                             focus_el = obs_child
                             break
-                    if focus_el is not None and focus_el.attrib.get('code') == '400':
+                    if focus_el is not None and focus_el.attrib.get('code') == focus_code:
                         val_el = None
                         for obs_child in obs:
                             if obs_child.tag.endswith('observationValue'):
@@ -298,13 +298,16 @@ def sanitize_and_write_temp(payload_path):
     return temp_path
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: compare_outputs.py <path_to_test_payload.dat>")
-        sys.exit(1)
+    import argparse
+    parser = argparse.ArgumentParser(description="Compare Rust PoC output with legacy Java ICE output")
+    parser.add_argument("payload_path", help="Path to test payload (.dat or .json)")
+    parser.add_argument("--group", default="POLIO", help="Vaccine group name in Rust output (e.g., POLIO, HEP_A)")
+    parser.add_argument("--focus", default="400", help="Focus concept code in Java ICE XML (e.g., 400 for POLIO, 810 for HEP_A)")
+    args = parser.parse_args()
         
-    payload_path = sys.argv[1]
+    payload_path = args.payload_path
     
-    print(f"Running comparison for {payload_path}...")
+    print(f"Running comparison for {payload_path} (Group: {args.group}, Focus Code: {args.focus})...")
     
     # Sanitizing input payload dynamically to avoid legacy Java date shifting bug
     try:
@@ -322,7 +325,7 @@ def main():
             print("Please verify the Java ICE service is running at http://localhost:8080")
             sys.exit(1)
             
-        birth_date, legacy_evals, legacy_forecasts = parse_legacy_xml(xml_content)
+        birth_date, legacy_evals, legacy_forecasts = parse_legacy_xml(xml_content, focus_code=args.focus)
         
         # 2. Run Rust PoC
         try:
@@ -334,22 +337,22 @@ def main():
         if os.path.exists(temp_payload_path):
             os.remove(temp_payload_path)
         
-    # Extract Polio evaluations from Rust output
-    polio_group = None
+    # Extract vaccine group from Rust output
+    selected_group = None
     for vg in rust_output.get('vaccine_groups', []):
-        if vg.get('vaccine_group') == 'POLIO':
-            polio_group = vg
+        if vg.get('vaccine_group') == args.group:
+            selected_group = vg
             break
             
-    if not polio_group:
-        print("Error: POLIO vaccine group not found in Rust PoC output.")
+    if not selected_group:
+        print(f"Error: {args.group} vaccine group not found in Rust PoC output.")
         sys.exit(1)
         
-    rust_evals = polio_group.get('evaluations', [])
+    rust_evals = selected_group.get('evaluations', [])
     # Sort rust evals chronologically for comparison
     rust_evals.sort(key=lambda e: e.get('dose_date') or "")
     
-    rust_forecast = polio_group.get('forecasts', [{}])[0]
+    rust_forecast = selected_group.get('forecasts', [{}])[0]
     
     # 3. Compare Patient DOB
     print(f"Patient Birth Date: {birth_date}")

@@ -6,7 +6,7 @@ mod rules;
 mod legacy_models;
 
 use chrono::NaiveDate;
-use models::{Patient, Gender, Dose, ForecastResponse};
+use models::{Patient, Gender, Dose, ForecastResponse, VaccineGroupForecast};
 use engine::EvaluationEngine;
 use std::time::Instant;
 
@@ -21,21 +21,55 @@ fn parse_request(content: &str) -> Result<models::ForecastRequest, Box<dyn std::
     legacy_req.translate()
 }
 
+fn evaluate_patient_all_groups(
+    patient: &Patient,
+    history: &[Dose],
+    eval_date: NaiveDate,
+) -> Vec<VaccineGroupForecast> {
+    let mut results = Vec::new();
+    for ruleset in rules::get_all_groups() {
+        if let Some(group_selection) = ruleset.group_selection {
+            let mut candidate_forecasts = std::collections::HashMap::new();
+            for series in &ruleset.series {
+                let mut engine = EvaluationEngine::new(series.clone());
+                engine.param_overrides = ruleset.param_overrides.clone();
+                engine.completion_rules = ruleset.completion_rules.clone();
+                engine.rec_overrides = ruleset.rec_overrides.clone();
+                engine.custom_forecast_hook = ruleset.custom_forecast_hook;
+                engine.custom_switch_hook = ruleset.custom_switch_hook;
+                engine.custom_evaluation_hook = ruleset.custom_evaluation_hook;
+                
+                let forecast = engine.evaluate_patient(patient, history, eval_date, &ruleset.series);
+                candidate_forecasts.insert(series.name.clone(), forecast);
+            }
+            let selected_name = (group_selection)(patient, history, eval_date, &mut candidate_forecasts);
+            if let Some(selected_forecast) = candidate_forecasts.remove(&selected_name) {
+                results.push(selected_forecast);
+            }
+        } else {
+            if let Some(series) = ruleset.series.first() {
+                let mut engine = EvaluationEngine::new(series.clone());
+                engine.param_overrides = ruleset.param_overrides.clone();
+                engine.completion_rules = ruleset.completion_rules.clone();
+                engine.rec_overrides = ruleset.rec_overrides.clone();
+                engine.custom_forecast_hook = ruleset.custom_forecast_hook;
+                engine.custom_switch_hook = ruleset.custom_switch_hook;
+                engine.custom_evaluation_hook = ruleset.custom_evaluation_hook;
+                
+                let forecast = engine.evaluate_patient(patient, history, eval_date, &ruleset.series);
+                results.push(forecast);
+            }
+        }
+    }
+    results
+}
+
 fn run_server() -> Result<(), Box<dyn std::error::Error>> {
     use tiny_http::{Server, Response, StatusCode, Header};
 
     let addr = "0.0.0.0:8081";
     let server = Server::http(addr).map_err(|e| format!("Failed to start server: {}", e))?;
     println!("Rust PoC REST server listening on http://{}", addr);
-
-    // Cache the ruleset and compiled series to avoid reloading per request
-    let ruleset = rules::get_ruleset("POLIO")
-        .ok_or("POLIO vaccine group definition not found in registry")?;
-    
-    let compiled_series = ruleset.series.iter()
-        .find(|s| s.name == "POLIO_4_DOSE_SERIES")
-        .ok_or("POLIO_4_DOSE_SERIES not found in Polio ruleset")?
-        .clone();
 
     for mut request in server.incoming_requests() {
         let req_start = Instant::now();
@@ -76,15 +110,9 @@ fn run_server() -> Result<(), Box<dyn std::error::Error>> {
 
             let mut responses = Vec::new();
             for single_req in req.requests {
-                let mut engine = EvaluationEngine::new(compiled_series.clone());
-                engine.param_overrides = ruleset.param_overrides.clone();
-                engine.completion_rules = ruleset.completion_rules.clone();
-                engine.rec_overrides = ruleset.rec_overrides.clone();
-                engine.custom_forecast_hook = ruleset.custom_forecast_hook;
-
-                let result = engine.evaluate_patient(&single_req.patient, &single_req.history, single_req.execution_date);
+                let results = evaluate_patient_all_groups(&single_req.patient, &single_req.history, single_req.execution_date);
                 responses.push(ForecastResponse {
-                    vaccine_groups: vec![result],
+                    vaccine_groups: results,
                 });
             }
 
@@ -123,16 +151,10 @@ fn run_server() -> Result<(), Box<dyn std::error::Error>> {
             }
         };
 
-        let mut engine = EvaluationEngine::new(compiled_series.clone());
-        engine.param_overrides = ruleset.param_overrides.clone();
-        engine.completion_rules = ruleset.completion_rules.clone();
-        engine.rec_overrides = ruleset.rec_overrides.clone();
-        engine.custom_forecast_hook = ruleset.custom_forecast_hook;
-
-        let result = engine.evaluate_patient(&req.patient, &req.history, req.execution_date);
+        let results = evaluate_patient_all_groups(&req.patient, &req.history, req.execution_date);
 
         let response_data = ForecastResponse {
-            vaccine_groups: vec![result],
+            vaccine_groups: results,
         };
 
         let response_json = match serde_json::to_string(&response_data) {
@@ -173,26 +195,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         
         let req = parse_request(&content)?;
         
-        let ruleset = rules::get_ruleset("POLIO")
-            .ok_or("POLIO vaccine group definition not found in registry")?;
-        
-        let compiled_series = ruleset.series.iter()
-            .find(|s| s.name == "POLIO_4_DOSE_SERIES")
-            .ok_or("POLIO_4_DOSE_SERIES not found in Polio ruleset")?
-            .clone();
-            
-        let mut engine = EvaluationEngine::new(compiled_series);
-        engine.param_overrides = ruleset.param_overrides.clone();
-        engine.completion_rules = ruleset.completion_rules.clone();
-        engine.rec_overrides = ruleset.rec_overrides.clone();
-        engine.custom_forecast_hook = ruleset.custom_forecast_hook;
-        
         eprintln!("DEBUG: parsed patient = {:?}", req.patient);
         eprintln!("DEBUG: parsed history = {:?}", req.history);
-        let result = engine.evaluate_patient(&req.patient, &req.history, req.execution_date);
+        let results = evaluate_patient_all_groups(&req.patient, &req.history, req.execution_date);
         
         let response = ForecastResponse {
-            vaccine_groups: vec![result],
+            vaccine_groups: results,
         };
         
         println!("{}", serde_json::to_string(&response)?);
@@ -201,27 +209,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("=== High-Performance Rust ICE Forecaster PoC (Compile-Time DSL) ===");
 
-    // 1. Get ruleset from the static registry
-    let ruleset = rules::get_ruleset("POLIO")
-        .ok_or("POLIO vaccine group definition not found in registry")?;
-    
-    println!("Successfully loaded ruleset for vaccine group: {}", ruleset.group_name);
-    
-    // For Polio, we grab the POLIO_4_DOSE_SERIES
-    let compiled_series = ruleset.series.iter()
-        .find(|s| s.name == "POLIO_4_DOSE_SERIES")
-        .ok_or("POLIO_4_DOSE_SERIES not found in Polio ruleset")?
-        .clone();
-        
-    println!("Successfully loaded schedule: {} (code: {}, target group: {})", 
-             compiled_series.name, compiled_series.code, compiled_series.vaccine_group);
-
-    // 2. Configure the Engine with Polio Custom Exception Primitives from the Registry
-    let mut engine = EvaluationEngine::new(compiled_series);
-    engine.param_overrides = ruleset.param_overrides.clone();
-    engine.completion_rules = ruleset.completion_rules.clone();
-    engine.rec_overrides = ruleset.rec_overrides.clone();
-    engine.custom_forecast_hook = ruleset.custom_forecast_hook;
+    for ruleset in rules::get_all_groups() {
+        println!("Successfully loaded ruleset for vaccine group: {}", ruleset.group_name);
+        for series in &ruleset.series {
+            println!("  - Schedule: {} (code: {}, target group: {})", 
+                     series.name, series.code, series.vaccine_group);
+        }
+    }
 
     // 3. Define test patient cases
     let eval_date = NaiveDate::from_ymd_opt(2026, 5, 20).unwrap();
@@ -262,45 +256,59 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // 4. Run evaluations
     println!("\n--- Test Case A: Standard 4-Dose Series (3 doses given) ---");
-    let result_a = engine.evaluate_patient(&patient_a, &history_a, eval_date);
-    for (i, eval) in result_a.evaluations.iter().enumerate() {
-        println!("Dose {}: date={}, cvx={}, status={:?}, reasons={:?}", 
-                 i+1, eval.dose_date, eval.cvx, eval.status, eval.reasons);
+    let result_a = evaluate_patient_all_groups(&patient_a, &history_a, eval_date);
+    for group_forecast in &result_a {
+        println!("Vaccine Group: {}", group_forecast.vaccine_group);
+        for (i, eval) in group_forecast.evaluations.iter().enumerate() {
+            println!("Dose {}: date={}, cvx={}, status={:?}, reasons={:?}", 
+                     i+1, eval.dose_date, eval.cvx, eval.status, eval.reasons);
+        }
+        if !group_forecast.forecasts.is_empty() {
+            println!("Forecast: status={:?}, earliest={:?}, recommended={:?}, overdue={:?}",
+                     group_forecast.forecasts[0].status, group_forecast.forecasts[0].earliest_date, 
+                     group_forecast.forecasts[0].recommended_date, group_forecast.forecasts[0].overdue_date);
+        }
     }
-    println!("Forecast: status={:?}, earliest={:?}, recommended={:?}, overdue={:?}",
-             result_a.forecasts[0].status, result_a.forecasts[0].earliest_date, 
-             result_a.forecasts[0].recommended_date, result_a.forecasts[0].overdue_date);
 
     println!("\n--- Test Case B: 3-Dose Completion Rule (Dose 3 given at >= 4 years) ---");
-    let result_b = engine.evaluate_patient(&patient_b, &history_b, eval_date);
-    for (i, eval) in result_b.evaluations.iter().enumerate() {
-        println!("Dose {}: date={}, cvx={}, status={:?}, reasons={:?}", 
-                 i+1, eval.dose_date, eval.cvx, eval.status, eval.reasons);
+    let result_b = evaluate_patient_all_groups(&patient_b, &history_b, eval_date);
+    for group_forecast in &result_b {
+        println!("Vaccine Group: {}", group_forecast.vaccine_group);
+        for (i, eval) in group_forecast.evaluations.iter().enumerate() {
+            println!("Dose {}: date={}, cvx={}, status={:?}, reasons={:?}", 
+                     i+1, eval.dose_date, eval.cvx, eval.status, eval.reasons);
+        }
+        if !group_forecast.forecasts.is_empty() {
+            println!("Forecast: status={:?}", group_forecast.forecasts[0].status);
+        }
     }
-    println!("Forecast: status={:?} (Expected: Complete)", result_b.forecasts[0].status);
 
     println!("\n--- Test Case C: Pre-2009 Vaccine Interval Check ---");
-    let result_c = engine.evaluate_patient(&patient_c, &history_c, eval_date);
-    for (i, eval) in result_c.evaluations.iter().enumerate() {
-        println!("Dose {}: date={}, cvx={}, status={:?}, reasons={:?}", 
-                 i+1, eval.dose_date, eval.cvx, eval.status, eval.reasons);
+    let result_c = evaluate_patient_all_groups(&patient_c, &history_c, eval_date);
+    for group_forecast in &result_c {
+        println!("Vaccine Group: {}", group_forecast.vaccine_group);
+        for (i, eval) in group_forecast.evaluations.iter().enumerate() {
+            println!("Dose {}: date={}, cvx={}, status={:?}, reasons={:?}", 
+                     i+1, eval.dose_date, eval.cvx, eval.status, eval.reasons);
+        }
+        if !group_forecast.forecasts.is_empty() {
+            println!("Forecast: status={:?}", group_forecast.forecasts[0].status);
+        }
     }
-    println!("Forecast: status={:?}", result_c.forecasts[0].status);
 
     // 5. Run Micro-Benchmarks
     println!("\n--- Micro-benchmarking Forecaster Loop Performance ---");
     let iterations = 100_000;
     let start = Instant::now();
     for _ in 0..iterations {
-        // Run mock evaluations
-        let _ = engine.evaluate_patient(&patient_a, &history_a, eval_date);
-        let _ = engine.evaluate_patient(&patient_b, &history_b, eval_date);
+        let _ = evaluate_patient_all_groups(&patient_a, &history_a, eval_date);
+        let _ = evaluate_patient_all_groups(&patient_b, &history_b, eval_date);
     }
     let duration = start.elapsed();
     let total_evals = iterations * 2;
     let avg_latency = duration.as_secs_f64() / total_evals as f64 * 1_000_000.0;
     println!("Processed {} evaluations in {:?}", total_evals, duration);
-    println!("Average latency per patient forecast: {:.3} microseconds", avg_latency);
+    println!("Average latency per patient forecast (Polio + HepA): {:.3} microseconds", avg_latency);
     println!("Throughput: {:.1} evaluations/sec", total_evals as f64 / duration.as_secs_f64());
 
     Ok(())

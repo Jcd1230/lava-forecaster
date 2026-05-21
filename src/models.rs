@@ -39,6 +39,7 @@ pub enum EvaluationReason {
     VaccineNotPartOfSeries,
     MissingAntigen,
     BoosterDose,
+    VaccineNotCountedBasedOnMostRecentVaccineGiven,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

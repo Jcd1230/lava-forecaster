@@ -45,6 +45,27 @@ pub type CustomForecastHook = fn(
     forecast: &mut SeriesForecast,
 );
 
+pub type CustomSwitchHook = fn(
+    current_series_name: &str,
+    target_dose_idx: usize,
+    ctx: &EvaluationContext,
+) -> Option<&'static str>;
+
+pub type CustomEvaluationHook = fn(
+    series_name: &str,
+    target_dose_idx: usize,
+    ctx: &EvaluationContext,
+    reasons: &mut Vec<EvaluationReason>,
+    is_valid: &mut bool,
+);
+
+pub type GroupSelectionAndPostProcess = fn(
+    patient: &Patient,
+    history: &[Dose],
+    eval_date: NaiveDate,
+    candidate_forecasts: &mut std::collections::HashMap<String, VaccineGroupForecast>,
+) -> String;
+
 // Primitives for generic override rules
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
@@ -79,6 +100,8 @@ pub struct EvaluationEngine {
     pub completion_rules: Vec<ConditionalCompletionRule>,
     pub rec_overrides: Vec<RecommendationOverrideRule>,
     pub custom_forecast_hook: Option<CustomForecastHook>,
+    pub custom_switch_hook: Option<CustomSwitchHook>,
+    pub custom_evaluation_hook: Option<CustomEvaluationHook>,
 }
 
 impl EvaluationEngine {
@@ -89,6 +112,8 @@ impl EvaluationEngine {
             completion_rules: Vec::new(),
             rec_overrides: Vec::new(),
             custom_forecast_hook: None,
+            custom_switch_hook: None,
+            custom_evaluation_hook: None,
         }
     }
 
@@ -97,11 +122,18 @@ impl EvaluationEngine {
         patient: &Patient,
         history: &[Dose],
         eval_date: NaiveDate,
+        group_series: &[CompiledSeries],
     ) -> VaccineGroupForecast {
-        // 1. Filter and sort history chronologically (only keep doses relevant to this series)
+        // 1. Filter and sort history chronologically (only keep doses relevant to this series or group)
         let mut sorted_history: Vec<Dose> = history.iter()
             .filter(|dose| {
-                self.series.doses.iter().any(|d_rule| d_rule.allowed_cvx.contains(&dose.cvx))
+                if group_series.is_empty() {
+                    self.series.doses.iter().any(|d_rule| d_rule.allowed_cvx.contains(&dose.cvx))
+                } else {
+                    group_series.iter().any(|s| {
+                        s.doses.iter().any(|d_rule| d_rule.allowed_cvx.contains(&dose.cvx))
+                    })
+                }
             })
             .cloned()
             .collect();
@@ -110,6 +142,7 @@ impl EvaluationEngine {
         let mut evaluations: Vec<DoseEvaluation> = Vec::new();
         let mut valid_doses: Vec<(NaiveDate, usize)> = Vec::new(); // (date, dose_number_in_series)
         let mut is_completed = false;
+        let mut active_series = self.series.clone();
 
         // 2. Chronological dose evaluation loop
         let mut i = 0;
@@ -146,8 +179,25 @@ impl EvaluationEngine {
                 continue;
             }
 
+            // Apply custom switch hook if present
+            if let Some(switch_hook) = self.custom_switch_hook {
+                let ctx = EvaluationContext::new(
+                    patient,
+                    &sorted_history,
+                    &valid_doses,
+                    Some(dose),
+                    target_dose_idx,
+                    eval_date,
+                );
+                if let Some(new_series_name) = (switch_hook)(&active_series.name, target_dose_idx, &ctx) {
+                    if let Some(new_series) = group_series.iter().find(|s| s.name == new_series_name) {
+                        active_series = new_series.clone();
+                    }
+                }
+            }
+
             // If patient already completed the series, additional doses are boosters/extra
-            if is_completed || target_dose_idx > self.series.num_doses {
+            if is_completed || target_dose_idx > active_series.num_doses {
                 evaluations.push(DoseEvaluation {
                     dose_date: dose.date,
                     cvx: dose.cvx.clone(),
@@ -160,9 +210,9 @@ impl EvaluationEngine {
             }
 
             // Look up dose parameters
-            let mut dose_rule = self.series.doses[target_dose_idx - 1].clone();
+            let mut dose_rule = active_series.doses[target_dose_idx - 1].clone();
             let mut interval_rule = if target_dose_idx > 1 {
-                self.series.intervals.iter()
+                active_series.intervals.iter()
                     .find(|int| int.to_dose == target_dose_idx)
                     .cloned()
             } else {
@@ -223,6 +273,11 @@ impl EvaluationEngine {
                 }
             }
 
+            // Invoke custom_evaluation_hook after checking standard requirements
+            if let Some(eval_hook) = self.custom_evaluation_hook {
+                (eval_hook)(&active_series.name, target_dose_idx, &ctx, &mut reasons, &mut is_valid);
+            }
+
             // Determine status
             let status = if is_valid {
                 valid_doses.push((dose.date, target_dose_idx));
@@ -254,7 +309,7 @@ impl EvaluationEngine {
                 }
             }
 
-            if valid_doses.len() == self.series.num_doses {
+            if valid_doses.len() == active_series.num_doses {
                 is_completed = true;
             }
 
@@ -268,13 +323,14 @@ impl EvaluationEngine {
             &valid_doses,
             is_completed,
             eval_date,
+            &active_series,
         );
 
         VaccineGroupForecast {
-            vaccine_group: self.series.vaccine_group.clone(),
+            vaccine_group: active_series.vaccine_group.clone(),
             evaluations,
             forecasts: vec![forecast],
-            selected_series: Some(self.series.name.clone()),
+            selected_series: Some(active_series.name.clone()),
         }
     }
 
@@ -285,10 +341,11 @@ impl EvaluationEngine {
         valid_doses: &[(NaiveDate, usize)],
         is_completed: bool,
         eval_date: NaiveDate,
+        active_series: &CompiledSeries,
     ) -> SeriesForecast {
         if is_completed {
             return SeriesForecast {
-                series_name: self.series.name.clone(),
+                series_name: active_series.name.clone(),
                 earliest_date: None,
                 recommended_date: None,
                 overdue_date: None,
@@ -299,9 +356,9 @@ impl EvaluationEngine {
         }
 
         let next_dose_idx = valid_doses.len() + 1;
-        let mut dose_rule = self.series.doses[next_dose_idx - 1].clone();
+        let mut dose_rule = active_series.doses[next_dose_idx - 1].clone();
         let mut interval_rule = if next_dose_idx > 1 {
-            self.series.intervals.iter()
+            active_series.intervals.iter()
                 .find(|int| int.to_dose == next_dose_idx)
                 .cloned()
         } else {
@@ -387,7 +444,7 @@ impl EvaluationEngine {
         };
 
         let mut forecast = SeriesForecast {
-            series_name: self.series.name.clone(),
+            series_name: active_series.name.clone(),
             earliest_date,
             recommended_date,
             overdue_date,
