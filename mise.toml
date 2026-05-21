@@ -1,0 +1,15 @@
+[tools]
+java = "25"
+maven = "3.9"
+
+[tasks.build]
+description = "Build the ICE project"
+run = "mvn clean install"
+
+[tasks.run]
+description = "Run the ICE server (Exploded WAR)"
+run = """
+mkdir -p ice-app && cd ice-app
+jar -xf ../opencds-decision-support-service/target/opencds-decision-support-service.war
+java -Xms512m -Xmx2g org.springframework.boot.loader.launch.WarLauncher
+"""
