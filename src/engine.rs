@@ -7,26 +7,68 @@ use crate::schedule::CompiledSeries;
 use crate::date_utils::{TimePeriod, compare_elapsed};
 use std::cmp::max;
 
+#[allow(dead_code)]
+pub struct EvaluationContext<'a> {
+    pub patient: &'a Patient,
+    pub history: &'a [Dose],
+    pub valid_doses: &'a [(NaiveDate, usize)],
+    pub current_dose: Option<&'a Dose>,
+    pub target_dose_number: usize,
+    pub eval_date: NaiveDate,
+}
+
+impl<'a> EvaluationContext<'a> {
+    pub fn new(
+        patient: &'a Patient,
+        history: &'a [Dose],
+        valid_doses: &'a [(NaiveDate, usize)],
+        current_dose: Option<&'a Dose>,
+        target_dose_number: usize,
+        eval_date: NaiveDate,
+    ) -> Self {
+        Self {
+            patient,
+            history,
+            valid_doses,
+            current_dose,
+            target_dose_number,
+            eval_date,
+        }
+    }
+}
+
+pub type RuleCondition = fn(&EvaluationContext) -> bool;
+pub type CustomForecastHook = fn(
+    patient: &Patient,
+    valid_doses: &[(NaiveDate, usize)],
+    eval_date: NaiveDate,
+    forecast: &mut SeriesForecast,
+);
+
 // Primitives for generic override rules
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct ParameterOverrideRule {
-    pub condition_date_before: Option<NaiveDate>,
+    pub description: &'static str,
     pub target_dose_number: usize,
+    pub condition: RuleCondition,
     pub override_abs_min_age: Option<TimePeriod>,
     pub override_abs_min_interval_from_dose: Option<(usize, TimePeriod)>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct ConditionalCompletionRule {
-    pub required_valid_doses: usize,
-    pub min_age_at_last_dose: TimePeriod,
-    pub min_interval_last_to_prev: TimePeriod,
+    pub description: &'static str,
+    pub condition: RuleCondition,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct RecommendationOverrideRule {
-    pub condition_eval_date_before: Option<NaiveDate>,
+    pub description: &'static str,
     pub target_dose_number: usize,
+    pub condition: RuleCondition,
     pub override_min_age: Option<TimePeriod>,
     pub override_min_interval: Option<TimePeriod>,
 }
@@ -36,6 +78,7 @@ pub struct EvaluationEngine {
     pub param_overrides: Vec<ParameterOverrideRule>,
     pub completion_rules: Vec<ConditionalCompletionRule>,
     pub rec_overrides: Vec<RecommendationOverrideRule>,
+    pub custom_forecast_hook: Option<CustomForecastHook>,
 }
 
 impl EvaluationEngine {
@@ -45,6 +88,7 @@ impl EvaluationEngine {
             param_overrides: Vec::new(),
             completion_rules: Vec::new(),
             rec_overrides: Vec::new(),
+            custom_forecast_hook: None,
         }
     }
 
@@ -121,9 +165,17 @@ impl EvaluationEngine {
             };
 
             // Apply parameter overrides (pre-2009 overrides, etc.)
+            let ctx = EvaluationContext::new(
+                patient,
+                &sorted_history,
+                &valid_doses,
+                Some(dose),
+                target_dose_idx,
+                eval_date,
+            );
+
             for rule in &self.param_overrides {
-                let matches_date = rule.condition_date_before.map_or(true, |d| dose.date < d);
-                if matches_date && rule.target_dose_number == target_dose_idx {
+                if rule.target_dose_number == target_dose_idx && (rule.condition)(&ctx) {
                     if let Some(ref over_age) = rule.override_abs_min_age {
                         dose_rule.absolute_minimum_age = Some(over_age.clone());
                     }
@@ -182,17 +234,18 @@ impl EvaluationEngine {
                 dose_number: Some(target_dose_idx),
             });
 
+            let ctx_complete = EvaluationContext::new(
+                patient,
+                &sorted_history,
+                &valid_doses,
+                Some(dose),
+                target_dose_idx,
+                eval_date,
+            );
+
             for rule in &self.completion_rules {
-                if valid_doses.len() == rule.required_valid_doses {
-                    let last_dose_date = valid_doses.last().unwrap().0;
-                    let prev_dose_date = valid_doses[valid_doses.len() - 2].0;
-
-                    let age_ok = compare_elapsed(patient.birth_date, last_dose_date, &rule.min_age_at_last_dose) != std::cmp::Ordering::Less;
-                    let interval_ok = compare_elapsed(prev_dose_date, last_dose_date, &rule.min_interval_last_to_prev) != std::cmp::Ordering::Less;
-
-                    if age_ok && interval_ok {
-                        is_completed = true;
-                    }
+                if (rule.condition)(&ctx_complete) {
+                    is_completed = true;
                 }
             }
 
@@ -206,6 +259,7 @@ impl EvaluationEngine {
         // 4. Recommendation / Forecasting
         let forecast = self.generate_forecast(
             patient,
+            &sorted_history,
             &valid_doses,
             is_completed,
             eval_date,
@@ -222,6 +276,7 @@ impl EvaluationEngine {
     fn generate_forecast(
         &self,
         patient: &Patient,
+        history: &[Dose],
         valid_doses: &[(NaiveDate, usize)],
         is_completed: bool,
         eval_date: NaiveDate,
@@ -248,10 +303,18 @@ impl EvaluationEngine {
             None
         };
 
+        let ctx = EvaluationContext::new(
+            patient,
+            history,
+            valid_doses,
+            None,
+            next_dose_idx,
+            eval_date,
+        );
+
         // Apply recommendation overrides
         for rule in &self.rec_overrides {
-            let matches_eval = rule.condition_eval_date_before.map_or(true, |d| eval_date < d);
-            if matches_eval && rule.target_dose_number == next_dose_idx {
+            if rule.target_dose_number == next_dose_idx && (rule.condition)(&ctx) {
                 if let Some(ref over_age) = rule.override_min_age {
                     dose_rule.minimum_age = Some(over_age.clone());
                 }
@@ -318,33 +381,21 @@ impl EvaluationEngine {
             (None, None) => None,
         };
 
-        // For Polio 2009 reset logic:
-        // "If the execution date is before 8/7/2009 and the calculated Earliest Date for Dose 4 is after 8/7/2009, reset back to 4y and 6m"
-        // In the interest of keeping code generic, we can perform standard evaluation first, and allow the vaccine module to adjust.
-        // Let's implement this as a post-calculation hook if needed, or simply handle it here:
-        let mut final_earliest = earliest_date;
-        let mut final_recommended = recommended_date;
-
-        if self.series.name == "POLIO_4_DOSE_SERIES" && next_dose_idx == 4 && eval_date < NaiveDate::from_ymd_opt(2009, 8, 7).unwrap() {
-            if let Some(e_date) = final_earliest {
-                if e_date >= NaiveDate::from_ymd_opt(2009, 8, 7).unwrap() {
-                    // Reset to standard 4y age and 6m interval
-                    let std_age = TimePeriod::parse("4y").unwrap().add_to(patient.birth_date);
-                    let std_int = TimePeriod::parse("6m").unwrap().add_to(valid_doses.last().unwrap().0);
-                    final_earliest = Some(max(std_age, std_int));
-                    final_recommended = final_earliest;
-                }
-            }
-        }
-
-        SeriesForecast {
+        let mut forecast = SeriesForecast {
             series_name: self.series.name.clone(),
-            earliest_date: final_earliest,
-            recommended_date: final_recommended,
+            earliest_date,
+            recommended_date,
             overdue_date,
             latest_date: None,
             status: SeriesStatus::NotComplete,
             reasons: vec!["NOT_COMPLETE".to_string()],
+        };
+
+        // Apply custom rules hook (like Polio 2009 reset) if present
+        if let Some(hook) = self.custom_forecast_hook {
+            (hook)(patient, valid_doses, eval_date, &mut forecast);
         }
+
+        forecast
     }
 }

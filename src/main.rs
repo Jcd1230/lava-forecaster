@@ -2,60 +2,37 @@ mod date_utils;
 mod models;
 mod schedule;
 mod engine;
+mod rules;
 
 use chrono::NaiveDate;
-use date_utils::TimePeriod;
 use models::{Patient, Gender, Dose};
-use schedule::{IceSupportingData, CompiledSeries};
-use engine::{EvaluationEngine, ParameterOverrideRule, ConditionalCompletionRule, RecommendationOverrideRule};
-use std::fs;
+use engine::EvaluationEngine;
 use std::time::Instant;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("=== High-Performance Rust ICE Forecaster PoC ===");
+    println!("=== High-Performance Rust ICE Forecaster PoC (Compile-Time DSL) ===");
 
-    // 1. Load and parse Polio YAML configuration
-    let yaml_path = "../opencds-decision-support-service/src/main/resources/data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/Series/Polio4DoseSeries.yml";
-    let yaml_content = fs::read_to_string(yaml_path)?;
+    // 1. Get ruleset from the static registry
+    let ruleset = rules::get_ruleset("POLIO")
+        .ok_or("POLIO vaccine group definition not found in registry")?;
     
-    let supporting_data: IceSupportingData = serde_yaml::from_str(&yaml_content)?;
-    let km = supporting_data.ice_supporting_data.knowledge_modules.get("[org.nyc.cir^ICE^1.0.0]")
-        .ok_or("Knowledge module [org.nyc.cir^ICE^1.0.0] not found")?;
-    let polio_yaml = km.series.get("POLIO_4_DOSE_SERIES")
-        .ok_or("POLIO_4_DOSE_SERIES not found in YAML")?;
+    println!("Successfully loaded ruleset for vaccine group: {}", ruleset.group_name);
     
-    let compiled_series = CompiledSeries::from_yaml("POLIO_4_DOSE_SERIES", polio_yaml)?;
+    // For Polio, we grab the POLIO_4_DOSE_SERIES
+    let compiled_series = ruleset.series.iter()
+        .find(|s| s.name == "POLIO_4_DOSE_SERIES")
+        .ok_or("POLIO_4_DOSE_SERIES not found in Polio ruleset")?
+        .clone();
+        
     println!("Successfully loaded schedule: {} (code: {}, target group: {})", 
              compiled_series.name, compiled_series.code, compiled_series.vaccine_group);
 
-    // 2. Configure the Engine with Polio Custom Exception Primitives
+    // 2. Configure the Engine with Polio Custom Exception Primitives from the Registry
     let mut engine = EvaluationEngine::new(compiled_series);
-
-    // A. Pre-2009 Overrides:
-    // "If dose 4 administered before 8/7/2009: abs_min_age = 122d, abs_min_interval for dose 3 = 24d"
-    engine.param_overrides.push(ParameterOverrideRule {
-        condition_date_before: Some(NaiveDate::from_ymd_opt(2009, 8, 7).unwrap()),
-        target_dose_number: 4,
-        override_abs_min_age: Some(TimePeriod::parse("122d")?),
-        override_abs_min_interval_from_dose: Some((3, TimePeriod::parse("24d")?)),
-    });
-
-    // B. Conditional 3-Dose Completion:
-    // "Complete with 3 doses if 3 prior valid doses, child >= 4y-4d at dose 3, and interval 2 to 3 is >= 6m-4d"
-    engine.completion_rules.push(ConditionalCompletionRule {
-        required_valid_doses: 3,
-        min_age_at_last_dose: TimePeriod::parse("4y-4d")?,
-        min_interval_last_to_prev: TimePeriod::parse("6m-4d")?,
-    });
-
-    // C. Pre-2009 Forecast Recommendations:
-    // "If evaluation date is before 8/7/2009, min_age of dose 4 is 126d and min_interval for dose 3 is 28d"
-    engine.rec_overrides.push(RecommendationOverrideRule {
-        condition_eval_date_before: Some(NaiveDate::from_ymd_opt(2009, 8, 7).unwrap()),
-        target_dose_number: 4,
-        override_min_age: Some(TimePeriod::parse("126d")?),
-        override_min_interval: Some(TimePeriod::parse("28d")?),
-    });
+    engine.param_overrides = ruleset.param_overrides.clone();
+    engine.completion_rules = ruleset.completion_rules.clone();
+    engine.rec_overrides = ruleset.rec_overrides.clone();
+    engine.custom_forecast_hook = ruleset.custom_forecast_hook;
 
     // 3. Define test patient cases
     let eval_date = NaiveDate::from_ymd_opt(2026, 5, 20).unwrap();
