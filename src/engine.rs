@@ -41,6 +41,7 @@ pub type RuleCondition = fn(&EvaluationContext) -> bool;
 pub type CustomForecastHook = fn(
     patient: &Patient,
     valid_doses: &[(NaiveDate, usize)],
+    history: &[Dose],
     eval_date: NaiveDate,
     forecast: &mut SeriesForecast,
 );
@@ -56,7 +57,7 @@ pub type CustomEvaluationHook = fn(
     target_dose_idx: usize,
     ctx: &EvaluationContext,
     reasons: &mut Vec<EvaluationReason>,
-    is_valid: &mut bool,
+    status: &mut DoseStatus,
 );
 
 pub type GroupSelectionAndPostProcess = fn(
@@ -137,7 +138,16 @@ impl EvaluationEngine {
             })
             .cloned()
             .collect();
-        sorted_history.sort_by_key(|d| d.date);
+        sorted_history.sort_by(|a, b| {
+            if a.date != b.date {
+                a.date.cmp(&b.date)
+            } else {
+                let group = &self.series.vaccine_group;
+                let prio_a = get_same_day_priority(group, &a.cvx, patient.birth_date, a.date);
+                let prio_b = get_same_day_priority(group, &b.cvx, patient.birth_date, b.date);
+                prio_a.cmp(&prio_b)
+            }
+        });
 
         let mut evaluations: Vec<DoseEvaluation> = Vec::new();
         let mut valid_doses: Vec<(NaiveDate, usize)> = Vec::new(); // (date, dose_number_in_series)
@@ -183,7 +193,7 @@ impl EvaluationEngine {
             if let Some(switch_hook) = self.custom_switch_hook {
                 let ctx = EvaluationContext::new(
                     patient,
-                    &sorted_history,
+                    history,
                     &valid_doses,
                     Some(dose),
                     target_dose_idx,
@@ -222,7 +232,7 @@ impl EvaluationEngine {
             // Apply parameter overrides (pre-2009 overrides, etc.)
             let ctx = EvaluationContext::new(
                 patient,
-                &sorted_history,
+                history,
                 &valid_doses,
                 Some(dose),
                 target_dose_idx,
@@ -273,18 +283,20 @@ impl EvaluationEngine {
                 }
             }
 
-            // Invoke custom_evaluation_hook after checking standard requirements
-            if let Some(eval_hook) = self.custom_evaluation_hook {
-                (eval_hook)(&active_series.name, target_dose_idx, &ctx, &mut reasons, &mut is_valid);
-            }
-
-            // Determine status
-            let status = if is_valid {
-                valid_doses.push((dose.date, target_dose_idx));
+            let mut status = if is_valid {
                 DoseStatus::Valid
             } else {
                 DoseStatus::Invalid
             };
+
+            // Invoke custom_evaluation_hook after checking standard requirements
+            if let Some(eval_hook) = self.custom_evaluation_hook {
+                (eval_hook)(&active_series.name, target_dose_idx, &ctx, &mut reasons, &mut status);
+            }
+
+            if status == DoseStatus::Valid {
+                valid_doses.push((dose.date, target_dose_idx));
+            }
 
             evaluations.push(DoseEvaluation {
                 dose_date: dose.date,
@@ -319,7 +331,7 @@ impl EvaluationEngine {
         // 4. Recommendation / Forecasting
         let forecast = self.generate_forecast(
             patient,
-            &sorted_history,
+            history,
             &valid_doses,
             is_completed,
             eval_date,
@@ -344,7 +356,7 @@ impl EvaluationEngine {
         active_series: &CompiledSeries,
     ) -> SeriesForecast {
         if is_completed {
-            return SeriesForecast {
+            let mut forecast = SeriesForecast {
                 series_name: active_series.name.clone(),
                 earliest_date: None,
                 recommended_date: None,
@@ -353,6 +365,10 @@ impl EvaluationEngine {
                 status: SeriesStatus::Complete,
                 reasons: vec!["COMPLETE".to_string()],
             };
+            if let Some(hook) = self.custom_forecast_hook {
+                (hook)(patient, valid_doses, history, eval_date, &mut forecast);
+            }
+            return forecast;
         }
 
         let next_dose_idx = valid_doses.len() + 1;
@@ -436,12 +452,12 @@ impl EvaluationEngine {
             None
         };
 
-        let overdue_date = match (overdue_age_date, overdue_int_date) {
-            (Some(a), Some(i)) => Some(max(a, i)),
-            (Some(a), None) => Some(a),
-            (None, Some(i)) => Some(i),
-            (None, None) => None,
+        let overdue_date = if overdue_age_date.is_some() {
+            overdue_age_date
+        } else {
+            overdue_int_date
         };
+        let overdue_date = overdue_date.and_then(|d| d.pred_opt());
 
         let mut forecast = SeriesForecast {
             series_name: active_series.name.clone(),
@@ -455,9 +471,33 @@ impl EvaluationEngine {
 
         // Apply custom rules hook (like Polio 2009 reset) if present
         if let Some(hook) = self.custom_forecast_hook {
-            (hook)(patient, valid_doses, eval_date, &mut forecast);
+            (hook)(patient, valid_doses, history, eval_date, &mut forecast);
         }
 
         forecast
+    }
+}
+
+fn get_same_day_priority(group: &str, cvx: &str, birth_date: NaiveDate, dose_date: NaiveDate) -> i32 {
+    match group {
+        "MMR" => match cvx {
+            "94" => 0,
+            "03" => 1,
+            "04" | "05" => 2,
+            _ => 3,
+        },
+        "POLIO" => match cvx {
+            "02" | "182" => 1,
+            _ => 0,
+        },
+        "HEP_A" => {
+            let age_19 = crate::date_utils::add_years(birth_date, 19);
+            if dose_date >= age_19 {
+                if cvx == "52" { 0 } else { 1 }
+            } else {
+                if cvx == "52" { 1 } else { 0 }
+            }
+        }
+        _ => 0,
     }
 }

@@ -1,7 +1,7 @@
 use chrono::NaiveDate;
 use crate::engine::{ParameterOverrideRule, ConditionalCompletionRule, RecommendationOverrideRule};
 use crate::date_utils::{TimePeriod, compare_elapsed};
-use crate::models::{Patient, SeriesForecast};
+use crate::models::{Patient, SeriesForecast, Dose};
 
 pub fn polio_parameter_overrides() -> Vec<ParameterOverrideRule> {
     vec![
@@ -78,6 +78,7 @@ pub fn polio_recommendation_overrides() -> Vec<RecommendationOverrideRule> {
 pub fn polio_custom_forecast_hook(
     _patient: &Patient,
     _valid_doses: &[(NaiveDate, usize)],
+    _history: &[Dose],
     eval_date: NaiveDate,
     forecast: &mut SeriesForecast,
 ) {

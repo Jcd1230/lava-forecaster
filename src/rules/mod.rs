@@ -1,5 +1,6 @@
 pub mod polio;
 pub mod hepa;
+pub mod mmr;
 
 use std::collections::HashMap;
 use std::sync::OnceLock;
@@ -28,6 +29,7 @@ pub fn get_ruleset(group_name: &str) -> Option<&'static VaccineGroupDefinition> 
         let mut m = HashMap::new();
         m.insert("POLIO", polio::definition());
         m.insert("HEP_A", hepa::definition());
+        m.insert("MMR", mmr::definition());
         m
     });
     
@@ -38,5 +40,6 @@ pub fn get_all_groups() -> Vec<&'static VaccineGroupDefinition> {
     vec![
         get_ruleset("POLIO").unwrap(),
         get_ruleset("HEP_A").unwrap(),
+        get_ruleset("MMR").unwrap(),
     ]
 }

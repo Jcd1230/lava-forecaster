@@ -49,7 +49,7 @@ pub fn hepa_custom_evaluation_hook(
     target_dose_idx: usize,
     ctx: &EvaluationContext,
     reasons: &mut Vec<EvaluationReason>,
-    is_valid: &mut bool,
+    status: &mut DoseStatus,
 ) {
     if let Some(dose) = ctx.current_dose {
         if series_name == "HEP_A_ADULT_3_DOSE_SERIES" && target_dose_idx == 3 {
@@ -57,7 +57,7 @@ pub fn hepa_custom_evaluation_hook(
                 let dose_1_date = ctx.valid_doses[0].0;
                 let min_int = TimePeriod::parse("6m-4d").unwrap().add_to(dose_1_date);
                 if dose.date < min_int {
-                    *is_valid = false;
+                    *status = DoseStatus::Invalid;
                     if !reasons.contains(&EvaluationReason::BelowMinimumInterval) {
                         reasons.push(EvaluationReason::BelowMinimumInterval);
                     }
@@ -68,7 +68,7 @@ pub fn hepa_custom_evaluation_hook(
                 let dose_1_date = ctx.valid_doses[0].0;
                 let min_int = TimePeriod::parse("12m-4d").unwrap().add_to(dose_1_date);
                 if dose.date < min_int {
-                    *is_valid = false;
+                    *status = DoseStatus::Invalid;
                     if !reasons.contains(&EvaluationReason::BelowMinimumInterval) {
                         reasons.push(EvaluationReason::BelowMinimumInterval);
                     }
@@ -90,6 +90,7 @@ fn max_date(d1: Option<NaiveDate>, d2: Option<NaiveDate>) -> NaiveDate {
 pub fn hepa_custom_forecast_hook(
     patient: &Patient,
     valid_doses: &[(NaiveDate, usize)],
+    _history: &[Dose],
     eval_date: NaiveDate,
     forecast: &mut SeriesForecast,
 ) {
