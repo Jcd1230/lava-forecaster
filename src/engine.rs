@@ -98,11 +98,16 @@ impl EvaluationEngine {
         history: &[Dose],
         eval_date: NaiveDate,
     ) -> VaccineGroupForecast {
-        // 1. Sort and copy history chronologically
-        let mut sorted_history = history.to_vec();
+        // 1. Filter and sort history chronologically (only keep doses relevant to this series)
+        let mut sorted_history: Vec<Dose> = history.iter()
+            .filter(|dose| {
+                self.series.doses.iter().any(|d_rule| d_rule.allowed_cvx.contains(&dose.cvx))
+            })
+            .cloned()
+            .collect();
         sorted_history.sort_by_key(|d| d.date);
 
-        let mut evaluations = Vec::new();
+        let mut evaluations: Vec<DoseEvaluation> = Vec::new();
         let mut valid_doses: Vec<(NaiveDate, usize)> = Vec::new(); // (date, dose_number_in_series)
         let mut is_completed = false;
 
@@ -111,15 +116,18 @@ impl EvaluationEngine {
         while i < sorted_history.len() {
             let dose = &sorted_history[i];
             
+            let target_dose_idx = valid_doses.len() + 1;
+
             // Same-day duplicate check
             let is_duplicate = i > 0 && sorted_history[i - 1].date == dose.date;
             if is_duplicate {
+                let prev_dose_num = evaluations.last().and_then(|e| e.dose_number).unwrap_or(target_dose_idx);
                 evaluations.push(DoseEvaluation {
                     dose_date: dose.date,
                     cvx: dose.cvx.clone(),
                     status: DoseStatus::Invalid,
                     reasons: vec![EvaluationReason::DuplicateShotSameDay],
-                    dose_number: None,
+                    dose_number: Some(prev_dose_num),
                 });
                 i += 1;
                 continue;
@@ -132,23 +140,20 @@ impl EvaluationEngine {
                     cvx: dose.cvx.clone(),
                     status: DoseStatus::Invalid,
                     reasons: vec![EvaluationReason::PriorToDOB],
-                    dose_number: None,
+                    dose_number: Some(target_dose_idx),
                 });
                 i += 1;
                 continue;
             }
 
-            // Target dose calculation
-            let target_dose_idx = valid_doses.len() + 1;
-            
             // If patient already completed the series, additional doses are boosters/extra
-            if target_dose_idx > self.series.num_doses {
+            if is_completed || target_dose_idx > self.series.num_doses {
                 evaluations.push(DoseEvaluation {
                     dose_date: dose.date,
                     cvx: dose.cvx.clone(),
                     status: DoseStatus::Accepted, // Mark accepted as extra dose
                     reasons: vec![EvaluationReason::BoosterDose],
-                    dose_number: None,
+                    dose_number: Some(target_dose_idx),
                 });
                 i += 1;
                 continue;

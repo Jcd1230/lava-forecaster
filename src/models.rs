@@ -89,3 +89,14 @@ pub struct ForecastRequest {
 pub struct ForecastResponse {
     pub vaccine_groups: Vec<VaccineGroupForecast>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BulkForecastRequest {
+    pub requests: Vec<ForecastRequest>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BulkForecastResponse {
+    pub responses: Vec<ForecastResponse>,
+}
+

@@ -3,13 +3,202 @@ mod models;
 mod schedule;
 mod engine;
 mod rules;
+mod legacy_models;
 
 use chrono::NaiveDate;
-use models::{Patient, Gender, Dose};
+use models::{Patient, Gender, Dose, ForecastResponse};
 use engine::EvaluationEngine;
 use std::time::Instant;
 
+fn parse_request(content: &str) -> Result<models::ForecastRequest, Box<dyn std::error::Error>> {
+    // Try to parse as simplified format first
+    if let Ok(req) = serde_json::from_str::<models::ForecastRequest>(content) {
+        return Ok(req);
+    }
+    
+    // Otherwise, parse as legacy REST format and translate
+    let legacy_req: legacy_models::LegacyEvaluateRequest = serde_json::from_str(content)?;
+    legacy_req.translate()
+}
+
+fn run_server() -> Result<(), Box<dyn std::error::Error>> {
+    use tiny_http::{Server, Response, StatusCode, Header};
+
+    let addr = "0.0.0.0:8081";
+    let server = Server::http(addr).map_err(|e| format!("Failed to start server: {}", e))?;
+    println!("Rust PoC REST server listening on http://{}", addr);
+
+    // Cache the ruleset and compiled series to avoid reloading per request
+    let ruleset = rules::get_ruleset("POLIO")
+        .ok_or("POLIO vaccine group definition not found in registry")?;
+    
+    let compiled_series = ruleset.series.iter()
+        .find(|s| s.name == "POLIO_4_DOSE_SERIES")
+        .ok_or("POLIO_4_DOSE_SERIES not found in Polio ruleset")?
+        .clone();
+
+    for mut request in server.incoming_requests() {
+        let req_start = Instant::now();
+
+        if request.method() != &tiny_http::Method::Post {
+            let response = Response::from_string("Method not allowed")
+                .with_status_code(StatusCode(405));
+            let _ = request.respond(response);
+            continue;
+        }
+
+        let url = request.url().to_string();
+        if url != "/evaluate" && url != "/opencds-decision-support-service/api/resources/evaluate" && url != "/evaluate_bulk" {
+            let response = Response::from_string("Not Found")
+                .with_status_code(StatusCode(404));
+            let _ = request.respond(response);
+            continue;
+        }
+
+        let mut body = String::new();
+        if let Err(e) = request.as_reader().read_to_string(&mut body) {
+            let response = Response::from_string(format!("Failed to read body: {}", e))
+                .with_status_code(StatusCode(400));
+            let _ = request.respond(response);
+            continue;
+        }
+
+        if url == "/evaluate_bulk" {
+            let req: models::BulkForecastRequest = match serde_json::from_str(&body) {
+                Ok(r) => r,
+                Err(e) => {
+                    let response = Response::from_string(format!("Failed to parse bulk request: {}", e))
+                        .with_status_code(StatusCode(400));
+                    let _ = request.respond(response);
+                    continue;
+                }
+            };
+
+            let mut responses = Vec::new();
+            for single_req in req.requests {
+                let mut engine = EvaluationEngine::new(compiled_series.clone());
+                engine.param_overrides = ruleset.param_overrides.clone();
+                engine.completion_rules = ruleset.completion_rules.clone();
+                engine.rec_overrides = ruleset.rec_overrides.clone();
+                engine.custom_forecast_hook = ruleset.custom_forecast_hook;
+
+                let result = engine.evaluate_patient(&single_req.patient, &single_req.history, single_req.execution_date);
+                responses.push(ForecastResponse {
+                    vaccine_groups: vec![result],
+                });
+            }
+
+            let response_data = models::BulkForecastResponse { responses };
+            let response_json = match serde_json::to_string(&response_data) {
+                Ok(j) => j,
+                Err(e) => {
+                    let response = Response::from_string(format!("Failed to serialize bulk response: {}", e))
+                        .with_status_code(StatusCode(500));
+                    let _ = request.respond(response);
+                    continue;
+                }
+            };
+
+            let elapsed = req_start.elapsed();
+            println!("INFO: processed Bulk request (size {}) in {:?}", response_data.responses.len(), elapsed);
+
+            let elapsed_us = elapsed.as_micros().to_string();
+            let response = Response::from_string(response_json)
+                .with_header(Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..]).unwrap())
+                .with_header(Header::from_bytes(&b"X-Process-Time-Us"[..], elapsed_us.into_bytes()).unwrap());
+            let _ = request.respond(response);
+            continue;
+        }
+
+        let is_legacy = body.contains("evaluationRequest");
+        let format_str = if is_legacy { "Legacy" } else { "Simplified" };
+
+        let req = match parse_request(&body) {
+            Ok(r) => r,
+            Err(e) => {
+                let response = Response::from_string(format!("Failed to parse request: {}", e))
+                    .with_status_code(StatusCode(400));
+                let _ = request.respond(response);
+                continue;
+            }
+        };
+
+        let mut engine = EvaluationEngine::new(compiled_series.clone());
+        engine.param_overrides = ruleset.param_overrides.clone();
+        engine.completion_rules = ruleset.completion_rules.clone();
+        engine.rec_overrides = ruleset.rec_overrides.clone();
+        engine.custom_forecast_hook = ruleset.custom_forecast_hook;
+
+        let result = engine.evaluate_patient(&req.patient, &req.history, req.execution_date);
+
+        let response_data = ForecastResponse {
+            vaccine_groups: vec![result],
+        };
+
+        let response_json = match serde_json::to_string(&response_data) {
+            Ok(j) => j,
+            Err(e) => {
+                let response = Response::from_string(format!("Failed to serialize response: {}", e))
+                    .with_status_code(StatusCode(500));
+                let _ = request.respond(response);
+                continue;
+            }
+        };
+
+        let elapsed = req_start.elapsed();
+        println!("INFO: processed {} request in {:?}", format_str, elapsed);
+
+        let elapsed_us = elapsed.as_micros().to_string();
+        let response = Response::from_string(response_json)
+            .with_header(Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..]).unwrap())
+            .with_header(Header::from_bytes(&b"X-Process-Time-Us"[..], elapsed_us.into_bytes()).unwrap());
+        let _ = request.respond(response);
+    }
+
+    Ok(())
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let args: Vec<String> = std::env::args().collect();
+    
+    if args.len() > 1 && args[1] == "--server" {
+        run_server()?;
+        return Ok(());
+    }
+    
+    if args.len() > 1 {
+        // Run file evaluation mode
+        let path = &args[1];
+        let content = std::fs::read_to_string(path)?;
+        
+        let req = parse_request(&content)?;
+        
+        let ruleset = rules::get_ruleset("POLIO")
+            .ok_or("POLIO vaccine group definition not found in registry")?;
+        
+        let compiled_series = ruleset.series.iter()
+            .find(|s| s.name == "POLIO_4_DOSE_SERIES")
+            .ok_or("POLIO_4_DOSE_SERIES not found in Polio ruleset")?
+            .clone();
+            
+        let mut engine = EvaluationEngine::new(compiled_series);
+        engine.param_overrides = ruleset.param_overrides.clone();
+        engine.completion_rules = ruleset.completion_rules.clone();
+        engine.rec_overrides = ruleset.rec_overrides.clone();
+        engine.custom_forecast_hook = ruleset.custom_forecast_hook;
+        
+        eprintln!("DEBUG: parsed patient = {:?}", req.patient);
+        eprintln!("DEBUG: parsed history = {:?}", req.history);
+        let result = engine.evaluate_patient(&req.patient, &req.history, req.execution_date);
+        
+        let response = ForecastResponse {
+            vaccine_groups: vec![result],
+        };
+        
+        println!("{}", serde_json::to_string(&response)?);
+        return Ok(());
+    }
+
     println!("=== High-Performance Rust ICE Forecaster PoC (Compile-Time DSL) ===");
 
     // 1. Get ruleset from the static registry
