@@ -41,14 +41,14 @@ To implement a group, follow the guidelines in the [Onboarding & Implementation 
 
 ## 7. Meningococcal B (`MENB`)
 *Java Concept:* `MENINGOCOCCAL_B` | *Focus Code:* `835`
-- [ ] Implement `MenB4C2DoseSeries.yml` & `MenB4C3DoseSeries.yml` (Bexsero)
-- [ ] Implement `MenBFHbp2DoseSeries.yml` & `MenBFHbp3DoseSeries.yml` (Trumenba)
-- [ ] Implement brand consistency & auto-switching logic:
+- [x] Implement `MenB4C2DoseSeries.yml` & `MenB4C3DoseSeries.yml` (Bexsero)
+- [x] Implement `MenBFHbp2DoseSeries.yml` & `MenBFHbp3DoseSeries.yml` (Trumenba)
+- [x] Implement brand consistency & auto-switching logic:
   - If a Bexsero (CVX 163) dose is given in the FHbp series, switch to the 4C 2-dose series.
   - If a Trumenba (CVX 162/316) dose is given in the 4C series, switch to the FHbp 2-dose series.
-- [ ] Implement age floor override: CVX 162/163 given at age >= 10y but below series absolute min age are **Accepted** (not Invalid).
-- [ ] Implement date-dependent duplicate-same-day preference rules (before vs on/after 10/25/2024).
-- [ ] Modify forecast status to `ConditionallyRecommended / CLINICAL_PATIENT_DISCRETION` if patient is >= 10y, series is incomplete, and they have >= 1 valid dose.
+- [x] Implement age floor override: CVX 162/163 given at age >= 10y but below series absolute min age are **Accepted** (not Invalid).
+- [x] Implement date-dependent duplicate-same-day preference rules (before vs on/after 10/25/2024).
+- [x] Modify forecast status to `ConditionallyRecommended / CLINICAL_PATIENT_DISCRETION` if patient is >= 10y, series is incomplete, and they have >= 1 valid dose.
 
 ## 8. Rotavirus (`ROTAVIRUS`)
 *Java Concept:* `ROTAVIRUS` | *Focus Code:* `820`

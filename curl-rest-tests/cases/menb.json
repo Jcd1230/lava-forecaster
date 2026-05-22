@@ -1,0 +1,17 @@
+{
+  "group": "MENB",
+  "focus": "835",
+  "cases": [
+    {
+      "name": "menb_standard_case_1",
+      "dob": "2020-01-01",
+      "evalDate": "2020-06-01",
+      "gender": "F",
+      "shots": [],
+      "expected": {
+        "status": "Recommended",
+        "evaluations": []
+      }
+    }
+  ]
+}

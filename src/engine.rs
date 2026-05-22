@@ -672,6 +672,18 @@ fn get_same_day_priority(group: &str, cvx: &str, birth_date: NaiveDate, dose_dat
             "104" | "110" | "146" => 0,
             _ => 1,
         },
+        "MENB" => {
+            let policy_change = NaiveDate::from_ymd_opt(2024, 10, 25).unwrap();
+            if dose_date < policy_change {
+                match cvx {
+                    "163" | "328" => 0,
+                    "162" | "316" => 1,
+                    _ => 2,
+                }
+            } else {
+                0
+            }
+        }
         _ => 0,
     }
 }

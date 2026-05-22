@@ -4,6 +4,7 @@ pub mod hepa;
 pub mod hib;
 pub mod hpv;
 pub mod mcv;
+pub mod menb;
 pub mod mmr;
 pub mod pneumococcal;
 pub mod polio;
@@ -48,6 +49,7 @@ pub fn get_ruleset(group_name: &str) -> Option<&'static VaccineGroupDefinition> 
         m.insert("HIB", hib::definition());
         m.insert("PNEUMOCOCCAL", pneumococcal::definition());
         m.insert("MCV", mcv::definition());
+        m.insert("MENB", menb::definition());
         m
     });
 
@@ -67,6 +69,6 @@ pub fn get_all_groups() -> Vec<&'static VaccineGroupDefinition> {
         get_ruleset("HIB").unwrap(),
         get_ruleset("PNEUMOCOCCAL").unwrap(),
         get_ruleset("MCV").unwrap(),
+        get_ruleset("MENB").unwrap(),
     ]
 }
-
