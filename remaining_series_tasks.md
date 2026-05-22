@@ -32,8 +32,8 @@ To implement a group, follow the guidelines in the [Onboarding & Implementation 
 
 
 ## 5. Pneumococcal (PCV / PPSV)
-- [ ] Implement `PneumococcalSeries.yml` (PCV13, PCV15, PCV20, PPSV23)
-- [ ] Implement complex risk-group and sequence-based evaluation rules
+- [x] Implement `PneumococcalSeries.yml` (PCV13, PCV15, PCV20, PPSV23)
+- [x] Implement complex risk-group and sequence-based evaluation rules
 
 ## 6. Meningococcal Conjugate (MCV4)
 - [ ] Implement `MCV42DoseSeries.yml` (Menactra, Menveo, MenQuadfi)

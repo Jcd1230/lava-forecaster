@@ -1,0 +1,53 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "pneumococcal_child_standard_modern_pcv",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 18m",
+      "doses": [
+        "birth + 2m:133",
+        "birth + 4m:133",
+        "birth + 6m:133",
+        "birth + 15m:215"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "pneumococcal_adult_pcv20_complete",
+      "dob": "1970-01-01",
+      "gender": "M",
+      "eval_date": "2021-02-01",
+      "doses": [
+        "2021-01-15:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "pneumococcal_adult_pcv15_ppsv23_complete",
+      "dob": "1970-01-01",
+      "gender": "M",
+      "eval_date": "2022-02-01",
+      "doses": [
+        "2021-01-15:215",
+        "2022-01-15:33"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "pneumococcal_child_ppsv23_outside_series",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 4m",
+      "doses": [
+        "birth + 2m:33"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    }
+  ]
+}

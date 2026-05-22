@@ -478,6 +478,15 @@ impl EvaluationEngine {
         // Get the most recent shot date for any dose belonging to this series
         let last_shot_date = history.iter()
             .filter(|d| active_series.doses.iter().any(|d_rule| d_rule.allowed_cvx.contains(&d.cvx)))
+            .filter(|d| {
+                !(active_series.vaccine_group == "PNEUMOCOCCAL"
+                    && d.cvx == "33"
+                    && compare_elapsed(
+                        patient.birth_date,
+                        d.date,
+                        &TimePeriod::parse("2y").unwrap(),
+                    ) == std::cmp::Ordering::Less)
+            })
             .map(|d| d.date)
             .max();
 
@@ -627,4 +636,3 @@ fn get_same_day_priority(group: &str, cvx: &str, birth_date: NaiveDate, dose_dat
         _ => 0,
     }
 }
-

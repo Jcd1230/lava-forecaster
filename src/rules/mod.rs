@@ -1,21 +1,22 @@
-pub mod polio;
-pub mod hepa;
-pub mod mmr;
-pub mod varicella;
-pub mod zoster;
 pub mod dtp;
 pub mod hep_b;
-pub mod hpv;
+pub mod hepa;
 pub mod hib;
+pub mod hpv;
+pub mod mmr;
+pub mod pneumococcal;
+pub mod polio;
+pub mod varicella;
+pub mod zoster;
 
+use crate::engine::{
+    ConditionalCompletionRule, CustomDoseNumberHook, CustomEvaluationHook, CustomForecastHook,
+    CustomSwitchHook, GroupSelectionAndPostProcess, ParameterOverrideRule,
+    RecommendationOverrideRule,
+};
+use crate::schedule::CompiledSeries;
 use std::collections::HashMap;
 use std::sync::OnceLock;
-use crate::schedule::CompiledSeries;
-use crate::engine::{
-    ParameterOverrideRule, ConditionalCompletionRule, RecommendationOverrideRule,
-    CustomForecastHook, CustomSwitchHook, CustomEvaluationHook, GroupSelectionAndPostProcess,
-    CustomDoseNumberHook,
-};
 
 pub struct VaccineGroupDefinition {
     pub group_name: &'static str,
@@ -32,7 +33,7 @@ pub struct VaccineGroupDefinition {
 
 pub fn get_ruleset(group_name: &str) -> Option<&'static VaccineGroupDefinition> {
     static REGISTRY: OnceLock<HashMap<&'static str, VaccineGroupDefinition>> = OnceLock::new();
-    
+
     let map = REGISTRY.get_or_init(|| {
         let mut m = HashMap::new();
         m.insert("POLIO", polio::definition());
@@ -44,9 +45,10 @@ pub fn get_ruleset(group_name: &str) -> Option<&'static VaccineGroupDefinition> 
         m.insert("HEP_B", hep_b::definition());
         m.insert("HPV", hpv::definition());
         m.insert("HIB", hib::definition());
+        m.insert("PNEUMOCOCCAL", pneumococcal::definition());
         m
     });
-    
+
     map.get(group_name)
 }
 
@@ -61,7 +63,6 @@ pub fn get_all_groups() -> Vec<&'static VaccineGroupDefinition> {
         get_ruleset("HEP_B").unwrap(),
         get_ruleset("HPV").unwrap(),
         get_ruleset("HIB").unwrap(),
+        get_ruleset("PNEUMOCOCCAL").unwrap(),
     ]
 }
-
-

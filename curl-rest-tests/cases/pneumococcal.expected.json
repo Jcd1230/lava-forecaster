@@ -1,0 +1,90 @@
+{
+  "pneumococcal_child_standard_modern_pcv": {
+    "evaluations": [
+      {
+        "date": "2020-03-01",
+        "cvx": "133",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2020-05-01",
+        "cvx": "133",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2020-07-01",
+        "cvx": "133",
+        "status": "Valid",
+        "dose_number": 3
+      },
+      {
+        "date": "2021-04-01",
+        "cvx": "215",
+        "status": "Valid",
+        "dose_number": 4
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "NotRecommended"
+    }
+  },
+  "pneumococcal_adult_pcv20_complete": {
+    "evaluations": [
+      {
+        "date": "2021-01-15",
+        "cvx": "216",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "pneumococcal_adult_pcv15_ppsv23_complete": {
+    "evaluations": [
+      {
+        "date": "2021-01-15",
+        "cvx": "215",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2022-01-15",
+        "cvx": "33",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "pneumococcal_child_ppsv23_outside_series": {
+    "evaluations": [
+      {
+        "date": "2020-03-01",
+        "cvx": "33",
+        "status": "Accepted",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2020-02-12",
+      "recommended_date": "2020-03-01",
+      "overdue_date": "2020-04-28",
+      "status": "NotComplete"
+    }
+  }
+}
