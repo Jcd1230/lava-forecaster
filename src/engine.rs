@@ -63,6 +63,11 @@ pub type CustomEvaluationHook = fn(
     status: &mut DoseStatus,
 );
 
+pub type CustomDoseNumberHook = fn(
+    series_name: &str,
+    ctx: &EvaluationContext,
+) -> usize;
+
 pub type GroupSelectionAndPostProcess = fn(
     patient: &Patient,
     history: &[Dose],
@@ -106,6 +111,7 @@ pub struct EvaluationEngine {
     pub custom_forecast_hook: Option<CustomForecastHook>,
     pub custom_switch_hook: Option<CustomSwitchHook>,
     pub custom_evaluation_hook: Option<CustomEvaluationHook>,
+    pub custom_dose_number_hook: Option<CustomDoseNumberHook>,
 }
 
 impl EvaluationEngine {
@@ -118,6 +124,7 @@ impl EvaluationEngine {
             custom_forecast_hook: None,
             custom_switch_hook: None,
             custom_evaluation_hook: None,
+            custom_dose_number_hook: None,
         }
     }
 
@@ -161,8 +168,19 @@ impl EvaluationEngine {
         let mut i = 0;
         while i < sorted_history.len() {
             let dose = &sorted_history[i];
-            
-            let target_dose_idx = valid_doses.len() + 1;
+            let mut target_dose_idx = valid_doses.iter().map(|(_, num)| *num).max().unwrap_or(0) + 1;
+            if let Some(hook) = self.custom_dose_number_hook {
+                let ctx = EvaluationContext::new(
+                    patient,
+                    history,
+                    &valid_doses,
+                    Some(dose),
+                    target_dose_idx,
+                    eval_date,
+                    &active_series.name,
+                );
+                target_dose_idx = (hook)(&active_series.name, &ctx);
+            }
 
             // Same-day duplicate check
             let is_duplicate = i > 0 && sorted_history[i - 1].date == dose.date;
@@ -181,12 +199,13 @@ impl EvaluationEngine {
 
             // Birthdate boundary check
             if dose.date < patient.birth_date {
+                let output_dose_number = std::cmp::min(target_dose_idx, valid_doses.len() + 1);
                 evaluations.push(DoseEvaluation {
                     dose_date: dose.date,
                     cvx: dose.cvx.clone(),
                     status: DoseStatus::Invalid,
                     reasons: vec![EvaluationReason::PriorToDOB],
-                    dose_number: Some(target_dose_idx),
+                    dose_number: Some(output_dose_number),
                 });
                 i += 1;
                 continue;
@@ -212,12 +231,13 @@ impl EvaluationEngine {
 
             // If patient already completed the series, additional doses are boosters/extra
             if is_completed || target_dose_idx > active_series.num_doses {
+                let output_dose_number = std::cmp::min(target_dose_idx, valid_doses.len() + 1);
                 evaluations.push(DoseEvaluation {
                     dose_date: dose.date,
                     cvx: dose.cvx.clone(),
                     status: DoseStatus::Accepted, // Mark accepted as extra dose
                     reasons: vec![EvaluationReason::BoosterDose],
-                    dose_number: Some(target_dose_idx),
+                    dose_number: Some(output_dose_number),
                 });
                 i += 1;
                 continue;
@@ -299,6 +319,8 @@ impl EvaluationEngine {
                 (eval_hook)(&active_series.name, target_dose_idx, &ctx, &mut reasons, &mut status);
             }
 
+            let output_dose_number = std::cmp::min(target_dose_idx, valid_doses.len() + 1);
+
             if status == DoseStatus::Valid {
                 valid_doses.push((dose.date, target_dose_idx));
             }
@@ -308,7 +330,7 @@ impl EvaluationEngine {
                 cvx: dose.cvx.clone(),
                 status,
                 reasons,
-                dose_number: Some(target_dose_idx),
+                dose_number: Some(output_dose_number),
             });
 
             let ctx_complete = EvaluationContext::new(
@@ -390,7 +412,36 @@ impl EvaluationEngine {
             return forecast;
         }
 
-        let next_dose_idx = satisfied_count + 1;
+        let mut next_dose_idx = valid_doses.iter().map(|(_, num)| *num).max().unwrap_or(0) + 1;
+        if let Some(hook) = self.custom_dose_number_hook {
+            let ctx = EvaluationContext::new(
+                patient,
+                history,
+                valid_doses,
+                None,
+                next_dose_idx,
+                eval_date,
+                &active_series.name,
+            );
+            next_dose_idx = (hook)(&active_series.name, &ctx);
+        }
+
+        if next_dose_idx > active_series.num_doses {
+            let mut forecast = SeriesForecast {
+                series_name: active_series.name.clone(),
+                earliest_date: None,
+                recommended_date: None,
+                overdue_date: None,
+                latest_date: None,
+                status: SeriesStatus::Complete,
+                reasons: vec!["COMPLETE".to_string()],
+            };
+            if let Some(hook) = self.custom_forecast_hook {
+                (hook)(patient, valid_doses, history, eval_date, &mut forecast);
+            }
+            return forecast;
+        }
+
         let mut dose_rule = active_series.doses[next_dose_idx - 1].clone();
         let mut interval_rule = if next_dose_idx > 1 {
             active_series.intervals.iter()

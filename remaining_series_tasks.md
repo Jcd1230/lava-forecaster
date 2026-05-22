@@ -26,9 +26,10 @@ To implement a group, follow the guidelines in the [Onboarding & Implementation 
 - [x] Implement custom series selection based on age of initiation (Dose 1 age < 15y vs >= 15y)
 
 ## 4. Hib (Haemophilus influenzae type b)
-- [ ] Implement `Hib4DoseSeries.yml` (ActHIB, Hiberix, Pentacel, etc.)
-- [ ] Implement `HibOMPSeries.yml` (PedvaxHIB 3-dose series)
-- [ ] Implement custom series switching depending on whether OMP or non-OMP vaccines are administered
+- [x] Implement `Hib4DoseSeries.yml` (ActHIB, Hiberix, Pentacel, etc.)
+- [x] Implement `HibOMPSeries.yml` (PedvaxHIB 3-dose series)
+- [x] Implement custom series switching depending on whether OMP or non-OMP vaccines are administered
+
 
 ## 5. Pneumococcal (PCV / PPSV)
 - [ ] Implement `PneumococcalSeries.yml` (PCV13, PCV15, PCV20, PPSV23)

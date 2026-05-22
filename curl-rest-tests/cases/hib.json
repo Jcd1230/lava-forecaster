@@ -1,0 +1,105 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "hib_standard_4dose",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 18m",
+      "doses": [
+        "birth + 2m:17",
+        "birth + 4m:17",
+        "birth + 6m:17",
+        "birth + 15m:17"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "hib_standard_omp_3dose",
+      "dob": "2020-01-01",
+      "gender": "M",
+      "eval_date": "birth + 18m",
+      "doses": [
+        "birth + 2m:49",
+        "birth + 4m:49",
+        "birth + 12m:17"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "hib_late_initiation_8m",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 18m",
+      "doses": [
+        "birth + 8m:17",
+        "birth + 10m:17",
+        "birth + 15m:17"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "hib_late_initiation_12m",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 18m",
+      "doses": [
+        "birth + 12m:17",
+        "birth + 15m:17"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "hib_booster_cvx50_invalid",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 6m",
+      "doses": [
+        "birth + 2m:50"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "hib_booster_cvx50_valid_final",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 18m",
+      "doses": [
+        "birth + 2m:17",
+        "birth + 4m:17",
+        "birth + 6m:17",
+        "birth + 15m:50"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "hib_age_clamp_5y_incomplete",
+      "dob": "2015-01-01",
+      "gender": "F",
+      "eval_date": "birth + 6y",
+      "doses": [
+        "birth + 2m:17"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "hib_age_clamp_5y_doses_after",
+      "dob": "2015-01-01",
+      "gender": "F",
+      "eval_date": "birth + 6y",
+      "doses": [
+        "birth + 2m:17",
+        "birth + 5y:17"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    }
+  ]
+}

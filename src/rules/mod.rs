@@ -6,6 +6,7 @@ pub mod zoster;
 pub mod dtp;
 pub mod hep_b;
 pub mod hpv;
+pub mod hib;
 
 use std::collections::HashMap;
 use std::sync::OnceLock;
@@ -13,6 +14,7 @@ use crate::schedule::CompiledSeries;
 use crate::engine::{
     ParameterOverrideRule, ConditionalCompletionRule, RecommendationOverrideRule,
     CustomForecastHook, CustomSwitchHook, CustomEvaluationHook, GroupSelectionAndPostProcess,
+    CustomDoseNumberHook,
 };
 
 pub struct VaccineGroupDefinition {
@@ -24,6 +26,7 @@ pub struct VaccineGroupDefinition {
     pub custom_forecast_hook: Option<CustomForecastHook>,
     pub custom_switch_hook: Option<CustomSwitchHook>,
     pub custom_evaluation_hook: Option<CustomEvaluationHook>,
+    pub custom_dose_number_hook: Option<CustomDoseNumberHook>,
     pub group_selection: Option<GroupSelectionAndPostProcess>,
 }
 
@@ -40,6 +43,7 @@ pub fn get_ruleset(group_name: &str) -> Option<&'static VaccineGroupDefinition> 
         m.insert("DTP", dtp::definition());
         m.insert("HEP_B", hep_b::definition());
         m.insert("HPV", hpv::definition());
+        m.insert("HIB", hib::definition());
         m
     });
     
@@ -56,6 +60,7 @@ pub fn get_all_groups() -> Vec<&'static VaccineGroupDefinition> {
         get_ruleset("DTP").unwrap(),
         get_ruleset("HEP_B").unwrap(),
         get_ruleset("HPV").unwrap(),
+        get_ruleset("HIB").unwrap(),
     ]
 }
 

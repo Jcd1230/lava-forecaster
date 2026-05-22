@@ -1,0 +1,202 @@
+{
+  "hib_standard_4dose": {
+    "evaluations": [
+      {
+        "date": "2020-03-01",
+        "cvx": "17",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2020-05-01",
+        "cvx": "17",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2020-07-01",
+        "cvx": "17",
+        "status": "Valid",
+        "dose_number": 3
+      },
+      {
+        "date": "2021-04-01",
+        "cvx": "17",
+        "status": "Valid",
+        "dose_number": 4
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "hib_standard_omp_3dose": {
+    "evaluations": [
+      {
+        "date": "2020-03-01",
+        "cvx": "49",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2020-05-01",
+        "cvx": "49",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2021-01-01",
+        "cvx": "17",
+        "status": "Valid",
+        "dose_number": 3
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "hib_late_initiation_8m": {
+    "evaluations": [
+      {
+        "date": "2020-09-01",
+        "cvx": "17",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2020-11-01",
+        "cvx": "17",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2021-04-01",
+        "cvx": "17",
+        "status": "Valid",
+        "dose_number": 3
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "hib_late_initiation_12m": {
+    "evaluations": [
+      {
+        "date": "2021-01-01",
+        "cvx": "17",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2021-04-01",
+        "cvx": "17",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "hib_booster_cvx50_invalid": {
+    "evaluations": [
+      {
+        "date": "2020-03-01",
+        "cvx": "50",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "hib_booster_cvx50_valid_final": {
+    "evaluations": [
+      {
+        "date": "2020-03-01",
+        "cvx": "17",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2020-05-01",
+        "cvx": "17",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2020-07-01",
+        "cvx": "17",
+        "status": "Valid",
+        "dose_number": 3
+      },
+      {
+        "date": "2021-04-01",
+        "cvx": "50",
+        "status": "Valid",
+        "dose_number": 4
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "hib_age_clamp_5y_incomplete": {
+    "evaluations": [
+      {
+        "date": "2015-03-01",
+        "cvx": "17",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "hib_age_clamp_5y_doses_after": {
+    "evaluations": [
+      {
+        "date": "2015-03-01",
+        "cvx": "17",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2020-01-01",
+        "cvx": "17",
+        "status": "Accepted",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  }
+}

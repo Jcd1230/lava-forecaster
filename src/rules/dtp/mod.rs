@@ -31,6 +31,7 @@ pub fn definition() -> VaccineGroupDefinition {
         custom_forecast_hook: Some(overrides::dtp_custom_forecast_hook),
         custom_switch_hook: None,
         custom_evaluation_hook: Some(overrides::dtp_custom_evaluation_hook),
+        custom_dose_number_hook: None,
         group_selection: Some(overrides::dtp_group_selection),
     }
 }

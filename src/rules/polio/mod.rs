@@ -13,6 +13,7 @@ pub fn definition() -> VaccineGroupDefinition {
         custom_forecast_hook: Some(overrides::polio_custom_forecast_hook),
         custom_switch_hook: None,
         custom_evaluation_hook: None,
+        custom_dose_number_hook: None,
         group_selection: None,
     }
 }
