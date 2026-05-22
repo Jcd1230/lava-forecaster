@@ -1,0 +1,120 @@
+{
+  "hepa_adult_3dose": {
+    "evaluations": [
+      {
+        "date": "2019-01-15",
+        "cvx": "104",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2019-02-15",
+        "cvx": "104",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2019-07-15",
+        "cvx": "104",
+        "status": "Valid",
+        "dose_number": 3
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "hepa_child_2dose": {
+    "evaluations": [
+      {
+        "date": "2021-01-01",
+        "cvx": "83",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2021-07-01",
+        "cvx": "83",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "hepa_twinrix_4dose": {
+    "evaluations": [
+      {
+        "date": "2018-01-01",
+        "cvx": "104",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2018-01-08",
+        "cvx": "104",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2018-01-22",
+        "cvx": "104",
+        "status": "Valid",
+        "dose_number": 3
+      },
+      {
+        "date": "2019-01-01",
+        "cvx": "104",
+        "status": "Valid",
+        "dose_number": 4
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "hepa_twinrix_revert_3dose": {
+    "evaluations": [
+      {
+        "date": "2018-01-01",
+        "cvx": "104",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2018-01-08",
+        "cvx": "104",
+        "status": "Accepted",
+        "dose_number": 2
+      },
+      {
+        "date": "2018-02-01",
+        "cvx": "104",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2018-07-01",
+        "cvx": "104",
+        "status": "Valid",
+        "dose_number": 3
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  }
+}

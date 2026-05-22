@@ -1,0 +1,159 @@
+{
+  "varicella_adult_24d_interval": {
+    "evaluations": [
+      {
+        "date": "2020-01-01",
+        "cvx": "21",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2020-01-25",
+        "cvx": "21",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "varicella_adult_standard": {
+    "evaluations": [
+      {
+        "date": "2020-01-01",
+        "cvx": "21",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2020-01-29",
+        "cvx": "21",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "varicella_adult_too_close": {
+    "evaluations": [
+      {
+        "date": "2020-01-01",
+        "cvx": "21",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2020-01-24",
+        "cvx": "21",
+        "status": "Invalid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2020-02-21",
+      "recommended_date": "2020-02-21",
+      "overdue_date": "2020-02-21",
+      "status": "NotComplete"
+    }
+  },
+  "varicella_child_standard": {
+    "evaluations": [
+      {
+        "date": "2021-01-01",
+        "cvx": "21",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-01-01",
+        "cvx": "21",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "varicella_child_under_13_too_close": {
+    "evaluations": [
+      {
+        "date": "2021-01-01",
+        "cvx": "21",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2021-02-01",
+        "cvx": "21",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "varicella_historical": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "varicella_live_virus_conflict": {
+    "evaluations": [
+      {
+        "date": "2021-01-16",
+        "cvx": "21",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2021-02-13",
+      "recommended_date": "2021-02-13",
+      "overdue_date": "2021-05-28",
+      "status": "NotComplete"
+    }
+  },
+  "varicella_same_day_duplicate": {
+    "evaluations": [
+      {
+        "date": "2021-01-01",
+        "cvx": "21",
+        "status": "Invalid",
+        "dose_number": 1
+      },
+      {
+        "date": "2021-01-01",
+        "cvx": "94",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2021-04-01",
+      "recommended_date": "2024-01-01",
+      "overdue_date": "2027-01-28",
+      "status": "NotComplete"
+    }
+  }
+}

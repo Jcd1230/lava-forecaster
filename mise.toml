@@ -13,3 +13,16 @@ mkdir -p ice-app && cd ice-app
 jar -xf ../opencds-decision-support-service/target/opencds-decision-support-service.war
 java -Xms512m -Xmx2g org.springframework.boot.loader.launch.WarLauncher
 """
+
+[tasks.test]
+description = "Run rest verification tests against Rust POC"
+run = "python3 curl-rest-tests/run_tests.py"
+
+[tasks.test-compare]
+description = "Compare outputs between Java ICE service and Rust POC"
+run = "python3 curl-rest-tests/run_tests.py --compare"
+
+[tasks.test-record]
+description = "Record current Rust POC output as the expected snapshot results"
+run = "python3 curl-rest-tests/run_tests.py --record"
+

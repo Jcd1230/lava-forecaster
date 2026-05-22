@@ -1,0 +1,73 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "dtp_adult_no_pertussis",
+      "dob": "2015-01-01",
+      "gender": "F",
+      "eval_date": "birth + 4168d",
+      "doses": [
+        "birth + 8y:09",
+        "birth + 97m:09",
+        "birth + 103m:09"
+      ],
+      "group": "DTP",
+      "focus": "200"
+    },
+    {
+      "name": "dtp_adult_standard",
+      "dob": "2015-01-01",
+      "gender": "F",
+      "eval_date": "birth + 4157d",
+      "doses": [
+        "birth + 8y:115",
+        "birth + 97m:09",
+        "birth + 103m:09"
+      ],
+      "group": "DTP",
+      "focus": "200"
+    },
+    {
+      "name": "dtp_child_3dose_exception",
+      "dob": "2018-01-01",
+      "gender": "F",
+      "eval_date": "birth + 3061d",
+      "doses": [
+        "birth + 13m:106",
+        "birth + 15m:106",
+        "birth + 50m:106"
+      ],
+      "group": "DTP",
+      "focus": "200"
+    },
+    {
+      "name": "dtp_child_4dose_exception",
+      "dob": "2018-01-01",
+      "gender": "F",
+      "eval_date": "birth + 3061d",
+      "doses": [
+        "birth + 2m:106",
+        "birth + 4m:106",
+        "birth + 6m:106",
+        "birth + 4y:106"
+      ],
+      "group": "DTP",
+      "focus": "200"
+    },
+    {
+      "name": "dtp_child_standard",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 333w",
+      "doses": [
+        "birth + 2m:106",
+        "birth + 4m:106",
+        "birth + 6m:106",
+        "birth + 15m:106",
+        "birth + 4y:106"
+      ],
+      "group": "DTP",
+      "focus": "200"
+    }
+  ]
+}

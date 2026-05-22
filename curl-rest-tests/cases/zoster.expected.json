@@ -1,0 +1,134 @@
+{
+  "zoster_01_no_doses_age50": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2025-01-01",
+      "recommended_date": "2025-01-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "zoster_02_no_doses_under50": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2030-01-01",
+      "recommended_date": "2030-01-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "zoster_03_dose1_valid": {
+    "evaluations": [
+      {
+        "date": "2025-01-15",
+        "cvx": "187",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-02-12",
+      "recommended_date": "2025-03-12",
+      "overdue_date": "2025-09-11",
+      "status": "NotComplete"
+    }
+  },
+  "zoster_04_two_doses_complete": {
+    "evaluations": [
+      {
+        "date": "2025-01-15",
+        "cvx": "187",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-03-15",
+        "cvx": "187",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "zoster_05_cvx121_accepted": {
+    "evaluations": [
+      {
+        "date": "2024-12-01",
+        "cvx": "121",
+        "status": "Accepted",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-01-26",
+      "recommended_date": "2025-01-26",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "zoster_06_cvx187_too_soon_after_121": {
+    "evaluations": [
+      {
+        "date": "2025-01-01",
+        "cvx": "121",
+        "status": "Accepted",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-02-01",
+        "cvx": "187",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-03-01",
+      "recommended_date": "2025-03-29",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "zoster_07_dose1_too_early": {
+    "evaluations": [
+      {
+        "date": "2024-09-01",
+        "cvx": "187",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-01-01",
+      "recommended_date": "2025-01-01",
+      "overdue_date": "2025-04-28",
+      "status": "NotComplete"
+    }
+  },
+  "zoster_08_cvx187_sameday_121": {
+    "evaluations": [
+      {
+        "date": "2025-01-01",
+        "cvx": "121",
+        "status": "Accepted",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-01-01",
+        "cvx": "187",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-02-26",
+      "recommended_date": "2025-02-26",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  }
+}

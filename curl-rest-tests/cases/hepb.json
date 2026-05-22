@@ -1,0 +1,71 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "hepb_adult_enough_is_enough",
+      "dob": "2000-01-01",
+      "gender": "F",
+      "eval_date": "birth + 7517d",
+      "doses": [
+        "birth + 20y:43",
+        "birth + 241m:43",
+        "birth + 242m:43",
+        "birth + 246m:43"
+      ],
+      "group": "HEP_B",
+      "focus": "100"
+    },
+    {
+      "name": "hepb_adult_heplisav",
+      "dob": "2000-01-01",
+      "gender": "F",
+      "eval_date": "birth + 1052w",
+      "doses": [
+        "birth + 20y:189",
+        "birth + 241m:189"
+      ],
+      "group": "HEP_B",
+      "focus": "100"
+    },
+    {
+      "name": "hepb_child_4dose_switch",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 212d",
+      "doses": [
+        "birth:08",
+        "birth + 1m:08",
+        "birth + 2m:08",
+        "birth + 6m:08"
+      ],
+      "group": "HEP_B",
+      "focus": "100"
+    },
+    {
+      "name": "hepb_child_standard",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 212d",
+      "doses": [
+        "birth:08",
+        "birth + 1m:08",
+        "birth + 6m:08"
+      ],
+      "group": "HEP_B",
+      "focus": "100"
+    },
+    {
+      "name": "hepb_twinrix_3dose",
+      "dob": "2000-01-01",
+      "gender": "F",
+      "eval_date": "birth + 7517d",
+      "doses": [
+        "birth + 20y:104",
+        "birth + 241m:104",
+        "birth + 246m:104"
+      ],
+      "group": "HEP_B",
+      "focus": "100"
+    }
+  ]
+}

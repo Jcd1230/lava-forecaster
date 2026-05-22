@@ -1,0 +1,58 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "hepa_adult_3dose",
+      "dob": "2000-01-01",
+      "gender": "F",
+      "eval_date": "birth + 7134d",
+      "doses": [
+        "birth + 6954d:104",
+        "birth + 6985d:104",
+        "birth + 7135d:104"
+      ],
+      "group": "HEP_A",
+      "focus": "810"
+    },
+    {
+      "name": "hepa_child_2dose",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 78w",
+      "doses": [
+        "birth + 1y:83",
+        "birth + 18m:83"
+      ],
+      "group": "HEP_A",
+      "focus": "810"
+    },
+    {
+      "name": "hepa_twinrix_4dose",
+      "dob": "2000-01-01",
+      "gender": "F",
+      "eval_date": "birth + 6939d",
+      "doses": [
+        "birth + 18y:104",
+        "birth + 6582d:104",
+        "birth + 6596d:104",
+        "birth + 19y:104"
+      ],
+      "group": "HEP_A",
+      "focus": "810"
+    },
+    {
+      "name": "hepa_twinrix_revert_3dose",
+      "dob": "2000-01-01",
+      "gender": "F",
+      "eval_date": "birth + 965w",
+      "doses": [
+        "birth + 18y:104",
+        "birth + 6582d:104",
+        "birth + 217m:104",
+        "birth + 222m:104"
+      ],
+      "group": "HEP_A",
+      "focus": "810"
+    }
+  ]
+}

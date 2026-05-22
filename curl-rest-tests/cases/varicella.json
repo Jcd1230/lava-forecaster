@@ -1,0 +1,98 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "varicella_adult_24d_interval",
+      "dob": "2000-01-01",
+      "gender": "F",
+      "eval_date": "birth + 9131d",
+      "doses": [
+        "birth + 20y:21",
+        "birth + 1047w:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "varicella_adult_standard",
+      "dob": "2000-01-01",
+      "gender": "F",
+      "eval_date": "birth + 9131d",
+      "doses": [
+        "birth + 20y:21",
+        "birth + 7333d:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "varicella_adult_too_close",
+      "dob": "2000-01-01",
+      "gender": "F",
+      "eval_date": "birth + 9131d",
+      "doses": [
+        "birth + 20y:21",
+        "birth + 7328d:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "varicella_child_standard",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 1826d",
+      "doses": [
+        "birth + 1y:21",
+        "birth + 4y:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "varicella_child_under_13_too_close",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 1826d",
+      "doses": [
+        "birth + 1y:21",
+        "birth + 13m:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "varicella_historical",
+      "dob": "1979-06-01",
+      "gender": "F",
+      "eval_date": "birth + 16650d",
+      "doses": [],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "varicella_live_virus_conflict",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 1826d",
+      "doses": [
+        "birth + 1y:03",
+        "birth + 381d:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "varicella_same_day_duplicate",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 1826d",
+      "doses": [
+        "birth + 1y:21",
+        "birth + 1y:94"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    }
+  ]
+}

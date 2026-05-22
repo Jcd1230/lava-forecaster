@@ -1,0 +1,112 @@
+{
+  "hpv_adult_3dose_standard": {
+    "evaluations": [
+      {
+        "date": "2021-01-01",
+        "cvx": "165",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2021-03-01",
+        "cvx": "165",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2021-07-01",
+        "cvx": "165",
+        "status": "Valid",
+        "dose_number": 3
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "hpv_child_2dose_standard": {
+    "evaluations": [
+      {
+        "date": "2021-01-01",
+        "cvx": "165",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2021-07-01",
+        "cvx": "165",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "hpv_child_3dose_switch": {
+    "evaluations": [
+      {
+        "date": "2021-01-01",
+        "cvx": "165",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2021-03-01",
+        "cvx": "165",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2021-07-01",
+        "cvx": "165",
+        "status": "Valid",
+        "dose_number": 3
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "hpv_male_cervarix_exception": {
+    "evaluations": [
+      {
+        "date": "2021-01-01",
+        "cvx": "118",
+        "status": "Accepted",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2021-01-01",
+      "recommended_date": "2021-01-01",
+      "overdue_date": "2021-01-01",
+      "status": "NotComplete"
+    }
+  },
+  "hpv_over_46_exception": {
+    "evaluations": [
+      {
+        "date": "2021-01-01",
+        "cvx": "165",
+        "status": "Accepted",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "NotRecommended"
+    }
+  }
+}

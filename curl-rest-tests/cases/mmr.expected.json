@@ -1,0 +1,131 @@
+{
+  "mmr_adult_1dose": {
+    "evaluations": [
+      {
+        "date": "2020-01-01",
+        "cvx": "03",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "mmr_adult_2doses": {
+    "evaluations": [
+      {
+        "date": "2001-01-01",
+        "cvx": "03",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2020-01-01",
+        "cvx": "03",
+        "status": "Accepted",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "mmr_child_standard": {
+    "evaluations": [
+      {
+        "date": "2021-01-05",
+        "cvx": "03",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-01-05",
+        "cvx": "03",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "mmr_early_dose": {
+    "evaluations": [
+      {
+        "date": "2020-10-05",
+        "cvx": "03",
+        "status": "Accepted",
+        "dose_number": 1
+      },
+      {
+        "date": "2021-02-05",
+        "cvx": "03",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2021-03-05",
+      "recommended_date": "2024-01-01",
+      "overdue_date": "2027-01-28",
+      "status": "NotComplete"
+    }
+  },
+  "mmr_historical": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "mmr_live_virus_conflict": {
+    "evaluations": [
+      {
+        "date": "2021-01-01",
+        "cvx": "03",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2021-02-13",
+      "recommended_date": "2024-01-01",
+      "overdue_date": "2027-01-28",
+      "status": "NotComplete"
+    }
+  },
+  "mmr_same_day_duplicate": {
+    "evaluations": [
+      {
+        "date": "2021-01-01",
+        "cvx": "03",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2021-01-01",
+        "cvx": "04",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2021-02-01",
+      "recommended_date": "2024-01-01",
+      "overdue_date": "2027-01-28",
+      "status": "NotComplete"
+    }
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "zoster_01_no_doses_age50",
+      "dob": "1975-01-01",
+      "gender": "F",
+      "eval_date": "birth + 18271d",
+      "doses": [],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "zoster_02_no_doses_under50",
+      "dob": "1980-01-01",
+      "gender": "F",
+      "eval_date": "birth + 16445d",
+      "doses": [],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "zoster_03_dose1_valid",
+      "dob": "1975-01-01",
+      "gender": "F",
+      "eval_date": "birth + 18352d",
+      "doses": [
+        "birth + 2611w:187"
+      ],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "zoster_04_two_doses_complete",
+      "dob": "1975-01-01",
+      "gender": "F",
+      "eval_date": "birth + 18413d",
+      "doses": [
+        "birth + 2611w:187",
+        "birth + 18336d:187"
+      ],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "zoster_05_cvx121_accepted",
+      "dob": "1955-01-01",
+      "gender": "F",
+      "eval_date": "birth + 25576d",
+      "doses": [
+        "birth + 839m:121"
+      ],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "zoster_06_cvx187_too_soon_after_121",
+      "dob": "1965-01-01",
+      "gender": "F",
+      "eval_date": "birth + 22004d",
+      "doses": [
+        "birth + 60y:121",
+        "birth + 721m:187"
+      ],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "zoster_07_dose1_too_early",
+      "dob": "1975-01-01",
+      "gender": "F",
+      "eval_date": "birth + 18271d",
+      "doses": [
+        "birth + 596m:187"
+      ],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "zoster_08_cvx187_sameday_121",
+      "dob": "1965-01-01",
+      "gender": "F",
+      "eval_date": "birth + 22004d",
+      "doses": [
+        "birth + 60y:121",
+        "birth + 60y:187"
+      ],
+      "group": "ZOSTER",
+      "focus": "620"
+    }
+  ]
+}

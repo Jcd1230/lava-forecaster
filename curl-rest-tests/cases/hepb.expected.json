@@ -1,0 +1,148 @@
+{
+  "hepb_adult_enough_is_enough": {
+    "evaluations": [
+      {
+        "date": "2020-01-01",
+        "cvx": "43",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2020-02-01",
+        "cvx": "43",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2020-03-01",
+        "cvx": "43",
+        "status": "Invalid",
+        "dose_number": 3
+      },
+      {
+        "date": "2020-07-01",
+        "cvx": "43",
+        "status": "Valid",
+        "dose_number": 3
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "hepb_adult_heplisav": {
+    "evaluations": [
+      {
+        "date": "2020-01-01",
+        "cvx": "189",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2020-02-01",
+        "cvx": "189",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "hepb_child_4dose_switch": {
+    "evaluations": [
+      {
+        "date": "2020-01-01",
+        "cvx": "08",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2020-02-01",
+        "cvx": "08",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2020-03-01",
+        "cvx": "08",
+        "status": "Valid",
+        "dose_number": 3
+      },
+      {
+        "date": "2020-07-01",
+        "cvx": "08",
+        "status": "Valid",
+        "dose_number": 4
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "hepb_child_standard": {
+    "evaluations": [
+      {
+        "date": "2020-01-01",
+        "cvx": "08",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2020-02-01",
+        "cvx": "08",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2020-07-01",
+        "cvx": "08",
+        "status": "Valid",
+        "dose_number": 3
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "hepb_twinrix_3dose": {
+    "evaluations": [
+      {
+        "date": "2020-01-01",
+        "cvx": "104",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2020-02-01",
+        "cvx": "104",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2020-07-01",
+        "cvx": "104",
+        "status": "Valid",
+        "dose_number": 3
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  }
+}

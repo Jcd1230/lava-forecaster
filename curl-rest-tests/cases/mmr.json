@@ -1,0 +1,85 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "mmr_adult_1dose",
+      "dob": "2000-01-01",
+      "gender": "F",
+      "eval_date": "birth + 9635d",
+      "doses": [
+        "birth + 20y:03"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "mmr_adult_2doses",
+      "dob": "2000-01-01",
+      "gender": "F",
+      "eval_date": "birth + 9635d",
+      "doses": [
+        "birth + 1y:03",
+        "birth + 20y:03"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "mmr_child_standard",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 1469d",
+      "doses": [
+        "birth + 370d:03",
+        "birth + 1465d:03"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "mmr_early_dose",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 424d",
+      "doses": [
+        "birth + 278d:03",
+        "birth + 401d:03"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "mmr_historical",
+      "dob": "1956-01-01",
+      "gender": "F",
+      "eval_date": "birth + 25706d",
+      "doses": [],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "mmr_live_virus_conflict",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 396d",
+      "doses": [
+        "birth + 1y:03",
+        "birth + 381d:21"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "mmr_same_day_duplicate",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 396d",
+      "doses": [
+        "birth + 1y:03",
+        "birth + 1y:04"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    }
+  ]
+}

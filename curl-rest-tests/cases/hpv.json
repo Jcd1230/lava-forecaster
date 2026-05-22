@@ -1,0 +1,65 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "hpv_adult_3dose_standard",
+      "dob": "2000-01-01",
+      "gender": "F",
+      "eval_date": "birth + 1126w",
+      "doses": [
+        "birth + 21y:165",
+        "birth + 254m:165",
+        "birth + 258m:165"
+      ],
+      "group": "HPV",
+      "focus": "840"
+    },
+    {
+      "name": "hpv_child_2dose_standard",
+      "dob": "2010-01-01",
+      "gender": "F",
+      "eval_date": "birth + 4229d",
+      "doses": [
+        "birth + 11y:165",
+        "birth + 138m:165"
+      ],
+      "group": "HPV",
+      "focus": "840"
+    },
+    {
+      "name": "hpv_child_3dose_switch",
+      "dob": "2010-01-01",
+      "gender": "F",
+      "eval_date": "birth + 4229d",
+      "doses": [
+        "birth + 11y:165",
+        "birth + 134m:165",
+        "birth + 138m:165"
+      ],
+      "group": "HPV",
+      "focus": "840"
+    },
+    {
+      "name": "hpv_male_cervarix_exception",
+      "dob": "2000-01-01",
+      "gender": "M",
+      "eval_date": "birth + 7701d",
+      "doses": [
+        "birth + 21y:118"
+      ],
+      "group": "HPV",
+      "focus": "840"
+    },
+    {
+      "name": "hpv_over_46_exception",
+      "dob": "1970-01-01",
+      "gender": "F",
+      "eval_date": "birth + 18658d",
+      "doses": [
+        "birth + 51y:165"
+      ],
+      "group": "HPV",
+      "focus": "840"
+    }
+  ]
+}

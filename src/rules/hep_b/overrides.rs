@@ -276,16 +276,38 @@ pub fn hep_b_group_selection(
         }
     }
 
-    // 2. Select series by status or age
-    // Order of preference: Complete series first
-    let series_priority = [
-        "HEP_B_ADULT_2_DOSE_SERIES",
-        "HEP_B_3_DOSE_TWINRIX_SERIES",
-        "HEP_B_4_DOSE_ACCELERATED_TWINRIX_SERIES",
-        "HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES",
-        "HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES",
-        "HEP_B_ADULT_3_DOSE_SERIES",
-    ];
+    // 2. Determine if the patient is considered an adult for Hep B series selection.
+    // Based on age when first Hep B dose was administered (or evaluation date if no doses).
+    let first_dose_date = history.iter()
+        .filter(|d| {
+            matches!(
+                d.cvx.as_str(),
+                "08" | "42" | "43" | "44" | "45" | "51" | "102" | "104" | "110" | "132" | "146" | "189" | "198" | "220"
+            )
+        })
+        .min_by_key(|d| d.date)
+        .map(|d| d.date);
+
+    let is_adult = match first_dose_date {
+        Some(date) => date >= add_years(patient.birth_date, 19),
+        None => eval_date >= add_years(patient.birth_date, 19),
+    };
+
+    // 3. Select series by status
+    // Order of preference: Complete series first, filtered by eligibility/is_adult
+    let mut series_priority = Vec::new();
+    if is_adult {
+        series_priority.push("HEP_B_ADULT_2_DOSE_SERIES");
+        series_priority.push("HEP_B_3_DOSE_TWINRIX_SERIES");
+        series_priority.push("HEP_B_4_DOSE_ACCELERATED_TWINRIX_SERIES");
+        series_priority.push("HEP_B_ADULT_3_DOSE_SERIES");
+    } else {
+        // Child/Adolescent can also use Twinrix if administered at >= 18y-4d
+        series_priority.push("HEP_B_3_DOSE_TWINRIX_SERIES");
+        series_priority.push("HEP_B_4_DOSE_ACCELERATED_TWINRIX_SERIES");
+        series_priority.push("HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES");
+        series_priority.push("HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES");
+    }
 
     for name in &series_priority {
         if let Some(f) = candidate_forecasts.get(*name) {
@@ -295,7 +317,7 @@ pub fn hep_b_group_selection(
         }
     }
 
-    // If none are complete, select based on history content or age
+    // 4. If none are complete, select based on history content or age
     let has_twinrix = history.iter().any(|d| d.cvx == "104");
     if has_twinrix {
         // Prefer Twinrix
@@ -315,9 +337,8 @@ pub fn hep_b_group_selection(
         }
     }
 
-    // Default to age-based choice at evaluation date
-    let age_19y = add_years(patient.birth_date, 19);
-    if eval_date >= age_19y {
+    // Default choice based on is_adult
+    if is_adult {
         "HEP_B_ADULT_3_DOSE_SERIES".to_string()
     } else {
         // For children/adolescents, check if switched or default to 3-Dose
