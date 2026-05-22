@@ -15,6 +15,7 @@ pub struct EvaluationContext<'a> {
     pub current_dose: Option<&'a Dose>,
     pub target_dose_number: usize,
     pub eval_date: NaiveDate,
+    pub active_series_name: &'a str,
 }
 
 impl<'a> EvaluationContext<'a> {
@@ -25,6 +26,7 @@ impl<'a> EvaluationContext<'a> {
         current_dose: Option<&'a Dose>,
         target_dose_number: usize,
         eval_date: NaiveDate,
+        active_series_name: &'a str,
     ) -> Self {
         Self {
             patient,
@@ -33,6 +35,7 @@ impl<'a> EvaluationContext<'a> {
             current_dose,
             target_dose_number,
             eval_date,
+            active_series_name,
         }
     }
 }
@@ -198,6 +201,7 @@ impl EvaluationEngine {
                     Some(dose),
                     target_dose_idx,
                     eval_date,
+                    &active_series.name,
                 );
                 if let Some(new_series_name) = (switch_hook)(&active_series.name, target_dose_idx, &ctx) {
                     if let Some(new_series) = group_series.iter().find(|s| s.name == new_series_name) {
@@ -237,6 +241,7 @@ impl EvaluationEngine {
                 Some(dose),
                 target_dose_idx,
                 eval_date,
+                &active_series.name,
             );
 
             for rule in &self.param_overrides {
@@ -313,6 +318,7 @@ impl EvaluationEngine {
                 Some(dose),
                 target_dose_idx,
                 eval_date,
+                &active_series.name,
             );
 
             for rule in &self.completion_rules {
@@ -328,11 +334,23 @@ impl EvaluationEngine {
             i += 1;
         }
 
+        let satisfied_count = evaluations.iter()
+            .filter(|e| {
+                e.status == DoseStatus::Valid || 
+                (e.status == DoseStatus::Accepted && 
+                 !e.reasons.contains(&EvaluationReason::OutsideRoutineSeries) &&
+                 !e.reasons.contains(&EvaluationReason::VaccineNotLicensedForMales))
+            })
+            .count();
+
+        let is_completed = is_completed || satisfied_count >= active_series.num_doses;
+
         // 4. Recommendation / Forecasting
         let forecast = self.generate_forecast(
             patient,
             history,
             &valid_doses,
+            satisfied_count,
             is_completed,
             eval_date,
             &active_series,
@@ -351,6 +369,7 @@ impl EvaluationEngine {
         patient: &Patient,
         history: &[Dose],
         valid_doses: &[(NaiveDate, usize)],
+        satisfied_count: usize,
         is_completed: bool,
         eval_date: NaiveDate,
         active_series: &CompiledSeries,
@@ -371,7 +390,7 @@ impl EvaluationEngine {
             return forecast;
         }
 
-        let next_dose_idx = valid_doses.len() + 1;
+        let next_dose_idx = satisfied_count + 1;
         let mut dose_rule = active_series.doses[next_dose_idx - 1].clone();
         let mut interval_rule = if next_dose_idx > 1 {
             active_series.intervals.iter()
@@ -388,6 +407,7 @@ impl EvaluationEngine {
             None,
             next_dose_idx,
             eval_date,
+            &active_series.name,
         );
 
         // Apply recommendation overrides
@@ -404,13 +424,19 @@ impl EvaluationEngine {
             }
         }
 
-        // Calculate Earliest Date: max(min_age, min_interval_from_prev)
-        let min_age_date = dose_rule.minimum_age.as_ref()
-            .map(|tp| tp.add_to(patient.birth_date));
+        // Get the most recent shot date for any dose belonging to this series
+        let last_shot_date = history.iter()
+            .filter(|d| active_series.doses.iter().any(|d_rule| d_rule.allowed_cvx.contains(&d.cvx)))
+            .map(|d| d.date)
+            .max();
+
+        // Calculate Earliest Date: max(minimum_age, minimum_interval)
+        let min_age_tp = dose_rule.minimum_age.as_ref();
+        let min_age_date = min_age_tp.map(|tp| tp.add_to(patient.birth_date));
         
         let min_int_date = if let Some(ref int_rule) = interval_rule {
             int_rule.minimum_interval.as_ref().and_then(|tp| {
-                valid_doses.last().map(|(prev_date, _)| tp.add_to(*prev_date))
+                last_shot_date.map(|prev_date| tp.add_to(prev_date))
             })
         } else {
             None
@@ -428,7 +454,7 @@ impl EvaluationEngine {
             .map(|tp| tp.add_to(patient.birth_date));
         let rec_int_date = if let Some(ref int_rule) = interval_rule {
             int_rule.earliest_recommended_interval.as_ref().and_then(|tp| {
-                valid_doses.last().map(|(prev_date, _)| tp.add_to(*prev_date))
+                last_shot_date.map(|prev_date| tp.add_to(prev_date))
             })
         } else {
             None
@@ -446,7 +472,7 @@ impl EvaluationEngine {
             .map(|tp| tp.add_to(patient.birth_date));
         let overdue_int_date = if let Some(ref int_rule) = interval_rule {
             int_rule.latest_recommended_interval.as_ref().and_then(|tp| {
-                valid_doses.last().map(|(prev_date, _)| tp.add_to(*prev_date))
+                last_shot_date.map(|prev_date| tp.add_to(prev_date))
             })
         } else {
             None
@@ -474,6 +500,41 @@ impl EvaluationEngine {
             (hook)(patient, valid_doses, history, eval_date, &mut forecast);
         }
 
+        if let Some(last_date) = last_shot_date {
+            if let Some(ref mut earliest) = forecast.earliest_date {
+                if *earliest < last_date {
+                    *earliest = last_date;
+                }
+            }
+            if let Some(ref mut recommended) = forecast.recommended_date {
+                if *recommended < last_date {
+                    *recommended = last_date;
+                }
+            }
+            if let Some(ref mut overdue) = forecast.overdue_date {
+                if *overdue < last_date {
+                    *overdue = last_date;
+                }
+            }
+        }
+
+        // Align earliest <= recommended <= overdue
+        if let (Some(earliest), Some(recommended)) = (forecast.earliest_date, forecast.recommended_date.as_mut()) {
+            if *recommended < earliest {
+                *recommended = earliest;
+            }
+        }
+        if let (Some(recommended), Some(overdue)) = (forecast.recommended_date, forecast.overdue_date.as_mut()) {
+            if *overdue < recommended {
+                *overdue = recommended;
+            }
+        }
+        if let (Some(earliest), Some(overdue)) = (forecast.earliest_date, forecast.overdue_date.as_mut()) {
+            if *overdue < earliest {
+                *overdue = earliest;
+            }
+        }
+
         forecast
     }
 }
@@ -498,6 +559,21 @@ fn get_same_day_priority(group: &str, cvx: &str, birth_date: NaiveDate, dose_dat
                 if cvx == "52" { 1 } else { 0 }
             }
         }
+        "VARICELLA" => match cvx {
+            "94" => 0,
+            "21" => 1,
+            _ => 2,
+        },
+        "DTP" => match cvx {
+            "115" | "198" => 1, // Tdap
+            "09" | "28" | "113" | "138" | "139" | "195" | "196" => 2, // DT/Td
+            _ => 0, // DTaP/DTP combo/single
+        },
+        "HEP_B" => match cvx {
+            "104" | "110" | "146" => 0,
+            _ => 1,
+        },
         _ => 0,
     }
 }
+

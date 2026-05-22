@@ -27,7 +27,7 @@ def map_legacy_status(legacy_status, reasons):
         return 'ConditionallyRecommended'
     if legacy_status == 'NOT_RECOMMENDED':
         return 'NotRecommended'
-    if legacy_status == 'RECOMMENDED':
+    if legacy_status in ('RECOMMENDED', 'FUTURE_RECOMMENDED'):
         return 'NotComplete'
     return legacy_status
 
@@ -172,7 +172,18 @@ def parse_legacy_xml(xml_content, focus_code='400'):
             if child.tag.endswith('substanceCode'):
                 sub_code_el = child
                 break
-        if sub_code_el is not None and sub_code_el.attrib.get('code') == focus_code:
+        # Match by substanceCode.code OR by observationFocus.code inside the proposal
+        sub_code_matches = sub_code_el is not None and sub_code_el.attrib.get('code') == focus_code
+        obs_focus_matches = False
+        if not sub_code_matches:
+            for rcs_check in proposal:
+                if rcs_check.tag.endswith('relatedClinicalStatement'):
+                    for obs_check in rcs_check:
+                        if obs_check.tag.endswith('observationResult'):
+                            for obs_c in obs_check:
+                                if obs_c.tag.endswith('observationFocus') and obs_c.attrib.get('code') == focus_code:
+                                    obs_focus_matches = True
+        if sub_code_matches or obs_focus_matches:
             earliest_date = None
             recommended_date = None
             overdue_date = None

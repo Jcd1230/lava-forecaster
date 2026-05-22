@@ -41,6 +41,9 @@ pub enum EvaluationReason {
     BoosterDose,
     VaccineNotCountedBasedOnMostRecentVaccineGiven,
     OutsideRoutineSeries,
+    InsufficientAntigen,
+    VaccineNotLicensedForMales,
+    AboveRecommendedAgeSeries,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
