@@ -126,6 +126,42 @@ pub fn zoster_custom_forecast_hook(
         }
     }
 
+    // If a recombinant zoster dose was attempted too soon after live zoster, the failed
+    // CVX 187 still anchors the next recombinant-dose forecast interval.
+    let last_invalid_shingrix_after_live = history
+        .iter()
+        .filter(|dose| is_shingrix(&dose.cvx))
+        .filter(|dose| {
+            history.iter().any(|prior| {
+                is_old_zoster(&prior.cvx)
+                    && prior.date <= dose.date
+                    && (dose.date - prior.date).num_days() < 52
+            })
+        })
+        .map(|dose| dose.date)
+        .max();
+
+    if let Some(last_invalid_date) = last_invalid_shingrix_after_live {
+        let earliest_date = last_invalid_date + chrono::Duration::days(28);
+        let recommended_date = last_invalid_date + chrono::Duration::days(56);
+
+        if let Some(ref mut earliest) = forecast.earliest_date {
+            if *earliest < earliest_date {
+                *earliest = earliest_date;
+            }
+        } else {
+            forecast.earliest_date = Some(earliest_date);
+        }
+
+        if let Some(ref mut recommended) = forecast.recommended_date {
+            if *recommended < recommended_date {
+                *recommended = recommended_date;
+            }
+        } else {
+            forecast.recommended_date = Some(recommended_date);
+        }
+    }
+
     // Ensure recommended >= earliest after all adjustments
     if let (Some(earliest), Some(recommended)) = (forecast.earliest_date, forecast.recommended_date.as_mut()) {
         if *recommended < earliest {
