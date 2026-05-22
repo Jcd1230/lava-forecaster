@@ -18,16 +18,19 @@ java -Xms512m -Xmx2g org.springframework.boot.loader.launch.WarLauncher
 description = "Run rest verification tests against Rust POC"
 run = "python3 curl-rest-tests/run_tests.py"
 
+[tasks.test-group]
+description = "Run rest verification tests for one vaccine group"
+run = "python3 curl-rest-tests/run_tests.py --group"
+
 [tasks.test-compare]
 description = "Compare outputs between Java ICE service and Rust POC"
 run = "python3 curl-rest-tests/run_tests.py --compare"
 
 [tasks.test-record]
-description = "Record current Rust POC output as the expected snapshot results"
+description = "Record Java ICE output as the expected snapshot results"
 run = "python3 curl-rest-tests/run_tests.py --record"
 
 [tasks.scaffold]
 description = "Scaffold a new vaccine group module and registration"
 run = "bash scripts/scaffold_group.sh"
-
 

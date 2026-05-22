@@ -25,6 +25,7 @@ All major tasks are configured as `mise` commands:
 | `mise run run` | Runs the Java ICE server (exploded WAR) on `http://localhost:8080`. |
 | `mise run scaffold <group_lower> [GROUP_UPPER]` | Scaffolds a new vaccine group module (directory structure, files, mod.rs registration, test JSON). |
 | `mise run test` | Runs the Python test suite to verify the Rust PoC output against recorded snapshot JSONs (default quiet, only fails/summary). Does *not* require the Java server to be running. |
+| `mise run test-group -- <group_lower>` | Runs Rust PoC verification for one vaccine group against recorded snapshots. |
 | `mise run test-compare` | Compares Rust PoC outputs directly against the live Java ICE server. **Auto-records missing expected snapshots.** Requires the Java server to be running. |
 | `mise run test-record` | Queries the Java ICE server and records its responses as the expected JSON snapshot. Requires the Java server to be running. |
 
@@ -36,6 +37,7 @@ All major tasks are configured as `mise` commands:
 - **Legacy Rule Definitions**: Legacy rules and support data YAML files are located under the [Series Directory](file:///home/jason/projects/ice/opencds-decision-support-service/src/main/resources/data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/Series/).
 - **Comparing Against Live Java**: When implementing or debugging a vaccine group, you can compare Rust behavior against Java in real time. First start the Java server using `mise run run`, then run `mise run test-compare -- --group <name>` in another shell.
 - **Test Runner Verbosity**: The test runner is quiet by default. Pass `--verbose` or `-v` to see full details of passing tests.
+- **Formatting Scope**: Avoid broad `cargo fmt` / `rustfmt` unless you intend to format the whole Rust module tree. Prefer formatting only files you intentionally changed; `rustfmt` can follow `mod.rs` declarations and touch sibling vaccine modules.
 
 ## Version Control (Jujutsu / jj-vcs)
 

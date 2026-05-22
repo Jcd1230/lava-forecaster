@@ -168,28 +168,28 @@ pub fn hepa_custom_switch_hook(
 ---
 
 ### Step C: Expose the Ruleset (`mod.rs`)
-Create `src/rules/<vaccine_group>/mod.rs` to bundle the engine definition and register schedules and hooks.
+Create `src/rules/<vaccine_group>/mod.rs` to bundle the group definition and register schedules and hooks.
 
 ```rust
-use crate::engine::EvaluationEngine;
-use crate::schedule::CompiledSeries;
+pub mod schedules;
+pub mod overrides;
 
-pub fn definition() -> EvaluationEngine {
-    let mut engine = EvaluationEngine::new(schedules::varicella_2_dose_series());
-    
-    // Wire up the custom override closures
-    engine.custom_evaluation_hook = Some(overrides::varicella_custom_evaluation_hook);
-    engine.custom_forecast_hook = Some(overrides::varicella_custom_forecast_hook);
-    
-    engine
+use crate::rules::VaccineGroupDefinition;
+
+pub fn definition() -> VaccineGroupDefinition {
+    VaccineGroupDefinition {
+        group_name: "VARICELLA",
+        series: vec![schedules::varicella_2_dose_series()],
+        param_overrides: Vec::new(),
+        completion_rules: Vec::new(),
+        rec_overrides: Vec::new(),
+        custom_forecast_hook: Some(overrides::varicella_custom_forecast_hook),
+        custom_switch_hook: None,
+        custom_evaluation_hook: Some(overrides::varicella_custom_evaluation_hook),
+        custom_dose_number_hook: None,
+        group_selection: None,
+    }
 }
-
-pub fn get_all_schedules() -> Vec<CompiledSeries> {
-    vec![schedules::varicella_2_dose_series()]
-}
-
-mod schedules;
-mod overrides;
 ```
 
 ---
@@ -201,16 +201,14 @@ Open `src/rules/mod.rs` and register the new group in the static thread-safe reg
 // 1. Declare the module
 pub mod varicella;
 
-// 2. Add registration inside get_registry()
-fn get_registry() -> &'static HashMap<&'static str, EvaluationEngine> {
-    REGISTRY.get_or_init(|| {
-        let mut m = HashMap::new();
-        m.insert("POLIO", polio::definition());
-        m.insert("HEP_A", hepa::definition());
-        m.insert("MMR", mmr::definition());
-        m.insert("VARICELLA", varicella::definition()); // <-- REGISTER HERE
-        m
-    })
+// 2. Add registration inside get_ruleset()
+m.insert("VARICELLA", varicella::definition());
+
+// 3. Add the group to get_all_groups()
+pub fn get_all_groups() -> Vec<&'static VaccineGroupDefinition> {
+    vec![
+        get_ruleset("VARICELLA").unwrap(),
+    ]
 }
 ```
 
@@ -247,6 +245,7 @@ All testing and verification commands are managed via `mise`:
 |---|---|
 | `mise run test-compare -- --group <name>` | Compares Rust PoC outputs against live Java. **Auto-records missing expected snapshots.** |
 | `mise run test -- --group <name>` | Runs Rust PoC verification against recorded snapshots. **Does not require Java.** |
+| `mise run test-group -- <name>` | Shortcut for Rust PoC verification of one vaccine group against recorded snapshots. |
 | `mise run test-record -- --group <name>` | Queries Java ICE and records snapshots. |
 
 ### Workflow for a New Vaccine Group
@@ -269,6 +268,14 @@ All testing and verification commands are managed via `mise`:
    ```bash
    mise run test -- --group <group_lower>
    ```
+   Or use the shortcut:
+   ```bash
+   mise run test-group -- <group_lower>
+   ```
+
+### Formatting Scope
+
+Avoid broad `cargo fmt` / `rustfmt` while porting a single vaccine group unless you intend to accept formatting changes across the Rust module tree. Because the crate uses `mod.rs` declarations for all vaccine groups, formatting from the crate root can touch sibling modules unrelated to the current task. Keep formatting scoped to files you intentionally changed and review `jj diff --name-only` before committing.
 
 ---
 
