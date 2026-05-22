@@ -1,0 +1,131 @@
+{
+  "mcv_child_routine_no_doses": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2026-01-01",
+      "recommended_date": "2026-01-01",
+      "overdue_date": "2028-01-28",
+      "status": "NotComplete"
+    }
+  },
+  "mcv_adolescent_16y_no_doses": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2021-01-01",
+      "recommended_date": "2026-01-01",
+      "overdue_date": "2026-01-01",
+      "status": "NotComplete"
+    }
+  },
+  "mcv_1_dose_routine": {
+    "evaluations": [
+      {
+        "date": "2025-01-01",
+        "cvx": "114",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2030-01-01",
+      "recommended_date": "2030-01-01",
+      "overdue_date": "2031-01-28",
+      "status": "NotComplete"
+    }
+  },
+  "mcv_1_dose_complete_at_16y": {
+    "evaluations": [
+      {
+        "date": "2026-01-01",
+        "cvx": "114",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "mcv_2_doses_complete": {
+    "evaluations": [
+      {
+        "date": "2021-01-01",
+        "cvx": "114",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2026-01-01",
+        "cvx": "114",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "mcv_dose_1_ignored_under_10y": {
+    "evaluations": [
+      {
+        "date": "2026-01-01",
+        "cvx": "114",
+        "status": "Accepted",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2028-01-01",
+      "recommended_date": "2028-01-01",
+      "overdue_date": "2030-01-28",
+      "status": "NotComplete"
+    }
+  },
+  "mcv_dose_1_invalid_under_min_age": {
+    "evaluations": [
+      {
+        "date": "2025-07-01",
+        "cvx": "114",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2036-01-01",
+      "recommended_date": "2036-01-01",
+      "overdue_date": "2038-01-28",
+      "status": "NotComplete"
+    }
+  },
+  "mcv_dose_1_late_accepted_over_22y": {
+    "evaluations": [
+      {
+        "date": "2023-01-01",
+        "cvx": "114",
+        "status": "Accepted",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "mcv_adult_over_19y_not_complete": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  }
+}

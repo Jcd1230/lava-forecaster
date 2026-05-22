@@ -36,7 +36,7 @@ To implement a group, follow the guidelines in the [Onboarding & Implementation 
 - [x] Implement complex risk-group and sequence-based evaluation rules
 
 ## 6. Meningococcal Conjugate (MCV4)
-- [ ] Implement `MCV42DoseSeries.yml` (Menactra, Menveo, MenQuadfi)
+- [x] Implement `MCV42DoseSeries.yml` (Menactra, Menveo, MenQuadfi)
 
 ## 7. Meningococcal B (MenB)
 - [ ] Implement `MenB4C2DoseSeries.yml` & `MenB4C3DoseSeries.yml` (Bexsero)

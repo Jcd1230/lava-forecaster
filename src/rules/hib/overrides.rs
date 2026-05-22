@@ -130,9 +130,7 @@ pub fn hib_custom_evaluation_hook(
     let age_ge_5y = compare_elapsed(birth, admin_date, &tp_5y) != std::cmp::Ordering::Less;
     if age_ge_5y {
         let num_doses = if series_name == "HIB_OMP_SERIES" { 3 } else { 4 };
-        let valid_before_5y = ctx.valid_doses.iter()
-            .filter(|(date, _)| *date < tp_5y.add_to(birth))
-            .count();
+        let valid_before_5y = ctx.count_valid_doses_before("5y");
         if valid_before_5y < num_doses {
             *status = DoseStatus::Accepted;
             if !reasons.contains(&EvaluationReason::AboveRecommendedAgeSeries) {
@@ -147,10 +145,8 @@ pub fn hib_custom_evaluation_hook(
         let tp_1y_4d = TimePeriod::parse("1y-4d").unwrap();
         let age_lt_1y_4d = compare_elapsed(birth, admin_date, &tp_1y_4d) == std::cmp::Ordering::Less;
         if age_lt_1y_4d {
-            let tp_7m = TimePeriod::parse("7m").unwrap();
-            let count_before_7m = ctx.history.iter()
-                .filter(|d| is_hib_cvx(&d.cvx) && d.date < tp_7m.add_to(birth))
-                .count();
+            let hib_cvx = &["17", "22", "46", "47", "48", "49", "50", "51", "102", "120", "132", "146", "148", "170", "198"];
+            let count_before_7m = ctx.count_cvx_before(hib_cvx, "7m");
             if count_before_7m == 0 {
                 *status = DoseStatus::Invalid;
                 if !reasons.contains(&EvaluationReason::BelowMinimumAge) {
@@ -182,26 +178,8 @@ pub fn hib_custom_forecast_hook(
     }
 
 
-    // Check if patient is >= 5 years of age at evaluation date
-    let age_5y = TimePeriod::parse("5y").unwrap().add_to(birth);
-    let is_eval_ge_5y = eval_date >= age_5y;
-
-    if is_eval_ge_5y {
-        let num_doses = if forecast.series_name == "HIB_OMP_SERIES" { 3 } else { 4 };
-        let valid_before_5y = valid_doses.iter()
-            .filter(|(date, _)| *date < age_5y)
-            .count();
-
-        if valid_before_5y < num_doses {
-            forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons = vec!["HIGH_RISK".to_string()];
-            forecast.earliest_date = None;
-            forecast.recommended_date = None;
-            forecast.overdue_date = None;
-            forecast.latest_date = None;
-            return;
-        }
-    }
+    // Removed the manual >= 5 years age check since it is now
+    // handled declaratively by active_series.max_age_clamp.
 
     // Recommended Date Overrides for HIB_4_DOSE_SERIES
     if forecast.series_name == "HIB_4_DOSE_SERIES" && forecast.status != SeriesStatus::Complete {
@@ -212,6 +190,7 @@ pub fn hib_custom_forecast_hook(
         let date_7m = tp_7m.add_to(birth);
         let date_12m = tp_12m.add_to(birth);
         let date_15m = tp_15m.add_to(birth);
+        let age_5y = TimePeriod::parse("5y").unwrap().add_to(birth);
 
         let eval_ge_7m = eval_date >= date_7m;
         let eval_lt_12m = eval_date < date_12m;

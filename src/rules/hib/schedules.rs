@@ -55,6 +55,7 @@ pub fn hib_4_dose_series() -> CompiledSeries {
             .earliest_recommended_interval("56d")
             .latest_recommended_interval("10m+4w")
         )
+        .max_age_clamp("5y", crate::models::SeriesStatus::ConditionallyRecommended)
         .build()
 }
 
@@ -101,5 +102,6 @@ pub fn hib_omp_series() -> CompiledSeries {
             .earliest_recommended_interval("56d")
             .latest_recommended_interval("10m+4w")
         )
+        .max_age_clamp("5y", crate::models::SeriesStatus::ConditionallyRecommended)
         .build()
 }

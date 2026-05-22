@@ -655,7 +655,10 @@ def verify_equivalence(tc_name, java_res, rust_res, expected_res=None):
         'expected': e_fore
     }
 
-def print_result_table(tc_name, errors, eval_table, forecast):
+def print_result_table(tc_name, errors, eval_table, forecast, quiet=False):
+    if quiet and not errors:
+        return
+        
     print(f"\nTest Case: {tc_name}")
     if errors:
         print("\033[91mFAIL\033[0m")
@@ -686,6 +689,7 @@ def main():
     parser.add_argument("--case", default=None, help="Name of a single test case to run")
     parser.add_argument("--compare", action="store_true", help="Compare outputs of Java and Rust PoC")
     parser.add_argument("--record", action="store_true", help="Record Java responses as expected outputs")
+    parser.add_argument("--quiet", "-q", action="store_true", help="Suppress output for passing tests")
     args = parser.parse_args()
     
     target = 'both' if args.compare else ('java' if args.record else 'rust')
@@ -724,7 +728,8 @@ def main():
                 continue
                 
             total_runs += 1
-            print(f"\nRunning {tc['name']} ({group.upper()})...")
+            if not args.quiet:
+                print(f"\nRunning {tc['name']} ({group.upper()})...")
             
             res = run_test_case(tc, target, tc["group"], tc["focus"])
             
@@ -768,7 +773,7 @@ def main():
                     expected_res=(expected_evals, expected_forecast) if expected else None
                 )
                 
-                print_result_table(tc["name"], errors, eval_table, forecast)
+                print_result_table(tc["name"], errors, eval_table, forecast, args.quiet)
                 
                 if errors:
                     failed_runs += 1

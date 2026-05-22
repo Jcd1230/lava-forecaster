@@ -1,0 +1,99 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "mcv_child_routine_no_doses",
+      "dob": "2015-01-01",
+      "gender": "F",
+      "eval_date": "birth + 11y",
+      "doses": [],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "mcv_adolescent_16y_no_doses",
+      "dob": "2010-01-01",
+      "gender": "F",
+      "eval_date": "birth + 16y",
+      "doses": [],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "mcv_1_dose_routine",
+      "dob": "2014-01-01",
+      "gender": "F",
+      "eval_date": "birth + 16y",
+      "doses": [
+        "birth + 11y:114"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "mcv_1_dose_complete_at_16y",
+      "dob": "2010-01-01",
+      "gender": "F",
+      "eval_date": "birth + 17y",
+      "doses": [
+        "birth + 16y:114"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "mcv_2_doses_complete",
+      "dob": "2010-01-01",
+      "gender": "F",
+      "eval_date": "birth + 18y",
+      "doses": [
+        "birth + 11y:114",
+        "birth + 16y:114"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "mcv_dose_1_ignored_under_10y",
+      "dob": "2017-01-01",
+      "gender": "F",
+      "eval_date": "birth + 11y",
+      "doses": [
+        "birth + 9y:114"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "mcv_dose_1_invalid_under_min_age",
+      "dob": "2025-01-01",
+      "gender": "F",
+      "eval_date": "birth + 11y",
+      "doses": [
+        "birth + 6m:114"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "mcv_dose_1_late_accepted_over_22y",
+      "dob": "2000-01-01",
+      "gender": "F",
+      "eval_date": "birth + 25y",
+      "doses": [
+        "birth + 23y:114"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "mcv_adult_over_19y_not_complete",
+      "dob": "2005-01-01",
+      "gender": "F",
+      "eval_date": "birth + 20y",
+      "doses": [],
+      "group": "MCV",
+      "focus": "830"
+    }
+  ]
+}

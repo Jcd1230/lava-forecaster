@@ -28,6 +28,7 @@ pub struct CompiledSeries {
     pub num_doses: usize,
     pub doses: Vec<CompiledDoseRule>,
     pub intervals: Vec<CompiledDoseInterval>,
+    pub max_age_clamp: Option<(TimePeriod, crate::models::SeriesStatus)>,
 }
 
 // Fluent builders to make writing schedules in Rust extremely clean
@@ -44,6 +45,7 @@ pub struct CompiledSeriesBuilder {
     num_doses: usize,
     doses: Vec<CompiledDoseRule>,
     intervals: Vec<CompiledDoseInterval>,
+    max_age_clamp: Option<(TimePeriod, crate::models::SeriesStatus)>,
 }
 
 impl CompiledSeriesBuilder {
@@ -55,6 +57,7 @@ impl CompiledSeriesBuilder {
             num_doses: 0,
             doses: Vec::new(),
             intervals: Vec::new(),
+            max_age_clamp: None,
         }
     }
 
@@ -93,6 +96,11 @@ impl CompiledSeriesBuilder {
         self
     }
 
+    pub fn max_age_clamp(mut self, age: &str, status: crate::models::SeriesStatus) -> Self {
+        self.max_age_clamp = Some((TimePeriod::parse(age).unwrap(), status));
+        self
+    }
+
     pub fn build(self) -> CompiledSeries {
         let code = self.code.unwrap_or_else(|| self.name.clone());
         let vaccine_group = self.vaccine_group.expect("vaccine_group is required");
@@ -110,6 +118,7 @@ impl CompiledSeriesBuilder {
             num_doses: self.num_doses,
             doses,
             intervals,
+            max_age_clamp: self.max_age_clamp,
         }
     }
 }

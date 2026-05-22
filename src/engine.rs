@@ -38,6 +38,31 @@ impl<'a> EvaluationContext<'a> {
             active_series_name,
         }
     }
+
+    /// Counts the number of valid doses administered before the specified age
+    pub fn count_valid_doses_before(&self, age_str: &str) -> usize {
+        let tp = TimePeriod::parse(age_str).unwrap();
+        let cutoff = tp.add_to(self.patient.birth_date);
+        self.valid_doses.iter().filter(|(date, _)| *date < cutoff).count()
+    }
+
+    /// Checks if a specific CVX code was administered but is not in the valid doses
+    pub fn has_invalid_cvx(&self, cvx: &str) -> bool {
+        let has_cvx = self.history.iter().any(|d| d.cvx == cvx);
+        let valid_has_cvx = self.valid_doses.iter().any(|(date, _)| {
+            self.history.iter().any(|d| d.cvx == cvx && d.date == *date)
+        });
+        has_cvx && !valid_has_cvx
+    }
+
+    /// Counts how many doses matching any of the provided CVX codes were administered before the specified age
+    pub fn count_cvx_before(&self, cvx_list: &[&str], age_str: &str) -> usize {
+        let tp = TimePeriod::parse(age_str).unwrap();
+        let cutoff = tp.add_to(self.patient.birth_date);
+        self.history.iter()
+            .filter(|d| cvx_list.contains(&d.cvx.as_str()) && d.date < cutoff)
+            .count()
+    }
 }
 
 pub type RuleCondition = fn(&EvaluationContext) -> bool;
@@ -554,6 +579,20 @@ impl EvaluationEngine {
             status: SeriesStatus::NotComplete,
             reasons: vec!["NOT_COMPLETE".to_string()],
         };
+
+        // Apply max age clamp if configured
+        if let Some((max_age, status)) = &active_series.max_age_clamp {
+            if eval_date >= max_age.add_to(patient.birth_date) {
+                if forecast.status != SeriesStatus::Complete {
+                    forecast.status = status.clone();
+                    forecast.earliest_date = None;
+                    forecast.recommended_date = None;
+                    forecast.overdue_date = None;
+                    forecast.latest_date = None;
+                    forecast.reasons = vec!["MAX_AGE_EXCEEDED".to_string()];
+                }
+            }
+        }
 
         // Apply custom rules hook (like Polio 2009 reset) if present
         if let Some(hook) = self.custom_forecast_hook {

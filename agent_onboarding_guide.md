@@ -267,3 +267,21 @@ Overdue:     Legacy=None            Rust=None            [OK]
 SUCCESS: 1:1 agreement verified!
 ```
 If there are discrepancies in statuses or forecast dates, the script will highlight them as `[MISMATCH]` to guide debugging.
+
+---
+
+## 4. Legacy Java ICE Quirks & Edge Cases
+
+When translating rules from the legacy Java Drools engine, be aware of the following quirks:
+
+### CVX Code Edge Cases & Combination Vaccines
+Some combination vaccines (like CVX 50 / TriHIBit) or mapping definitions are not explicitly listed in the primary series YAML files (e.g., `Hib4DoseSeries.yml`). Instead, they may be found in:
+- Alternative series YAMLs (e.g., `HibOMPSeries.yml`).
+- Central mapping files like `cdm.xml` under `opencds-decision-support-service/src/main/resources/config/conceptDeterminationMethods/`.
+If a CVX code behaves strangely and isn't in the expected YAML, check `cdm.xml`.
+
+### Forecast Status Triggers (`ConditionallyRecommended`)
+The legacy engine sometimes forces a series forecast status to `ConditionallyRecommended` and clears all forecast dates (`earliest_date`, `recommended_date`, `overdue_date`, `latest_date` set to `None`). Common triggers include:
+- A patient receiving a booster-only vaccine (e.g., CVX 50) at an invalid age, with no prior valid doses.
+- A patient exceeding the absolute maximum age for catch-up (e.g., >= 5 years old for Hib) without completing the series.
+If you observe `ConditionallyRecommended` with cleared dates in test outputs, check the custom forecast hook for these types of conditions.
