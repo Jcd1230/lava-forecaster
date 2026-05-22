@@ -28,8 +28,19 @@ src/
 
 To port a new vaccine group from Java ICE supporting data (under `opencds-decision-support-service/src/main/resources/data/.../Series/`):
 
+### Step 0: Scaffold the Module
+Run the scaffold script via `mise` to automatically generate the module directory, files, registrations, and test case placeholder:
+```bash
+mise run scaffold <group_lower> [GROUP_UPPER]
+```
+Example:
+```bash
+mise run scaffold menb MENB
+```
+This generates `src/rules/menb/`, wires it into `src/rules/mod.rs`, and creates `curl-rest-tests/cases/menb.json`.
+
 ### Step A: Define the Schedules (`schedules.rs`)
-Create `src/rules/<vaccine_group>/schedules.rs` and translate the series YAML definitions into our type-safe internal builder DSL.
+Create `src/rules/<vaccine_group>/schedules.rs` (or modify the scaffolded stub) and translate the series YAML definitions into our type-safe internal builder DSL.
 
 #### Example: Varicella 2-Dose Series
 ```rust
@@ -228,49 +239,95 @@ fn get_same_day_priority(group: &str, cvx: &str, birth_date: NaiveDate, dose_dat
 
 To verify that the implementation is 100% logically equivalent to the legacy Drools-based Java ICE engine, we execute 1:1 diff comparisons.
 
-### 1. Build the Rust Project
-Ensure the project builds cleanly in release mode:
-```bash
-cargo build --release
-```
+### Essential Commands
 
-### 2. Run Python Comparison Tests
-Go to the test directory (`curl-rest-tests/`) and execute the automated verification script `compare_outputs.py` against a local running Java ICE instance (`http://localhost:8080/`):
+All testing and verification commands are managed via `mise`:
 
-```bash
-cd ../curl-rest-tests
-python3 compare_outputs.py --group <RUST_GROUP_NAME> --focus <JAVA_CONCEPT_CODE> <PAYLOAD_JSON>
-```
+| Command | Description |
+|---|---|
+| `mise run test-compare -- --group <name>` | Compares Rust PoC outputs against live Java. **Auto-records missing expected snapshots.** |
+| `mise run test -- --group <name>` | Runs Rust PoC verification against recorded snapshots. **Does not require Java.** |
+| `mise run test-record -- --group <name>` | Queries Java ICE and records snapshots. |
 
-#### Example: Verifying Varicella
-```bash
-python3 compare_outputs.py --group VARICELLA --focus 600 varicella_child_standard.json
-```
+### Workflow for a New Vaccine Group
 
-A successful matching run outputs:
-```
-Running comparison for varicella_child_standard.json (Group: VARICELLA, Focus Code: 600)...
-Patient Birth Date: 2020-01-01
-
---- Dose Evaluations Comparison ---
-Date         | CVX  | Legacy Status   | Rust Status     | Legacy Dose# | Rust Dose#
--------------------------------------------------------------------------------------
-  2021-01-01 | 21   | Valid           | Valid           | 1            | 1
-  2024-01-01 | 21   | Valid           | Valid           | 2            | 2
-
---- Forecast Comparison ---
-Status:      Legacy=Complete        Rust=Complete        [OK]
-Earliest:    Legacy=None            Rust=None            [OK]
-Recommended: Legacy=None            Rust=None            [OK]
-Overdue:     Legacy=None            Rust=None            [OK]
-
-SUCCESS: 1:1 agreement verified!
-```
-If there are discrepancies in statuses or forecast dates, the script will highlight them as `[MISMATCH]` to guide debugging.
+1. **Start the Java ICE server** in a separate terminal:
+   ```bash
+   mise run run
+   ```
+2. **Run comparison tests** for your group:
+   ```bash
+   mise run test-compare -- --group <group_lower>
+   ```
+   *Note: If no `<group_lower>.expected.json` file exists yet, the runner will automatically detect it and query Java to record the snapshot before running the comparison. This collapses the recording and comparison into a single step.*
+3. **Verify single test cases** (if debugging a discrepancy):
+   ```bash
+   mise run test-compare -- --group <group_lower> --case <test_case_name> --verbose
+   ```
+   *Note: By default, the test runner is quiet and only outputs errors and a summary. Pass `-v` or `--verbose` to view details for passing tests.*
+4. **Run offline regression tests** (without requiring the Java server):
+   ```bash
+   mise run test -- --group <group_lower>
+   ```
 
 ---
 
-## 4. Legacy Java ICE Quirks & Edge Cases
+## 4. Drools DSL → Rust Mapping Gotchas
+
+When writing overrides, do not trust the Drools DSL rules literally. The Java engine often maps abstract Drools rule actions to different output states in the XML response.
+
+### 1. "Mark the shot as Ignored" vs. "Accepted"
+In Drools rules (e.g. MCV under-10y doses), you will see:
+`Mark the shot $currentShot as Ignored`
+*Gotcha:* This does **not** map to `DoseStatus::Ignored` in the Java REST/XML output. It maps to `DoseStatus::Accepted` with the reason `BelowMinimumAge` (or similar). The shot is "ignored" in terms of series advancement, but it is still accepted in the output. Always verify against the XML/snapshot output!
+
+### 2. "COMPLETE_HIGH_RISK" vs. "Complete"
+When a series is completed, recommendation rules might evaluate to `NOT_RECOMMENDED` with a sub-reason like `COMPLETE_HIGH_RISK`.
+*Gotcha:* The legacy Java engine's mapping layer maps this combination to `SeriesStatus::Complete` in the final output, not `NotRecommended`. Series completion status takes precedence.
+
+---
+
+## 5. Focus Code Reference Table
+
+Every test suite requires a `focus` code (which tells the XML parser which vaccine group forecast to evaluate). Here is the complete lookup table:
+
+| Rust Group Name | Java Concept Code | Focus Code | Display Name |
+|---|---|---|---|
+| `HEP_B` | `HEP_B` | `100` | Hep B Vaccine Group |
+| `DTP` | `DTP` | `200` | DTP Vaccine Group |
+| `HIB` | `HIB` | `300` | Hib Vaccine Group |
+| `POLIO` | `POLIO` | `400` | Polio Vaccine Group |
+| `MMR` | `MMR` | `500` | MMR Vaccine Group |
+| `VARICELLA` | `VARICELLA` | `600` | Varicella Vaccine Group |
+| `ZOSTER` | `ZOSTER` | `620` | Zoster Vaccine Group |
+| `PNEUMOCOCCAL` | `PNEUMOCOCCAL` | `750` | Pneumococcal Vaccine Group |
+| `HEP_A` | `HEP_A` | `810` | Hep A Vaccine Group |
+| `MCV` | `MENINGOCOCCAL_ACWY` | `830` | Meningococcal ACWY Vaccine Group |
+| `HPV` | `HPV` | `840` | HPV Vaccine Group |
+| `MENB` | `MENINGOCOCCAL_B` | `835` | Meningococcal B Vaccine Group |
+| `INFLUENZA` | `INFLUENZA` | `800` | Influenza Vaccine Group |
+| `ROTAVIRUS` | `ROTAVIRUS` | `820` | Rotavirus Vaccine Group |
+| `COVID19` | `COVID_19` | `850` | COVID-19 Vaccine Group |
+| `MPOX` | `MPOX` | `860` | Mpox Vaccine Group |
+| `RSV` | `RSV` | `875` | RSV Vaccine Group |
+| `H1N1` | `INFLUENZA_H1N1` | `890` | H1N1 Influenza Vaccine Group |
+| `CHOLERA` | `CHOLERA` | `901` | Cholera Vaccine Group |
+| `JEV` | `JAPANESE_ENCEPHALITIS` | `902` | Japanese Encephalitis Vaccine Group |
+| `TYPHOID` | `TYPHOID` | `904` | Typhoid Vaccine Group |
+| `YELLOW_FEVER` | `YELLOW_FEVER` | `905` | Yellow Fever Vaccine Group |
+
+---
+
+## 6. Vaccine-Specific Minimum Ages
+
+Some vaccine groups have age-based exceptions where a dose given below the series-level `absolute-minimum-age` is still evaluated as `Accepted` (rather than `Invalid`).
+
+- **Where they live:** These are defined on a per-CVX basis in `supportedVaccines.yml` under `ice-supporting-data/OtherLists/`.
+- **How they are used:** In custom evaluation hooks, check the dose CVX against its vaccine-specific minimum age. If the dose date is greater than or equal to the vaccine minimum age, override the status to `DoseStatus::Accepted` and clear/add the appropriate `EvaluationReason` (such as `BelowMinimumAge`).
+
+---
+
+## 7. Legacy Java ICE Quirks & Edge Cases
 
 When translating rules from the legacy Java Drools engine, be aware of the following quirks:
 

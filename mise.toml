@@ -26,3 +26,8 @@ run = "python3 curl-rest-tests/run_tests.py --compare"
 description = "Record current Rust POC output as the expected snapshot results"
 run = "python3 curl-rest-tests/run_tests.py --record"
 
+[tasks.scaffold]
+description = "Scaffold a new vaccine group module and registration"
+run = "bash scripts/scaffold_group.sh"
+
+

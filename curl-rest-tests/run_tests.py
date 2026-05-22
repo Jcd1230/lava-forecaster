@@ -683,16 +683,38 @@ def print_result_table(tc_name, errors, eval_table, forecast, quiet=False):
         print(f"{field:<15} | {j_val:<18} | {r_val:<18} | {e_val:<18}")
 
 # Main CLI entrypoint
+def auto_record_expected(group, cases, expected_path):
+    print(f"\033[93mNo expected snapshot found for '{group}' — auto-recording from Java...\033[0m")
+    recorded_snapshots = {}
+    for tc in cases:
+        res = run_test_case(tc, 'java', tc["group"], tc["focus"])
+        if 'java' in res:
+            java_evals, java_forecast = res['java']
+            recorded_snapshots[tc["name"]] = {
+                'evaluations': java_evals,
+                'forecast': java_forecast
+            }
+        else:
+            print(f"\033[91mError querying Java service to record snapshot: {res.get('java_error')}\033[0m")
+            return None
+    with open(expected_path, "w") as f:
+        json.dump(recorded_snapshots, f, indent=2)
+    print(f"Recorded and saved {len(recorded_snapshots)} test cases to {expected_path}")
+    return recorded_snapshots
+
+# Main CLI entrypoint
 def main():
     parser = argparse.ArgumentParser(description="Centralized ICE REST Test Runner")
     parser.add_argument("--group", default="ALL", help="Vaccine group to run (e.g. varicella, mmr, hepa, or ALL)")
     parser.add_argument("--case", default=None, help="Name of a single test case to run")
     parser.add_argument("--compare", action="store_true", help="Compare outputs of Java and Rust PoC")
     parser.add_argument("--record", action="store_true", help="Record Java responses as expected outputs")
-    parser.add_argument("--quiet", "-q", action="store_true", help="Suppress output for passing tests")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Show detailed output for passing tests")
+    parser.add_argument("--quiet", "-q", action="store_true", help="Deprecated (quiet mode is now default)")
     args = parser.parse_args()
     
     target = 'both' if args.compare else ('java' if args.record else 'rust')
+    quiet_mode = not args.verbose
     
     groups_to_run = []
     if args.group.upper() == 'ALL':
@@ -702,6 +724,7 @@ def main():
         
     total_runs = 0
     failed_runs = 0
+    results = []
     
     for group in sorted(groups_to_run):
         config_path = os.path.join(CASES_DIR, f"{group}.json")
@@ -714,13 +737,37 @@ def main():
         with open(config_path, "r") as f:
             suite_data = json.load(f)
             
-        expected_data = {}
-        if os.path.exists(expected_path) and not args.record:
-            with open(expected_path, "r") as f:
-                expected_data = json.load(f)
-                
         cases = expand_cases(suite_data)
         
+        expected_data = {}
+        if not args.record:
+            if not os.path.exists(expected_path):
+                # Try to ping Java
+                java_running = False
+                try:
+                    requests.get(ICE_BASE_URI, timeout=0.5)
+                    java_running = True
+                except requests.exceptions.ConnectionError:
+                    pass
+                except requests.exceptions.RequestException:
+                    java_running = True
+                
+                if java_running:
+                    expected_data = auto_record_expected(group, cases, expected_path)
+                    if expected_data is None:
+                        expected_data = {}
+                        failed_runs += len(cases)
+                        continue
+                else:
+                    print(f"\033[91mError: Expected snapshot file not found: {expected_path}\033[0m")
+                    print("To record snapshots, run the Java server (mise run run) and execute:")
+                    print(f"  mise run test-record -- --group {group}")
+                    failed_runs += len(cases)
+                    continue
+            else:
+                with open(expected_path, "r") as f:
+                    expected_data = json.load(f)
+                
         recorded_snapshots = {}
         
         for tc in cases:
@@ -728,7 +775,7 @@ def main():
                 continue
                 
             total_runs += 1
-            if not args.quiet:
+            if not quiet_mode:
                 print(f"\nRunning {tc['name']} ({group.upper()})...")
             
             res = run_test_case(tc, target, tc["group"], tc["focus"])
@@ -752,12 +799,16 @@ def main():
                 rust_error = res.get('rust_error')
                 
                 if java_error:
-                    print(f"\033[91mJava execution error: {java_error}\033[0m")
+                    err_msg = f"Java execution error: {java_error}"
+                    print(f"\033[91m{err_msg}\033[0m")
                     failed_runs += 1
+                    results.append((tc["name"], group, False, [err_msg]))
                     continue
                 if rust_error:
-                    print(f"\033[91mRust execution error: {rust_error}\033[0m")
+                    err_msg = f"Rust execution error: {rust_error}"
+                    print(f"\033[91m{err_msg}\033[0m")
                     failed_runs += 1
+                    results.append((tc["name"], group, False, [err_msg]))
                     continue
                     
                 java_res = res.get('java')
@@ -773,10 +824,13 @@ def main():
                     expected_res=(expected_evals, expected_forecast) if expected else None
                 )
                 
-                print_result_table(tc["name"], errors, eval_table, forecast, args.quiet)
+                print_result_table(tc["name"], errors, eval_table, forecast, quiet_mode)
                 
                 if errors:
                     failed_runs += 1
+                    results.append((tc["name"], group, False, errors))
+                else:
+                    results.append((tc["name"], group, True, []))
                     
         if args.record and recorded_snapshots:
             # Merge with existing expected data if running a single test case
@@ -795,7 +849,13 @@ def main():
     print(f"\n--- Test Runner Summary ---")
     print(f"Total test cases executed: {total_runs}")
     if failed_runs > 0:
-        print(f"\033[91m{failed_runs} test cases failed.\033[0m")
+        print(f"\nFailed test cases:")
+        for name, grp, passed, errs in results:
+            if not passed:
+                print(f"  \033[91mFAIL\033[0m: {name} ({grp.upper()})")
+                for err in errs:
+                    print(f"    - {err}")
+        print(f"\n\033[91m{failed_runs} test cases failed.\033[0m")
         sys.exit(1)
     else:
         print(f"\033[92mAll test cases passed successfully!\033[0m")

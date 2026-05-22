@@ -2,7 +2,7 @@
 
 This task list tracks the remaining vaccine groups and series from the legacy Drools-based Java ICE engine that need to be ported to the high-performance Rust forecaster PoC.
 
-To implement a group, follow the guidelines in the [Onboarding & Implementation Guide](file:///home/jason/.gemini/antigravity/brain/9400bc4d-c837-43ac-95b0-8fb76e962685/agent_onboarding_guide.md).
+To implement a group, follow the guidelines in the [Onboarding & Implementation Guide](file:///home/jason/projects/ice/agent_onboarding_guide.md).
 
 ---
 
@@ -30,7 +30,6 @@ To implement a group, follow the guidelines in the [Onboarding & Implementation 
 - [x] Implement `HibOMPSeries.yml` (PedvaxHIB 3-dose series)
 - [x] Implement custom series switching depending on whether OMP or non-OMP vaccines are administered
 
-
 ## 5. Pneumococcal (PCV / PPSV)
 - [x] Implement `PneumococcalSeries.yml` (PCV13, PCV15, PCV20, PPSV23)
 - [x] Implement complex risk-group and sequence-based evaluation rules
@@ -38,45 +37,106 @@ To implement a group, follow the guidelines in the [Onboarding & Implementation 
 ## 6. Meningococcal Conjugate (MCV4)
 - [x] Implement `MCV42DoseSeries.yml` (Menactra, Menveo, MenQuadfi)
 
-## 7. Meningococcal B (MenB)
+---
+
+## 7. Meningococcal B (`MENB`)
+*Java Concept:* `MENINGOCOCCAL_B` | *Focus Code:* `835`
 - [ ] Implement `MenB4C2DoseSeries.yml` & `MenB4C3DoseSeries.yml` (Bexsero)
 - [ ] Implement `MenBFHbp2DoseSeries.yml` & `MenBFHbp3DoseSeries.yml` (Trumenba)
-- [ ] Enforce product-specific brand consistency rules (do not mix Bexsero and Trumenba)
+- [ ] Implement brand consistency & auto-switching logic:
+  - If a Bexsero (CVX 163) dose is given in the FHbp series, switch to the 4C 2-dose series.
+  - If a Trumenba (CVX 162/316) dose is given in the 4C series, switch to the FHbp 2-dose series.
+- [ ] Implement age floor override: CVX 162/163 given at age >= 10y but below series absolute min age are **Accepted** (not Invalid).
+- [ ] Implement date-dependent duplicate-same-day preference rules (before vs on/after 10/25/2024).
+- [ ] Modify forecast status to `ConditionallyRecommended / CLINICAL_PATIENT_DISCRETION` if patient is >= 10y, series is incomplete, and they have >= 1 valid dose.
 
-## 8. Rotavirus
+## 8. Rotavirus (`ROTAVIRUS`)
+*Java Concept:* `ROTAVIRUS` | *Focus Code:* `820`
 - [ ] Implement `Rotavirus2DoseSeries.yml` (Rotarix)
 - [ ] Implement `Rotavirus3DoseSeries.yml` (RotaTeq)
-- [ ] Enforce strict age clamps (max age of first dose 14 weeks + 6 days, max age of final dose 8 months + 0 days)
+- [ ] Enforce strict age clamps:
+  - Any dose given at age >= 8 months is evaluated as **Invalid / TOO_OLD**.
+  - Forecast recommendation status is forced to `NotRecommended / TOO_OLD` once patient reaches age 8 months.
+- [ ] Implement vaccine-counting override: invalid unspecified formulation still counts for dose numbering.
+- [ ] Implement duplicate-same-day CVX preferences split by date 1/1/2000 (withdrawn CVX 74 vs CVX 119).
 
-## 9. Seasonal Influenza
+## 9. Seasonal Influenza (`INFLUENZA`)
+*Java Concept:* `INFLUENZA` | *Focus Code:* `800`
 - [ ] Implement `Influenza1DoseSeries.yml`
 - [ ] Implement `Influenza2DoseSeries.yml`
 - [ ] Implement `Influenza2DoseDefaultSeries.yml`
-- [ ] Integrate annual influenza season-boundary logic and age-based dose count requirements (2 doses for vaccine-naive young children)
+- [ ] Implement flu season boundaries: doses administered outside season dates are evaluated as **Invalid / OUTSIDE_FLU_SEASON**.
+- [ ] Implement 24-day override: if dose is >= 24 days after a valid dose in the *prior* season, it satisfies the interval requirement.
+- [ ] Implement age-based rules: children < 9y with 0 prior-season valid doses require 2 doses in the current season; children < 9y with >= 1 prior valid dose (and all individuals >= 9y) require only 1 dose.
+- [ ] Suppress "Insufficient Antigen" reasons for patients >= 9y.
 
-## 10. COVID-19 (Standard & Season-Specific)
-- [ ] Implement Pfizer, Moderna, Novavax, Janssen, AstraZeneca, and other international vaccine schedules
-- [ ] Implement the September 2023 season schedules (age < 5y vs >= 5y)
-- [ ] Implement the August 2025 season schedules (age < 2y, 2y-64y, >= 65y)
+## 10. COVID-19 (`COVID19`)
+*Java Concept:* `COVID_19` | *Focus Code:* `850`
+> [!NOTE]
+> This is a highly complex, multi-session effort. It involves seasonal agenda group routing.
+- [ ] Implement September 2023 season rules (age < 5y vs >= 5y).
+- [ ] Implement August 2025 season rules (age < 2y, 2y-64y, >= 65y).
+- [ ] Implement CVX-specific minimum interval overrides (e.g. CVX 313 -> CVX 313: 17 days absolute min; non-313 -> any COVID: 52 days).
+- [ ] Implement Moderna dose-skip logic for infants (<2y series) with pre-season doses.
+- [ ] Implement age-based series auto-switching (switch to >=65y 2-dose series if patient turns 65 within 12 months of season start).
+- [ ] Enforce complex duplicate-same-day preference rules (Janssen order, Moderna preferred over Pfizer, approved vs WHO-only, etc.).
+- [ ] Overdue/Forecast date adjustments based on vaccine brand and interval-dependent supplemental text.
+- [ ] Map series completion to `Not Recommended / COMPLETE_HIGH_RISK`.
 
-## 11. Mpox
+## 11. Mpox (`MPOX`)
+*Java Concept:* `MPOX` | *Focus Code:* `860`
 - [ ] Implement `Mpox1DoseSeries.yml` & `Mpox2DoseSeries.yml`
+- [ ] Implement interval warning: dose 2 given < 28 days after dose 1 is **Accepted** but with supplemental text warnings (not Invalid).
+- [ ] Exempt Mpox (CVX 206) from standard live-virus inter-group interval checks.
+- [ ] Support booster dose evaluation (dose 3 evaluated as booster if patient has 2 valid doses).
+- [ ] Enforce duplicate-same-day precedence (CVX 206/75/105 > CVX 325; Valid > Accepted).
+- [ ] Map incomplete series to `Conditionally Recommended / HIGH_RISK` and complete to `Not Recommended / COMPLETE_HIGH_RISK`.
 
-## 12. RSV (Respiratory Syncytial Virus)
+## 12. RSV (Respiratory Syncytial Virus - `RSV`)
+*Java Concept:* `RSV` | *Focus Code:* `875`
 - [ ] Implement `RSVAdultSeries.yml` (Arexvy, Abrysvo)
 - [ ] Implement `RSVInfantSeries.yml` (Beyfortus/Nirsevimab, Synagis/Palivizumab)
+- [ ] Enforce vaccine availability date limits (CVX 303: 9/22/2023, CVX 305: 6/29/2023, CVX 306: 5/31/2023). Doses given before these dates are **Invalid / VACCINE_NOT_COUNTED...**.
+- [ ] Implement infant weight-based and season-aligned dosing and forecasting.
+- [ ] Adjust adult RSV recommendations: 60y-75y -> `Conditional / CLINICAL_PATIENT_DISCRETION`, >= 75y -> `Recommended`.
 
-## 13. JEV (Japanese Encephalitis)
-- [ ] Implement `JEVCRisk2DoseSeries.yml` & `JEVCRisk2DoseAcceleratedSeries.yml` (Ixiaro)
+## 13. JEV (Japanese Encephalitis - `JEV`)
+*Java Concept:* `JAPANESE_ENCEPHALITIS` | *Focus Code:* `902`
+- [ ] Implement `JEVCRisk2DoseSeries.yml` & `JEVCRisk2DoseAcceleratedSeries.yml`
+- [ ] Support 18-65y accelerated series: allows 7-day interval between dose 1 and 2 (normally 28 days).
+- [ ] Forecast recommendation status is `Not Recommended / TOO_OLD` for accelerated series if patient is >= 66y.
 
-## 14. Cholera
-- [ ] Implement `Cholera1DoseRiskSeries.yml` (Vaxchora)
+## 14. Cholera (`CHOLERA`)
+*Java Concept:* `CHOLERA` | *Focus Code:* `901`
+- [ ] Implement `Cholera1DoseRiskSeries.yml`
+- [ ] Unconditionally attach warning supplemental text to all forecasts (except COMPLETE).
+- [ ] Implement three-tier age-gated recommendations:
+  - Age < 2y -> `Not Recommended`
+  - Age 2y-64y -> `Conditionally Recommended / HIGH_RISK`
+  - Age >= 65y -> `Not Recommended / TOO_OLD`
 
-## 15. Typhoid
-- [ ] Implement `TyphoidRiskSeries.yml` (Typhim Vi, Vivotif)
+## 15. Typhoid (`TYPHOID`)
+*Java Concept:* `TYPHOID` | *Focus Code:* `904`
+- [ ] Implement `TyphoidRiskSeries.yml`
+- [ ] Unconditionally attach warning supplemental text to all forecasts (including COMPLETE).
+- [ ] Implement conditional status overrides:
+  - Age < 2y -> `Not Recommended`
+  - Age >= 2y and not complete -> `Conditionally Recommended / HIGH_RISK`
+  - Series complete -> `Conditionally Recommended / COMPLETE_HIGH_RISK` (due to travel re-exposure risks)
 
-## 16. Yellow Fever
-- [ ] Implement `YellowFeverRiskSeries.yml` (YF-Vax)
+## 16. Yellow Fever (`YELLOW_FEVER`)
+*Java Concept:* `YELLOW_FEVER` | *Focus Code:* `905`
+- [ ] Implement `YellowFeverRiskSeries.yml`
+- [ ] Attach live virus warning supplemental text to all recommendations.
+- [ ] Implement four-tier age-gated recommendations:
+  - Age < 6 months -> `Not Recommended`
+  - Age 6m-8m -> `Conditionally Recommended / BELOW_REC_AGE_SERIES + HIGH_RISK`
+  - Age >= 9 months -> `Conditionally Recommended / HIGH_RISK`
+  - Series complete -> `Conditionally Recommended / COMPLETE_HIGH_RISK`
+- [ ] Implement cross-group live-virus override: if YF series is completed and YF dose was < 30 days before another live vaccine's earliest forecast date, push that other forecast date to YF date + 30 days.
 
-## 17. Historical H1N1 Influenza
+## 17. Historical H1N1 Influenza (`H1N1`)
+*Java Concept:* `INFLUENZA_H1N1` | *Focus Code:* `890`
 - [ ] Implement `H1N11DoseSeries.yml` & `H1N12DoseSeries.yml`
+- [ ] Check H1N1 season boundaries: doses outside dates are evaluated as **Invalid / OUTSIDE_FLU_SEASON**.
+- [ ] Ensure H1N1 does not generate recommendations or forecasts (historical database tracking only).
