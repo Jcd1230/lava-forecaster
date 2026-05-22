@@ -7,18 +7,18 @@ To implement a group, follow the guidelines in the [Onboarding & Implementation 
 ---
 
 ## 1. DTaP / Tdap / Td / DTP Series
-- [ ] Implement `DTP3DoseSeries.yml` (Adult series)
-- [ ] Implement `DTP5DoseSeries.yml` (Child series)
-- [ ] Implement same-day priority sorting & custom evaluation logic
+- [x] Implement `DTP3DoseSeries.yml` (Adult series)
+- [x] Implement `DTP5DoseSeries.yml` (Child series)
+- [x] Implement same-day priority sorting & custom evaluation logic
 
 ## 2. Hepatitis B (`HEP_B`)
-- [ ] Implement `HepB3DoseChildAdolescentSeries.yml`
-- [ ] Implement `HepB4DoseChildAdolescentSeries.yml`
-- [ ] Implement `HepB3DoseTwinrixSeries.yml`
-- [ ] Implement `HepB4DoseTwinrixSeries.yml`
-- [ ] Implement `HepBAdult2DoseSeries.yml` (Heplisav-B CVX 189)
-- [ ] Implement `HepBAdult3DoseSeries.yml`
-- [ ] Implement custom switch/selection logic between Twinrix, child/adolescent, and adult series
+- [x] Implement `HepB3DoseChildAdolescentSeries.yml`
+- [x] Implement `HepB4DoseChildAdolescentSeries.yml`
+- [x] Implement `HepB3DoseTwinrixSeries.yml`
+- [x] Implement `HepB4DoseTwinrixSeries.yml`
+- [x] Implement `HepBAdult2DoseSeries.yml` (Heplisav-B CVX 189)
+- [x] Implement `HepBAdult3DoseSeries.yml`
+- [x] Implement custom switch/selection logic between Twinrix, child/adolescent, and adult series
 
 ## 3. HPV (Human Papillomavirus)
 - [x] Implement `HPV2DoseSeries.yml`
