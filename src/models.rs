@@ -44,6 +44,8 @@ pub enum EvaluationReason {
     InsufficientAntigen,
     VaccineNotLicensedForMales,
     AboveRecommendedAgeSeries,
+    OutsideFluVacSeason,
+    VaccineNotAllowedInUs,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

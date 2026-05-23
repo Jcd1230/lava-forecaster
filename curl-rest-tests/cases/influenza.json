@@ -1,0 +1,117 @@
+{
+  "histories": {
+    "prior_2_doses": {
+      "dob": "2020-01-01",
+      "gender": "F",
+      "doses": [
+        "birth + 10m:88",
+        "birth + 11m:88"
+      ]
+    }
+  },
+  "test_cases": [
+    {
+      "name": "influenza_no_shots",
+      "dob": "2024-01-01",
+      "gender": "F",
+      "eval_date": "birth + 10m",
+      "doses": [],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "influenza_child_0_prior_doses_current_season",
+      "dob": "2024-01-01",
+      "gender": "F",
+      "eval_date": "birth + 11m",
+      "doses": [
+        "birth + 10m:88"
+      ],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "influenza_child_0_prior_doses_complete",
+      "dob": "2024-01-01",
+      "gender": "F",
+      "eval_date": "birth + 12m",
+      "doses": [
+        "birth + 10m:88",
+        "birth + 11m:88"
+      ],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "influenza_child_2_prior_doses",
+      "history_ref": "prior_2_doses",
+      "eval_date": "birth + 23m",
+      "doses": [],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "influenza_child_2_prior_doses_complete",
+      "history_ref": "prior_2_doses",
+      "eval_date": "birth + 24m",
+      "doses": [
+        "birth + 23m:88"
+      ],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "influenza_adult_no_prior",
+      "dob": "1990-01-01",
+      "gender": "M",
+      "eval_date": "birth + 34y",
+      "doses": [],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "influenza_adult_complete",
+      "dob": "1990-01-01",
+      "gender": "M",
+      "eval_date": "birth + 34y + 5m",
+      "doses": [
+        "birth + 34y + 4m:88"
+      ],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "influenza_cvx161_under_9",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 5y",
+      "doses": [
+        "birth + 4y:161"
+      ],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "influenza_cvx161_over_9",
+      "dob": "2010-01-01",
+      "gender": "F",
+      "eval_date": "birth + 11y",
+      "doses": [
+        "birth + 10y:161"
+      ],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "influenza_disallowed_cvx",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 4y",
+      "doses": [
+        "birth + 3y:194"
+      ],
+      "group": "INFLUENZA",
+      "focus": "800"
+    }
+  ]
+}

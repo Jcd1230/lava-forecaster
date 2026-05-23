@@ -11,6 +11,7 @@ pub mod polio;
 pub mod varicella;
 pub mod zoster;
 pub mod rotavirus;
+pub mod influenza;
 
 use crate::engine::{
     ConditionalCompletionRule, CustomDoseNumberHook, CustomEvaluationHook, CustomForecastHook,
@@ -52,6 +53,7 @@ pub fn get_ruleset(group_name: &str) -> Option<&'static VaccineGroupDefinition> 
         m.insert("MCV", mcv::definition());
         m.insert("MENB", menb::definition());
         m.insert("ROTAVIRUS", rotavirus::definition());
+        m.insert("INFLUENZA", influenza::definition());
         m
     });
 
@@ -73,5 +75,6 @@ pub fn get_all_groups() -> Vec<&'static VaccineGroupDefinition> {
         get_ruleset("MCV").unwrap(),
         get_ruleset("MENB").unwrap(),
         get_ruleset("ROTAVIRUS").unwrap(),
+        get_ruleset("INFLUENZA").unwrap(),
     ]
 }

@@ -1,0 +1,172 @@
+{
+  "influenza_no_shots": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2024-07-01",
+      "recommended_date": "2024-07-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "influenza_child_0_prior_doses_current_season": {
+    "evaluations": [
+      {
+        "date": "2024-11-01",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2024-11-29",
+      "recommended_date": "2024-11-29",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "influenza_child_0_prior_doses_complete": {
+    "evaluations": [
+      {
+        "date": "2024-11-01",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-12-01",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": "2025-07-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "influenza_child_2_prior_doses": {
+    "evaluations": [
+      {
+        "date": "2020-11-01",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2020-12-01",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2021-07-01",
+      "recommended_date": "2021-07-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "influenza_child_2_prior_doses_complete": {
+    "evaluations": [
+      {
+        "date": "2020-11-01",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2020-12-01",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2021-12-01",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": "2022-07-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "influenza_adult_no_prior": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2023-07-01",
+      "recommended_date": "2023-07-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "influenza_adult_complete": {
+    "evaluations": [
+      {
+        "date": "2024-01-01",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": "2024-07-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "influenza_cvx161_under_9": {
+    "evaluations": [
+      {
+        "date": "2024-01-01",
+        "cvx": "161",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2024-07-01",
+      "recommended_date": "2024-07-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "influenza_cvx161_over_9": {
+    "evaluations": [
+      {
+        "date": "2020-01-01",
+        "cvx": "161",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2020-07-01",
+      "recommended_date": "2020-07-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "influenza_disallowed_cvx": {
+    "evaluations": [
+      {
+        "date": "2023-01-01",
+        "cvx": "194",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2023-07-01",
+      "recommended_date": "2023-07-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  }
+}

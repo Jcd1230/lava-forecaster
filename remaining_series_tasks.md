@@ -62,13 +62,13 @@ To implement a group, follow the guidelines in the [Onboarding & Implementation 
 
 ## 9. Seasonal Influenza (`INFLUENZA`)
 *Java Concept:* `INFLUENZA` | *Focus Code:* `800`
-- [ ] Implement `Influenza1DoseSeries.yml`
-- [ ] Implement `Influenza2DoseSeries.yml`
-- [ ] Implement `Influenza2DoseDefaultSeries.yml`
-- [ ] Implement flu season boundaries: doses administered outside season dates are evaluated as **Invalid / OUTSIDE_FLU_SEASON**.
-- [ ] Implement 24-day override: if dose is >= 24 days after a valid dose in the *prior* season, it satisfies the interval requirement.
-- [ ] Implement age-based rules: children < 9y with 0 prior-season valid doses require 2 doses in the current season; children < 9y with >= 1 prior valid dose (and all individuals >= 9y) require only 1 dose.
-- [ ] Suppress "Insufficient Antigen" reasons for patients >= 9y.
+- [x] Implement `Influenza1DoseSeries.yml`
+- [x] Implement `Influenza2DoseSeries.yml`
+- [x] Implement `Influenza2DoseDefaultSeries.yml`
+- [x] Implement flu season boundaries: doses administered outside season dates are evaluated as **Invalid / OUTSIDE_FLU_SEASON**.
+- [x] Implement 24-day override: if dose is >= 24 days after a valid dose in the *prior* season, it satisfies the interval requirement.
+- [x] Implement age-based rules: children < 9y with 0 prior-season valid doses require 2 doses in the current season; children < 9y with >= 1 prior valid dose (and all individuals >= 9y) require only 1 dose.
+- [x] Suppress "Insufficient Antigen" reasons for patients >= 9y.
 
 ## 10. COVID-19 (`COVID19`)
 *Java Concept:* `COVID_19` | *Focus Code:* `850`
