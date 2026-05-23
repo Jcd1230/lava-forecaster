@@ -7,7 +7,7 @@ use crate::models::{Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast,
 const CHILD_PCV_CVX: &[&str] = &["100", "133", "177", "215", "216", "109", "152"];
 const MODERN_PCV_CVX: &[&str] = &["133", "215", "216", "327"];
 const ADULT_PCV_CVX: &[&str] = &["133", "215", "216", "327"];
-const ADULT_COMPLETE_PCV_CVX: &[&str] = &["215", "216", "327"];
+const ADULT_COMPLETE_PCV_CVX: &[&str] = &["216", "327"];
 
 fn is_pneumo_cvx(cvx: &str) -> bool {
     matches!(
@@ -50,6 +50,15 @@ fn valid_adult_doses<'a>(valid_doses: &[(NaiveDate, usize)], history: &'a [Dose]
                 .find(|d| d.date == *date && is_pneumo_cvx(&d.cvx))
         })
         .collect()
+}
+
+fn has_valid_child_modern_pcv(valid_doses: &[(NaiveDate, usize)], history: &[Dose]) -> bool {
+    valid_doses.iter().any(|(date, dose_num)| {
+        *dose_num <= 5
+            && history
+                .iter()
+                .any(|d| d.date == *date && MODERN_PCV_CVX.contains(&d.cvx.as_str()))
+    })
 }
 
 pub fn pneumococcal_custom_dose_number_hook(_series_name: &str, ctx: &EvaluationContext) -> usize {
@@ -146,6 +155,27 @@ pub fn pneumococcal_custom_evaluation_hook(
             }
         }
 
+        if *status == DoseStatus::Valid {
+            let last_valid_date = ctx.valid_doses.last().map(|(date, _)| *date);
+            let last_retry_attempt = ctx
+                .history
+                .iter()
+                .filter(|prior| is_pneumo_cvx(&prior.cvx) && prior.date < dose.date)
+                .filter(|prior| last_valid_date.is_some_and(|last_valid| prior.date > last_valid))
+                .map(|prior| prior.date)
+                .max();
+
+            if let Some(last_retry_attempt) = last_retry_attempt {
+                if compare_elapsed(last_retry_attempt, dose.date, &TimePeriod::parse("52d").unwrap())
+                    == std::cmp::Ordering::Less
+                {
+                    *status = DoseStatus::Invalid;
+                    reasons.clear();
+                    reasons.push(EvaluationReason::BelowMinimumInterval);
+                }
+            }
+        }
+
         return;
     }
 
@@ -183,6 +213,22 @@ pub fn pneumococcal_custom_evaluation_hook(
         reasons.clear();
         reasons.push(EvaluationReason::OutsideRoutineSeries);
         return;
+    }
+
+    if age_ge(birth, dose.date, "19y") && matches!(dose.cvx.as_str(), "215" | "216" | "327") {
+        let adult_valid = valid_adult_doses(ctx.valid_doses, ctx.history);
+        let has_prior_pcv13 = adult_valid
+            .iter()
+            .any(|prior| prior.date < dose.date && prior.cvx == "133");
+        let has_prior_ppsv23 = adult_valid
+            .iter()
+            .any(|prior| prior.date < dose.date && prior.cvx == "33");
+        if has_prior_pcv13 && has_prior_ppsv23 {
+            *status = DoseStatus::Accepted;
+            reasons.clear();
+            reasons.push(EvaluationReason::OutsideRoutineSeries);
+            return;
+        }
     }
 
     if target_dose_idx == 7 {
@@ -225,9 +271,15 @@ pub fn pneumococcal_custom_forecast_hook(
 ) {
     let birth = patient.birth_date;
     let adult_valid = valid_adult_doses(valid_doses, history);
+    let has_valid_child_modern_pcv = has_valid_child_modern_pcv(valid_doses, history);
     let child_complete = valid_doses
         .iter()
         .any(|(date, dose_num)| *dose_num == 4 && age_lt(birth, *date, "5y"));
+    let has_adult_pcv13 = adult_valid.iter().any(|d| d.cvx == "133");
+    let has_adult_modern_pcv = adult_valid
+        .iter()
+        .any(|d| matches!(d.cvx.as_str(), "215" | "216" | "327"));
+    let has_adult_ppsv23 = adult_valid.iter().any(|d| d.cvx == "33");
 
     if adult_valid
         .iter()
@@ -244,7 +296,6 @@ pub fn pneumococcal_custom_forecast_hook(
     let has_adult_pcv15 = adult_valid
         .iter()
         .any(|d| d.cvx == "215" && age_ge(birth, d.date, "19y"));
-    let has_adult_ppsv23 = adult_valid.iter().any(|d| d.cvx == "33");
     if has_adult_pcv15 && has_adult_ppsv23 {
         forecast.status = SeriesStatus::Complete;
         forecast.reasons = vec!["COMPLETE".to_string()];
@@ -257,11 +308,9 @@ pub fn pneumococcal_custom_forecast_hook(
     let has_ppsv65 = adult_valid
         .iter()
         .any(|d| d.cvx == "33" && age_ge(birth, d.date, "65y"));
-    let has_any_adult_pcv = adult_valid
-        .iter()
-        .any(|d| ADULT_PCV_CVX.contains(&d.cvx.as_str()));
-    if has_ppsv65 && has_any_adult_pcv {
-        forecast.status = SeriesStatus::Complete;
+
+    if age_ge(birth, eval_date, "65y") && has_adult_pcv13 && has_ppsv65 && !has_adult_modern_pcv {
+        forecast.status = SeriesStatus::ConditionallyRecommended;
         forecast.reasons = vec!["COMPLETE".to_string()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
@@ -307,18 +356,35 @@ pub fn pneumococcal_custom_forecast_hook(
     if age_ge(birth, eval_date, "19y") && age_lt(birth, eval_date, "50y") {
         forecast.status = SeriesStatus::ConditionallyRecommended;
         forecast.reasons = vec!["HIGH_RISK".to_string()];
+        forecast.earliest_date = None;
+        forecast.recommended_date = None;
+        forecast.overdue_date = None;
+        return;
     }
 
     if child_complete
         && age_lt(birth, eval_date, "5y")
-        && has_valid_modern_pcv(valid_doses, history)
+        && has_valid_child_modern_pcv
     {
-        forecast.status = SeriesStatus::NotRecommended;
+        forecast.status = SeriesStatus::Complete;
         forecast.reasons = vec!["COMPLETE_HIGH_RISK".to_string()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
         return;
+    }
+
+    if age_lt(birth, eval_date, "5y")
+        && !has_valid_child_modern_pcv
+        && forecast.status == SeriesStatus::NotComplete
+        && forecast.recommended_date.is_some()
+        && history.last().is_some_and(|dose| {
+            is_pneumo_cvx(&dose.cvx)
+                && (age_ge(birth, dose.date, "24m") || child_complete)
+                && age_lt(birth, TimePeriod::parse("8w").unwrap().add_to(dose.date), "5y")
+        })
+    {
+        forecast.earliest_date = None;
     }
 
     let last_ppsv_or_unspecified = history
@@ -328,12 +394,14 @@ pub fn pneumococcal_custom_forecast_hook(
         .max();
     if valid_doses.iter().map(|(_, n)| *n).max().unwrap_or(1) >= 6 {
         if let Some(last) = last_ppsv_or_unspecified {
-            let date = TimePeriod::parse("5y").unwrap().add_to(last);
-            if matches!(forecast.recommended_date, Some(current) if date > current) {
-                forecast.recommended_date = Some(date);
-            }
-            if matches!(forecast.earliest_date, Some(current) if date > current) {
-                forecast.earliest_date = Some(date);
+            if has_adult_pcv13 || has_adult_pcv15 || has_adult_modern_pcv {
+                let date = TimePeriod::parse("5y").unwrap().add_to(last);
+                if matches!(forecast.recommended_date, Some(current) if date > current) {
+                    forecast.recommended_date = Some(date);
+                }
+                if matches!(forecast.earliest_date, Some(current) if date > current) {
+                    forecast.earliest_date = Some(date);
+                }
             }
         } else if let Some(last_pcv) = history
             .iter()
