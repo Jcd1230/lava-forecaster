@@ -1,0 +1,143 @@
+{
+  "rsv_adult_complete_60y": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "303",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "rsv_newborn_preseason_recommended_oct1": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2025-10-01",
+      "recommended_date": "2025-10-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "rsv_newborn_complete_beyfortus": {
+    "evaluations": [
+      {
+        "date": "2025-10-02",
+        "cvx": "306",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "rsv_infant_in_season_recommended_at_birth": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2025-11-07",
+      "recommended_date": "2025-11-07",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "rsv_infant_at_8_months_conditional": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "rsv_adult_49y_dose_accepted_not_counted": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "305",
+        "status": "Accepted",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2051-06-30",
+      "recommended_date": "2051-06-30",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "rsv_adult_almost_75_conditional": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "rsv_infant_abrysvo_invalid": {
+    "evaluations": [
+      {
+        "date": "2025-12-01",
+        "cvx": "305",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-12-01",
+      "recommended_date": "2025-12-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "rsv_adult_preavailability_invalid": {
+    "evaluations": [
+      {
+        "date": "2023-06-20",
+        "cvx": "303",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "rsv_infant_clesrovimab_preavailability_invalid": {
+    "evaluations": [
+      {
+        "date": "2025-06-08",
+        "cvx": "332",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "rsv_not_supported_before_launch": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "NotRecommended"
+    }
+  }
+}

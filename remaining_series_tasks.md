@@ -94,11 +94,11 @@ To implement a group, follow the guidelines in the [Onboarding & Implementation 
 
 ## 12. RSV (Respiratory Syncytial Virus - `RSV`)
 *Java Concept:* `RSV` | *Focus Code:* `875`
-- [ ] Implement `RSVAdultSeries.yml` (Arexvy, Abrysvo)
-- [ ] Implement `RSVInfantSeries.yml` (Beyfortus/Nirsevimab, Synagis/Palivizumab)
-- [ ] Enforce vaccine availability date limits (CVX 303: 9/22/2023, CVX 305: 6/29/2023, CVX 306: 5/31/2023). Doses given before these dates are **Invalid / VACCINE_NOT_COUNTED...**.
-- [ ] Implement infant weight-based and season-aligned dosing and forecasting.
-- [ ] Adjust adult RSV recommendations: 60y-75y -> `Conditional / CLINICAL_PATIENT_DISCRETION`, >= 75y -> `Recommended`.
+- [x] Implement `RSVAdultSeries.yml` (Arexvy, Abrysvo)
+- [x] Implement `RSVInfantSeries.yml` (Beyfortus/Nirsevimab, Synagis/Palivizumab)
+- [x] Enforce vaccine availability date limits (adult CVX 303/304/305/314/326, infant CVX 304/306/307/315, and CVX 332). Doses given before the legacy availability dates are invalid.
+- [x] Implement infant season-aligned dosing and forecasting, including the under-8-month versus 8-19-month recommendation split.
+- [x] Adjust adult RSV recommendations: ages 50-74 -> `ConditionallyRecommended`, >= 75y -> standard completion/date forecasting.
 
 ## 13. JEV (Japanese Encephalitis - `JEV`)
 *Java Concept:* `JAPANESE_ENCEPHALITIS` | *Focus Code:* `902`

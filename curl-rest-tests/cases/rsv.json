@@ -1,0 +1,116 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "rsv_adult_complete_60y",
+      "dob": "1965-10-07",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:303"
+      ],
+      "group": "RSV",
+      "focus": "875"
+    },
+    {
+      "name": "rsv_newborn_preseason_recommended_oct1",
+      "dob": "2025-08-21",
+      "gender": "M",
+      "eval_date": "2025-08-21",
+      "doses": [],
+      "group": "RSV",
+      "focus": "875"
+    },
+    {
+      "name": "rsv_newborn_complete_beyfortus",
+      "dob": "2025-08-10",
+      "gender": "F",
+      "eval_date": "2025-10-02",
+      "doses": [
+        "2025-10-02:306"
+      ],
+      "group": "RSV",
+      "focus": "875"
+    },
+    {
+      "name": "rsv_infant_in_season_recommended_at_birth",
+      "dob": "2025-11-07",
+      "gender": "F",
+      "eval_date": "2025-12-01",
+      "doses": [],
+      "group": "RSV",
+      "focus": "875"
+    },
+    {
+      "name": "rsv_infant_at_8_months_conditional",
+      "dob": "2025-04-01",
+      "gender": "M",
+      "eval_date": "2025-12-01",
+      "doses": [],
+      "group": "RSV",
+      "focus": "875"
+    },
+    {
+      "name": "rsv_adult_49y_dose_accepted_not_counted",
+      "dob": "1976-06-30",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:305"
+      ],
+      "group": "RSV",
+      "focus": "875"
+    },
+    {
+      "name": "rsv_adult_almost_75_conditional",
+      "dob": "1950-12-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "RSV",
+      "focus": "875"
+    },
+    {
+      "name": "rsv_infant_abrysvo_invalid",
+      "dob": "2025-11-01",
+      "gender": "M",
+      "eval_date": "2025-12-01",
+      "doses": [
+        "2025-12-01:305"
+      ],
+      "group": "RSV",
+      "focus": "875"
+    },
+    {
+      "name": "rsv_adult_preavailability_invalid",
+      "dob": "1963-01-01",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2023-06-20:303"
+      ],
+      "group": "RSV",
+      "focus": "875"
+    },
+    {
+      "name": "rsv_infant_clesrovimab_preavailability_invalid",
+      "dob": "2025-01-01",
+      "gender": "F",
+      "eval_date": "2025-07-01",
+      "doses": [
+        "2025-06-08:332"
+      ],
+      "group": "RSV",
+      "focus": "875"
+    },
+    {
+      "name": "rsv_not_supported_before_launch",
+      "dob": "2023-01-01",
+      "gender": "F",
+      "eval_date": "2023-06-20",
+      "doses": [],
+      "group": "RSV",
+      "focus": "875"
+    }
+  ]
+}
