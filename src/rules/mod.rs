@@ -19,6 +19,7 @@ pub mod jev;
 pub mod h1n1;
 pub mod mpox;
 pub mod rsv;
+pub mod covid19;
 
 use crate::engine::{
     ConditionalCompletionRule, CustomDoseNumberHook, CustomEvaluationHook, CustomExtraDoseHook,
@@ -69,6 +70,7 @@ pub fn get_ruleset(group_name: &str) -> Option<&'static VaccineGroupDefinition> 
         m.insert("H1N1", h1n1::definition());
         m.insert("MPOX", mpox::definition());
         m.insert("RSV", rsv::definition());
+        m.insert("COVID19", covid19::definition());
         m
     });
 
@@ -98,5 +100,6 @@ pub fn get_all_groups() -> Vec<&'static VaccineGroupDefinition> {
         get_ruleset("H1N1").unwrap(),
         get_ruleset("MPOX").unwrap(),
         get_ruleset("RSV").unwrap(),
+        get_ruleset("COVID19").unwrap(),
     ]
 }
