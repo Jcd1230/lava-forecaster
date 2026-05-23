@@ -15,6 +15,19 @@ pub fn is_omp_cvx(cvx: &str) -> bool {
     OMP_CVX.contains(&cvx)
 }
 
+fn count_valid_doses_before(valid_doses: &[(NaiveDate, usize)], cutoff: NaiveDate) -> usize {
+    valid_doses.iter().filter(|(date, _)| *date < cutoff).count()
+}
+
+fn effective_dose_number_before(valid_doses: &[(NaiveDate, usize)], cutoff: NaiveDate) -> usize {
+    valid_doses
+        .iter()
+        .filter(|(date, _)| *date < cutoff)
+        .map(|(_, dose_number)| *dose_number)
+        .max()
+        .unwrap_or(0)
+}
+
 pub fn hib_custom_dose_number_hook(
     series_name: &str,
     ctx: &EvaluationContext,
@@ -37,14 +50,18 @@ pub fn hib_custom_dose_number_hook(
         compare_elapsed(birth, ref_date, &tp) == std::cmp::Ordering::Less
     };
 
-    // Calculate number of Hib doses in overall history administered before 12m of age
-    let count_hib_before_12m = ctx.history.iter()
-        .filter(|d| {
-            is_hib_cvx(&d.cvx) && {
-                let tp_12m = TimePeriod::parse("12m").unwrap();
-                compare_elapsed(birth, d.date, &tp_12m) == std::cmp::Ordering::Less
-            }
-        })
+    let tp_7m = TimePeriod::parse("7m").unwrap();
+    let tp_12m = TimePeriod::parse("12m").unwrap();
+
+    // Forecast-time skip rules only apply when there are no valid doses at all.
+    // Once a series has started, Java keeps forecasting from the effective
+    // next dose number produced by the evaluated history.
+    if ctx.current_dose.is_none() && !ctx.valid_doses.is_empty() {
+        return target_dose_idx;
+    }
+
+    let count_hib_before_12m = ctx.valid_doses.iter()
+        .filter(|(date, _)| compare_elapsed(birth, *date, &tp_12m) == std::cmp::Ordering::Less)
         .count();
 
     // Check age ranges:
@@ -67,13 +84,9 @@ pub fn hib_custom_dose_number_hook(
     } else if is_age_ge("12m-28d") && is_age_lt("12m") {
         // Patient between 12m-28d and 12m
         // Rule: Skip to 3 if patient has received exactly 1 prior dose which was administered < 7m of age
-        let prior_hib_count = ctx.history.iter()
-            .filter(|d| is_hib_cvx(&d.cvx) && d.date < ref_date)
-            .count();
+        let prior_hib_count = ctx.valid_doses.len();
         if prior_hib_count == 1 {
-            let prior_dose = ctx.history.iter().find(|d| is_hib_cvx(&d.cvx) && d.date < ref_date).unwrap();
-            let tp_7m = TimePeriod::parse("7m").unwrap();
-            let prior_dose_lt_7m = compare_elapsed(birth, prior_dose.date, &tp_7m) == std::cmp::Ordering::Less;
+            let prior_dose_lt_7m = compare_elapsed(birth, ctx.valid_doses[0].0, &tp_7m) == std::cmp::Ordering::Less;
             if prior_dose_lt_7m {
                 if target_dose_idx < 3 {
                     target_dose_idx = 3;
@@ -165,6 +178,20 @@ pub fn hib_custom_forecast_hook(
     forecast: &mut SeriesForecast,
 ) {
     let birth = patient.birth_date;
+    let age_5y = TimePeriod::parse("5y").unwrap().add_to(birth);
+
+    if eval_date >= age_5y {
+        let doses_required = if forecast.series_name == "HIB_OMP_SERIES" { 3 } else { 4 };
+        let effective_before_5y = effective_dose_number_before(valid_doses, age_5y);
+        if effective_before_5y < doses_required {
+            forecast.status = SeriesStatus::ConditionallyRecommended;
+            forecast.earliest_date = None;
+            forecast.recommended_date = None;
+            forecast.overdue_date = None;
+            forecast.latest_date = None;
+            return;
+        }
+    }
 
     // Check if patient received CVX 50 and there are no valid doses
     let has_cvx50 = history.iter().any(|d| d.cvx == "50");
@@ -181,8 +208,11 @@ pub fn hib_custom_forecast_hook(
     // Removed the manual >= 5 years age check since it is now
     // handled declaratively by active_series.max_age_clamp.
 
-    // Recommended Date Overrides for HIB_4_DOSE_SERIES
-    if forecast.series_name == "HIB_4_DOSE_SERIES" && forecast.status != SeriesStatus::Complete {
+    // Recommended Date Overrides for HIB_4_DOSE_SERIES.
+    // These Java rules act on the series' current effective target dose.
+    // Once a catch-up dose has already satisfied the skipped target, forecasting
+    // should fall back to the generic next-dose timing.
+    if forecast.series_name == "HIB_4_DOSE_SERIES" && forecast.status != SeriesStatus::Complete && valid_doses.is_empty() {
         let tp_7m = TimePeriod::parse("7m").unwrap();
         let tp_12m = TimePeriod::parse("12m").unwrap();
         let tp_15m = TimePeriod::parse("15m").unwrap();
@@ -190,8 +220,6 @@ pub fn hib_custom_forecast_hook(
         let date_7m = tp_7m.add_to(birth);
         let date_12m = tp_12m.add_to(birth);
         let date_15m = tp_15m.add_to(birth);
-        let age_5y = TimePeriod::parse("5y").unwrap().add_to(birth);
-
         let eval_ge_7m = eval_date >= date_7m;
         let eval_lt_12m = eval_date < date_12m;
         let eval_ge_12m = eval_date >= date_12m;
@@ -199,30 +227,42 @@ pub fn hib_custom_forecast_hook(
         let eval_ge_15m = eval_date >= date_15m;
         let eval_lt_5y = eval_date < age_5y;
 
-        if eval_ge_7m && eval_lt_12m {
-            let count_before_7m = history.iter()
-                .filter(|d| is_hib_cvx(&d.cvx) && d.date < date_7m)
-                .count();
-            if count_before_7m == 0 {
+        let next_target_dose = if valid_doses.is_empty() {
+            if eval_ge_15m && eval_lt_5y {
+                4
+            } else if eval_ge_12m && eval_lt_15m {
+                3
+            } else if eval_ge_7m && eval_lt_12m {
+                2
+            } else {
+                1
+            }
+        } else {
+            valid_doses.iter().map(|(_, dose_number)| *dose_number).max().unwrap_or(0) + 1
+        };
+
+        let count_valid_before_7m = count_valid_doses_before(valid_doses, date_7m);
+        let count_valid_before_12m = count_valid_doses_before(valid_doses, date_12m);
+        let effective_before_15m = effective_dose_number_before(valid_doses, date_15m);
+
+        if next_target_dose == 2 && eval_ge_7m && eval_lt_12m {
+            if count_valid_before_7m == 0 {
                 forecast.recommended_date = Some(date_7m);
                 forecast.earliest_date = Some(date_7m);
+                forecast.overdue_date = Some(date_7m);
             }
-        } else if eval_ge_12m && eval_lt_15m {
-            let count_before_12m = history.iter()
-                .filter(|d| is_hib_cvx(&d.cvx) && d.date < date_12m)
-                .count();
-            if count_before_12m < 2 {
-                forecast.recommended_date = Some(date_12m);
-                forecast.earliest_date = Some(date_12m);
-            } else if count_before_12m == 2 {
+        } else if next_target_dose == 3 && eval_ge_12m && eval_lt_15m {
+            if count_valid_before_12m < 2 {
                 forecast.recommended_date = Some(date_12m);
                 forecast.earliest_date = Some(date_12m);
             }
-        } else if eval_ge_15m && eval_lt_5y {
-            let count_before_15m = history.iter()
-                .filter(|d| is_hib_cvx(&d.cvx) && d.date < date_15m)
-                .count();
-            if count_before_15m < 4 {
+        } else if next_target_dose == 4 && eval_ge_12m && eval_lt_15m {
+            if count_valid_before_12m == 2 {
+                forecast.recommended_date = Some(date_12m);
+                forecast.earliest_date = Some(date_12m);
+            }
+        } else if next_target_dose == 4 && eval_ge_15m && eval_lt_5y {
+            if effective_before_15m < 4 {
                 forecast.recommended_date = Some(date_15m);
                 forecast.earliest_date = Some(date_15m);
             }
@@ -316,20 +356,35 @@ pub fn hib_group_selection(
     let four_dose_exists = candidate_forecasts.contains_key(&four_dose_name);
 
     if omp_exists && four_dose_exists {
-        let omp_complete = is_series_complete(candidate_forecasts.get(&omp_name).unwrap());
-        let four_dose_complete = is_series_complete(candidate_forecasts.get(&four_dose_name).unwrap());
-
-        if omp_complete && !four_dose_complete {
-            return omp_name;
-        }
-        if four_dose_complete && !omp_complete {
-            return four_dose_name;
-        }
-
         let omp_fc = candidate_forecasts.get(&omp_name).unwrap();
-        if matches_omp_criteria_from_eval(patient, omp_fc) {
-            return omp_name;
+        let four_dose_fc = candidate_forecasts.get(&four_dose_name).unwrap();
+
+        let default_selection = if matches_omp_criteria_from_eval(patient, omp_fc) {
+            &omp_name
+        } else {
+            &four_dose_name
+        };
+
+        let selected_complete = if default_selection == &omp_name {
+            is_series_complete(omp_fc)
+        } else {
+            is_series_complete(four_dose_fc)
+        };
+        let other_complete = if default_selection == &omp_name {
+            is_series_complete(four_dose_fc)
+        } else {
+            is_series_complete(omp_fc)
+        };
+
+        if !selected_complete && other_complete {
+            return if default_selection == &omp_name {
+                four_dose_name
+            } else {
+                omp_name
+            };
         }
+
+        return default_selection.clone();
     }
 
     four_dose_name
