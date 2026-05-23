@@ -1,0 +1,2157 @@
+{
+  "cdsi_2025_0038_patient_is_6_months_of_age_with_no_previous_administration_of_the_covid_19_vaccine": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2025-11-10",
+      "recommended_date": "2025-11-10",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0039_patient_is_6_months_5_days_of_age_with_no_previous_administered_dose_of_the_covid_19_vaccine": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2025-11-15",
+      "recommended_date": "2025-11-15",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0040_patient_is_32_years_of_age_with_a_previous_dose_of_a_pfizer_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2023-08-08",
+        "cvx": "300",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0041_patient_is_6_months_of_age_and_has_been_administered_a_dose_of_the_fall_moderna_2025_2026_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-12-08",
+      "recommended_date": "2025-12-08",
+      "overdue_date": "2026-01-04",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0042_patient_is_32_years_of_age_and_has_been_administered_a_dose_of_the_2025_2026_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "309",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0043_patient_is_28_years_of_age_and_has_been_administered_a_previous_dose_of_a_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2024-09-03",
+        "cvx": "309",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0044_patient_is_60_years_of_age_and_has_been_administered_two_previous_doses_of_a_pfizer_covid_19_vaccine_and_one_dose_of_a_2025_2026_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2022-08-03",
+        "cvx": "208",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2022-08-28",
+        "cvx": "208",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2025-09-30",
+        "cvx": "309",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0045_patient_is_9_years_of_age_and_has_been_administered_a_previous_dose_of_a_pfizer_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2023-06-01",
+        "cvx": "310",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0046_patient_is_24_years_and_was_administered_previous_doses_of_pfizer_and_novavax_covid_19_vaccines": {
+    "evaluations": [
+      {
+        "date": "2023-05-18",
+        "cvx": "208",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2023-06-08",
+        "cvx": "211",
+        "status": "Invalid",
+        "dose_number": 2
+      },
+      {
+        "date": "2024-08-24",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0047_patient_is_15_years_of_age_and_has_been_administered_a_previous_dose_of_the_moderna_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2023-06-06",
+        "cvx": "229",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2025_0048_patient_is_5_years_of_age_and_has_been_administered_a_moderna_2025_2026_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0049_patient_is_10_years_of_age_and_was_previously_administered_a_novavax_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2023-07-25",
+        "cvx": "211",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2025_0050_patient_is_5_years_of_age_and_was_administered_three_previous_doses_of_a_pfizer_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2023-06-10",
+        "cvx": "300",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2023-07-10",
+        "cvx": "300",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2024-09-22",
+        "cvx": "310",
+        "status": "Valid",
+        "dose_number": 3
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2025_0051_patient_is_16_years_of_age_and_has_been_previously_administered_three_doses_of_the_moderna_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2023-08-19",
+        "cvx": "312",
+        "status": "Invalid",
+        "dose_number": 1
+      },
+      {
+        "date": "2023-09-16",
+        "cvx": "312",
+        "status": "Invalid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-08-24",
+        "cvx": "312",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2025_0052_patient_is_2_years_of_age_and_has_been_administered_three_doses_of_the_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2023-08-04",
+        "cvx": "229",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2023-09-10",
+        "cvx": "308",
+        "status": "Invalid",
+        "dose_number": 2
+      },
+      {
+        "date": "2024-09-01",
+        "cvx": "308",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2025_0053_patient_is_14_months_of_age_and_has_been_administered_the_second_dose_of_the_moderna_2025_2026_fall_formula_at_28_5_days": {
+    "evaluations": [
+      {
+        "date": "2025-10-18",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "311",
+        "status": "Invalid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-12-08",
+      "recommended_date": "2025-12-08",
+      "overdue_date": "2026-01-04",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0054_patient_is_4_months_of_age_and_has_been_administered_a_dose_of_the_fall_2025_2026_moderna_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "311",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2026-01-10",
+      "recommended_date": "2026-01-10",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0055_patient_is_4_years_of_age_and_was_administered_two_previous_pfizer_covid_19_vaccine_and_one_previous_fall_2023_2024_novavax_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2023-03-13",
+        "cvx": "219",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2023-04-18",
+        "cvx": "302",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2023-10-09",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 3
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2025_0056_patient_is_17_months_of_age_and_has_been_administered_two_previous_doses_of_a_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2024-10-17",
+        "cvx": "308",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-11-17",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0057_patient_is_3_years_of_age_and_has_been_administered_four_previous_doses_of_a_pfizer_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2023-05-23",
+        "cvx": "302",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2023-06-13",
+        "cvx": "302",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2023-08-08",
+        "cvx": "302",
+        "status": "Valid",
+        "dose_number": 3
+      },
+      {
+        "date": "2024-09-09",
+        "cvx": "308",
+        "status": "Valid",
+        "dose_number": 3
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2025_0058_patient_is_36_years_of_age_with_four_previous_doses_of_the_novavax_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2022-12-27",
+        "cvx": "211",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2023-01-17",
+        "cvx": "211",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2023-08-07",
+        "cvx": "211",
+        "status": "Valid",
+        "dose_number": 3
+      },
+      {
+        "date": "2023-10-02",
+        "cvx": "313",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0059_patient_is_45_years_of_age_and_has_been_previously_administered_three_who_approved_covid_19_vaccine_and_a_previous_u_s_fall_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2022-11-27",
+        "cvx": "502",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2022-12-25",
+        "cvx": "502",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2023-03-22",
+        "cvx": "519",
+        "status": "Valid",
+        "dose_number": 3
+      },
+      {
+        "date": "2024-09-18",
+        "cvx": "312",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0060_patient_is_14_years_of_age_with_a_previous_administered_dose_of_the_moderna_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2024-09-09",
+        "cvx": "312",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2025_0061_patient_is_15_years_of_age_with_a_previous_administered_covid_19_dose_and_a_2025_2026_moderna_covid_19_vaccine_dose": {
+    "evaluations": [
+      {
+        "date": "2024-11-10",
+        "cvx": "312",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "312",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0063_patient_is_19_years_of_age_with_a_fall_2025_2026_pfizer_covid_19_vaccine_administered_at_8_weeks_4_days_after_previous_dose": {
+    "evaluations": [
+      {
+        "date": "2025-07-29",
+        "cvx": "309",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-09-19",
+        "cvx": "309",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0064_patient_is_11_years_of_age_and_has_been_administered_a_dose_of_2025_2026_moderna_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0065_patient_is_10_years_of_age_and_has_been_administered_a_previous_dose_of_the_novavax_covid_19_vaccine_and_a_previous_dose_of_the_fall_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2023-08-11",
+        "cvx": "211",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2023-10-06",
+        "cvx": "310",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2025_0066_patient_is_27_years_of_age_and_has_received_a_previous_dose_of_the_janssen_covid_19_vaccine_and_a_2024_2025_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2023-02-07",
+        "cvx": "212",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-08-23",
+        "cvx": "312",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0067_patient_is_16_years_of_age_and_has_received_a_previous_dose_of_the_janssen_covid_19_vaccine_and_a_previous_fall_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2022-06-21",
+        "cvx": "212",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-10-16",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2025_0068_patient_is_19_months_of_age_and_has_been_administered_three_previous_doses_of_the_fall_2023_2024_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2024-09-12",
+        "cvx": "308",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-10-03",
+        "cvx": "308",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2024-11-28",
+        "cvx": "308",
+        "status": "Valid",
+        "dose_number": 3
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0069_patient_is_22_months_of_age_and_has_been_administered_two_previous_doses_of_the_moderna_2024_2025_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-06-26",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-07-30",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-09-24",
+      "recommended_date": "2025-09-24",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0070_patient_is_9_months_of_age_and_has_been_administered_two_doses_of_the_moderna_fall_2025_2026_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-10-13",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0071_patient_is_13_years_of_age_and_has_been_administered_a_previous_dose_of_the_novavax_2024_2025_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2024-09-09",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2025_0072_patient_is_15_years_of_age_and_has_been_administered_a_dose_of_the_novavax_fall_2025_2026_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0073_patient_is_34_years_of_age_and_has_been_administered_three_previous_doses_of_the_novavax_covid_19_vaccine_two_doses_cvx_211_and_one_dose_cvx_313": {
+    "evaluations": [
+      {
+        "date": "2022-11-14",
+        "cvx": "211",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2022-12-05",
+        "cvx": "211",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2024-08-23",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0074_patient_is_46_years_of_age_and_has_been_administered_a_previous_doses_of_the_moderna_covid_19_vaccine_and_one_dose_of_the_novavax_fall_2024_2025_vaccine": {
+    "evaluations": [
+      {
+        "date": "2023-06-06",
+        "cvx": "229",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-08-23",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0075_patient_is_10_years_of_age_and_has_been_administered_two_previous_doses_of_the_novavax_fall_2024_2025_vaccine_and_one_dose_of_the_novavax_fall_2025_2026_vaccine": {
+    "evaluations": [
+      {
+        "date": "2024-08-24",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-09-14",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2025-10-07",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0076_patient_is_17_years_of_age_and_has_been_previously_administered_a_second_dose_of_a_moderna_covid_19_vaccine_at_an_interval_of_three_weeks": {
+    "evaluations": [
+      {
+        "date": "2023-08-01",
+        "cvx": "300",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2023-08-22",
+        "cvx": "312",
+        "status": "Invalid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2025_0077_patient_is_2_years_of_age_and_has_been_administered_a_previous_dose_of_a_pfizer_vaccine_and_two_doses_of_moderna_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2023-07-12",
+        "cvx": "302",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2023-08-04",
+        "cvx": "229",
+        "status": "Invalid",
+        "dose_number": 2
+      },
+      {
+        "date": "2025-10-06",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0078_patient_is_9_years_of_age_with_a_dose_of_pfizer_s_fall_2025_2026_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "310",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0079_patient_is_3_years_of_age_and_was_administered_a_fall_2025_2026_covid_19_vaccine_at_8_weeks_5_days_from_previous_vaccine_dose": {
+    "evaluations": [
+      {
+        "date": "2025-07-16",
+        "cvx": "308",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-08-20",
+        "cvx": "308",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2025-10-10",
+        "cvx": "311",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-12-05",
+      "recommended_date": "2025-12-05",
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2025_0080_patient_is_6_years_of_age_and_has_been_administered_two_moderna_covid_19_vaccines_in_previous_seasons": {
+    "evaluations": [
+      {
+        "date": "2023-09-04",
+        "cvx": "229",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-09-01",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2025_0081_patient_is_4_years_old_and_was_administered_a_fall_2025_2026_moderna_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0082_patient_is_4_years_old_and_was_administered_a_dose_of_the_2024_2025_pfizer_covid_19": {
+    "evaluations": [
+      {
+        "date": "2024-09-26",
+        "cvx": "310",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2025_0083_patient_is_13_months_of_age_and_has_been_administered_a_second_dose_of_the_fall_2025_2026_covid_19_vaccine_at_an_interval_of_28_4_days": {
+    "evaluations": [
+      {
+        "date": "2025-10-17",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0084_patient_is_11_months_of_age_and_has_been_administered_a_second_dose_of_the_fall_2025_2026_covid_19_vaccine_at_an_interval_of_28_5_days": {
+    "evaluations": [
+      {
+        "date": "2025-10-18",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "311",
+        "status": "Invalid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-12-08",
+      "recommended_date": "2025-12-08",
+      "overdue_date": "2026-01-04",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0086_patient_transitions_from_23_months_of_age_to_2_years_of_age_and_has_been_administered_a_second_dose_of_the_2025_2026_covid_19_vaccine_at_an_interval_of_4_weeks_4_days": {
+    "evaluations": [
+      {
+        "date": "2025-10-17",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0088_patient_is_40_years_of_age_and_was_administered_a_dose_of_the_fall_moderna_2025_2026_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "312",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0089_patient_is_14_years_of_age_and_has_been_administered_a_fall_2025_2026_pfizer_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "309",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0090_patient_is_2_years_old_and_was_administered_a_dose_of_the_2025_2026_pfizer_covid_19_vaccine_cvx_310": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "310",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0091_patient_is_2_years_old_and_was_administered_three_doses_of_the_2024_2025_pfizer_covid_19_vaccine_and_one_dose_of_the_2025_2026_moderna_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2024-01-11",
+        "cvx": "310",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-02-08",
+        "cvx": "310",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2024-05-01",
+        "cvx": "308",
+        "status": "Valid",
+        "dose_number": 3
+      },
+      {
+        "date": "2025-10-03",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0092_patient_is_18_years_of_age_and_has_been_administered_two_doses_of_a_covid_19_vaccine_in_previous_seasons": {
+    "evaluations": [
+      {
+        "date": "2023-08-01",
+        "cvx": "300",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-10-17",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2025_0093_patient_is_57_years_of_age_and_has_been_administered_two_previous_doses_of_the_moderna_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2023-06-22",
+        "cvx": "229",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-08-23",
+        "cvx": "312",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0094_patient_is_on_or_after_65_years_of_age_with_four_previous_doses_of_the_moderna_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2022-07-22",
+        "cvx": "207",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2022-08-19",
+        "cvx": "207",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2023-03-08",
+        "cvx": "229",
+        "status": "Valid",
+        "dose_number": 3
+      },
+      {
+        "date": "2023-09-25",
+        "cvx": "312",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0095_patient_is_7_years_of_age_and_was_administered_three_doses_of_moderna_covid_19_vaccine_in_previous_seasons": {
+    "evaluations": [
+      {
+        "date": "2022-09-16",
+        "cvx": "221",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2022-10-16",
+        "cvx": "229",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2023-09-18",
+        "cvx": "312",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2025_0096_patient_is_5_years_of_age_and_was_administered_three_covid_19_vaccines_in_previous_seasons_and_one_2025_2026_moderna_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2022-09-23",
+        "cvx": "228",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2022-10-23",
+        "cvx": "300",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2023-09-13",
+        "cvx": "309",
+        "status": "Valid",
+        "dose_number": 3
+      },
+      {
+        "date": "2025-10-03",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0097_patient_is_6_months_5_days_of_age_and_has_been_administered_a_dose_of_the_2025_2026_moderna_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "311",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-12-08",
+      "recommended_date": "2025-12-08",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0098_patient_is_6_months_5_days_of_age_and_has_been_administered_a_dose_of_the_fall_2025_2026_pfizer_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "310",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-12-08",
+      "recommended_date": "2025-12-08",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0099_patient_is_6_years_of_age_and_has_been_administered_two_doses_of_the_2024_2025_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2024-08-28",
+        "cvx": "313",
+        "status": "Accepted",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-09-19",
+        "cvx": "310",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0100_patient_is_6_years_of_age_and_has_been_administered_two_previous_doses_of_a_covid_19_vaccine_and_one_new_fall_2025_2026_covid_19_vaccine_dose": {
+    "evaluations": [
+      {
+        "date": "2024-08-28",
+        "cvx": "313",
+        "status": "Accepted",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-09-19",
+        "cvx": "310",
+        "status": "Invalid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-10-02",
+        "cvx": "310",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0085_patient_transitions_from_23_months_of_age_to_2_years_of_age_and_has_been_administered_a_second_dose_of_the_2025_2026_covid_19_vaccine_at_an_interval_of_4_weeks_5_days": {
+    "evaluations": [
+      {
+        "date": "2025-10-18",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "311",
+        "status": "Invalid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-12-08",
+      "recommended_date": "2025-12-08",
+      "overdue_date": "2026-01-04",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0087_patient_is_23_months_of_age_and_has_been_administered_a_dose_of_the_fall_moderna_2025_2026_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-12-08",
+      "recommended_date": "2025-12-08",
+      "overdue_date": "2026-01-04",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0101_patient_is_2_years_of_age_and_was_administered_two_doses_of_the_2024_2025_novavax_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2024-09-10",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-10-08",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2025_0102_patient_is_70_years_of_age_and_has_been_administered_two_doses_of_a_covid_19_vaccine_in_previous_seasons": {
+    "evaluations": [
+      {
+        "date": "2023-10-01",
+        "cvx": "309",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-10-14",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0103_patient_is_65_years_of_age_and_has_been_administered_a_dose_of_the_fall_pfizer_2025_2026_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "309",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2026-01-05",
+      "recommended_date": "2026-05-10",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0104_patient_is_90_years_of_age_and_has_been_administered_a_dose_of_a_moderna_2024_2025_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2024-09-02",
+        "cvx": "312",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0105_patient_is_66_years_of_age_and_has_been_administered_two_doses_of_a_moderna_2024_2025_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2024-10-01",
+        "cvx": "312",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-04-08",
+        "cvx": "312",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0106_patient_is_75_years_of_age_and_has_been_administered_two_doses_of_covid_19_vaccines_from_previous_seasons_and_one_2025_2026_covid_19_vaccine_dose": {
+    "evaluations": [
+      {
+        "date": "2023-11-10",
+        "cvx": "309",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-05-10",
+        "cvx": "309",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "309",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2026-01-05",
+      "recommended_date": "2026-05-10",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0107_patient_is_80_years_of_age_and_has_been_administered_two_doses_of_the_novavax_fall_2024_2025_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2024-10-09",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-12-06",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0108_patient_is_67_years_of_age_and_has_been_administered_three_doses_of_the_novavax_covid_19_vaccine_in_previous_seasons": {
+    "evaluations": [
+      {
+        "date": "2023-09-13",
+        "cvx": "313",
+        "status": "Invalid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-11-10",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-03-08",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0109_patient_is_8_months_of_age_and_has_received_the_second_dose_of_the_moderna_2025_2026_vaccine_at_4_weeks_4_days": {
+    "evaluations": [
+      {
+        "date": "2025-10-17",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0110_patient_is_14_months_of_age_and_has_been_administered_a_2025_2026_covid_19_vaccine_at_an_interval_of_8_weeks": {
+    "evaluations": [
+      {
+        "date": "2025-03-12",
+        "cvx": "308",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-08-22",
+        "cvx": "308",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2025-10-17",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0111_patient_is_16_months_of_age_and_has_been_administered_a_2025_2026_covid_19_vaccine_at_an_interval_of_8_weeks_4_days": {
+    "evaluations": [
+      {
+        "date": "2025-07-04",
+        "cvx": "308",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-08-04",
+        "cvx": "308",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2025-09-25",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0112_patient_is_16_months_of_age_and_has_been_administered_a_2025_2026_covid_19_vaccine_at_an_interval_of_8_weeks_5_days": {
+    "evaluations": [
+      {
+        "date": "2025-07-04",
+        "cvx": "308",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-08-04",
+        "cvx": "308",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2025-09-24",
+        "cvx": "311",
+        "status": "Invalid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-11-19",
+      "recommended_date": "2025-11-19",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0115_patient_is_nearly_9_months_of_age_and_has_been_administered_two_doses_of_a_24_25_pfizer_vaccine_and_one_2025_2026_covid_19_vaccine_dose": {
+    "evaluations": [
+      {
+        "date": "2025-07-12",
+        "cvx": "308",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-08-12",
+        "cvx": "308",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2025-10-06",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0116_patient_is_4_years_of_age_and_was_administered_two_previous_moderna_covid_19_vaccine_doses_and_one_novavax_2025_2026_covid_19_vaccine_dose": {
+    "evaluations": [
+      {
+        "date": "2024-08-23",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-09-23",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2025-10-07",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0117_patient_is_nearly_20_months_of_age_and_has_been_administered_three_doses_of_the_2024_2025_covid_19_vaccine_and_one_2025_2026_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2024-09-12",
+        "cvx": "308",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-10-03",
+        "cvx": "308",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2024-11-28",
+        "cvx": "308",
+        "status": "Valid",
+        "dose_number": 3
+      },
+      {
+        "date": "2025-10-21",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0118_patient_is_13_months_of_age_with_three_doses_of_a_2024_2025_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-03-20",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-04-20",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2025-06-18",
+        "cvx": "308",
+        "status": "Valid",
+        "dose_number": 3
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0119_patient_is_13_years_of_age_and_has_been_administered_two_doses_of_a_covid_19_vaccine_in_a_previous_season": {
+    "evaluations": [
+      {
+        "date": "2024-08-27",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-09-25",
+        "cvx": "309",
+        "status": "Invalid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2025_0120_patient_is_13_years_of_age_and_has_been_administered_two_doses_of_a_24_25_covid_19_vaccine_and_one_dose_of_the_novavax_2025_2026_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-03-17",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-04-17",
+        "cvx": "312",
+        "status": "Invalid",
+        "dose_number": 2
+      },
+      {
+        "date": "2025-09-01",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0121_patient_is_68_years_of_age_and_has_been_administered_five_doses_of_the_novavax_covid_19_vaccine_in_previous_seasons": {
+    "evaluations": [
+      {
+        "date": "2023-09-13",
+        "cvx": "313",
+        "status": "Invalid",
+        "dose_number": 1
+      },
+      {
+        "date": "2023-11-10",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-03-08",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2024-11-18",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-05-18",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0122_patient_is_3_years_of_age_and_has_been_administered_two_doses_of_a_24_25_covid_19_moderna_and_novavax_vaccine": {
+    "evaluations": [
+      {
+        "date": "2024-11-14",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-12-12",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2025_0123_patient_was_4_years_of_age_and_turned_5_years_and_was_administered_2_doses_of_the_24_25_pfizer_covid_19_vaccines_and_1_2025_2026_pfizer_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2024-09-18",
+        "cvx": "308",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-10-16",
+        "cvx": "310",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2025-09-08",
+        "cvx": "310",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0124_patient_was_4_years_of_age_and_turned_5_years_and_was_administered_2_doses_of_the_24_25_moderna_covid_19_vaccines_and_1_2025_2026_moderna_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2024-10-17",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-11-14",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2025-09-20",
+        "cvx": "312",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0125_patient_is_2_years_of_age_and_was_administered_a_24_25_covid_19_vaccine_and_a_2025_2026_moderna_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2024-10-17",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-09-20",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0126_patient_is_6_months_of_age_and_has_been_administered_the_first_dose_of_a_2025_2026_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-12-08",
+      "recommended_date": "2025-12-08",
+      "overdue_date": "2026-01-04",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0127_patient_is_7_months_of_age_and_has_been_administered_two_doses_of_a_2025_2026_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-10-10",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-07",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0128_patient_is_6_months_of_age_and_has_been_administered_a_valid_dose_of_a_2025_2026_covid_19_vaccine_after_a_previously_invalid_dose": {
+    "evaluations": [
+      {
+        "date": "2025-09-10",
+        "cvx": "311",
+        "status": "Invalid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-12-08",
+      "recommended_date": "2025-12-08",
+      "overdue_date": "2026-01-04",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0129_patient_is_3_years_old_and_has_been_administered_two_24_25_doses_of_a_covid_19": {
+    "evaluations": [
+      {
+        "date": "2024-02-01",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-03-21",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2025_0130_patient_is_68_years_of_age_and_has_been_administered_five_doses_of_the_novavax_covid_19_vaccine_in_previous_seasons_and_one_dose_in_the_2025_2026_season": {
+    "evaluations": [
+      {
+        "date": "2023-09-13",
+        "cvx": "313",
+        "status": "Invalid",
+        "dose_number": 1
+      },
+      {
+        "date": "2023-11-10",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-03-08",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2024-11-18",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-05-18",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2025-09-09",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-11-04",
+      "recommended_date": "2026-03-09",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0131_patient_is_5_years_old_and_has_been_administered_three_doses_of_covid_19_vaccine_in_previous_seasons": {
+    "evaluations": [
+      {
+        "date": "2023-10-25",
+        "cvx": "308",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2023-11-28",
+        "cvx": "308",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2024-11-23",
+        "cvx": "310",
+        "status": "Valid",
+        "dose_number": 3
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2025_0132_patient_is_under_12_years_old_and_was_administered_a_novavax_2025_2026_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0133_patient_is_11_years_old_and_has_been_administered_two_doses_of_the_novavax_covid_19_vaccine_in_previous_seasons_and_a_2025_2026_dose_of_the_novovax_covid_19_vaccine": {
+    "evaluations": [
+      {
+        "date": "2024-07-31",
+        "cvx": "313",
+        "status": "Accepted",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-08-24",
+        "cvx": "313",
+        "status": "Invalid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-09-09",
+        "cvx": "313",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0134_patient_is_10_years_of_age_and_has_not_been_administered_a_dose_of_a_covid_19_vaccine": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  }
+}

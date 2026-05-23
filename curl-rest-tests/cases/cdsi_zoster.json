@@ -1,0 +1,238 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "cdsi_2015_0013_zoster_dose_administered_at_50_years_of_age",
+      "dob": "1969-03-01",
+      "gender": "F",
+      "eval_date": "2019-03-04",
+      "doses": [
+        "2019-03-04:121"
+      ],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "cdsi_2015_0014_zoster_dose_administered_at_60_years_of_age",
+      "dob": "1959-02-05",
+      "gender": "F",
+      "eval_date": "2019-03-01",
+      "doses": [
+        "2019-03-01:121"
+      ],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "cdsi_2015_0016_zoster_patient_is_overdue_at_62_years_of_age_for_zoster_dose",
+      "dob": "1963-10-25",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "cdsi_2015_0018_zoster_mmr_to_zoster_interval_28_days",
+      "dob": "1966-05-15",
+      "gender": "F",
+      "eval_date": "2019-06-15",
+      "doses": [
+        "2019-05-15:3",
+        "2019-06-15:121"
+      ],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "cdsi_2015_0019_zoster_mmr_to_zoster_interval_28_1_days",
+      "dob": "1968-03-12",
+      "gender": "F",
+      "eval_date": "2019-08-14",
+      "doses": [
+        "2019-07-17:3",
+        "2019-08-13:121"
+      ],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "cdsi_2018_0001_zoster_patient_has_received_dose_1_of_the_rzv_shingrix_series",
+      "dob": "1975-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:187"
+      ],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "cdsi_2018_0002_zoster_dose_2_of_the_rzv_shringrix_vaccine_administered_at_two_months_after_dose_1",
+      "dob": "1975-09-15",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-15:187",
+        "2025-11-10:187"
+      ],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "cdsi_2018_0003_zoster_dose_2_shingrix_administered_at_4_weeks_after_dose_1",
+      "dob": "1975-10-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:187",
+        "2025-11-10:187"
+      ],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "cdsi_2018_0004_zoster_dose_2_of_shingrix_administered_at_one_year_after_dose_1",
+      "dob": "1973-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-11-10:187",
+        "2025-11-10:187"
+      ],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "cdsi_2018_0005_zoster_dose_2_shingrix_administered_at_4_weeks_1_days_after_dose_1",
+      "dob": "1975-10-13",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:187",
+        "2025-11-09:187"
+      ],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "cdsi_2018_0006_zoster_patient_is_50_with_no_previous_history_of_shringrix_vaccine",
+      "dob": "1975-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "cdsi_2018_0008_zoster_dose_1_of_rzv_administered_4_weeks_after_previous_dose_of_zvl",
+      "dob": "1969-07-29",
+      "gender": "F",
+      "eval_date": "2019-08-26",
+      "doses": [
+        "2019-07-29:121",
+        "2019-08-26:187"
+      ],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "cdsi_2018_0009_zoster_zvl_and_rzv_shingrix_vaccine_doses_administered_on_the_same_day_time",
+      "dob": "1969-02-14",
+      "gender": "F",
+      "eval_date": "2019-05-12",
+      "doses": [
+        "2019-02-27:121",
+        "2019-02-27:187"
+      ],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "cdsi_2018_0011_zoster_dose_1_of_shingrix_8_weeks_after_dose_2_of_varicella_vaccine",
+      "dob": "1975-10-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-09-15:21",
+        "2025-09-15:21",
+        "2025-11-10:187"
+      ],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "cdsi_2018_0012_zoster_dose_1_of_shingrix_4_weeks_after_dose_2_of_varicella_vaccine",
+      "dob": "1975-10-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-10-13:21",
+        "2025-10-13:21",
+        "2025-11-10:187"
+      ],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "cdsi_2018_0013_zoster_dose_1_of_rzv_administered_8_weeks_after_previous_dose_of_zvl",
+      "dob": "1968-07-12",
+      "gender": "F",
+      "eval_date": "2019-09-24",
+      "doses": [
+        "2019-07-30:121",
+        "2019-09-24:187"
+      ],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "cdsi_2018_0014_zoster_patient_has_received_all_three_doses_of_the_zoster_vaccine",
+      "dob": "1968-07-12",
+      "gender": "F",
+      "eval_date": "2024-07-30",
+      "doses": [
+        "2019-07-30:121",
+        "2019-09-24:187",
+        "2019-11-19:187"
+      ],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "cdsi_2019_0001_zoster_dose_2_shingrix_administered_at_4_weeks_5_days_after_dose_1",
+      "dob": "1975-10-13",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:187",
+        "2025-11-05:187"
+      ],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "cdsi_2019_0002_zoster_dose_2_shingrix_administered_at_4_weeks_4_days_after_dose_1",
+      "dob": "1975-10-13",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:187",
+        "2025-11-06:187"
+      ],
+      "group": "ZOSTER",
+      "focus": "620"
+    },
+    {
+      "name": "cdsi_2024_0073_zoster_dose_1_of_shingrix_at_18_years_5_days",
+      "dob": "2007-11-15",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:187"
+      ],
+      "group": "ZOSTER",
+      "focus": "620"
+    }
+  ]
+}

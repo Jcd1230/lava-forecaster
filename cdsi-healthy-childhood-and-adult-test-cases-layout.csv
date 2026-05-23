@@ -1,0 +1,29 @@
+Column,Field Name,Description
+A,CDC_Test_ID,Simple numerical identifier for the test case.
+B,Test_Case_Name,Human-readable test name to briefly describe the test case.
+C,DOB,"Date of birth of the patient. DOB format: MM/DD/YYYY (e.g., 01/01/2000)."
+D,Gender,Gender of the patient. Either M or F (Male or Female)
+E,Med_History_Text,Field no longer used.  This will always be empty.  Field retained for backwards compatability.
+F,Med_History_Code,Field no longer used.  This will always be empty.  Field retained for backwards compatability.
+G,Med_History_Code_Sys,Field no longer used.  This will always be empty.  Field retained for backwards compatability.
+H,Series_Status,Series Status is the measure of the patients status in relationship to presumed immunity.
+I,Date_Administered_1,"Date vaccine dose was administered. Date format: MM/DD/YYYY (e.g., 01/01/2000)."
+J,Vaccine_Name_1,Human readable trade name or the unspecified formulation of the vaccine.
+K,CVX_1,Coded value to define the type of vaccine. Together with MVX the trade name can be inferred.
+L,MVX_1,"Coded value to define the manufacturer of the vaccine. Together with CVX the trade name can be inferred. If an unspecified formulation is used, no MVX is specified."
+M,Evaluation_Status_1,"Expected evaluation status (Valid, Not Valid, Extraneous) of the vaccine dose administered based on the ACIP recommendations. In the case of a combination shot, the Expected Evaluation Status is related to the Vaccine Group targeted by the particular test case. The other components of the combination vaccine are tested in their respective Vaccine Group test cases."
+N,Evaluation_Reason_1,"Provides further information as to why the dose administered was not valid. In the case of a combination shot, the reason is related to the Vaccine Group targeted by the particular test case. The other components of the combination vaccine are tested in their specific Vaccine Group test cases."
+O – AX,Vaccine Doses Administered 2 through 7.  This is a repetition of fields I – N.,Vaccine Doses Administered 2 through 7. This is a repetition of fields I - N.
+AY,Forecast_#,"Target Dose being forecasted. If Target Doses 1 and 2 have been satisfied, the Target Dose Number being forecasted would be Target Dose Number 3. If the patient no longer requires a dose (complete, immune, contraindication), the forecast_# is set to “-“."
+AZ,Earliest_Date,"Earliest point in time which the next vaccine dose could be administered and still be considered valid. This does not include the 4-day grace period. Date format: MM/DD/YYYY (e.g., 01/01/2000)."
+BA,Recommended_Date,"Date at which the next vaccine dose administered should be given. Date format: MM/DD/YYYY (e.g., 01/01/2000)."
+BB,Past_Due_Date,"Date at which the patient is considered overdue for their immunization. Date format: MM/DD/YYYY (e.g., 01/01/2000)."
+BC,Vaccine_Group,The Vaccine Group being tested with the test case.
+BD,Assessment Date,Assessment Date is the date which should be used during evaluation and forecasting rather than the current date.  This is used to help with test cases which would become invalid over time.
+BE,Evaluation_Test_Type,Evaluation Test Type is used to categorize the test case.  This will allow testers to focus in on categories of tests as needed.
+BF,Date_Added,This is the date the test case was created. The format is MM/DD/YYYY. (e.g.: 01/01/2000)
+BG,Date Updated,This is the date the test case was changed. The format is MM/DD/YYYY. (e.g.: 01/01/2000)
+BH,Forecast_Test_Type,Forecast Test Type is used to categorize the test case.  This will allow testers to focus on categories of tests as needed.
+BI,Reason_For_Change,"As test cases are changed, this field is used to document the reason the test case was changed."
+BJ,Changed_In_Version,This field documents the version number the test case was last changed.
+BK,General_Description,Basic description of the scenario or test case being tested.

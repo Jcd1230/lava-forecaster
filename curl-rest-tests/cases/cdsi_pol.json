@@ -1,0 +1,1635 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "cdsi_2013_0626_newborn_testing",
+      "dob": "2025-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0627_dose_2_at_age_10_weeks",
+      "dob": "2025-09-01",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0628_dose_2_at_age_4_months",
+      "dob": "2025-07-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-10:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0629_dose_2_at_age_3_years_9_months",
+      "dob": "2022-02-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-04-10:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0630_dose_2_at_age_4_years_0_months",
+      "dob": "2021-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2023-11-10:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0631_dose_3_at_age_14_weeks_5_days",
+      "dob": "2025-08-09",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-16:10",
+        "2025-10-14:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0632_dose_3_at_age_14_weeks_4_days",
+      "dob": "2025-08-08",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-19:10",
+        "2025-10-17:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0633_dose_3_at_age_14_weeks",
+      "dob": "2025-08-04",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-15:10",
+        "2025-10-13:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0634_dose_3_at_age_6_months",
+      "dob": "2025-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-07-10:10",
+        "2025-09-10:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0635_dose_3_at_age_3_yrs_11_5_months_old",
+      "dob": "2021-11-26",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-01-26:10",
+        "2022-03-26:10",
+        "2025-10-31:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0636_dose_3_at_age_4_years_5_days_is_valid_as_a_dose_but_child_will_need_another",
+      "dob": "2021-11-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-01-15:10",
+        "2022-03-15:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0637_1_and_2_at_4_years",
+      "dob": "2021-10-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0638_dose_3_at_4_years_4_days_but_not_six_months_after_dose_2_child_will_need_another",
+      "dob": "2021-11-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-11-14:10",
+        "2025-06-14:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0639_dose_3_at_4_years_4_days_and_6_months_since_dose_2_series_complete",
+      "dob": "2021-11-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-11-14:10",
+        "2025-04-14:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0640_dose_3_at_age_4_years_but_6_months_after_dose_2_dose_is_not_valid_child_will_need_another_dose",
+      "dob": "2021-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-11-10:10",
+        "2025-07-10:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0641_dose_3_at_4_years_0_months_and_6_mo_since_dose_2_series_complete",
+      "dob": "2021-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-01-10:10",
+        "2022-03-10:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0642_dose_4_at_age_18_months",
+      "dob": "2024-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-07-10:10",
+        "2024-09-10:10",
+        "2024-11-10:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0643_dose_4_at_age_4_yrs_5_days",
+      "dob": "2021-11-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-02-15:10",
+        "2022-06-15:10",
+        "2024-11-16:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0644_dose_4_at_age_4_years_4_days_series_complete",
+      "dob": "2021-11-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-02-14:10",
+        "2022-06-14:10",
+        "2024-11-15:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0645_dose_4_at_age_4_years_0_days_series_complete",
+      "dob": "2021-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-01-10:10",
+        "2022-03-10:10",
+        "2022-07-11:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0646_invalid_dose_1_age_as_first_of_others",
+      "dob": "2025-05-03",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-06-03:10",
+        "2025-09-03:10",
+        "2025-11-03:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0647_invalid_dose_2_age_in_midst_of_others",
+      "dob": "2025-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-06-17:10",
+        "2025-07-14:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0648_invalid_dose_3_age_in_midst_of_others_no_additional_dose_required_the_next_dose_was_at_age_4_and_6_months_since_previous_dose_series_complete",
+      "dob": "2021-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2021-12-22:10",
+        "2022-01-16:10",
+        "2022-02-11:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0649_dose_1_to_dose_2_interval_28_5_days",
+      "dob": "2025-08-18",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-18:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0650_dose_1_to_dose2_interval_28_4_days",
+      "dob": "2025-08-17",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-17:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0651_dose_1_to_dose_2_interval_28_days",
+      "dob": "2025-08-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0652_dose_2_to_dose_3_interval_28_5_days",
+      "dob": "2025-06-18",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-08-18:10",
+        "2025-10-18:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0653_dose_2_to_dose_3_interval_28_4_days",
+      "dob": "2025-08-04",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-13:10",
+        "2025-10-17:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0654_dose_2_to_dose_3_interval_28_days",
+      "dob": "2025-06-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-08-13:10",
+        "2025-10-13:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0655_dose_3_to_dose_4_interval_6_m_5_days",
+      "dob": "2021-10-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-10-10:10",
+        "2023-10-10:10",
+        "2025-05-10:10",
+        "2025-11-05:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0656_dose_3_to_dose_4_interval_6_months_4_days_series_complete",
+      "dob": "2021-11-06",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-11-06:10",
+        "2023-11-06:10",
+        "2025-05-10:10",
+        "2025-11-06:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0657_dose_3_to_dose_4_interval_6_months_series_complete",
+      "dob": "2021-11-02",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-11-02:10",
+        "2023-11-02:10",
+        "2025-05-06:10",
+        "2025-11-06:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0658_dose_1_at_age_6_weeks_5_days",
+      "dob": "2025-10-04",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0659_invalid_dose_1_to_dose_2_interval_in_midst_of_others",
+      "dob": "2025-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-07-10:10",
+        "2025-08-01:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0660_invalid_dose_3_interval_in_midst_of_others_makes_no_difference_in_forecasting_if_4_is_4_years_old_and_6_months_after_previous_dose_series_complete",
+      "dob": "2021-11-08",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-01-08:10",
+        "2022-03-08:10",
+        "2022-03-31:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0661_mixed_opv_ipv_where_3_is_after_age_4_and_6_months_after_previous_dose_patient_complete",
+      "dob": "2011-10-16",
+      "gender": "F",
+      "eval_date": "2016-10-16",
+      "doses": [
+        "2011-12-16:2",
+        "2012-02-16:2",
+        "2016-10-16:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0662_4_doses_of_mixed_opv_ipv_with_one_after_age_4_polio_series_complete",
+      "dob": "2011-04-13",
+      "gender": "F",
+      "eval_date": "2016-04-17",
+      "doses": [
+        "2011-06-13:2",
+        "2011-08-13:2",
+        "2014-04-13:10",
+        "2016-04-17:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0664_dose_1_given_as_kinrix_at_age_2_mos_off_label_but_valid_as_ipv_1",
+      "dob": "2025-09-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:130"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0665_dose_2_given_as_kinrix_at_age_4_mo_off_label_but_valid_as_ipv_2",
+      "dob": "2025-07-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-16:10",
+        "2025-11-10:130"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0666_dose_3_given_as_kinrix_at_age_6_mos_off_label_but_valid",
+      "dob": "2025-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-07-12:10",
+        "2025-09-14:10",
+        "2025-11-10:130"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0667_kinrix_at_12_months_old",
+      "dob": "2024-10-16",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-12-18:10",
+        "2025-02-20:10",
+        "2025-04-08:10",
+        "2025-11-10:130"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0668_kinrix_at_age_4_years_as_dose_4_polio_series_complete",
+      "dob": "2021-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-01-12:110",
+        "2022-03-10:110",
+        "2022-05-12:110",
+        "2025-11-10:130"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0669_dose_1_at_age_6_weeks_4_days",
+      "dob": "2025-10-03",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0670_kinrix_as_dose_4_at_age_4_years_5_days",
+      "dob": "2021-11-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-01-08:110",
+        "2022-03-04:110",
+        "2022-07-14:110",
+        "2025-11-10:130"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0671_kinrix_as_dose_4_at_age_4_years_4_days_polio_series_complete",
+      "dob": "2021-11-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-01-03:110",
+        "2022-03-03:110",
+        "2022-05-03:110",
+        "2025-11-10:130"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0672_dose_1_at_age_6_weeks",
+      "dob": "2025-09-29",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0673_dose_1_at_age_2_months",
+      "dob": "2025-09-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0674_dose_2_at_age_10_weeks_5_days",
+      "dob": "2025-09-06",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-14:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0675_dose_2_at_age_10_weeks_4_days",
+      "dob": "2025-09-05",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-17:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0676_newborn_forecasting",
+      "dob": "2025-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0677_2_pediarix_at_6_yrs_11_5_mo",
+      "dob": "2018-11-27",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2021-11-11:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0678_2_pediarix_at_7_yrs_1_at_less_than_12_mo",
+      "dob": "2018-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2019-02-10:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0679_2_pediarix_at_7_yrs_1_12_mo",
+      "dob": "2018-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2019-12-10:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0680_1_and_2_pediarix_at_7_yrs_with_28_day_interval_off_label",
+      "dob": "2018-10-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0681_3_pediarix_at_14_wks_5_days",
+      "dob": "2025-08-09",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-16:110",
+        "2025-10-14:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0682_3_pediarix_at_14_wks_4_days",
+      "dob": "2025-08-08",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-17:110",
+        "2025-10-15:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0683_3_pediarix_at_24_weeks_5_days",
+      "dob": "2025-05-31",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-07-12:110",
+        "2025-09-11:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0684_3_pediarix_at_24_weeks_4_days",
+      "dob": "2025-05-30",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-07-11:110",
+        "2025-09-10:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0685_3_pediarix_at_6_yrs_11_5_mo",
+      "dob": "2018-11-23",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2021-09-20:110",
+        "2022-12-23:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0686_4_pediarix_at_1_yr_5_days",
+      "dob": "2024-11-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-15:110",
+        "2025-03-15:110",
+        "2025-05-21:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0687_1_pediarix_at_6_wks_5_days",
+      "dob": "2025-10-04",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0688_4_pediarix_at_1_yr_4_days",
+      "dob": "2024-11-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-14:110",
+        "2025-04-14:110",
+        "2025-06-28:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0689_4_pediarix_at_3_yrs_11_5_mo",
+      "dob": "2021-11-27",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-01-27:110",
+        "2022-04-27:110",
+        "2022-07-27:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0690_4_pediarix_at_4_yrs",
+      "dob": "2021-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-03-13:110",
+        "2022-09-05:110",
+        "2024-01-12:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0691_5_pediarix_at_4_yrs_5_days",
+      "dob": "2021-11-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-01-15:110",
+        "2022-02-15:110",
+        "2022-06-16:110",
+        "2023-02-24:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0692_5_pediarix_at_4_yrs_4_days",
+      "dob": "2021-11-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-01-14:110",
+        "2022-02-14:110",
+        "2022-06-15:110",
+        "2023-02-23:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0693_5_pediarix_at_6_yrs_11_5_mo",
+      "dob": "2018-11-27",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2019-01-27:110",
+        "2019-03-27:110",
+        "2019-05-27:110",
+        "2019-12-27:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0694_5_pediarix_at_7_yrs_off_label",
+      "dob": "2018-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2019-02-10:110",
+        "2019-05-10:110",
+        "2019-08-10:110",
+        "2020-05-25:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0695_invalid_age_dose_1_as_first_of_others",
+      "dob": "2025-08-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-15:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0696_invalid_age_dose_2_in_midst_of_others",
+      "dob": "2025-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-06-17:110",
+        "2025-07-13:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0697_invalid_age_dose_3_in_midst_of_others",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-12-24:110",
+        "2025-01-19:110",
+        "2025-02-10:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0698_1_pediarix_at_6_wks_4_days",
+      "dob": "2025-10-03",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0699_dose_1_to_2_pediarix_interval_28_5_days",
+      "dob": "2025-08-16",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-18:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0700_dose_1_to_2_pediarix_interval_28_4_days",
+      "dob": "2025-08-17",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-17:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0701_dose_2_to_3_pediarix_interval_28_5_days",
+      "dob": "2025-06-16",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-08-16:110",
+        "2025-10-16:110",
+        "2025-11-08:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0702_dose_2_to_3_pediarix_interval_28_4_days",
+      "dob": "2025-06-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-08-15:110",
+        "2025-10-15:110",
+        "2025-11-08:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0704_dose_3_to_4_pediarix_interval_6m_4_days",
+      "dob": "2024-09-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-11-13:110",
+        "2025-01-13:110",
+        "2025-05-13:110",
+        "2025-11-09:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0707_invalid_dose_1_2_interval_in_midst_of_others",
+      "dob": "2025-07-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-10:110",
+        "2025-09-29:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0708_invalid_dose_2_3_interval_in_midst_of_others",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-10:110",
+        "2025-03-10:110",
+        "2025-04-02:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0709_1_pediarix_at_6_wks",
+      "dob": "2025-09-29",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0712_1_pediarix_at_6_yrs_11_5_mo",
+      "dob": "2018-11-26",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0713_1_pediarix_at_7_yrs",
+      "dob": "2018-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0714_2_pediarix_at_10_wks_5_days",
+      "dob": "2025-09-06",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-14:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0715_2_pediarix_at_10_wks_4_days",
+      "dob": "2025-09-05",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-15:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0716_2_pediarix_at_10_wks",
+      "dob": "2025-09-01",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-11:110",
+        "2025-11-10:110"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0717_newborn",
+      "dob": "2025-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0718_2_pentacel_at_6_yrs_11_5_mo_off_label_but_counts",
+      "dob": "2018-11-27",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2021-08-17:120",
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0719_pentacel_at_7_yrs_1_at_age_12_mo_off_label_use",
+      "dob": "2018-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2019-04-19:10",
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0720_2_pentacel_at_7_yrs_1_at_age_12_mo",
+      "dob": "2018-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2020-01-13:10",
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0721_3_pentacel_at_14_wks_5_days",
+      "dob": "2025-08-09",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-16:120",
+        "2025-10-14:120",
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0722_3_pentacel_at_14_wks_4_days",
+      "dob": "2025-08-08",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-15:120",
+        "2025-10-13:120",
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0723_3_pentacel_at_6_yrs_11_5_mo",
+      "dob": "2018-11-26",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2019-01-26:10",
+        "2019-03-26:10",
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0724_4_pentacel_at_1_yr_5_days",
+      "dob": "2024-11-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-15:120",
+        "2025-03-15:120",
+        "2025-05-15:120",
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0725_4_pentacel_at_1_yr_4_days",
+      "dob": "2024-11-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-14:120",
+        "2025-03-14:120",
+        "2025-05-14:120",
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0726_4_pentacel_age_12_mo",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-10:120",
+        "2025-03-10:120",
+        "2025-05-10:120",
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0727_4_pentacel_at_4_yrs",
+      "dob": "2021-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-03-19:120",
+        "2022-11-01:120",
+        "2025-05-10:120",
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0728_1_pentacel_at_6_wks_5_days",
+      "dob": "2025-10-04",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0729_5_pentacel_at_4_yrs",
+      "dob": "2021-10-20",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-09-20:120",
+        "2022-12-20:120",
+        "2023-03-20:120",
+        "2023-08-21:120",
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0730_4_pentacel_at_5_yrs_off_label",
+      "dob": "2020-11-08",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2021-03-08:120",
+        "2021-09-04:120",
+        "2021-11-06:120",
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0731_invalid_age_dose_1_as_first_of_others",
+      "dob": "2025-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-06-14:120",
+        "2025-09-10:120",
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0732_invalid_age_dose_2_in_midst_of_others",
+      "dob": "2024-11-08",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-12-16:120",
+        "2025-01-12:120",
+        "2025-03-29:120",
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0733_invalid_age_dose_3_in_midst_of_others",
+      "dob": "2024-10-04",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-11-11:120",
+        "2024-12-09:120",
+        "2025-01-05:120",
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0734_dose_1_to_2_pentacel_interval_28_5_days",
+      "dob": "2025-08-24",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-18:120",
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0735_dose_1_to_2_pentacel_interval_28_4_days",
+      "dob": "2025-08-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-17:120",
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0736_dose_2_to_3_pentacel_interval_28_5_days",
+      "dob": "2025-06-18",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-08-18:120",
+        "2025-10-18:120",
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0737_dose_2_to_3_pentacel_interval_28_4_days",
+      "dob": "2025-06-17",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-08-17:120",
+        "2025-10-17:120",
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0739_1_pentacel_at_6_wks_4_days",
+      "dob": "2025-10-03",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0740_dose_3_to_4_pentacel_interval_6m_4_days",
+      "dob": "2024-09-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-11-13:120",
+        "2025-03-13:120",
+        "2025-05-13:120",
+        "2025-11-09:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0743_invalid_dose_1_2_interval_in_midst_of_others",
+      "dob": "2025-05-20",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-07-20:120",
+        "2025-08-12:120",
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0744_invalid_dose_2_3_interval_in_midst_of_others",
+      "dob": "2024-11-07",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-07:120",
+        "2025-03-07:120",
+        "2025-03-28:120",
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0747_1_pentacel_at_6_wks",
+      "dob": "2025-09-29",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0748_1_pentacel_at_6_yrs_11_5_mo",
+      "dob": "2018-11-23",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0749_1_pentacel_at_7_yrs_off_label",
+      "dob": "2018-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0750_2_pentacel_at_10_wks_5_days",
+      "dob": "2025-09-06",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-14:120",
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0751_2_pentacel_at_10_wks_4_days",
+      "dob": "2025-09-05",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:120",
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2013_0752_2_pentacel_at_6_yrs_off_label",
+      "dob": "2019-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2020-11-10:120",
+        "2025-11-10:120"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2023_0022_patient_is_an_adult_who_has_been_administered_the_first_dose_of_the_polio_vaccine",
+      "dob": "1995-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2023_0023_patient_is_an_adult_who_has_been_administered_two_doses_of_the_polio_vaccine",
+      "dob": "1995-10-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2023_0024_patient_is_an_adult_who_has_been_administered_three_doses_of_the_polio_vaccine",
+      "dob": "1995-04-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-04-10:10",
+        "2025-05-08:10",
+        "2025-11-08:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2024_0049_patient_is_2_months_of_age_and_has_been_administered_a_dose_of_fipv_as_a_first_dose",
+      "dob": "2025-09-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:324"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2024_0050_patient_is_3_months_of_age_and_has_been_administered_2_doses_of_fipv_polio_vaccine",
+      "dob": "2025-07-27",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-27:324",
+        "2025-11-10:324"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2024_0051_patient_is_4_years_of_age_has_been_administered_one_dose_of_the_fipv_vaccine_and_4_doses_of_ipv_vaccine",
+      "dob": "2021-11-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-11-10:324",
+        "2022-12-08:10",
+        "2023-01-05:10",
+        "2023-02-02:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2024_0052_patient_is_5_years_of_age_and_has_been_administered_2_doses_of_fipv_vaccine_and_4_doses_of_ipv_vaccine",
+      "dob": "2020-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2021-11-10:324",
+        "2021-12-08:324",
+        "2022-01-05:10",
+        "2022-02-02:10",
+        "2022-03-02:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2024_0053_patient_is_14_weeks_old_and_has_been_administered_1_dose_of_fipv_vaccine_and_1_dose_of_ipv_vaccine",
+      "dob": "2025-08-04",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-15:324",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2024_0054_patient_is_19_months_of_age_has_been_administered_2_doses_of_fipv_vaccine_and_1_dose_of_ipv_vaccine",
+      "dob": "2024-04-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-11-10:324",
+        "2025-09-10:324",
+        "2025-10-08:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2024_0071_opv_bivalent_administered_after_april_2016",
+      "dob": "2015-09-13",
+      "gender": "F",
+      "eval_date": "2016-05-06",
+      "doses": [
+        "2016-02-06:2",
+        "2016-05-06:178"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2024_0074_fipv_dose_1_administered_at_6_weeks_5_days",
+      "dob": "2025-10-04",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:324"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    },
+    {
+      "name": "cdsi_2024_0086_patient_is_5_years_of_age_and_has_been_administered_2_doses_of_fipv_vaccine_and_3_doses_of_ipv_vaccine",
+      "dob": "2020-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2021-11-10:324",
+        "2021-12-08:324",
+        "2022-01-05:10",
+        "2022-02-02:10",
+        "2025-11-10:10"
+      ],
+      "group": "POLIO",
+      "focus": "400"
+    }
+  ]
+}

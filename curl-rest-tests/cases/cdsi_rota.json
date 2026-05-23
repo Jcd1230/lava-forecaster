@@ -1,0 +1,382 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "cdsi_2013_0753_newborn_forecast",
+      "dob": "2025-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0754_dose_3_rotateq_at_age_14_weeks",
+      "dob": "2025-08-04",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-15:116",
+        "2025-10-13:116",
+        "2025-11-10:116"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0755_dose_3_rotateq_at_age_6_months",
+      "dob": "2025-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-07-10:116",
+        "2025-09-10:116",
+        "2025-11-10:116"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0756_dose_1_to_dose_2_rotateq_interval_28_5_days",
+      "dob": "2025-08-30",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-18:116",
+        "2025-11-10:116"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0757_dose_1_to_dose_2_rotateq_interval_28_4_days",
+      "dob": "2025-08-29",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-17:116",
+        "2025-11-10:116"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0758_dose_1_to_dose_2_rotateq_interval_28_days",
+      "dob": "2025-08-25",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:116",
+        "2025-11-10:116"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0759_dose_2_to_dose_3_rotateq_interval_28_5_days",
+      "dob": "2025-07-17",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-12:116",
+        "2025-10-18:116",
+        "2025-11-10:116"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0760_dose_2_to_dose_3_rotateq_interval_28_4_days",
+      "dob": "2025-07-16",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-11:116",
+        "2025-10-17:116",
+        "2025-11-10:116"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0761_dose_2_to_dose_3_rotateq_interval_28_days",
+      "dob": "2025-07-12",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-07:116",
+        "2025-10-13:116",
+        "2025-11-10:116"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0762_dose_1_rotarix_at_age_6_weeks_5_days",
+      "dob": "2025-10-04",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:119"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0763_dose_1_rotarix_at_age_6_weeks_4_days",
+      "dob": "2025-10-03",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:119"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0764_dose_1_rotateq_at_age_6_weeks_5_days",
+      "dob": "2025-10-04",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:116"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0765_dose_1_rotarix_at_age_6_weeks",
+      "dob": "2025-09-29",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:119"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0766_dose_2_rotarix_at_age_10_weeks_5_days",
+      "dob": "2025-09-06",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-16:119",
+        "2025-11-10:119"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0767_dose_2_rotarix_at_age_10_weeks_4_days",
+      "dob": "2025-09-05",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-17:119",
+        "2025-11-10:119"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0768_dose_2_rotarix_at_age_10_weeks",
+      "dob": "2025-09-01",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:119",
+        "2025-11-10:119"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0769_dose_1_to_dose_2_rotarix_interval_28_5_days",
+      "dob": "2025-08-18",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-18:119",
+        "2025-11-10:119"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0770_dose_1_to_dose_2_rotarix_interval_28_4_days",
+      "dob": "2025-08-17",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-17:119",
+        "2025-11-10:119"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0771_dose_1_to_dose_2_rotarix_interval_28_days",
+      "dob": "2025-08-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:119",
+        "2025-11-10:119"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0772_15_weeks_old_with_no_rota_vax_no_forecast_for_rotavirus",
+      "dob": "2025-07-28",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0773_dose_1_15_weeks_old",
+      "dob": "2025-07-24",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:119"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0774_8_months_old_with_only_one_rota_vax",
+      "dob": "2025-03-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-06-10:119"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0775_dose_1_rotateq_at_age_6_weeks_4_days",
+      "dob": "2025-10-03",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:116"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0776_rotateq_at_2_months_rotarix_at_4_mo",
+      "dob": "2025-07-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-10:116",
+        "2025-11-10:119"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0777_rotatrix_at_2_mo_rotateq_at_4_mo",
+      "dob": "2025-07-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-10:119",
+        "2025-11-10:116"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0778_unspecified_rotavirus_at_2_and_4_mo",
+      "dob": "2025-07-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-10:122",
+        "2025-11-10:122"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0781_dose_1_rotateq_at_age_6_weeks",
+      "dob": "2025-09-29",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:116"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0782_dose_2_rotateq_at_age_10_weeks_5_days",
+      "dob": "2025-09-06",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-16:116",
+        "2025-11-10:116"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0783_dose_2_rotateq_at_age_10_weeks_4_days",
+      "dob": "2025-09-05",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-17:116",
+        "2025-11-10:116"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0784_dose_2_rotateq_at_age_10_weeks",
+      "dob": "2025-09-01",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:116",
+        "2025-11-10:116"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0785_dose_3_rotateq_at_age_14_weeks_5_days",
+      "dob": "2025-08-09",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-17:116",
+        "2025-10-15:116",
+        "2025-11-10:116"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "cdsi_2013_0786_dose_3_rotateq_at_age_14_weeks_4_days",
+      "dob": "2025-08-08",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-19:116",
+        "2025-10-17:116",
+        "2025-11-10:116"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    }
+  ]
+}

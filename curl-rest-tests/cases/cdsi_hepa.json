@@ -1,0 +1,199 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "cdsi_2013_0185_infant_forecasting",
+      "dob": "2025-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "HEP_A",
+      "focus": "810"
+    },
+    {
+      "name": "cdsi_2013_0186_dose_1_to_dose_2_interval_6_months_series_complete",
+      "dob": "2024-03-06",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-05-06:85",
+        "2025-11-06:85"
+      ],
+      "group": "HEP_A",
+      "focus": "810"
+    },
+    {
+      "name": "cdsi_2013_0188_adult_dose_mistakenly_given_to_a_child_counts_as_valid",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:52"
+      ],
+      "group": "HEP_A",
+      "focus": "810"
+    },
+    {
+      "name": "cdsi_2013_0189_dose_1_at_age_12_months_5_days",
+      "dob": "2024-11-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:85"
+      ],
+      "group": "HEP_A",
+      "focus": "810"
+    },
+    {
+      "name": "cdsi_2013_0190_dose_1_at_age_12_months_4_days",
+      "dob": "2024-11-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:85"
+      ],
+      "group": "HEP_A",
+      "focus": "810"
+    },
+    {
+      "name": "cdsi_2013_0191_dose_1_at_age_12_months",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:85"
+      ],
+      "group": "HEP_A",
+      "focus": "810"
+    },
+    {
+      "name": "cdsi_2013_0192_dose_1_to_dose_2_interval_6_mo_5_days_invalid",
+      "dob": "2024-05-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-05-15:85",
+        "2025-11-10:85"
+      ],
+      "group": "HEP_A",
+      "focus": "810"
+    },
+    {
+      "name": "cdsi_2013_0193_dose_1_to_dose_2_interval_6_mo_4_days_series_complete",
+      "dob": "2021-05-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-05-14:85",
+        "2025-11-10:85"
+      ],
+      "group": "HEP_A",
+      "focus": "810"
+    },
+    {
+      "name": "cdsi_2013_0194_dose_2_at_18_months_series_complete",
+      "dob": "2024-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-05-10:85",
+        "2025-11-10:85"
+      ],
+      "group": "HEP_A",
+      "focus": "810"
+    },
+    {
+      "name": "cdsi_2013_0196_dose_1_to_dose_2_interval_6_mo_5_days",
+      "dob": "2024-03-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-05-10:85",
+        "2025-11-05:85"
+      ],
+      "group": "HEP_A",
+      "focus": "810"
+    },
+    {
+      "name": "cdsi_2013_0197_dose_1_to_dose_2_interval_6_months_4_days_series_complete",
+      "dob": "2024-03-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-05-10:85",
+        "2025-11-06:85"
+      ],
+      "group": "HEP_A",
+      "focus": "810"
+    },
+    {
+      "name": "cdsi_2019_0010_no_doses_of_hep_a_vaccine_at_age_18_years",
+      "dob": "2007-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "HEP_A",
+      "focus": "810"
+    },
+    {
+      "name": "cdsi_2019_0011_dose_1_of_hep_a_at_age_18_years",
+      "dob": "2007-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:52"
+      ],
+      "group": "HEP_A",
+      "focus": "810"
+    },
+    {
+      "name": "cdsi_2019_0012_dose_2_of_hep_a_at_6_months",
+      "dob": "2007-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-05-10:52",
+        "2025-11-10:52"
+      ],
+      "group": "HEP_A",
+      "focus": "810"
+    },
+    {
+      "name": "cdsi_2019_0013_dose_2_of_hep_a_at_6_months_4_days",
+      "dob": "2007-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-05-10:52",
+        "2025-11-06:52"
+      ],
+      "group": "HEP_A",
+      "focus": "810"
+    },
+    {
+      "name": "cdsi_2019_0014_dose_2_of_hep_a_at_6_months_5_days",
+      "dob": "2007-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-05-10:52",
+        "2025-11-05:52"
+      ],
+      "group": "HEP_A",
+      "focus": "810"
+    },
+    {
+      "name": "cdsi_2020_0001_dose_3_administered_at_least_6_months_after_1st_valid_dose",
+      "dob": "2024-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-05-10:85",
+        "2025-10-10:85",
+        "2025-11-10:85"
+      ],
+      "group": "HEP_A",
+      "focus": "810"
+    }
+  ]
+}

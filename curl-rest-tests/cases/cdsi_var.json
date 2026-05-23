@@ -1,0 +1,491 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "cdsi_2013_0789_1_at_15_months",
+      "dob": "2024-08-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0795_no_doses_of_varicella_current_age_13y_1d",
+      "dob": "2012-11-11",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0798_1_at_1_year",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0803_1_at_12_months_5_days",
+      "dob": "2024-11-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0804_var_1_at_12_months_4_days",
+      "dob": "2024-11-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0806_newborn_forecasting",
+      "dob": "2025-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0807_2_at_age_13_years_28_days",
+      "dob": "2012-10-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:21",
+        "2025-11-10:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0808_dose_1_to_dose_2_interval_28_1_days_in_child_13_years",
+      "dob": "2024-10-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-14:21",
+        "2025-11-10:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0809_dose_1_to_dose_2_interval_28_days_in_child_13_yrs_old",
+      "dob": "2016-08-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:21",
+        "2025-11-10:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0810_dose_1_to_dose_2_interval_28_5_days_in_child_13_yrs_old",
+      "dob": "2012-07-18",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-18:21",
+        "2025-11-10:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0811_dose_1_to_dose_2_interval_28_4_days_in_child_13_years_old",
+      "dob": "2012-07-17",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-17:21",
+        "2025-11-10:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0812_dose_1_to_dose_2_interval_28_days_in_child_13_years_old",
+      "dob": "2012-05-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:21",
+        "2025-11-10:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0813_vz_and_mmr_given_on_same_day_at_age_12_months",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:3",
+        "2025-11-10:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0814_doses_1_and_2_of_vz_and_mmr_given_at_ages_12_months_and_4_weeks_later",
+      "dob": "2024-10-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:3",
+        "2025-10-13:21",
+        "2025-11-10:3",
+        "2025-11-10:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0815_mmr_to_vz_interval_28_1_day_invalid_vz",
+      "dob": "2024-10-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-14:3",
+        "2025-11-10:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0816_mmr_given_at_age_12_mo_vz_at_age_12_mo_28_days",
+      "dob": "2024-10-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:3",
+        "2025-11-10:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0817_1_at_age_12_mo_5_days",
+      "dob": "2024-11-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0818_1_mmrv_at_12_m_5_days",
+      "dob": "2024-11-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:94"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0819_1_mmrv_at_12_m_4_days",
+      "dob": "2024-11-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:94"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0820_1_mmrv_at_12_months",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:94"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0823_dose_1_to_dose_2_mmrv_interval_28_1_days",
+      "dob": "2021-09-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-05:94",
+        "2025-11-01:94"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0824_mmr_to_mmrv_interval_28_days_valid_vz_1",
+      "dob": "2024-10-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:3",
+        "2025-11-10:94"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0825_mmr_to_mmrv_interval_27_days_invalid_as_vz_1",
+      "dob": "2024-10-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-14:3",
+        "2025-11-10:94"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0826_dose_1_to_dose_2_mmrv_interval_12_weeks_in_child_13_years_old",
+      "dob": "2022-02-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-08-10:94",
+        "2025-11-02:94"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0827_dose_1_to_dose_2_interval_of_4_wks_between_vz_and_mmrv_in_any_age_child_both_valid",
+      "dob": "2024-09-29",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-09:21",
+        "2025-11-06:94"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0829_28_day_interval_between_invalid_vz_and_subsequent_mmrv_valid_vz",
+      "dob": "2024-10-18",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:21",
+        "2025-11-10:94"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0831_interval_of_24_days_between_an_invalid_vz_and_a_subsequent_mmrv_not_valid_vz",
+      "dob": "2024-10-22",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-17:21",
+        "2025-11-10:94"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0832_laiv_given_at_age_3_years_vz_at_age_3_years_27_days",
+      "dob": "2022-10-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-14:149",
+        "2025-11-10:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0833_laiv_given_at_age_3_years_vz_at_age_3_years_28_days",
+      "dob": "2022-10-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:149",
+        "2025-11-10:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0840_1_mmr_at_12_5_mo_vz_not_given_need_28_day_interval_for_vz",
+      "dob": "2024-10-25",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-09:3"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0842_2_at_age_12_mo_4_weeks",
+      "dob": "2024-10-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-11:21",
+        "2025-11-08:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0843_2_at_age_15_mo",
+      "dob": "2024-08-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-08-10:21",
+        "2025-11-10:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2013_0844_1_at_age_13_years_old",
+      "dob": "2012-11-07",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2015_0001_varicella_zoster_dose_in_lieu_of_first_dose_of_varicella_for_adult_patient",
+      "dob": "1989-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:121"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2015_0002_varicella_adult_patient_has_received_2_doses_of_the_varicella_vaccine_at_least_4_weeks_apart",
+      "dob": "2002-10-06",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-06:21",
+        "2025-11-10:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2019_0023_adult_patient_with_no_doses_of_the_varicella_vaccine",
+      "dob": "2003-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2019_0024_adult_patient_with_dose_2_at_4_weeks",
+      "dob": "1994-10-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:21",
+        "2025-11-10:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2019_0025_adult_patient_with_dose_2_at_4_weeks_4_days",
+      "dob": "1994-10-17",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-17:21",
+        "2025-11-10:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2019_0026_adult_patient_with_dose_2_at_4_weeks_5_days",
+      "dob": "1994-10-18",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-18:21",
+        "2025-11-10:21"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2025_0033_dose_1_of_varicella_at_4_years_dose_2_mmrv_at_4_weeks",
+      "dob": "2021-10-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:21",
+        "2025-11-10:94"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2025_0034_dose_1_of_mmrv_at_4_years_and_dose_2_mmrv_at_interval_of_4_weeks",
+      "dob": "2021-10-13",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:94",
+        "2025-11-10:94"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    },
+    {
+      "name": "cdsi_2025_0035_dose_1_of_varicella_at_12_months_and_dose_2_mmrv_at_interval_of_4_years",
+      "dob": "2020-11-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2021-11-10:21",
+        "2025-11-10:94"
+      ],
+      "group": "VARICELLA",
+      "focus": "600"
+    }
+  ]
+}

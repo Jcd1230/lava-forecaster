@@ -1,0 +1,308 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "cdsi_2024_0032_patient_is_20_years_of_age_with_no_doses_of_the_menb_vaccine",
+      "dob": "2005-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2024_0033_patient_is_20_years_of_age_with_one_dose_of_the_menb_bexsero_vaccine",
+      "dob": "2005-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:163"
+      ],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2024_0034_patient_is_20_years_of_age_with_two_doses_of_the_menb_bexsero_vaccine_4_weeks_a_part",
+      "dob": "2005-10-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:163",
+        "2025-11-10:163"
+      ],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2024_0035_patient_is_18_years_of_age_with_two_doses_of_the_menb_bexsero_vaccine_4_weeks_4_days_a_part",
+      "dob": "2007-10-13",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:163",
+        "2025-11-06:163"
+      ],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2024_0036_patient_is_16_years_of_age_with_two_doses_of_the_menb_bexsero_vaccine_4_weeks_5_days_apart",
+      "dob": "2009-10-18",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-18:163",
+        "2025-11-10:163"
+      ],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2024_0037_patient_is_19_years_of_age_with_a_dose_of_the_men_b_vaccine_trumemba",
+      "dob": "2006-11-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:162"
+      ],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2024_0038_patient_is_19_years_of_age_with_a_second_dose_of_the_men_b_vaccine_trumemba",
+      "dob": "2006-05-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-05-10:162",
+        "2025-11-10:162"
+      ],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2024_0039_patient_is_19_years_of_age_with_a_second_dose_of_the_men_b_vaccine_trumemba_at_an_interval_6_months_4_days",
+      "dob": "2006-05-14",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-05-14:162",
+        "2025-11-10:162"
+      ],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2024_0040_patient_is_17_years_of_age_with_a_second_dose_of_the_men_b_vaccine_trumemba_at_an_interval_6_months_5_days",
+      "dob": "2008-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-05-10:162",
+        "2025-11-05:162"
+      ],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2024_0041_patient_is_23_years_of_age_with_a_dose_of_menb_penbraya_vaccine",
+      "dob": "2002-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:316"
+      ],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2024_0042_patient_is_23_years_of_age_with_a_two_doses_of_menb_penbraya_vaccine",
+      "dob": "2002-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-05-10:316",
+        "2025-11-10:316"
+      ],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2024_0043_patient_is_21_years_of_age_with_two_doses_of_the_menb_vaccine_trumenba_and_penbraya",
+      "dob": "2004-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-05-10:162",
+        "2025-11-10:316"
+      ],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2024_0044_patient_is_24_years_of_age_and_has_not_been_administered_a_dose_of_the_men_b_vaccine",
+      "dob": "2001-11-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2024_0068_patient_is_15_years_of_age_and_has_been_administered_an_unspecified_dose_of_the_men_b_vaccine",
+      "dob": "2010-04-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:164"
+      ],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2024_0069_patient_is_17_years_of_age_and_has_been_administered_an_unspecified_dose_of_the_men_b_vaccine",
+      "dob": "2008-09-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:164"
+      ],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2024_0075_patient_is_18_years_of_age_with_two_doses_of_the_menb_bexsero_vaccine_4_weeks_4_days_a_part",
+      "dob": "2006-07-11",
+      "gender": "M",
+      "eval_date": "2024-08-15",
+      "doses": [
+        "2024-07-22:163",
+        "2024-08-15:163"
+      ],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2024_0076_patient_is_16_years_of_age_with_two_doses_of_the_menb_bexsero_vaccine_4_weeks_a_part",
+      "dob": "2008-01-10",
+      "gender": "M",
+      "eval_date": "2024-03-12",
+      "doses": [
+        "2024-02-13:163",
+        "2024-03-12:163"
+      ],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2024_0077_patient_is_17_years_of_age_and_has_been_administered_three_doses_of_the_meningococcal_vaccine_bexsero",
+      "dob": "2008-11-06",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-05-06:163",
+        "2025-07-01:163",
+        "2025-11-06:163"
+      ],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2024_0078_patient_is_17_years_of_age_and_has_been_administered_a_second_dose_of_the_meningococcal_vaccine_bexsero_at_6_months",
+      "dob": "2008-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-05-10:163",
+        "2025-11-10:163"
+      ],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2024_0079_patient_is_22_years_of_age_and_has_been_administered_a_second_dose_of_the_men_b_vaccine_at_6_months_5_days",
+      "dob": "2003-05-15",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-05-15:163",
+        "2025-11-10:163"
+      ],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2024_0080_patient_is_21_years_of_age_and_has_been_administered_three_doses_of_the_meningococcal_vaccine_trumemba",
+      "dob": "2004-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-05-10:162",
+        "2025-06-07:162",
+        "2025-11-10:162"
+      ],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2024_0081_patient_is_16_years_of_age_and_has_been_administered_one_dose_of_bexsero_and_one_dose_of_the_trumemba_menb_vaccine",
+      "dob": "2009-05-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-05-10:163",
+        "2025-11-10:162"
+      ],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2025_0011_patient_is_18_years_and_has_been_administered_a_dose_of_the_menb_penmenvy_vaccine",
+      "dob": "2007-10-04",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:328"
+      ],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2025_0012_patient_is_22_years_and_has_been_administered_two_doses_of_the_menb_bexsero_penmenvy_vaccine_at_an_interval_of_6_months",
+      "dob": "2003-04-15",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-05-07:163",
+        "2025-11-07:328"
+      ],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2025_0013_patient_is_23_years_and_has_been_administered_three_doses_of_the_menb_2_bexsero_penmenvy_vaccine",
+      "dob": "2002-04-15",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-05-07:163",
+        "2025-06-04:163",
+        "2025-11-07:328"
+      ],
+      "group": "MENB",
+      "focus": "835"
+    },
+    {
+      "name": "cdsi_2025_0014_patient_is_23_years_and_has_been_administered_a_second_dose_of_the_menb_penmenvy_vaccine_at_an_interval_of_4_weeks_5_days",
+      "dob": "2002-10-18",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-18:163",
+        "2025-11-10:328"
+      ],
+      "group": "MENB",
+      "focus": "835"
+    }
+  ]
+}

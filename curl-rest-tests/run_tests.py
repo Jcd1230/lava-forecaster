@@ -709,6 +709,7 @@ def main():
     parser.add_argument("--case", default=None, help="Name of a single test case to run")
     parser.add_argument("--compare", action="store_true", help="Compare outputs of Java and Rust PoC")
     parser.add_argument("--record", action="store_true", help="Record Java responses as expected outputs")
+    parser.add_argument("--cdsi", action="store_true", help="Run only CDSi test cases (excluding standard test cases)")
     parser.add_argument("--verbose", "-v", action="store_true", help="Show detailed output for passing tests")
     parser.add_argument("--quiet", "-q", action="store_true", help="Deprecated (quiet mode is now default)")
     args = parser.parse_args()
@@ -718,7 +719,11 @@ def main():
     
     groups_to_run = []
     if args.group.upper() == 'ALL':
-        groups_to_run = [f[:-5] for f in os.listdir(CASES_DIR) if f.endswith(".json") and not f.endswith(".expected.json")]
+        all_files = [f[:-5] for f in os.listdir(CASES_DIR) if f.endswith(".json") and not f.endswith(".expected.json")]
+        if args.cdsi:
+            groups_to_run = [g for g in all_files if g.startswith("cdsi_")]
+        else:
+            groups_to_run = [g for g in all_files if not g.startswith("cdsi_")]
     else:
         groups_to_run = [args.group.lower()]
         

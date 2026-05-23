@@ -1,0 +1,147 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "cdsi_2023_0020_patient_is_60_years_of_age_and_has_been_administered_a_rsv_arexvy_vaccine_dose",
+      "dob": "1965-10-07",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:303"
+      ],
+      "group": "RSV",
+      "focus": "875"
+    },
+    {
+      "name": "cdsi_2023_0028_patient_is_a_newborn_infant_and_hasn_t_been_administered_any_doses_of_the_rsv_vaccine",
+      "dob": "2025-08-21",
+      "gender": "M",
+      "eval_date": "2025-08-21",
+      "doses": [],
+      "group": "RSV",
+      "focus": "875"
+    },
+    {
+      "name": "cdsi_2023_0029_patient_is_a_newborn_and_has_received_a_dose_of_the_rsv_beyfortus_vaccine",
+      "dob": "2025-08-10",
+      "gender": "F",
+      "eval_date": "2025-10-02",
+      "doses": [
+        "2025-10-02:306"
+      ],
+      "group": "RSV",
+      "focus": "875"
+    },
+    {
+      "name": "cdsi_2023_0031_patient_is_an_infant_born_in_april_with_an_assessment_date_in_october_and_hasn_t_received_a_rsv_vaccine",
+      "dob": "2025-04-23",
+      "gender": "M",
+      "eval_date": "2025-10-01",
+      "doses": [],
+      "group": "RSV",
+      "focus": "875"
+    },
+    {
+      "name": "cdsi_2023_0032_patient_is_an_infant_born_in_june_with_an_assessment_date_in_november_and_hasn_t_received_a_rsv_vaccine",
+      "dob": "2025-06-01",
+      "gender": "F",
+      "eval_date": "2025-11-01",
+      "doses": [],
+      "group": "RSV",
+      "focus": "875"
+    },
+    {
+      "name": "cdsi_2023_0033_patient_is_an_infant_born_in_november_with_an_assessment_date_in_december_and_hasn_t_received_a_rsv_vaccine",
+      "dob": "2025-11-07",
+      "gender": "F",
+      "eval_date": "2025-12-01",
+      "doses": [],
+      "group": "RSV",
+      "focus": "875"
+    },
+    {
+      "name": "cdsi_2023_0034_patient_is_an_infant_born_in_april_with_an_assessment_date_in_december_and_hasn_t_received_a_rsv_vaccine",
+      "dob": "2025-04-01",
+      "gender": "M",
+      "eval_date": "2025-12-01",
+      "doses": [],
+      "group": "RSV",
+      "focus": "875"
+    },
+    {
+      "name": "cdsi_2024_0012_patient_is_52_years_of_age_and_has_been_administered_a_rsv_arexvy_vaccine_dose",
+      "dob": "1973-10-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:303"
+      ],
+      "group": "RSV",
+      "focus": "875"
+    },
+    {
+      "name": "cdsi_2024_0055_patient_is_almost_75_years_of_age_and_hasn_t_been_administered_any_doses_of_the_rsv_vaccine",
+      "dob": "1950-12-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "RSV",
+      "focus": "875"
+    },
+    {
+      "name": "cdsi_2024_0056_patient_is_75_years_of_age_and_has_been_administered_a_rsv_arexvy_vaccine_dose",
+      "dob": "1950-10-07",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:303"
+      ],
+      "group": "RSV",
+      "focus": "875"
+    },
+    {
+      "name": "cdsi_2024_0057_patient_is_80_years_of_age_and_has_been_administered_a_rsv_mresvia_vaccine_dose",
+      "dob": "1945-10-27",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:326"
+      ],
+      "group": "RSV",
+      "focus": "875"
+    },
+    {
+      "name": "cdsi_2025_0008_patient_is_a_one_month_old_infant_who_has_been_administered_a_dose_of_rsv_clesrovimab_vaccine",
+      "dob": "2025-10-02",
+      "gender": "F",
+      "eval_date": "2025-11-02",
+      "doses": [
+        "2025-11-02:332"
+      ],
+      "group": "RSV",
+      "focus": "875"
+    },
+    {
+      "name": "cdsi_2025_0009_patient_is_49_years_of_age_and_has_been_administered_a_dose_of_the_rsv_abrysvo_vaccine",
+      "dob": "1976-06-30",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:305"
+      ],
+      "group": "RSV",
+      "focus": "875"
+    },
+    {
+      "name": "cdsi_2025_0010_patient_is_an_infant_who_has_been_administered_a_dose_of_abrysvo_at_1_month_of_age",
+      "dob": "2025-11-01",
+      "gender": "M",
+      "eval_date": "2025-12-01",
+      "doses": [
+        "2025-12-01:305"
+      ],
+      "group": "RSV",
+      "focus": "875"
+    }
+  ]
+}

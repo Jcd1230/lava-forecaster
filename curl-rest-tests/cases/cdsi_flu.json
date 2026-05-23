@@ -1,0 +1,215 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "cdsi_2013_0167_newborn",
+      "dob": "2025-08-01",
+      "gender": "F",
+      "eval_date": "2025-08-01",
+      "doses": [],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "cdsi_2013_0168_1_to_2_interval_28_days",
+      "dob": "2024-05-01",
+      "gender": "F",
+      "eval_date": "2025-08-01",
+      "doses": [
+        "2024-12-01:88",
+        "2024-12-29:88"
+      ],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "cdsi_2013_0169_child_under_9_needs_two_in_first_season",
+      "dob": "2018-09-01",
+      "gender": "F",
+      "eval_date": "2025-09-01",
+      "doses": [
+        "2025-09-01:140"
+      ],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "cdsi_2013_0170_child_under_9_received_only_one_in_first_season",
+      "dob": "2019-04-04",
+      "gender": "F",
+      "eval_date": "2025-10-15",
+      "doses": [
+        "2025-10-15:88"
+      ],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "cdsi_2013_0171_child_under_9_received_two_in_first_season",
+      "dob": "2019-05-10",
+      "gender": "F",
+      "eval_date": "2025-09-04",
+      "doses": [
+        "2025-08-01:88",
+        "2025-09-04:88"
+      ],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "cdsi_2013_0172_invalid_dose_1st_season",
+      "dob": "2025-05-01",
+      "gender": "F",
+      "eval_date": "2025-09-01",
+      "doses": [
+        "2025-09-01:140"
+      ],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "cdsi_2013_0178_1_at_6_mo_4_days",
+      "dob": "2025-04-01",
+      "gender": "F",
+      "eval_date": "2025-09-27",
+      "doses": [
+        "2025-09-27:88"
+      ],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "cdsi_2013_0179_1_at_6_mo",
+      "dob": "2025-04-01",
+      "gender": "F",
+      "eval_date": "2025-10-01",
+      "doses": [
+        "2025-10-01:88"
+      ],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "cdsi_2013_0183_1_to_2_interval_23_days",
+      "dob": "2025-02-01",
+      "gender": "F",
+      "eval_date": "2025-09-24",
+      "doses": [
+        "2025-09-01:88",
+        "2025-09-24:88"
+      ],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "cdsi_2013_0184_1_to_2_interval_24_days",
+      "dob": "2025-01-09",
+      "gender": "F",
+      "eval_date": "2025-09-25",
+      "doses": [
+        "2025-09-01:88",
+        "2025-09-25:88"
+      ],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "cdsi_2016_0012_child_under_9_received_one_in_previous_season_and_one_in_current_season",
+      "dob": "2024-06-01",
+      "gender": "M",
+      "eval_date": "2025-09-01",
+      "doses": [
+        "2024-12-01:88",
+        "2025-09-01:88"
+      ],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "cdsi_2018_0024_patient_9_years_or_older_with_no_current_seasonal_dose",
+      "dob": "2015-08-10",
+      "gender": "M",
+      "eval_date": "2025-11-27",
+      "doses": [],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "cdsi_2018_0025_patient_9_years_or_older_with_one_current_seasonal_dose",
+      "dob": "2016-08-10",
+      "gender": "M",
+      "eval_date": "2025-09-10",
+      "doses": [
+        "2025-09-10:88"
+      ],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "cdsi_2018_0026_child_under_9_years_with_dose_in_current_season_and_two_doses_in_previous_different_seasons",
+      "dob": "2022-03-06",
+      "gender": "M",
+      "eval_date": "2025-09-04",
+      "doses": [
+        "2022-09-15:88",
+        "2022-10-13:88",
+        "2025-09-04:88"
+      ],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "cdsi_2019_0004_child_received_first_dose_at_9_years_series_complete",
+      "dob": "2016-08-10",
+      "gender": "M",
+      "eval_date": "2025-08-18",
+      "doses": [
+        "2025-08-18:88"
+      ],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "cdsi_2019_0005_child_entered_season_at_8_years_of_age_received_dose_before_9_forecast_another_dose",
+      "dob": "2016-09-01",
+      "gender": "M",
+      "eval_date": "2025-09-01",
+      "doses": [
+        "2025-08-31:88"
+      ],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "cdsi_2019_0015_adult_with_no_previous_dose_of_the_influenza_vaccine",
+      "dob": "1988-09-01",
+      "gender": "M",
+      "eval_date": "2025-09-01",
+      "doses": [],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "cdsi_2019_0016_adult_with_a_dose_of_the_influenza_vaccine",
+      "dob": "1988-09-01",
+      "gender": "M",
+      "eval_date": "2025-09-01",
+      "doses": [
+        "2025-09-01:140"
+      ],
+      "group": "INFLUENZA",
+      "focus": "800"
+    },
+    {
+      "name": "cdsi_2025_0020_adult_with_a_self_administered_dose_of_the_flumist_vaccine",
+      "dob": "1997-09-12",
+      "gender": "F",
+      "eval_date": "2025-09-26",
+      "doses": [
+        "2025-09-26:333"
+      ],
+      "group": "INFLUENZA",
+      "focus": "800"
+    }
+  ]
+}

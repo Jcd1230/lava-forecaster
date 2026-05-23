@@ -1,0 +1,966 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "cdsi_2013_0575_newborn_testing",
+      "dob": "2025-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0576_dose_1_pcv_15_at_age_18_months",
+      "dob": "2024-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:215"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0577_dose_1_of_pcv_7_at_age_24_months_need_one_dose_pcv_13",
+      "dob": "2008-03-01",
+      "gender": "F",
+      "eval_date": "2010-03-01",
+      "doses": [
+        "2010-03-01:100"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0578_dose_1_of_pcv_20_at_age_24_months_series_complete",
+      "dob": "2023-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0579_dose_2_pcv_20_at_age_10_weeks_5_days",
+      "dob": "2025-09-06",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-14:215",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0580_dose_2_pcv_at_age_10_weeks_4_days",
+      "dob": "2025-09-05",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-14:216",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0581_dose_2_pcv_at_age_10_weeks",
+      "dob": "2025-09-01",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:216",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0582_dose_2_pcv_20_at_age_4_months",
+      "dob": "2025-07-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-10:216",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0583_dose_1_pcv_15_at_age_7_months_dose_2_at_age_8_mos_and_current_age_12_mos",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-06-10:215",
+        "2025-07-10:215"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0584_dose_1_pcv_20_at_12_mo_dose_2_at_1_yr_8_wks_5_days",
+      "dob": "2024-09-20",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-20:216",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0585_dose_1_pcv_15_at_age_12_mos_2_at_1_yr_8_wks_4_days",
+      "dob": "2024-09-19",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-19:215",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0587_dose_1_pcv_20_at_age_12_months_2_at_age_14_mos_series_complete",
+      "dob": "2024-09-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-10:216",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0588_dose_1_pcv_15_at_24_mo_5_days_valid_but_child_needs_another",
+      "dob": "2023-11-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:215"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0589_dose_1_pcv_20_at_24_m_4_days_series_complete",
+      "dob": "2023-11-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0590_dose_3_pcv_20_at_age_14_weeks_5_days",
+      "dob": "2025-08-09",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-17:215",
+        "2025-10-15:215",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0591_dose_3_pcv_20_at_age_14_weeks_4_days",
+      "dob": "2025-08-08",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-16:216",
+        "2025-10-14:216",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0592_dose_3_pcv_15_at_age_14_weeks",
+      "dob": "2025-08-04",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-15:215",
+        "2025-10-13:215",
+        "2025-11-10:215"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0593_dose_3_pcv_20_at_6_mo",
+      "dob": "2025-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-07-10:215",
+        "2025-09-10:215",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0594_mixed_vaccines_dose_1_pcv_7_at_6_mo_2_pcv_13_at_8_mo_3_pcv_13_at_12_months_series_complete",
+      "dob": "2010-03-04",
+      "gender": "F",
+      "eval_date": "2011-03-04",
+      "doses": [
+        "2010-09-04:100",
+        "2010-11-04:133",
+        "2011-03-04:133"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0595_mixed_vaccines_dose_1_pcv_7_at_7_mo_2_pcv_7_at_8_mo_3_pcv_13_at_12_months_series_complete",
+      "dob": "2009-06-01",
+      "gender": "F",
+      "eval_date": "2010-06-01",
+      "doses": [
+        "2010-01-01:100",
+        "2010-02-01:100",
+        "2010-06-01:133"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0596_dose_1_pcv_20_at_age_6_weeks_5_days",
+      "dob": "2025-10-04",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0597_dose_1_pcv_20_at_6_mo_2_at_11_mo_3_at_12_mo",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-05-10:216",
+        "2025-10-10:216",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0598_dose_4_pcv_15_at_age_12_mo_5_days",
+      "dob": "2024-11-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-15:215",
+        "2025-03-15:215",
+        "2025-05-15:215",
+        "2025-11-10:215"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0599_dose_4_pcv_20_at_age_12_months_4_days_series_complete",
+      "dob": "2024-11-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-14:216",
+        "2025-03-14:216",
+        "2025-05-14:216",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0600_dose_4_pcv_20_at_1_year_series_complete",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-10:215",
+        "2025-03-10:215",
+        "2025-05-10:215",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0601_4_doses_of_pcv_7_no_pcv_13_needs_one_pcv_13",
+      "dob": "2009-06-01",
+      "gender": "F",
+      "eval_date": "2010-07-01",
+      "doses": [
+        "2009-08-01:100",
+        "2009-10-01:100",
+        "2009-12-01:100",
+        "2010-07-01:100"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0602_dose_1_invalid_age_as_first_of_others",
+      "dob": "2025-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-06-10:216",
+        "2025-08-24:216",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0603_dose_2_invalid_age_in_midst_of_others",
+      "dob": "2025-06-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-07-20:216",
+        "2025-08-14:216",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0604_dose_3_invalid_age_in_midst_of_others_four_valid_doses_not_required_in_this_scenario",
+      "dob": "2024-10-29",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-12-09:216",
+        "2025-01-05:216",
+        "2025-01-16:216",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0605_dose_1_to_dose_2_interval_28_5_days",
+      "dob": "2025-08-18",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-18:216",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0606_dose_1_to_dose_2_interval_28_4_days",
+      "dob": "2025-08-17",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-17:216",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0607_dose_1_pcv_20_at_age_6_weeks_4_days",
+      "dob": "2025-10-03",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0608_dose_1_pcv_20_to_dose_2_interval_28_days",
+      "dob": "2025-08-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:216",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0609_dose_2_to_dose_3_interval_28_5_days",
+      "dob": "2025-06-18",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-08-18:216",
+        "2025-10-18:216",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0610_dose_2_to_dose_3_pcv_15_interval_28_4_days",
+      "dob": "2025-05-17",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-07-17:215",
+        "2025-10-17:215",
+        "2025-11-10:215"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0611_dose_2_to_dose_3_pcv_20_interval_28_days",
+      "dob": "2025-05-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-07-13:216",
+        "2025-10-13:216",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0612_dose_3_pcv_20_to_dose_4_interval_8_weeks_5_days",
+      "dob": "2024-10-20",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-04-20:216",
+        "2025-08-20:216",
+        "2025-09-20:216",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0613_dose_3_pcv_20_to_dose_4_interval_8_wks_4_days_series_complete",
+      "dob": "2024-10-19",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-04-19:216",
+        "2025-08-19:216",
+        "2025-09-19:216",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0614_dose_3_pcv_20_to_dose_4_interval_8_weeks_series_complete",
+      "dob": "2024-10-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-04-15:216",
+        "2025-08-15:216",
+        "2025-09-15:216",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0615_invalid_dose_2_interval_in_midst_of_others",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-12-28:216",
+        "2025-01-20:216",
+        "2025-05-10:216",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0616_invalid_dose_3_interval_in_midst_of_others",
+      "dob": "2024-10-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-02-10:216",
+        "2025-05-18:216",
+        "2025-06-09:216",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0617_invalid_dose_4_interval_in_midst_of_others",
+      "dob": "2024-08-23",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-10-23:215",
+        "2025-02-23:215",
+        "2025-08-12:215",
+        "2025-09-12:215",
+        "2025-11-07:215"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0618_dose_1_pcv_20_at_age_6_weeks",
+      "dob": "2025-09-29",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0619_4_doses_of_pcv_7_and_1_dose_of_pcv_13_series_complete",
+      "dob": "2008-06-06",
+      "gender": "F",
+      "eval_date": "2012-03-05",
+      "doses": [
+        "2008-08-06:100",
+        "2008-10-06:100",
+        "2008-12-06:100",
+        "2009-12-06:100",
+        "2012-03-05:133"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0622_dose_1_pcv_15_at_age_2_months",
+      "dob": "2025-09-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:215"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0624_dose_1_pcv_20_at_age_11_months",
+      "dob": "2024-12-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2013_0625_dose_1_pcv_20_at_age_12_months",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2015_0021_pneumococcal_patient_has_received_pcv13_and_ppsv23",
+      "dob": "1959-11-04",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-11-10:133",
+        "2025-11-10:33"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2015_0022_adult_patient_has_received_pcv13_but_has_no_history_of_ppsv23",
+      "dob": "1960-10-01",
+      "gender": "F",
+      "eval_date": "2025-10-01",
+      "doses": [
+        "2025-02-03:133"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2015_0023_adult_patient_has_received_ppsv23_at_age_65_but_has_no_history_of_pcv",
+      "dob": "1960-10-25",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:33"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2019_0008_adult_patient_65_years_with_no_history_of_pneumococcal_vaccine",
+      "dob": "1960-11-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2019_0009_adult_patient_65_years_with_a_dose_of_ppsv23_vaccine_and_pcv",
+      "dob": "1959-11-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-11-10:33",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2022_0003_adult_patient_65_years_has_received_pcv15",
+      "dob": "1960-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:215"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2022_0004_adult_patient_65_years_has_received_pcv20",
+      "dob": "1960-11-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2022_0010_adult_patient_66_years_has_received_pcv13_and_pcv20",
+      "dob": "1959-11-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-11-10:133",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2022_0011_adult_patient_66_years_has_received_pcv15_and_pcv20",
+      "dob": "1959-11-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-11-10:215",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2022_0012_adult_patient_66_years_has_received_pcv15_and_ppsv",
+      "dob": "1959-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-11-10:215",
+        "2025-11-10:33"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2022_0072_dose_1_pcv15_at_age_18_months",
+      "dob": "2024-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:215"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2022_0073_dose_4_pcv15_at_1_year_series_complete",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-10:215",
+        "2025-03-10:215",
+        "2025-05-10:215",
+        "2025-11-10:215"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2022_0074_dose_1_pcv15_at_age_6_weeks_4_days",
+      "dob": "2025-10-03",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:215"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2023_0001_adult_patient_has_received_one_ppsv23_one_dose_of_pcv_13_and_one_dose_of_pcv15",
+      "dob": "1955-02-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2020-02-10:33",
+        "2020-11-10:133",
+        "2025-11-10:215"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2023_0002_adult_patient_has_received_pcv13_and_ppsv23_and_pcv20_at_five_years_later",
+      "dob": "1954-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2019-11-10:133",
+        "2020-11-10:33",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2023_0025_dose_1_2_and_3_pcv15_dose_4_pcv20_at_12_months_series_complete",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-10:215",
+        "2025-03-10:215",
+        "2025-05-10:215",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2023_0026_dose_1_pcv_20_at_age_6_weeks_4_days",
+      "dob": "2025-10-03",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2023_0027_patient_is_a_child_with_four_doses_of_pcv20_series_complete",
+      "dob": "2024-11-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-10:216",
+        "2025-03-10:216",
+        "2025-05-10:216",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2024_0062_adult_patient_67_years_with_a_dose_of_pcv21",
+      "dob": "1958-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:327"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2024_0063_adult_patient_68_years_with_a_dose_of_ppsv23_and_pcv21",
+      "dob": "1957-11-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-11-10:33",
+        "2025-11-10:327"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2024_0064_adult_patient_80_years_with_a_dose_of_pcv15_and_pcv21",
+      "dob": "1945-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-11-10:215",
+        "2025-11-10:327"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2024_0082_patient_is_50_years_of_age_and_has_not_been_administered_a_dose_of_the_pneumococcal_vaccine",
+      "dob": "1975-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2024_0083_patient_is_50_years_of_age_and_has_been_administered_a_dose_of_the_pneumococcal_vaccine_pcv20",
+      "dob": "1975-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2024_0084_patient_is_55_years_of_age_and_has_been_administered_a_dose_of_the_pneumococcal_vaccine_pcv_21",
+      "dob": "1970-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:327"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2024_0102_patient_is_47_years_of_age_and_was_administered_a_previous_dose_of_ppsv23",
+      "dob": "1978-03-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-03-10:33"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2025_0001_patient_is_55_years_of_age_and_has_been_administered_a_dose_of_the_pneumococcal_vaccine_pcv15",
+      "dob": "1970-10-26",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:215"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2025_0002_patient_is_55_years_of_age_and_has_been_administered_two_doses_of_the_pneumococcal_vaccine_pcv15_ppsv23",
+      "dob": "1970-10-26",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-11-10:215",
+        "2025-11-10:33"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2025_0003_patient_is_52_years_of_age_and_has_been_administered_two_doses_of_the_pneumococcal_vaccine_pcv15_pcv21",
+      "dob": "1973-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-11-10:215",
+        "2025-11-10:327"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2025_0004_patient_is_53_years_of_age_and_has_been_administered_a_previous_dose_of_pcv13_vaccine",
+      "dob": "1972-06-16",
+      "gender": "F",
+      "eval_date": "2025-09-30",
+      "doses": [
+        "2024-10-02:133"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2025_0005_patient_is_54_years_of_age_and_has_been_administered_two_doses_of_pneumococcal_pcv13_and_a_dose_of_pcv20_vaccine",
+      "dob": "1971-09-03",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2021-11-10:133",
+        "2025-11-10:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2025_0036_dose_1_of_pcv_13_at_2_months",
+      "dob": "2023-06-04",
+      "gender": "M",
+      "eval_date": "2023-08-04",
+      "doses": [
+        "2023-08-04:133"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    },
+    {
+      "name": "cdsi_2025_0037_dose_1_and_2_pcv13_at_2_and_4_months_with_dose_3_pcv20_at_6_months",
+      "dob": "2025-03-29",
+      "gender": "M",
+      "eval_date": "2025-09-29",
+      "doses": [
+        "2025-05-29:133",
+        "2025-07-29:133",
+        "2025-09-29:216"
+      ],
+      "group": "PNEUMOCOCCAL",
+      "focus": "750"
+    }
+  ]
+}

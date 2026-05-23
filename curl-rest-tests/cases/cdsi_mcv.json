@@ -1,0 +1,313 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "cdsi_2013_0487_1_11_yrs_0_days_mcv4",
+      "dob": "2014-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:203"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2013_0488_2_16_yr_4_days_mcv4",
+      "dob": "2009-11-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2020-11-14:136",
+        "2025-11-10:136"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2013_0489_2_10_16_yr_5_days_mcv4",
+      "dob": "2009-11-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2020-11-15:136",
+        "2025-11-10:203"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2013_0491_2_16_years_mcv4",
+      "dob": "2009-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2020-11-10:136",
+        "2025-11-10:136"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2013_0495_2_with_interval_of_5_years_of_1",
+      "dob": "2007-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2020-11-10:136",
+        "2025-11-10:136"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2013_0497_1_10_yrs_1_day_2_10_yrs_8_weeks_5_days",
+      "dob": "2015-09-20",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-19:136",
+        "2025-11-10:136"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2013_0498_1_10_yrs_1_day_2_10_yrs_8_weeks",
+      "dob": "2015-09-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-14:203",
+        "2025-11-10:203"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2013_0499_1_10_yrs_mcv4",
+      "dob": "2015-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:203"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2013_0500_1_10_yrs_1_day_mcv4",
+      "dob": "2015-11-11",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:136"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2013_0501_1_10_yrs_1_day_2_10_yrs_8_weeks_4_days",
+      "dob": "2015-09-19",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-18:136",
+        "2025-11-10:203"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2013_0502_10_year_old",
+      "dob": "2015-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2013_0503_dose_1_to_dose_2_interval_8_wks_5_days",
+      "dob": "2014-07-20",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-20:147",
+        "2025-11-10:147"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2013_0504_dose_1_to_dose_2_interval_8_wks_4_days",
+      "dob": "2009-09-29",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-15:147",
+        "2025-11-06:147"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2013_0505_dose_1_to_dose_2_interval_8_weeks",
+      "dob": "2009-09-21",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-09:147",
+        "2025-11-04:147"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2013_0507_1_at_age_11_years",
+      "dob": "2014-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:147"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2013_0508_age_22_no_doses_no_forecast",
+      "dob": "2003-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2013_0509_1_at_age_15_years",
+      "dob": "2010-11-02",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:147"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2013_0510_1_at_age_16_years_5_days",
+      "dob": "2009-11-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:147"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2013_0511_1_at_age_16_years_4_days",
+      "dob": "2009-11-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:147"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2013_0512_1_at_age_16_years",
+      "dob": "2009-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:147"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2023_0105_patient_is_11_years_of_age_and_has_been_administered_cvx_316_as_a_first_dose",
+      "dob": "2014-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:316"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2023_0106_patient_is_16_years_of_age_and_has_been_administered_an_extraneous_dose_of_the_meningococcal_vaccine",
+      "dob": "2009-09-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-15:316",
+        "2025-11-10:316"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2023_0107_patient_is_16_years_of_age_and_has_been_administered_cvx_316_as_a_second_dose",
+      "dob": "2009-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2020-11-10:136",
+        "2025-11-10:316"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2024_0015_patient_is_16_years_of_age_and_has_been_administered_two_doses_of_the_meningococcal_vaccine_cvx_316",
+      "dob": "2009-10-06",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-06:316",
+        "2025-11-01:316"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2025_0017_patient_is_12_years_of_age_and_has_been_administered_a_dose_of_penmenvy_vaccine",
+      "dob": "2013-10-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:328"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2025_0018_patient_is_16_years_of_age_and_has_been_administered_two_doses_of_meningococcal_vaccine_menquadfi_and_penmenvy",
+      "dob": "2009-10-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-10-10:203",
+        "2025-11-10:328"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    },
+    {
+      "name": "cdsi_2025_0019_patient_is_16_years_of_age_and_has_been_administered_two_doses_of_meningococcal_vaccine_one_dose_penbraya_and_another_dose_as_penmenvy",
+      "dob": "2009-11-07",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-07:316",
+        "2025-11-10:328"
+      ],
+      "group": "MCV",
+      "focus": "830"
+    }
+  ]
+}

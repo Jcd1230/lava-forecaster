@@ -1,0 +1,510 @@
+{
+  "cdsi_2013_0487_1_11_yrs_0_days_mcv4": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "203",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2030-11-10",
+      "recommended_date": "2030-11-10",
+      "overdue_date": "2031-12-07",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0488_2_16_yr_4_days_mcv4": {
+    "evaluations": [
+      {
+        "date": "2020-11-14",
+        "cvx": "136",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "136",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2013_0489_2_10_16_yr_5_days_mcv4": {
+    "evaluations": [
+      {
+        "date": "2020-11-15",
+        "cvx": "136",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "203",
+        "status": "Invalid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2026-01-05",
+      "recommended_date": "2026-01-05",
+      "overdue_date": "2026-12-12",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0491_2_16_years_mcv4": {
+    "evaluations": [
+      {
+        "date": "2020-11-10",
+        "cvx": "136",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "136",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2013_0495_2_with_interval_of_5_years_of_1": {
+    "evaluations": [
+      {
+        "date": "2020-11-10",
+        "cvx": "136",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "136",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2013_0497_1_10_yrs_1_day_2_10_yrs_8_weeks_5_days": {
+    "evaluations": [
+      {
+        "date": "2025-09-19",
+        "cvx": "136",
+        "status": "Accepted",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "136",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2031-09-20",
+      "recommended_date": "2031-09-20",
+      "overdue_date": "2032-10-17",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0498_1_10_yrs_1_day_2_10_yrs_8_weeks": {
+    "evaluations": [
+      {
+        "date": "2025-09-14",
+        "cvx": "203",
+        "status": "Accepted",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "203",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2031-09-15",
+      "recommended_date": "2031-09-15",
+      "overdue_date": "2032-10-12",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0499_1_10_yrs_mcv4": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "203",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2031-11-10",
+      "recommended_date": "2031-11-10",
+      "overdue_date": "2032-12-07",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0500_1_10_yrs_1_day_mcv4": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "136",
+        "status": "Accepted",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2026-11-11",
+      "recommended_date": "2026-11-11",
+      "overdue_date": "2028-12-08",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0501_1_10_yrs_1_day_2_10_yrs_8_weeks_4_days": {
+    "evaluations": [
+      {
+        "date": "2025-09-18",
+        "cvx": "136",
+        "status": "Accepted",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "203",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2031-09-19",
+      "recommended_date": "2031-09-19",
+      "overdue_date": "2032-10-16",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0502_10_year_old": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2026-11-10",
+      "recommended_date": "2026-11-10",
+      "overdue_date": "2028-12-07",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0503_dose_1_to_dose_2_interval_8_wks_5_days": {
+    "evaluations": [
+      {
+        "date": "2025-09-20",
+        "cvx": "147",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "147",
+        "status": "Invalid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2030-07-20",
+      "recommended_date": "2030-07-20",
+      "overdue_date": "2031-08-16",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0504_dose_1_to_dose_2_interval_8_wks_4_days": {
+    "evaluations": [
+      {
+        "date": "2025-09-15",
+        "cvx": "147",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-06",
+        "cvx": "147",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2013_0505_dose_1_to_dose_2_interval_8_weeks": {
+    "evaluations": [
+      {
+        "date": "2025-09-09",
+        "cvx": "147",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-04",
+        "cvx": "147",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2013_0507_1_at_age_11_years": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "147",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2030-11-10",
+      "recommended_date": "2030-11-10",
+      "overdue_date": "2031-12-07",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0508_age_22_no_doses_no_forecast": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2013_0509_1_at_age_15_years": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "147",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2026-11-02",
+      "recommended_date": "2026-11-02",
+      "overdue_date": "2027-11-29",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0510_1_at_age_16_years_5_days": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "147",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2026-01-05",
+      "recommended_date": "2026-01-05",
+      "overdue_date": "2026-12-12",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0511_1_at_age_16_years_4_days": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "147",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2026-01-05",
+      "recommended_date": "2026-01-05",
+      "overdue_date": "2026-12-11",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0512_1_at_age_16_years": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "147",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2023_0105_patient_is_11_years_of_age_and_has_been_administered_cvx_316_as_a_first_dose": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "316",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2030-11-10",
+      "recommended_date": "2030-11-10",
+      "overdue_date": "2031-12-07",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2023_0106_patient_is_16_years_of_age_and_has_been_administered_an_extraneous_dose_of_the_meningococcal_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-09-15",
+        "cvx": "316",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "316",
+        "status": "Accepted",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2023_0107_patient_is_16_years_of_age_and_has_been_administered_cvx_316_as_a_second_dose": {
+    "evaluations": [
+      {
+        "date": "2020-11-10",
+        "cvx": "136",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "316",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2024_0015_patient_is_16_years_of_age_and_has_been_administered_two_doses_of_the_meningococcal_vaccine_cvx_316": {
+    "evaluations": [
+      {
+        "date": "2025-09-06",
+        "cvx": "316",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-01",
+        "cvx": "316",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0017_patient_is_12_years_of_age_and_has_been_administered_a_dose_of_penmenvy_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "328",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2029-10-10",
+      "recommended_date": "2029-10-10",
+      "overdue_date": "2030-11-06",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0018_patient_is_16_years_of_age_and_has_been_administered_two_doses_of_meningococcal_vaccine_menquadfi_and_penmenvy": {
+    "evaluations": [
+      {
+        "date": "2022-10-10",
+        "cvx": "203",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "328",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0019_patient_is_16_years_of_age_and_has_been_administered_two_doses_of_meningococcal_vaccine_one_dose_penbraya_and_another_dose_as_penmenvy": {
+    "evaluations": [
+      {
+        "date": "2025-09-07",
+        "cvx": "316",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "328",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  }
+}

@@ -1,0 +1,374 @@
+{
+  "cdsi_2015_0013_zoster_dose_administered_at_50_years_of_age": {
+    "evaluations": [
+      {
+        "date": "2019-03-04",
+        "cvx": "121",
+        "status": "Accepted",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2019-04-29",
+      "recommended_date": "2019-04-29",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2015_0014_zoster_dose_administered_at_60_years_of_age": {
+    "evaluations": [
+      {
+        "date": "2019-03-01",
+        "cvx": "121",
+        "status": "Accepted",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2019-04-26",
+      "recommended_date": "2019-04-26",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2015_0016_zoster_patient_is_overdue_at_62_years_of_age_for_zoster_dose": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2013-10-25",
+      "recommended_date": "2013-10-25",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2015_0018_zoster_mmr_to_zoster_interval_28_days": {
+    "evaluations": [
+      {
+        "date": "2019-06-15",
+        "cvx": "121",
+        "status": "Accepted",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2019-08-10",
+      "recommended_date": "2019-08-10",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2015_0019_zoster_mmr_to_zoster_interval_28_1_days": {
+    "evaluations": [
+      {
+        "date": "2019-08-13",
+        "cvx": "121",
+        "status": "Accepted",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2019-10-08",
+      "recommended_date": "2019-10-08",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2018_0001_zoster_patient_has_received_dose_1_of_the_rzv_shingrix_series": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "187",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-12-08",
+      "recommended_date": "2026-01-05",
+      "overdue_date": "2026-07-07",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2018_0002_zoster_dose_2_of_the_rzv_shringrix_vaccine_administered_at_two_months_after_dose_1": {
+    "evaluations": [
+      {
+        "date": "2025-09-15",
+        "cvx": "187",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "187",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2018_0003_zoster_dose_2_shingrix_administered_at_4_weeks_after_dose_1": {
+    "evaluations": [
+      {
+        "date": "2025-10-13",
+        "cvx": "187",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "187",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2018_0004_zoster_dose_2_of_shingrix_administered_at_one_year_after_dose_1": {
+    "evaluations": [
+      {
+        "date": "2024-11-10",
+        "cvx": "187",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "187",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2018_0005_zoster_dose_2_shingrix_administered_at_4_weeks_1_days_after_dose_1": {
+    "evaluations": [
+      {
+        "date": "2025-10-13",
+        "cvx": "187",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-09",
+        "cvx": "187",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2018_0006_zoster_patient_is_50_with_no_previous_history_of_shringrix_vaccine": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2025-11-10",
+      "recommended_date": "2025-11-10",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2018_0008_zoster_dose_1_of_rzv_administered_4_weeks_after_previous_dose_of_zvl": {
+    "evaluations": [
+      {
+        "date": "2019-07-29",
+        "cvx": "121",
+        "status": "Accepted",
+        "dose_number": 1
+      },
+      {
+        "date": "2019-08-26",
+        "cvx": "187",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2019-09-23",
+      "recommended_date": "2019-10-21",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2018_0009_zoster_zvl_and_rzv_shingrix_vaccine_doses_administered_on_the_same_day_time": {
+    "evaluations": [
+      {
+        "date": "2019-02-27",
+        "cvx": "121",
+        "status": "Accepted",
+        "dose_number": 1
+      },
+      {
+        "date": "2019-02-27",
+        "cvx": "187",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2019-04-24",
+      "recommended_date": "2019-04-24",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2018_0011_zoster_dose_1_of_shingrix_8_weeks_after_dose_2_of_varicella_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "187",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-12-08",
+      "recommended_date": "2026-01-05",
+      "overdue_date": "2026-07-07",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2018_0012_zoster_dose_1_of_shingrix_4_weeks_after_dose_2_of_varicella_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "187",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-12-08",
+      "recommended_date": "2026-01-05",
+      "overdue_date": "2026-07-07",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2018_0013_zoster_dose_1_of_rzv_administered_8_weeks_after_previous_dose_of_zvl": {
+    "evaluations": [
+      {
+        "date": "2019-07-30",
+        "cvx": "121",
+        "status": "Accepted",
+        "dose_number": 1
+      },
+      {
+        "date": "2019-09-24",
+        "cvx": "187",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2019-10-22",
+      "recommended_date": "2019-11-19",
+      "overdue_date": "2020-05-21",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2018_0014_zoster_patient_has_received_all_three_doses_of_the_zoster_vaccine": {
+    "evaluations": [
+      {
+        "date": "2019-07-30",
+        "cvx": "121",
+        "status": "Accepted",
+        "dose_number": 1
+      },
+      {
+        "date": "2019-09-24",
+        "cvx": "187",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2019-11-19",
+        "cvx": "187",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2019_0001_zoster_dose_2_shingrix_administered_at_4_weeks_5_days_after_dose_1": {
+    "evaluations": [
+      {
+        "date": "2025-10-13",
+        "cvx": "187",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-05",
+        "cvx": "187",
+        "status": "Invalid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-12-03",
+      "recommended_date": "2025-12-31",
+      "overdue_date": "2026-07-02",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2019_0002_zoster_dose_2_shingrix_administered_at_4_weeks_4_days_after_dose_1": {
+    "evaluations": [
+      {
+        "date": "2025-10-13",
+        "cvx": "187",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-06",
+        "cvx": "187",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2024_0073_zoster_dose_1_of_shingrix_at_18_years_5_days": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "187",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2057-11-15",
+      "recommended_date": "2057-11-15",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  }
+}

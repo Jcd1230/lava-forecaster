@@ -1,0 +1,627 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "cdsi_2013_0523_1_at_15_months",
+      "dob": "2024-08-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:3"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0524_2_at_4_years",
+      "dob": "2021-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2023-02-10:3",
+        "2025-11-10:3"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0525_1_at_7_years",
+      "dob": "2018-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:3"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0528_5_single_antigen_doses_1_measles_2_mumps_2_rubella",
+      "dob": "2020-09-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2021-09-10:7",
+        "2021-10-08:6",
+        "2021-11-05:5",
+        "2025-10-08:6",
+        "2025-11-08:7"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0530_4_single_antigen_doses_1_measles_2_mumps_1_rubella",
+      "dob": "2020-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2021-11-10:7",
+        "2021-12-08:6",
+        "2022-01-05:5",
+        "2025-11-10:7"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0531_1_single_antigen_dose_at_12m_1_measles",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:5"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0534_2_single_antigen_doses_1_measles_1_mumps",
+      "dob": "2024-10-02",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-02:5",
+        "2025-11-10:7"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0535_7_single_antigen_doses_2_measles_3_mumps_2_rubella",
+      "dob": "2020-08-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2021-08-10:7",
+        "2021-09-07:6",
+        "2021-10-05:5",
+        "2025-08-10:7",
+        "2025-09-07:6",
+        "2025-10-05:7",
+        "2025-11-10:5"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0536_3_single_antigen_doses_1_measles_1_mumps_1_rubella",
+      "dob": "2024-07-18",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-07-18:7",
+        "2025-08-18:6",
+        "2025-11-10:5"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0537_3_single_antigen_doses_on_same_day_1_measles_1_mumps_1_rubella",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:7",
+        "2025-11-10:6",
+        "2025-11-10:5"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0538_6_single_antigen_doses_2_measles_2_mumps_2_rubella",
+      "dob": "2020-09-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2021-09-15:7",
+        "2021-10-13:6",
+        "2021-11-10:5",
+        "2025-09-15:7",
+        "2025-10-13:6",
+        "2025-11-10:5"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0539_3_single_antigen_doses_2_measles_1_rubella",
+      "dob": "2023-11-29",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-06:5",
+        "2025-06-23:6",
+        "2025-11-10:5"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0540_mmr_1_at_12_months_5_days",
+      "dob": "2024-11-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:3"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0541_mmr_1_at_12_months_4_days",
+      "dob": "2024-11-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:3"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0542_mmr_1_at_12_months",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:3"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0543_newborn_forecasting",
+      "dob": "2025-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0544_dose_1_to_dose_2_interval_28_days",
+      "dob": "2023-10-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:3",
+        "2025-11-10:3"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0545_mmr_and_vz_given_at_age_12_months",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:3",
+        "2025-11-10:21"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0546_doses_1_and_2_of_mmr_and_vz_at_ages_12_and_13_months",
+      "dob": "2024-10-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-10:3",
+        "2025-10-10:21",
+        "2025-11-10:3",
+        "2025-11-10:21"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0547_vz_to_mmr_interval_28_1_day_invalid_mmr",
+      "dob": "2024-10-12",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-14:21",
+        "2025-11-10:3"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0548_vz_given_at_age_12_mo_mmr_at_age_12_mo_28_days",
+      "dob": "2024-10-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:21",
+        "2025-11-10:3"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0549_dose_1_mmrv_at_12_m_5_days",
+      "dob": "2024-11-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:94"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0550_dose_1_mmrv_at_12_m_4_days",
+      "dob": "2024-11-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:94"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0552_dose_1_to_2_mmrv_interval_28_days_in_child_15_months_old_valid_mmr",
+      "dob": "2022-10-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:94",
+        "2025-11-10:94"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0556_mmr_to_mmrv_interval_24_days_not_valid_mmr_2",
+      "dob": "2024-09-17",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-17:3",
+        "2025-11-10:94"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0557_mmrv_to_mmr_interval_28_days_valid_mmr_dose_2",
+      "dob": "2024-09-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:94",
+        "2025-11-10:3"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0558_dose_1_to_dose_2_interval_4_wks_between_vz_and_mmrv_in_any_age_child_valid_mmr",
+      "dob": "2024-10-03",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:21",
+        "2025-11-10:94"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0559_28_day_interval_between_invalid_vz_and_subsequent_mmrv_valid_mmr_and_vz",
+      "dob": "2024-10-18",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:21",
+        "2025-11-10:94"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0562_interval_of_24_days_between_an_invalid_mmr_and_a_subsequent_mmrv_no_valid_mmr_s",
+      "dob": "2024-10-23",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-18:3",
+        "2025-11-10:94"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0563_interval_of_24_days_between_an_invalid_vz_and_a_subsequent_mmrv_no_valid_mmr_or_vz",
+      "dob": "2024-10-23",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-18:21",
+        "2025-11-10:94"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0565_correctly_administered_single_antigen_m_m_and_r_followed_by_mmr_series_complete",
+      "dob": "2022-11-01",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-01-07:7",
+        "2024-03-07:6",
+        "2024-11-07:5",
+        "2025-11-07:3"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0570_dose_2_at_age_13_mo_5_days",
+      "dob": "2024-10-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:3",
+        "2025-11-10:3"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0571_dose_2_at_age_13_mo_4_days",
+      "dob": "2024-10-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-14:3",
+        "2025-11-10:3"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0572_dose_2_at_age_13_mo",
+      "dob": "2024-10-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-10:3",
+        "2025-11-10:3"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0573_dose_1_to_dose_2_interval_28_days_5_days",
+      "dob": "2023-07-18",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-18:3",
+        "2025-11-10:3"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2013_0574_dose_1_to_dose_2_interval_28_4_days",
+      "dob": "2024-09-17",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-17:3",
+        "2025-11-10:3"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2015_0024_mmr_patient_is_born_before_01_01_1957",
+      "dob": "1956-06-12",
+      "gender": "F",
+      "eval_date": "2015-03-23",
+      "doses": [],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2019_0017_adult_with_no_previous_doses_of_the_mmr_vaccine",
+      "dob": "1990-11-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2019_0018_adult_with_a_dose_of_the_mmr_vaccine",
+      "dob": "1990-11-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:3"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2019_0019_adolescent_with_no_dose_of_mmr_vaccine",
+      "dob": "2009-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2019_0020_adolescent_with_2nd_dose_of_mmr_vaccine_at_4_weeks",
+      "dob": "2009-10-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:3",
+        "2025-11-10:3"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2019_0021_adolescent_with_2nd_dose_of_mmr_vaccine_at_4_weeks_5_days",
+      "dob": "2009-10-18",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-18:3",
+        "2025-11-10:3"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2019_0022_adolescent_with_2nd_dose_of_mmr_vaccine_at_4_weeks_4_days",
+      "dob": "2009-10-17",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-17:3",
+        "2025-11-10:3"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2025_0024_dose_1_of_mmrv_at_4_years",
+      "dob": "2021-11-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:94"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2025_0025_dose_1_at_mmrv_4_years_4_day",
+      "dob": "2021-11-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:94"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2025_0026_dose_1_mmrv_at_12_months_and_dose_2_mmrv_at_4_years",
+      "dob": "2021-11-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-11-10:94",
+        "2025-11-10:94"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2025_0027_dose_1_mmrv_at_12_months_and_dose_2_mmrv_at_interval_of_4_weeks",
+      "dob": "2024-10-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:94",
+        "2025-11-10:94"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2025_0028_dose_1_of_mmrv_at_4_years_and_dose_2_mmrv_at_interval_of_4_weeks",
+      "dob": "2021-10-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:94",
+        "2025-11-10:94"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2025_0029_dose_1_of_varicella_at_4_years_and_dose_2_mmrv_at_interval_of_4_weeks",
+      "dob": "2021-10-13",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:21",
+        "2025-11-10:94"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2025_0030_dose_1_of_varicella_at_12_months_and_dose_2_mmrv_at_4_years_of_age",
+      "dob": "2021-11-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-11-10:21",
+        "2025-11-10:94"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2025_0031_dose_1_of_mmr_at_12_months_4_days_and_dose_2_mmrv_at_4_years_of_age",
+      "dob": "2021-11-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-11-06:3",
+        "2025-11-10:94"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    },
+    {
+      "name": "cdsi_2025_0032_dose_1_of_varicella_at_12_months_5_days_dose_2_mmrv_at_4_years_of_age",
+      "dob": "2021-11-10",
+      "gender": "M",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-11-05:21",
+        "2025-11-10:94"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    }
+  ]
+}

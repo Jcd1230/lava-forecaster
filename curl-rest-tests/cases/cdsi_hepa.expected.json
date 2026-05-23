@@ -1,0 +1,326 @@
+{
+  "cdsi_2013_0185_infant_forecasting": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2026-11-10",
+      "recommended_date": "2026-11-10",
+      "overdue_date": "2027-12-07",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0186_dose_1_to_dose_2_interval_6_months_series_complete": {
+    "evaluations": [
+      {
+        "date": "2025-05-06",
+        "cvx": "85",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-06",
+        "cvx": "85",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2013_0188_adult_dose_mistakenly_given_to_a_child_counts_as_valid": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "52",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2026-05-10",
+      "recommended_date": "2026-05-10",
+      "overdue_date": "2026-12-07",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0189_dose_1_at_age_12_months_5_days": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "85",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-11-15",
+      "recommended_date": "2025-11-15",
+      "overdue_date": "2026-12-12",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0190_dose_1_at_age_12_months_4_days": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "85",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2026-05-14",
+      "recommended_date": "2026-05-14",
+      "overdue_date": "2026-12-11",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0191_dose_1_at_age_12_months": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "85",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2026-05-10",
+      "recommended_date": "2026-05-10",
+      "overdue_date": "2026-12-07",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0192_dose_1_to_dose_2_interval_6_mo_5_days_invalid": {
+    "evaluations": [
+      {
+        "date": "2025-05-15",
+        "cvx": "85",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "85",
+        "status": "Invalid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2026-05-10",
+      "recommended_date": "2026-05-10",
+      "overdue_date": "2026-06-11",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0193_dose_1_to_dose_2_interval_6_mo_4_days_series_complete": {
+    "evaluations": [
+      {
+        "date": "2025-05-14",
+        "cvx": "85",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "85",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2013_0194_dose_2_at_18_months_series_complete": {
+    "evaluations": [
+      {
+        "date": "2025-05-10",
+        "cvx": "85",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "85",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2013_0196_dose_1_to_dose_2_interval_6_mo_5_days": {
+    "evaluations": [
+      {
+        "date": "2025-05-10",
+        "cvx": "85",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-05",
+        "cvx": "85",
+        "status": "Invalid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2026-05-05",
+      "recommended_date": "2026-05-05",
+      "overdue_date": "2026-05-05",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0197_dose_1_to_dose_2_interval_6_months_4_days_series_complete": {
+    "evaluations": [
+      {
+        "date": "2025-05-10",
+        "cvx": "85",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-06",
+        "cvx": "85",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2019_0010_no_doses_of_hep_a_vaccine_at_age_18_years": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2008-11-10",
+      "recommended_date": "2008-11-10",
+      "overdue_date": "2009-12-07",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2019_0011_dose_1_of_hep_a_at_age_18_years": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "52",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2026-05-10",
+      "recommended_date": "2026-05-10",
+      "overdue_date": "2026-05-10",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2019_0012_dose_2_of_hep_a_at_6_months": {
+    "evaluations": [
+      {
+        "date": "2025-05-10",
+        "cvx": "52",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "52",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2019_0013_dose_2_of_hep_a_at_6_months_4_days": {
+    "evaluations": [
+      {
+        "date": "2025-05-10",
+        "cvx": "52",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-06",
+        "cvx": "52",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2019_0014_dose_2_of_hep_a_at_6_months_5_days": {
+    "evaluations": [
+      {
+        "date": "2025-05-10",
+        "cvx": "52",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-11-05",
+        "cvx": "52",
+        "status": "Invalid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2026-05-05",
+      "recommended_date": "2026-05-05",
+      "overdue_date": "2026-05-05",
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2020_0001_dose_3_administered_at_least_6_months_after_1st_valid_dose": {
+    "evaluations": [
+      {
+        "date": "2025-05-10",
+        "cvx": "85",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-10-10",
+        "cvx": "85",
+        "status": "Invalid",
+        "dose_number": 2
+      },
+      {
+        "date": "2025-11-10",
+        "cvx": "85",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  }
+}

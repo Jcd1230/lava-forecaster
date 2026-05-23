@@ -1,0 +1,1269 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "cdsi_2013_0273_child_2_months_no_shots_1_forecasted_at_2_months_of_age",
+      "dob": "2025-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0274_1_at_6_wks_5_days",
+      "dob": "2025-10-04",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0275_1_at_6_wks_4_days",
+      "dob": "2025-10-03",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0276_1_at_6_wks_3_days",
+      "dob": "2025-10-02",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0277_1_at_3_months",
+      "dob": "2025-08-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0278_1_at_3_months_and_3_days_catchup_2_recommended_at_28_days",
+      "dob": "2025-08-07",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0279_1_at_6_months_catchup_2_recommended_at_28_days",
+      "dob": "2025-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0280_1_at_7_and_11_months_catchup_drop_to_3_dose_schedule",
+      "dob": "2025-04-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0281_1_at_12_months_drop_to_2_dose_schedule",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0282_1_at_15m_drop_to_1_dose_schedule",
+      "dob": "2024-08-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0283_1_at_3_years_drop_to_1_dose_schedule",
+      "dob": "2022-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0284_1_at_5_years",
+      "dob": "2020-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0285_1_at_6_years",
+      "dob": "2019-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0286_2_at_10_wks_5_days",
+      "dob": "2025-09-06",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-14:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0287_2_at_10_wks_4_days",
+      "dob": "2025-09-05",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0288_2_at_10_wks_3_days",
+      "dob": "2025-09-04",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-12:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0289_2_at_4_months",
+      "dob": "2025-07-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-10:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0290_2_at_5_months",
+      "dob": "2025-06-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-08-10:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0291_2_at_5_months_and_3_days_catchup_3_at_28_days",
+      "dob": "2025-06-07",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-08-07:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0292_2_at_12_m_5_days",
+      "dob": "2024-11-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-15:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0293_2_at_12_m_4_days",
+      "dob": "2024-11-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-14:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0294_2_at_15_months",
+      "dob": "2024-08-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-10-10:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0295_2_at_5_years",
+      "dob": "2020-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2021-01-10:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0296_dose_1_to_2_interval_4_weeks_5_days",
+      "dob": "2025-08-18",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-18:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0297_dose_1_to_2_interval_4_weeks_4_days",
+      "dob": "2025-08-17",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-17:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0298_dose_1_to_2_interval_25_days",
+      "dob": "2025-08-16",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-16:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0299_3_at_14_weeks_5_days",
+      "dob": "2025-08-09",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-16:48",
+        "2025-10-14:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0300_3_at_6_months",
+      "dob": "2025-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-07-10:48",
+        "2025-09-10:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0301_dose_2_to_3_interval_4_weeks_5_days",
+      "dob": "2025-06-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-08-15:48",
+        "2025-10-15:48",
+        "2025-11-07:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0302_dose_2_to_3_interval_4_weeks_4_days",
+      "dob": "2025-06-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-08-14:48",
+        "2025-10-14:48",
+        "2025-11-07:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0303_dose_2_to_3_interval_4_weeks",
+      "dob": "2025-06-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-08-13:48",
+        "2025-10-13:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0304_4_at_12_months_5_days_of_age_interval_between_3_4_8_weeks",
+      "dob": "2024-11-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-15:48",
+        "2025-03-15:48",
+        "2025-05-15:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0305_4_at_12_months_4_days_of_age_interval_between_3_4_8_weeks",
+      "dob": "2024-11-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-14:48",
+        "2025-03-14:48",
+        "2025-05-14:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0306_4_at_12_months_3_days_of_age_interval_between_3_4_8_weeks",
+      "dob": "2024-11-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-13:48",
+        "2025-03-13:48",
+        "2025-05-13:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0307_4_at_15_months_of_age_interval_between_3_4_8_weeks",
+      "dob": "2024-08-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-10-10:48",
+        "2024-12-10:48",
+        "2025-02-10:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0308_4_at_12_months_of_age_interval_between_3_4_8_weeks_5_days",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-10:48",
+        "2025-03-10:48",
+        "2025-09-20:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0309_4_at_12_months_of_age_interval_between_3_4_8_weeks_4_days",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-10:48",
+        "2025-03-10:48",
+        "2025-09-19:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0310_4_at_15_months_of_age",
+      "dob": "2024-08-07",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-10-07:48",
+        "2024-12-07:48",
+        "2025-03-07:48",
+        "2025-11-07:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0313_4_at_5_years",
+      "dob": "2020-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2021-01-10:48",
+        "2021-03-10:48",
+        "2021-06-10:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0314_4_at_7_years",
+      "dob": "2019-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2020-01-10:48",
+        "2020-03-10:48",
+        "2020-07-10:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0315_child_2_months_no_shots_1_forecasted_at_2_months_of_age",
+      "dob": "2025-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0317_2_at_10_wks_4_days_prp_omp_series",
+      "dob": "2025-09-05",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:49",
+        "2025-11-10:49"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0318_2_at_10_wks_3_days_prp_omp_series",
+      "dob": "2025-09-04",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-12:49",
+        "2025-11-10:49"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0319_2_at_12_months",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-10:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0320_3_at_5m_1_2_at_2_and_4m",
+      "dob": "2025-06-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-08-10:48",
+        "2025-10-10:49",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0321_3_at_10_months_and_9_days_1_2_at_2_and_3_m",
+      "dob": "2025-01-01",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-03-01:48",
+        "2025-04-01:48",
+        "2025-11-10:49"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0322_3_at_11_months",
+      "dob": "2024-12-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-02-10:48",
+        "2025-04-10:49",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0323_3_at_12_months_5_days",
+      "dob": "2024-11-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-15:48",
+        "2025-03-15:48",
+        "2025-11-10:49"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0324_3_at_12_months_3_days",
+      "dob": "2024-11-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-13:48",
+        "2025-03-13:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0325_3_at_15_months",
+      "dob": "2024-08-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-10-10:48",
+        "2024-12-10:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0326_3_at_59_months",
+      "dob": "2020-11-11",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2021-01-11:48",
+        "2021-03-11:49",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0327_1_at_7_months_5_days",
+      "dob": "2025-04-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0328_1_at_7_months_3_days",
+      "dob": "2025-04-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0329_dose_2_to_3_interval_8_weeks_3_days_3_after_12_months_of_age",
+      "dob": "2024-11-04",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-04:48",
+        "2025-09-18:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0330_1_at_7_months_4_days",
+      "dob": "2025-04-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0331_1_at_12_months_minus_5_days",
+      "dob": "2024-11-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0332_1_at_12_months_4_days",
+      "dob": "2024-11-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0333_1_at_12_months_3_days",
+      "dob": "2024-11-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0334_2_at_7_m_and_23_days_1_at_7_m",
+      "dob": "2025-03-18",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-18:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0335_2_at_7_m_and_24_days_1_at_7_m",
+      "dob": "2025-03-17",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-17:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0336_2_at_11_m_1_at_7_m",
+      "dob": "2024-12-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-07-10:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0337_2_at_12_m_1_at_7_m",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-06-10:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0338_3_at_365_d_5_days_1_at_7m_2_at_8m",
+      "dob": "2024-11-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-06-15:48",
+        "2025-07-15:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0339_3_at_365_d_4_days_1_at_7m_2_at_8m",
+      "dob": "2024-11-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-06-14:48",
+        "2025-07-14:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0340_3_at_365_days_3_days_1_at_7m_2_at_8m",
+      "dob": "2024-11-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-06-13:48",
+        "2025-07-13:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0341_3_at_59_months_1_at_7m_2_at_8m",
+      "dob": "2020-12-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2021-07-10:48",
+        "2021-08-10:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0342_3_at_5_years_1_at_7m_2_at_8m",
+      "dob": "2020-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2021-06-10:48",
+        "2021-07-10:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0343_dose_2_to_3_interval_8_weeks_5_days_3_after_12_months_of_age",
+      "dob": "2024-10-03",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-12-03:48",
+        "2025-09-17:49",
+        "2025-11-07:49"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0344_dose_2_to_3_interval_8_weeks_4_days_3_after_12_months_of_age",
+      "dob": "2024-10-03",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-12-03:48",
+        "2025-09-17:49",
+        "2025-11-08:49"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0346_1_at_15_months_5_days",
+      "dob": "2024-08-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0347_1_at_15_months_4_days",
+      "dob": "2024-08-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0348_dose_1_to_2_at_8_weeks_5_days_1_at_1_year",
+      "dob": "2024-09-20",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-20:48",
+        "2025-11-10:49"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0349_dose_1_to_2_at_8_weeks_4_days_1_at_1_year",
+      "dob": "2024-09-19",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-19:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0350_dose_1_to_2_at_8_weeks_3_days_1_at_1_year",
+      "dob": "2024-09-18",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-18:48",
+        "2025-11-10:49"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0351_3_1_at_one_year_2_at_15_months",
+      "dob": "2024-06-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-06-15:48",
+        "2025-09-15:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0352_1_at_15_m_3_days",
+      "dob": "2024-08-13",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0353_1_at_5_years_1_day",
+      "dob": "2020-11-11",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0354_2_at_2_years_1_at_15_m",
+      "dob": "2023-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-02-10:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0355_2_at_5_months",
+      "dob": "2025-06-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-08-10:48",
+        "2025-11-10:48"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0356_2_pentacel_at_6_yrs_11_5_mo",
+      "dob": "2018-11-27",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2021-08-17:120",
+        "2025-11-10:120"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0357_3_pentacel_at_14_wks_5_days",
+      "dob": "2025-08-09",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-16:120",
+        "2025-10-14:120",
+        "2025-11-10:120"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0358_invalid_age_dose_1_as_first_of_others",
+      "dob": "2025-05-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-06-14:120",
+        "2025-09-10:120",
+        "2025-11-10:120"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0359_dose_1_to_2_pentacel_interval_28_4_days",
+      "dob": "2025-08-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-17:120",
+        "2025-11-10:120"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0360_dose_2_to_3_pentacel_interval_28_5_days",
+      "dob": "2025-06-16",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-08-16:120",
+        "2025-10-16:120",
+        "2025-11-08:120"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0365_1_pentacel_at_6_wks",
+      "dob": "2025-09-29",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:120"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0366_1_pentacel_at_6_wks_4_days",
+      "dob": "2025-10-03",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:120"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0367_1_pentacel_at_6_wks_5_days",
+      "dob": "2025-10-04",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-11-10:120"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0368_2_pentacel_at_10_wks_4_days",
+      "dob": "2025-09-05",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-13:120",
+        "2025-11-10:120"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0369_2_pentacel_at_10_wks_5_days",
+      "dob": "2025-09-06",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-14:120",
+        "2025-11-10:120"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0370_3_pentacel_at_14_wks_4_days",
+      "dob": "2025-08-08",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-09-15:120",
+        "2025-10-13:120",
+        "2025-11-10:120"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0371_4_pentacel_age_12_mo",
+      "dob": "2024-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-10:120",
+        "2025-03-10:120",
+        "2025-05-10:120",
+        "2025-11-10:120"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0372_4_pentacel_at_1_yr_4_days",
+      "dob": "2024-11-14",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-14:120",
+        "2025-03-14:120",
+        "2025-05-14:120",
+        "2025-11-10:120"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0373_4_pentacel_at_1_yr_5_days",
+      "dob": "2024-11-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-01-15:120",
+        "2025-03-15:120",
+        "2025-04-26:120",
+        "2025-11-10:120"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0374_4_pentacel_at_4_yrs",
+      "dob": "2021-11-06",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-03-15:120",
+        "2022-10-28:120",
+        "2025-06-12:120",
+        "2025-11-10:120"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0375_4_pentacel_at_5_yrs",
+      "dob": "2020-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2021-03-10:120",
+        "2021-09-06:120",
+        "2021-11-05:120",
+        "2025-11-10:120"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0376_5_pentacel_at_4_yrs_is_off_label_but_counts",
+      "dob": "2021-10-19",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2022-09-19:120",
+        "2022-12-19:120",
+        "2023-03-19:120",
+        "2023-08-20:120",
+        "2025-11-10:120"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0378_dose_1_to_2_pentacel_interval_28_5_days",
+      "dob": "2025-08-24",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-10-18:120",
+        "2025-11-10:120"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0379_dose_2_to_3_pentacel_interval_28_4_days",
+      "dob": "2025-06-15",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-08-15:120",
+        "2025-10-15:120",
+        "2025-11-08:120"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0380_invalid_age_dose_2_in_midst_of_others",
+      "dob": "2024-11-08",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-12-16:120",
+        "2025-01-12:120",
+        "2025-03-28:120",
+        "2025-11-10:120"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0381_invalid_age_dose_3_in_midst_of_others",
+      "dob": "2024-10-04",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2024-11-11:120",
+        "2024-12-09:120",
+        "2025-01-05:120",
+        "2025-11-10:120"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0382_invalid_dose_1_2_interval_in_midst_of_others",
+      "dob": "2025-05-20",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2025-07-20:120",
+        "2025-08-12:120",
+        "2025-11-10:120"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0383_newborn",
+      "dob": "2025-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [],
+      "group": "HIB",
+      "focus": "300"
+    },
+    {
+      "name": "cdsi_2013_0384_pentacel_at_6_yrs",
+      "dob": "2019-11-10",
+      "gender": "F",
+      "eval_date": "2025-11-10",
+      "doses": [
+        "2020-04-19:120",
+        "2025-11-10:120"
+      ],
+      "group": "HIB",
+      "focus": "300"
+    }
+  ]
+}

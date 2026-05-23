@@ -1,0 +1,327 @@
+{
+  "cdsi_2013_0167_newborn": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2026-02-01",
+      "recommended_date": "2026-02-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0168_1_to_2_interval_28_days": {
+    "evaluations": [
+      {
+        "date": "2024-12-01",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2024-12-29",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-07-01",
+      "recommended_date": "2025-07-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0169_child_under_9_needs_two_in_first_season": {
+    "evaluations": [
+      {
+        "date": "2025-09-01",
+        "cvx": "140",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-09-29",
+      "recommended_date": "2025-09-29",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0170_child_under_9_received_only_one_in_first_season": {
+    "evaluations": [
+      {
+        "date": "2025-10-15",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-11-12",
+      "recommended_date": "2025-11-12",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0171_child_under_9_received_two_in_first_season": {
+    "evaluations": [
+      {
+        "date": "2025-08-01",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-09-04",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": "2026-07-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0172_invalid_dose_1st_season": {
+    "evaluations": [
+      {
+        "date": "2025-09-01",
+        "cvx": "140",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-11-01",
+      "recommended_date": "2025-11-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0178_1_at_6_mo_4_days": {
+    "evaluations": [
+      {
+        "date": "2025-09-27",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-10-25",
+      "recommended_date": "2025-10-25",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0179_1_at_6_mo": {
+    "evaluations": [
+      {
+        "date": "2025-10-01",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-10-29",
+      "recommended_date": "2025-10-29",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0183_1_to_2_interval_23_days": {
+    "evaluations": [
+      {
+        "date": "2025-09-01",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-09-24",
+        "cvx": "88",
+        "status": "Invalid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-10-22",
+      "recommended_date": "2025-10-22",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2013_0184_1_to_2_interval_24_days": {
+    "evaluations": [
+      {
+        "date": "2025-09-01",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-09-25",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": "2026-07-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2016_0012_child_under_9_received_one_in_previous_season_and_one_in_current_season": {
+    "evaluations": [
+      {
+        "date": "2024-12-01",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2025-09-01",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-09-29",
+      "recommended_date": "2025-09-29",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2018_0024_patient_9_years_or_older_with_no_current_seasonal_dose": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2025-07-01",
+      "recommended_date": "2025-07-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2018_0025_patient_9_years_or_older_with_one_current_seasonal_dose": {
+    "evaluations": [
+      {
+        "date": "2025-09-10",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": "2026-07-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2018_0026_child_under_9_years_with_dose_in_current_season_and_two_doses_in_previous_different_seasons": {
+    "evaluations": [
+      {
+        "date": "2022-09-15",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2022-10-13",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2025-09-04",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": "2026-07-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2019_0004_child_received_first_dose_at_9_years_series_complete": {
+    "evaluations": [
+      {
+        "date": "2025-08-18",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": "2026-07-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2019_0005_child_entered_season_at_8_years_of_age_received_dose_before_9_forecast_another_dose": {
+    "evaluations": [
+      {
+        "date": "2025-08-31",
+        "cvx": "88",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-09-28",
+      "recommended_date": "2025-09-28",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2019_0015_adult_with_no_previous_dose_of_the_influenza_vaccine": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2025-07-01",
+      "recommended_date": "2025-07-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2019_0016_adult_with_a_dose_of_the_influenza_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-09-01",
+        "cvx": "140",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": "2026-07-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0020_adult_with_a_self_administered_dose_of_the_flumist_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-09-26",
+        "cvx": "333",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": "2026-07-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  }
+}

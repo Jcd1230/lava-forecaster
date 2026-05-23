@@ -1,0 +1,184 @@
+{
+  "cdsi_2023_0020_patient_is_60_years_of_age_and_has_been_administered_a_rsv_arexvy_vaccine_dose": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "303",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2023_0028_patient_is_a_newborn_infant_and_hasn_t_been_administered_any_doses_of_the_rsv_vaccine": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2025-10-01",
+      "recommended_date": "2025-10-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2023_0029_patient_is_a_newborn_and_has_received_a_dose_of_the_rsv_beyfortus_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-10-02",
+        "cvx": "306",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2023_0031_patient_is_an_infant_born_in_april_with_an_assessment_date_in_october_and_hasn_t_received_a_rsv_vaccine": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2025-10-01",
+      "recommended_date": "2025-10-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2023_0032_patient_is_an_infant_born_in_june_with_an_assessment_date_in_november_and_hasn_t_received_a_rsv_vaccine": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2025-10-01",
+      "recommended_date": "2025-10-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2023_0033_patient_is_an_infant_born_in_november_with_an_assessment_date_in_december_and_hasn_t_received_a_rsv_vaccine": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2025-11-07",
+      "recommended_date": "2025-11-07",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2023_0034_patient_is_an_infant_born_in_april_with_an_assessment_date_in_december_and_hasn_t_received_a_rsv_vaccine": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2024_0012_patient_is_52_years_of_age_and_has_been_administered_a_rsv_arexvy_vaccine_dose": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "303",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2024_0055_patient_is_almost_75_years_of_age_and_hasn_t_been_administered_any_doses_of_the_rsv_vaccine": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cdsi_2024_0056_patient_is_75_years_of_age_and_has_been_administered_a_rsv_arexvy_vaccine_dose": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "303",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2024_0057_patient_is_80_years_of_age_and_has_been_administered_a_rsv_mresvia_vaccine_dose": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "326",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0008_patient_is_a_one_month_old_infant_who_has_been_administered_a_dose_of_rsv_clesrovimab_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-11-02",
+        "cvx": "332",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cdsi_2025_0009_patient_is_49_years_of_age_and_has_been_administered_a_dose_of_the_rsv_abrysvo_vaccine": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "305",
+        "status": "Accepted",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2051-06-30",
+      "recommended_date": "2051-06-30",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "cdsi_2025_0010_patient_is_an_infant_who_has_been_administered_a_dose_of_abrysvo_at_1_month_of_age": {
+    "evaluations": [
+      {
+        "date": "2025-12-01",
+        "cvx": "305",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-12-01",
+      "recommended_date": "2025-12-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  }
+}
