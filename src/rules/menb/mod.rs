@@ -17,7 +17,7 @@ pub fn definition() -> VaccineGroupDefinition {
         completion_rules: Vec::new(),
         rec_overrides: Vec::new(),
         custom_forecast_hook: Some(overrides::menb_custom_forecast_hook),
-        custom_switch_hook: Some(overrides::menb_custom_switch_hook),
+        custom_switch_hook: None,
         custom_evaluation_hook: Some(overrides::menb_custom_evaluation_hook),
         custom_dose_number_hook: None,
         custom_extra_dose_hook: None,

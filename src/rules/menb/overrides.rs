@@ -1,4 +1,4 @@
-use crate::date_utils::add_years;
+use crate::date_utils::{add_years, TimePeriod};
 use crate::engine::EvaluationContext;
 use crate::models::{
     Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus, VaccineGroupForecast,
@@ -8,12 +8,89 @@ use std::collections::HashMap;
 
 const DUPLICATE_POLICY_CHANGE_DATE: (i32, u32, u32) = (2024, 10, 25);
 
+fn policy_change_date() -> NaiveDate {
+    NaiveDate::from_ymd_opt(
+        DUPLICATE_POLICY_CHANGE_DATE.0,
+        DUPLICATE_POLICY_CHANGE_DATE.1,
+        DUPLICATE_POLICY_CHANGE_DATE.2,
+    )
+    .unwrap()
+}
+
 fn is_4c(cvx: &str) -> bool {
     matches!(cvx, "163" | "328")
 }
 
 fn is_fhbp(cvx: &str) -> bool {
     matches!(cvx, "162" | "316")
+}
+
+fn is_4c_series(series_name: &str) -> bool {
+    series_name.starts_with("MEN_B_4_C")
+}
+
+fn is_fhbp_series(series_name: &str) -> bool {
+    series_name.starts_with("MEN_BF_HBP")
+}
+
+fn is_opposite_family(series_name: &str, cvx: &str) -> bool {
+    (is_4c_series(series_name) && is_fhbp(cvx)) || (is_fhbp_series(series_name) && is_4c(cvx))
+}
+
+fn valid_count(forecast: &VaccineGroupForecast) -> usize {
+    forecast
+        .evaluations
+        .iter()
+        .filter(|evaluation| evaluation.status == DoseStatus::Valid)
+        .count()
+}
+
+fn is_complete(forecast: &VaccineGroupForecast) -> bool {
+    forecast
+        .forecasts
+        .first()
+        .is_some_and(|series| series.status == SeriesStatus::Complete)
+}
+
+fn choose_series<'a>(
+    two_dose_name: &'a str,
+    three_dose_name: &'a str,
+    candidate_forecasts: &HashMap<String, VaccineGroupForecast>,
+) -> String {
+    let Some(two_dose) = candidate_forecasts.get(two_dose_name) else {
+        return three_dose_name.to_string();
+    };
+    let Some(three_dose) = candidate_forecasts.get(three_dose_name) else {
+        return two_dose_name.to_string();
+    };
+
+    let two_complete = is_complete(two_dose);
+    let three_complete = is_complete(three_dose);
+
+    if two_complete != three_complete {
+        return if three_complete {
+            three_dose_name.to_string()
+        } else {
+            two_dose_name.to_string()
+        };
+    }
+
+    let two_valid = valid_count(two_dose);
+    let three_valid = valid_count(three_dose);
+
+    if three_valid > two_valid {
+        three_dose_name.to_string()
+    } else {
+        two_dose_name.to_string()
+    }
+}
+
+fn latest_family(history: &[Dose]) -> Option<&'static str> {
+    history
+        .iter()
+        .filter(|dose| is_4c(&dose.cvx) || is_fhbp(&dose.cvx))
+        .max_by_key(|dose| dose.date)
+        .map(|dose| if is_4c(&dose.cvx) { "4C" } else { "FHBP" })
 }
 
 fn has_mixed_brand_same_day(dose: &Dose, history: &[Dose]) -> bool {
@@ -25,8 +102,8 @@ fn has_mixed_brand_same_day(dose: &Dose, history: &[Dose]) -> bool {
 }
 
 pub fn menb_custom_evaluation_hook(
-    _series_name: &str,
-    _target_dose_idx: usize,
+    series_name: &str,
+    target_dose_idx: usize,
     ctx: &EvaluationContext,
     reasons: &mut Vec<EvaluationReason>,
     status: &mut DoseStatus,
@@ -44,23 +121,67 @@ pub fn menb_custom_evaluation_hook(
         reasons.retain(|r| *r != EvaluationReason::BelowMinimumAge);
     }
 
-    let policy_change = NaiveDate::from_ymd_opt(
-        DUPLICATE_POLICY_CHANGE_DATE.0,
-        DUPLICATE_POLICY_CHANGE_DATE.1,
-        DUPLICATE_POLICY_CHANGE_DATE.2,
-    )
-    .unwrap();
+    let policy_change = policy_change_date();
     if dose.date >= policy_change && has_mixed_brand_same_day(dose, ctx.history) {
         *status = DoseStatus::Invalid;
         reasons.clear();
         reasons.push(EvaluationReason::DuplicateShotSameDay);
+        return;
+    }
+
+    if is_opposite_family(series_name, &dose.cvx) {
+        *status = DoseStatus::Accepted;
+        reasons.clear();
+        reasons.push(EvaluationReason::VaccineNotCountedBasedOnMostRecentVaccineGiven);
+        reasons.push(EvaluationReason::OutsideRoutineSeries);
+        return;
+    }
+
+    if series_name == "MEN_B_4_C_3_DOSE_SERIES" && dose.date < policy_change {
+        *status = DoseStatus::Invalid;
+        reasons.clear();
+        reasons.push(EvaluationReason::VaccineNotPartOfSeries);
+        return;
+    }
+
+    if series_name == "MEN_B_4_C_2_DOSE_SERIES" && target_dose_idx == 2 && is_4c(&dose.cvx) {
+        if let Some((dose1_date, _)) = ctx.valid_doses.first() {
+            let threshold = if dose.date >= policy_change {
+                TimePeriod::parse("6m-4d").unwrap().add_to(*dose1_date)
+            } else {
+                TimePeriod::parse("1m-4d").unwrap().add_to(*dose1_date)
+            };
+
+            if dose.date < threshold {
+                *status = DoseStatus::Invalid;
+                if !reasons.contains(&EvaluationReason::BelowMinimumInterval) {
+                    reasons.push(EvaluationReason::BelowMinimumInterval);
+                }
+            } else {
+                *status = DoseStatus::Valid;
+                reasons.retain(|reason| *reason != EvaluationReason::BelowMinimumInterval);
+            }
+        }
+        return;
+    }
+
+    if matches!(series_name, "MEN_B_4_C_3_DOSE_SERIES" | "MEN_BF_HBP_3_DOSE_SERIES")
+        && target_dose_idx == 3
+    {
+        if let Some((dose1_date, _)) = ctx.valid_doses.first() {
+            let threshold = TimePeriod::parse("6m-4d").unwrap().add_to(*dose1_date);
+            if dose.date >= threshold {
+                *status = DoseStatus::Valid;
+                reasons.retain(|reason| *reason != EvaluationReason::BelowMinimumInterval);
+            }
+        }
     }
 }
 
 pub fn menb_custom_forecast_hook(
     patient: &Patient,
     valid_doses: &[(NaiveDate, usize)],
-    _history: &[Dose],
+    history: &[Dose],
     eval_date: NaiveDate,
     forecast: &mut SeriesForecast,
 ) {
@@ -73,10 +194,57 @@ pub fn menb_custom_forecast_hook(
         return;
     }
 
-    if eval_date >= add_years(patient.birth_date, 10) && !valid_doses.is_empty() {
-        forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = vec!["CLINICAL_PATIENT_DISCRETION".to_string()];
+    if valid_doses.is_empty() {
+        let age_10 = add_years(patient.birth_date, 10);
+        if eval_date < age_10 {
+            forecast.status = SeriesStatus::NotRecommended;
+            forecast.reasons = vec!["BELOW_MINIMUM_AGE_HIGH_RISK_SERIES".to_string()];
+        } else if eval_date < add_years(patient.birth_date, 16) {
+            forecast.status = SeriesStatus::ConditionallyRecommended;
+            forecast.reasons = vec!["HIGH_RISK".to_string()];
+        } else if eval_date < add_years(patient.birth_date, 24) {
+            forecast.status = SeriesStatus::ConditionallyRecommended;
+            forecast.reasons = vec!["CLINICAL_PATIENT_DISCRETION".to_string()];
+        } else {
+            forecast.status = SeriesStatus::ConditionallyRecommended;
+            forecast.reasons = vec!["HIGH_RISK".to_string()];
+        }
+        forecast.earliest_date = None;
+        forecast.recommended_date = None;
+        forecast.overdue_date = None;
+        forecast.latest_date = None;
+        return;
     }
+
+    if forecast.series_name == "MEN_B_4_C_2_DOSE_SERIES" {
+        if let Some((dose1_date, _)) = valid_doses.first() {
+            if *dose1_date >= policy_change_date() {
+                let anchor = TimePeriod::parse("6m").unwrap().add_to(*dose1_date);
+                forecast.earliest_date = Some(forecast.earliest_date.map_or(anchor, |date| date.max(anchor)));
+                forecast.recommended_date = Some(forecast.recommended_date.map_or(anchor, |date| date.max(anchor)));
+            } else {
+                let last_4c_shot = history
+                    .iter()
+                    .filter(|dose| is_4c(&dose.cvx))
+                    .map(|dose| dose.date)
+                    .max()
+                    .unwrap_or(*dose1_date);
+                let anchor = TimePeriod::parse("1m").unwrap().add_to(last_4c_shot);
+                forecast.earliest_date = Some(anchor);
+                forecast.recommended_date = Some(anchor);
+            }
+        }
+    }
+
+    if matches!(forecast.series_name.as_str(), "MEN_B_4_C_3_DOSE_SERIES" | "MEN_BF_HBP_3_DOSE_SERIES") {
+        if let Some((dose1_date, _)) = valid_doses.first() {
+            let anchor = TimePeriod::parse("6m").unwrap().add_to(*dose1_date);
+            forecast.earliest_date = Some(forecast.earliest_date.map_or(anchor, |date| date.max(anchor)));
+            forecast.recommended_date = Some(forecast.recommended_date.map_or(anchor, |date| date.max(anchor)));
+        }
+    }
+
+    forecast.overdue_date = None;
 }
 
 pub fn menb_custom_switch_hook(
@@ -95,17 +263,12 @@ pub fn menb_custom_switch_hook(
 }
 
 pub fn menb_group_selection(
-    patient: &Patient,
+    _patient: &Patient,
     history: &[Dose],
-    eval_date: NaiveDate,
+    _eval_date: NaiveDate,
     candidate_forecasts: &mut HashMap<String, VaccineGroupForecast>,
 ) -> String {
-    let policy_change = NaiveDate::from_ymd_opt(
-        DUPLICATE_POLICY_CHANGE_DATE.0,
-        DUPLICATE_POLICY_CHANGE_DATE.1,
-        DUPLICATE_POLICY_CHANGE_DATE.2,
-    )
-    .unwrap();
+    let policy_change = policy_change_date();
     if history
         .iter()
         .any(|dose| dose.date < policy_change && has_mixed_brand_same_day(dose, history))
@@ -113,47 +276,17 @@ pub fn menb_group_selection(
         return "MEN_B_4_C_2_DOSE_SERIES".to_string();
     }
 
-    for name in [
-        "MEN_B_4_C_2_DOSE_SERIES",
-        "MEN_BF_HBP_2_DOSE_SERIES",
-        "MEN_B_4_C_3_DOSE_SERIES",
-        "MEN_BF_HBP_3_DOSE_SERIES",
-    ] {
-        if candidate_forecasts.get(name).is_some_and(|f| {
-            f.forecasts
-                .iter()
-                .any(|fc| fc.status == SeriesStatus::Complete)
-        }) {
-            return name.to_string();
-        }
-    }
-
-    let first_menb = history
-        .iter()
-        .filter(|d| is_4c(&d.cvx) || is_fhbp(&d.cvx))
-        .min_by_key(|d| d.date);
-
-    if let Some(dose) = first_menb {
-        let age_16 = add_years(patient.birth_date, 16);
-        if is_4c(&dose.cvx) {
-            return if dose.date >= age_16 {
-                "MEN_B_4_C_2_DOSE_SERIES".to_string()
-            } else {
-                "MEN_B_4_C_3_DOSE_SERIES".to_string()
-            };
-        }
-        if is_fhbp(&dose.cvx) {
-            return if dose.date >= age_16 {
-                "MEN_BF_HBP_2_DOSE_SERIES".to_string()
-            } else {
-                "MEN_BF_HBP_3_DOSE_SERIES".to_string()
-            };
-        }
-    }
-
-    if eval_date >= add_years(patient.birth_date, 16) {
-        "MEN_B_4_C_2_DOSE_SERIES".to_string()
-    } else {
-        "MEN_B_4_C_3_DOSE_SERIES".to_string()
+    match latest_family(history) {
+        Some("FHBP") => choose_series(
+            "MEN_BF_HBP_2_DOSE_SERIES",
+            "MEN_BF_HBP_3_DOSE_SERIES",
+            candidate_forecasts,
+        ),
+        Some("4C") => choose_series(
+            "MEN_B_4_C_2_DOSE_SERIES",
+            "MEN_B_4_C_3_DOSE_SERIES",
+            candidate_forecasts,
+        ),
+        _ => "MEN_B_4_C_2_DOSE_SERIES".to_string(),
     }
 }
