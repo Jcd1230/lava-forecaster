@@ -4,6 +4,10 @@ use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast,
 use crate::date_utils::{TimePeriod, add_years};
 use std::collections::HashMap;
 
+fn is_hpv_cvx(cvx: &str) -> bool {
+    matches!(cvx, "62" | "118" | "137" | "165")
+}
+
 fn add_interval(date: NaiveDate, interval: &str) -> NaiveDate {
     TimePeriod::parse(interval).unwrap().add_to(date)
 }
@@ -45,12 +49,17 @@ pub fn hpv_custom_evaluation_hook(
         if series_name == "HPV_3_DOSE_SERIES" && target_dose_idx == 3 {
             if ctx.valid_doses.len() >= 2 {
                 let dose_1_date = ctx.valid_doses[0].0;
+                let dose_2_date = ctx.valid_doses[1].0;
                 let min_int_1_3 = TimePeriod::parse("5m-4d").unwrap().add_to(dose_1_date);
-                if dose.date < min_int_1_3 {
+                let min_int_2_3 = TimePeriod::parse("80d").unwrap().add_to(dose_2_date);
+                if dose.date < min_int_1_3 || dose.date < min_int_2_3 {
                     *status = DoseStatus::Invalid;
                     if !reasons.contains(&EvaluationReason::BelowMinimumInterval) {
                         reasons.push(EvaluationReason::BelowMinimumInterval);
                     }
+                } else if reasons.contains(&EvaluationReason::BelowMinimumInterval) {
+                    reasons.retain(|reason| *reason != EvaluationReason::BelowMinimumInterval);
+                    *status = DoseStatus::Valid;
                 }
             }
         }
@@ -72,7 +81,9 @@ pub fn hpv_custom_forecast_hook(
     let age_27 = add_years(patient.birth_date, 27);
     let age_46 = add_years(patient.birth_date, 46);
 
-    if eval_date >= age_27 && eval_date < age_46 {
+    let has_hpv_history = _history.iter().any(|dose| is_hpv_cvx(&dose.cvx));
+
+    if !has_hpv_history && eval_date >= age_27 && eval_date < age_46 {
         forecast.status = SeriesStatus::ConditionallyRecommended;
         forecast.earliest_date = None;
         forecast.recommended_date = None;
@@ -97,15 +108,25 @@ pub fn hpv_custom_forecast_hook(
 
     let first_valid_date = valid_doses[0].0;
     let started_at_or_after_15 = first_valid_date >= age_15;
+    let latest_hpv_dose_date = _history.iter()
+        .filter(|dose| is_hpv_cvx(&dose.cvx))
+        .map(|dose| dose.date)
+        .max()
+        .unwrap_or(first_valid_date);
 
     if valid_doses.len() == 1 && started_at_or_after_15 {
-        forecast.overdue_date = Some(latest_boundary(first_valid_date, "16w"));
+        forecast.overdue_date = Some(latest_boundary(latest_hpv_dose_date, "16w"));
         return;
     }
 
     if valid_doses.len() >= 2 {
-        forecast.earliest_date = Some(add_interval(first_valid_date, "5m"));
-        forecast.recommended_date = Some(add_interval(first_valid_date, "6m"));
+        let earliest_from_dose_1 = add_interval(first_valid_date, "5m");
+        let recommended_from_dose_1 = add_interval(first_valid_date, "6m");
+        let earliest_from_latest = add_interval(latest_hpv_dose_date, "12w");
+        let recommended_from_latest = add_interval(latest_hpv_dose_date, "4m");
+
+        forecast.earliest_date = Some(earliest_from_dose_1.max(earliest_from_latest));
+        forecast.recommended_date = Some(recommended_from_dose_1.max(recommended_from_latest));
         forecast.overdue_date = Some(latest_boundary(
             first_valid_date,
             if started_at_or_after_15 { "7m+4w" } else { "13m+4w" },
