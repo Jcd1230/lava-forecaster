@@ -15,6 +15,17 @@ fn is_mmr_group(cvx: &str) -> bool {
     MMR_CVX.contains(&cvx)
 }
 
+fn has_same_day_mixed_live_virus(history: &[Dose], eval_date: NaiveDate) -> bool {
+    let has_mmr_live = history
+        .iter()
+        .any(|dose| dose.date == eval_date && is_mmr_group(&dose.cvx));
+    let has_non_mmr_live = history
+        .iter()
+        .any(|dose| dose.date == eval_date && is_live_virus(&dose.cvx) && !is_mmr_group(&dose.cvx));
+
+    has_mmr_live && has_non_mmr_live
+}
+
 pub fn mmr_custom_evaluation_hook(
     _series_name: &str,
     target_dose_idx: usize,
@@ -113,7 +124,6 @@ pub fn mmr_custom_forecast_hook(
             // Case 3: Adjust earliest and recommended dates based on live virus conflict in history
             let last_live_virus = history.iter()
                 .filter(|d| is_live_virus(&d.cvx))
-                .filter(|d| d.date < eval_date)
                 .map(|d| d.date)
                 .max();
 
@@ -137,17 +147,9 @@ pub fn mmr_custom_forecast_hook(
                 }
             }
 
-            if history.iter().any(|dose| is_live_virus(&dose.cvx) && dose.date == eval_date) {
-                if let Some(ref mut earliest) = forecast.earliest_date {
-                    if *earliest < eval_date {
-                        *earliest = eval_date;
-                    }
-                }
-                if let Some(ref mut recommended) = forecast.recommended_date {
-                    if *recommended < eval_date {
-                        *recommended = eval_date;
-                    }
-                }
+            if has_same_day_mixed_live_virus(history, eval_date) {
+                forecast.earliest_date = Some(eval_date);
+                forecast.recommended_date = Some(eval_date);
             }
         }
     }

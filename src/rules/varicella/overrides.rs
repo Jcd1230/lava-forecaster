@@ -14,6 +14,10 @@ fn is_varicella_group(cvx: &str) -> bool {
     cvx == "21" || cvx == "94"
 }
 
+fn is_old_zoster(cvx: &str) -> bool {
+    cvx == "121" || cvx == "188"
+}
+
 pub fn varicella_custom_evaluation_hook(
     _series_name: &str,
     target_dose_idx: usize,
@@ -90,7 +94,7 @@ pub fn varicella_custom_forecast_hook(
     if forecast.status != SeriesStatus::Complete
         && valid_doses.is_empty()
         && !history.is_empty()
-        && history.iter().all(|dose| !is_varicella_group(&dose.cvx))
+        && history.iter().all(|dose| is_old_zoster(&dose.cvx))
     {
         forecast.earliest_date = Some(eval_date);
         forecast.recommended_date = Some(eval_date);
@@ -113,8 +117,7 @@ pub fn varicella_custom_forecast_hook(
     // 3. Live Virus Forecast Spacing
     if forecast.status != SeriesStatus::Complete {
         let last_live_virus = history.iter()
-            .filter(|d| is_live_virus(&d.cvx))
-            .filter(|d| d.date < eval_date)
+            .filter(|d| is_varicella_group(&d.cvx))
             .map(|d| d.date)
             .max();
 

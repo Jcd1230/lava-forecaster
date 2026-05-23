@@ -11,6 +11,21 @@ use models::{Dose, ForecastResponse, Gender, Patient, VaccineGroupForecast};
 use std::time::Instant;
 use rayon::prelude::*;
 
+fn is_single_antigen_mmr(cvx: &str) -> bool {
+    matches!(cvx, "3" | "4" | "5" | "6" | "7" | "03" | "04" | "05" | "06" | "07" | "38")
+}
+
+fn has_same_day_separate_mmr_and_varicella(history: &[Dose], eval_date: NaiveDate) -> bool {
+    let has_mmr = history
+        .iter()
+        .any(|dose| dose.date == eval_date && is_single_antigen_mmr(&dose.cvx));
+    let has_varicella = history
+        .iter()
+        .any(|dose| dose.date == eval_date && matches!(dose.cvx.as_str(), "21"));
+
+    has_mmr && has_varicella
+}
+
 fn parse_request(content: &str) -> Result<models::ForecastRequest, Box<dyn std::error::Error>> {
     // Try to parse as simplified format first
     if let Ok(req) = serde_json::from_str::<models::ForecastRequest>(content) {
@@ -116,6 +131,21 @@ fn evaluate_patient_all_groups(
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+
+    if has_same_day_separate_mmr_and_varicella(history, eval_date) {
+        for g in &mut results {
+            if g.vaccine_group != "MMR" {
+                continue;
+            }
+
+            for f in &mut g.forecasts {
+                if f.status == models::SeriesStatus::NotComplete {
+                    f.earliest_date = Some(eval_date);
+                    f.recommended_date = Some(eval_date);
                 }
             }
         }
