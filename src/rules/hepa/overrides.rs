@@ -255,18 +255,18 @@ pub fn hepa_group_selection(
             }
         }
     } else if selected == "HEP_A_2_DOSE_CHILD_ADULT_SERIES" {
-        // Find doses Valid in 3-dose or 4-dose, and if they are Invalid in 2-dose, mark Accepted
+        // Only Twinrix-valid alternate-series doses are accepted when the 2-dose series stays selected.
         let mut valid_dates_other = Vec::new();
         if let Some(f3) = candidate_forecasts.get("HEP_A_ADULT_3_DOSE_SERIES") {
             for e in &f3.evaluations {
-                if e.status == DoseStatus::Valid {
+                if e.status == DoseStatus::Valid && e.cvx == "104" {
                     valid_dates_other.push(e.dose_date);
                 }
             }
         }
         if let Some(f4) = candidate_forecasts.get("HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES") {
             for e in &f4.evaluations {
-                if e.status == DoseStatus::Valid {
+                if e.status == DoseStatus::Valid && e.cvx == "104" {
                     valid_dates_other.push(e.dose_date);
                 }
             }

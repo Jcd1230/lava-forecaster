@@ -87,6 +87,17 @@ pub fn varicella_custom_forecast_hook(
         return;
     }
 
+    if forecast.status != SeriesStatus::Complete
+        && valid_doses.is_empty()
+        && !history.is_empty()
+        && history.iter().all(|dose| !is_varicella_group(&dose.cvx))
+    {
+        forecast.earliest_date = Some(eval_date);
+        forecast.recommended_date = Some(eval_date);
+        forecast.overdue_date = Some(eval_date);
+        return;
+    }
+
     // 2. Patient age >= 13 years interval overrides
     if forecast.status != SeriesStatus::Complete && valid_doses.len() == 1 {
         let age_13 = add_years(patient.birth_date, 13);
@@ -103,6 +114,7 @@ pub fn varicella_custom_forecast_hook(
     if forecast.status != SeriesStatus::Complete {
         let last_live_virus = history.iter()
             .filter(|d| is_live_virus(&d.cvx))
+            .filter(|d| d.date < eval_date)
             .map(|d| d.date)
             .max();
 

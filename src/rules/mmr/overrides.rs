@@ -113,6 +113,7 @@ pub fn mmr_custom_forecast_hook(
             // Case 3: Adjust earliest and recommended dates based on live virus conflict in history
             let last_live_virus = history.iter()
                 .filter(|d| is_live_virus(&d.cvx))
+                .filter(|d| d.date < eval_date)
                 .map(|d| d.date)
                 .max();
 
@@ -132,6 +133,19 @@ pub fn mmr_custom_forecast_hook(
                 if let (Some(earliest), Some(recommended)) = (forecast.earliest_date, forecast.recommended_date.as_mut()) {
                     if *recommended < earliest {
                         *recommended = earliest;
+                    }
+                }
+            }
+
+            if history.iter().any(|dose| is_live_virus(&dose.cvx) && dose.date == eval_date) {
+                if let Some(ref mut earliest) = forecast.earliest_date {
+                    if *earliest < eval_date {
+                        *earliest = eval_date;
+                    }
+                }
+                if let Some(ref mut recommended) = forecast.recommended_date {
+                    if *recommended < eval_date {
+                        *recommended = eval_date;
                     }
                 }
             }
