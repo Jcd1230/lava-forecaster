@@ -52,13 +52,13 @@ To implement a group, follow the guidelines in the [Onboarding & Implementation 
 
 ## 8. Rotavirus (`ROTAVIRUS`)
 *Java Concept:* `ROTAVIRUS` | *Focus Code:* `820`
-- [ ] Implement `Rotavirus2DoseSeries.yml` (Rotarix)
-- [ ] Implement `Rotavirus3DoseSeries.yml` (RotaTeq)
-- [ ] Enforce strict age clamps:
+- [x] Implement `Rotavirus2DoseSeries.yml` (Rotarix)
+- [x] Implement `Rotavirus3DoseSeries.yml` (RotaTeq)
+- [x] Enforce strict age clamps:
   - Any dose given at age >= 8 months is evaluated as **Invalid / TOO_OLD**.
   - Forecast recommendation status is forced to `NotRecommended / TOO_OLD` once patient reaches age 8 months.
-- [ ] Implement vaccine-counting override: invalid unspecified formulation still counts for dose numbering.
-- [ ] Implement duplicate-same-day CVX preferences split by date 1/1/2000 (withdrawn CVX 74 vs CVX 119).
+- [x] Implement vaccine-counting override: invalid unspecified formulation still counts for dose numbering.
+- [x] Implement duplicate-same-day CVX preferences split by date 1/1/2000 (withdrawn CVX 74 vs CVX 119).
 
 ## 9. Seasonal Influenza (`INFLUENZA`)
 *Java Concept:* `INFLUENZA` | *Focus Code:* `800`
