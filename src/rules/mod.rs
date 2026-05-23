@@ -17,10 +17,11 @@ pub mod yellow_fever;
 pub mod zoster;
 pub mod jev;
 pub mod h1n1;
+pub mod mpox;
 
 use crate::engine::{
-    ConditionalCompletionRule, CustomDoseNumberHook, CustomEvaluationHook, CustomForecastHook,
-    CustomSwitchHook, GroupSelectionAndPostProcess, ParameterOverrideRule,
+    ConditionalCompletionRule, CustomDoseNumberHook, CustomEvaluationHook, CustomExtraDoseHook,
+    CustomForecastHook, CustomSwitchHook, GroupSelectionAndPostProcess, ParameterOverrideRule,
     RecommendationOverrideRule,
 };
 use crate::schedule::CompiledSeries;
@@ -37,6 +38,7 @@ pub struct VaccineGroupDefinition {
     pub custom_switch_hook: Option<CustomSwitchHook>,
     pub custom_evaluation_hook: Option<CustomEvaluationHook>,
     pub custom_dose_number_hook: Option<CustomDoseNumberHook>,
+    pub custom_extra_dose_hook: Option<CustomExtraDoseHook>,
     pub group_selection: Option<GroupSelectionAndPostProcess>,
 }
 
@@ -64,6 +66,7 @@ pub fn get_ruleset(group_name: &str) -> Option<&'static VaccineGroupDefinition> 
         m.insert("YELLOW_FEVER", yellow_fever::definition());
         m.insert("JEV", jev::definition());
         m.insert("H1N1", h1n1::definition());
+        m.insert("MPOX", mpox::definition());
         m
     });
 
@@ -91,5 +94,6 @@ pub fn get_all_groups() -> Vec<&'static VaccineGroupDefinition> {
         get_ruleset("YELLOW_FEVER").unwrap(),
         get_ruleset("JEV").unwrap(),
         get_ruleset("H1N1").unwrap(),
+        get_ruleset("MPOX").unwrap(),
     ]
 }

@@ -85,12 +85,12 @@ To implement a group, follow the guidelines in the [Onboarding & Implementation 
 
 ## 11. Mpox (`MPOX`)
 *Java Concept:* `MPOX` | *Focus Code:* `860`
-- [ ] Implement `Mpox1DoseSeries.yml` & `Mpox2DoseSeries.yml`
-- [ ] Implement interval warning: dose 2 given < 28 days after dose 1 is **Accepted** but with supplemental text warnings (not Invalid).
-- [ ] Exempt Mpox (CVX 206) from standard live-virus inter-group interval checks.
-- [ ] Support booster dose evaluation (dose 3 evaluated as booster if patient has 2 valid doses).
-- [ ] Enforce duplicate-same-day precedence (CVX 206/75/105 > CVX 325; Valid > Accepted).
-- [ ] Map incomplete series to `Conditionally Recommended / HIGH_RISK` and complete to `Not Recommended / COMPLETE_HIGH_RISK`.
+- [x] Implement `Mpox1DoseSeries.yml` & `Mpox2DoseSeries.yml`
+- [x] Implement interval warning: dose 2 given < 28 days after dose 1 is **Accepted** but with supplemental text warnings (not Invalid).
+- [x] Exempt Mpox (CVX 206) from standard live-virus inter-group interval checks.
+- [x] Support booster dose evaluation (dose 3 evaluated as booster if patient has 2 valid doses).
+- [x] Enforce duplicate-same-day precedence (CVX 206/75/105 > CVX 325; Valid > Accepted).
+- [x] Map incomplete series to `Conditionally Recommended / HIGH_RISK` and complete to `Not Recommended / COMPLETE_HIGH_RISK`.
 
 ## 12. RSV (Respiratory Syncytial Virus - `RSV`)
 *Java Concept:* `RSV` | *Focus Code:* `875`

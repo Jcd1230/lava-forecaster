@@ -18,6 +18,7 @@ pub fn definition() -> VaccineGroupDefinition {
         custom_switch_hook: None,
         custom_evaluation_hook: Some(overrides::jev_custom_evaluation_hook),
         custom_dose_number_hook: None,
+        custom_extra_dose_hook: None,
         group_selection: Some(overrides::jev_group_selection),
     }
 }

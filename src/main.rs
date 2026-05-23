@@ -40,6 +40,7 @@ fn evaluate_patient_all_groups(
                 engine.custom_switch_hook = ruleset.custom_switch_hook;
                 engine.custom_evaluation_hook = ruleset.custom_evaluation_hook;
                 engine.custom_dose_number_hook = ruleset.custom_dose_number_hook;
+                engine.custom_extra_dose_hook = ruleset.custom_extra_dose_hook;
 
                 let forecast =
                     engine.evaluate_patient(patient, history, eval_date, &ruleset.series);
@@ -60,6 +61,7 @@ fn evaluate_patient_all_groups(
                 engine.custom_switch_hook = ruleset.custom_switch_hook;
                 engine.custom_evaluation_hook = ruleset.custom_evaluation_hook;
                 engine.custom_dose_number_hook = ruleset.custom_dose_number_hook;
+                engine.custom_extra_dose_hook = ruleset.custom_extra_dose_hook;
 
                 let forecast =
                     engine.evaluate_patient(patient, history, eval_date, &ruleset.series);

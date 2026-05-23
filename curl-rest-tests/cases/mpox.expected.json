@@ -1,0 +1,193 @@
+{
+  "mpox_1_dose_selected_then_booster_valid": {
+    "evaluations": [
+      {
+        "date": "2021-01-01",
+        "cvx": "75",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2021-01-31",
+        "cvx": "206",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "mpox_2_dose_cvx75_accepted_not_counted": {
+    "evaluations": [
+      {
+        "date": "2020-06-29",
+        "cvx": "75",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "mpox_2_dose_first_booster_valid": {
+    "evaluations": [
+      {
+        "date": "2020-01-02",
+        "cvx": "206",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2020-01-30",
+        "cvx": "206",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2020-03-01",
+        "cvx": "206",
+        "status": "Valid",
+        "dose_number": 3
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "mpox_2_dose_one_valid_206": {
+    "evaluations": [
+      {
+        "date": "2020-01-02",
+        "cvx": "206",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2020-01-30",
+      "recommended_date": "2020-01-30",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "mpox_2_dose_short_interval_still_complete": {
+    "evaluations": [
+      {
+        "date": "2020-01-02",
+        "cvx": "206",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2020-01-16",
+        "cvx": "206",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "mpox_after_booster_extra_dose_accepted": {
+    "evaluations": [
+      {
+        "date": "2020-01-02",
+        "cvx": "206",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2020-01-30",
+        "cvx": "206",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2020-03-01",
+        "cvx": "206",
+        "status": "Valid",
+        "dose_number": 3
+      },
+      {
+        "date": "2020-03-31",
+        "cvx": "206",
+        "status": "Accepted",
+        "dose_number": 4
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "mpox_no_history": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "mpox_same_day_206_beats_325": {
+    "evaluations": [
+      {
+        "date": "2020-01-02",
+        "cvx": "206",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2020-01-02",
+        "cvx": "325",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2020-01-30",
+      "recommended_date": "2020-01-30",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "mpox_same_day_75_beats_325": {
+    "evaluations": [
+      {
+        "date": "2021-01-01",
+        "cvx": "75",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2021-01-01",
+        "cvx": "325",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  }
+}

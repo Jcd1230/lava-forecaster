@@ -19,6 +19,7 @@ pub fn definition() -> VaccineGroupDefinition {
         custom_switch_hook: None,
         custom_evaluation_hook: Some(overrides::influenza_custom_evaluation_hook),
         custom_dose_number_hook: None,
+        custom_extra_dose_hook: None,
         group_selection: Some(overrides::influenza_group_selection),
     }
 }

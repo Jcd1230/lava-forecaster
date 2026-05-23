@@ -1,0 +1,111 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "mpox_no_history",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 2y",
+      "doses": [],
+      "group": "MPOX",
+      "focus": "860"
+    },
+    {
+      "name": "mpox_2_dose_one_valid_206",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 40d",
+      "doses": [
+        "birth + 1d:206"
+      ],
+      "group": "MPOX",
+      "focus": "860"
+    },
+    {
+      "name": "mpox_2_dose_cvx75_accepted_not_counted",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 190d",
+      "doses": [
+        "birth + 180d:75"
+      ],
+      "group": "MPOX",
+      "focus": "860"
+    },
+    {
+      "name": "mpox_same_day_206_beats_325",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 40d",
+      "doses": [
+        "birth + 1d:325",
+        "birth + 1d:206"
+      ],
+      "group": "MPOX",
+      "focus": "860"
+    },
+    {
+      "name": "mpox_same_day_75_beats_325",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 406d",
+      "doses": [
+        "birth + 366d:325",
+        "birth + 366d:75"
+      ],
+      "group": "MPOX",
+      "focus": "860"
+    },
+    {
+      "name": "mpox_2_dose_short_interval_still_complete",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 40d",
+      "doses": [
+        "birth + 1d:206",
+        "birth + 15d:206"
+      ],
+      "group": "MPOX",
+      "focus": "860"
+    },
+    {
+      "name": "mpox_2_dose_first_booster_valid",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 90d",
+      "doses": [
+        "birth + 1d:206",
+        "birth + 29d:206",
+        "birth + 60d:206"
+      ],
+      "group": "MPOX",
+      "focus": "860"
+    },
+    {
+      "name": "mpox_1_dose_selected_then_booster_valid",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 436d",
+      "doses": [
+        "birth + 366d:75",
+        "birth + 396d:206"
+      ],
+      "group": "MPOX",
+      "focus": "860"
+    },
+    {
+      "name": "mpox_after_booster_extra_dose_accepted",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 120d",
+      "doses": [
+        "birth + 1d:206",
+        "birth + 29d:206",
+        "birth + 60d:206",
+        "birth + 90d:206"
+      ],
+      "group": "MPOX",
+      "focus": "860"
+    }
+  ]
+}

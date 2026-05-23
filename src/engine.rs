@@ -93,6 +93,11 @@ pub type CustomDoseNumberHook = fn(
     ctx: &EvaluationContext,
 ) -> usize;
 
+pub type CustomExtraDoseHook = fn(
+    series_name: &str,
+    ctx: &EvaluationContext,
+) -> Option<(DoseStatus, Vec<EvaluationReason>)>;
+
 pub type GroupSelectionAndPostProcess = fn(
     patient: &Patient,
     history: &[Dose],
@@ -137,6 +142,7 @@ pub struct EvaluationEngine {
     pub custom_switch_hook: Option<CustomSwitchHook>,
     pub custom_evaluation_hook: Option<CustomEvaluationHook>,
     pub custom_dose_number_hook: Option<CustomDoseNumberHook>,
+    pub custom_extra_dose_hook: Option<CustomExtraDoseHook>,
 }
 
 impl EvaluationEngine {
@@ -150,6 +156,7 @@ impl EvaluationEngine {
             custom_switch_hook: None,
             custom_evaluation_hook: None,
             custom_dose_number_hook: None,
+            custom_extra_dose_hook: None,
         }
     }
 
@@ -256,6 +263,33 @@ impl EvaluationEngine {
 
             // If patient already completed the series, additional doses are boosters/extra
             if is_completed || target_dose_idx > active_series.num_doses {
+                let ctx = EvaluationContext::new(
+                    patient,
+                    history,
+                    &valid_doses,
+                    Some(dose),
+                    target_dose_idx,
+                    eval_date,
+                    &active_series.name,
+                );
+                if let Some(extra_dose_hook) = self.custom_extra_dose_hook {
+                    if let Some((status, reasons)) = (extra_dose_hook)(&active_series.name, &ctx) {
+                        let output_dose_number = std::cmp::min(target_dose_idx, valid_doses.len() + 1);
+                        if status == DoseStatus::Valid {
+                            valid_doses.push((dose.date, target_dose_idx));
+                        }
+                        evaluations.push(DoseEvaluation {
+                            dose_date: dose.date,
+                            cvx: dose.cvx.clone(),
+                            status,
+                            reasons,
+                            dose_number: Some(output_dose_number),
+                        });
+                        i += 1;
+                        continue;
+                    }
+                }
+
                 let output_dose_number = std::cmp::min(target_dose_idx, valid_doses.len() + 1);
                 evaluations.push(DoseEvaluation {
                     dose_date: dose.date,
@@ -700,6 +734,12 @@ fn get_same_day_priority(group: &str, cvx: &str, birth_date: NaiveDate, dose_dat
                 }
             }
         }
+        "MPOX" => match cvx {
+            "206" => 0,
+            "75" | "105" => 1,
+            "325" => 2,
+            _ => 3,
+        },
         _ => 0,
     }
 }
