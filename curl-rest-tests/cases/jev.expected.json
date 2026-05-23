@@ -1,0 +1,172 @@
+{
+  "jevc_risk_2_dose_accelerated_no_history_at_rec_age": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "jevc_risk_2_dose_accelerated_dose1_valid": {
+    "evaluations": [
+      {
+        "date": "2038-01-01",
+        "cvx": "134",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2038-01-08",
+      "recommended_date": "2038-01-08",
+      "overdue_date": "2038-01-28",
+      "status": "NotComplete"
+    }
+  },
+  "jevc_risk_2_dose_accelerated_dose1_too_young": {
+    "evaluations": [
+      {
+        "date": "2037-12-27",
+        "cvx": "134",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2038-01-24",
+      "recommended_date": "2038-01-24",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "jevc_risk_2_dose_accelerated_complete": {
+    "evaluations": [
+      {
+        "date": "2038-01-01",
+        "cvx": "134",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2038-01-08",
+        "cvx": "134",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "jevc_risk_2_dose_accelerated_dose2_too_soon": {
+    "evaluations": [
+      {
+        "date": "2038-01-01",
+        "cvx": "134",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2038-01-07",
+        "cvx": "134",
+        "status": "Invalid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2038-01-14",
+      "recommended_date": "2038-01-14",
+      "overdue_date": "2038-02-03",
+      "status": "NotComplete"
+    }
+  },
+  "jevc_risk_2_dose_no_history_at_rec_age": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "jevc_risk_2_dose_dose1_valid": {
+    "evaluations": [
+      {
+        "date": "2020-03-01",
+        "cvx": "134",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2020-03-29",
+      "recommended_date": "2020-03-29",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "jevc_risk_2_dose_dose1_too_young": {
+    "evaluations": [
+      {
+        "date": "2020-02-25",
+        "cvx": "134",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "jevc_risk_2_dose_complete": {
+    "evaluations": [
+      {
+        "date": "2020-03-01",
+        "cvx": "134",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2020-03-29",
+        "cvx": "134",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "jevc_risk_2_dose_dose2_too_soon": {
+    "evaluations": [
+      {
+        "date": "2020-03-01",
+        "cvx": "134",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2020-03-24",
+        "cvx": "134",
+        "status": "Invalid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2020-04-21",
+      "recommended_date": "2020-04-21",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  }
+}

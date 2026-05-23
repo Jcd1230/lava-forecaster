@@ -102,9 +102,9 @@ To implement a group, follow the guidelines in the [Onboarding & Implementation 
 
 ## 13. JEV (Japanese Encephalitis - `JEV`)
 *Java Concept:* `JAPANESE_ENCEPHALITIS` | *Focus Code:* `902`
-- [ ] Implement `JEVCRisk2DoseSeries.yml` & `JEVCRisk2DoseAcceleratedSeries.yml`
-- [ ] Support 18-65y accelerated series: allows 7-day interval between dose 1 and 2 (normally 28 days).
-- [ ] Forecast recommendation status is `Not Recommended / TOO_OLD` for accelerated series if patient is >= 66y.
+- [x] Implement `JEVCRisk2DoseSeries.yml` & `JEVCRisk2DoseAcceleratedSeries.yml`
+- [x] Support 18-65y accelerated series: allows 7-day interval between dose 1 and 2 (normally 28 days).
+- [x] Forecast recommendation status is `Not Recommended / TOO_OLD` for accelerated series if patient is >= 66y.
 
 ## 14. Cholera (`CHOLERA`)
 *Java Concept:* `CHOLERA` | *Focus Code:* `901`
@@ -137,6 +137,6 @@ To implement a group, follow the guidelines in the [Onboarding & Implementation 
 
 ## 17. Historical H1N1 Influenza (`H1N1`)
 *Java Concept:* `INFLUENZA_H1N1` | *Focus Code:* `890`
-- [ ] Implement `H1N11DoseSeries.yml` & `H1N12DoseSeries.yml`
-- [ ] Check H1N1 season boundaries: doses outside dates are evaluated as **Invalid / OUTSIDE_FLU_SEASON**.
-- [ ] Ensure H1N1 does not generate recommendations or forecasts (historical database tracking only).
+- [x] Implement `H1N11DoseSeries.yml` & `H1N12DoseSeries.yml`
+- [x] Check H1N1 season boundaries: doses outside dates are evaluated as **Invalid / OUTSIDE_FLU_SEASON**.
+- [x] Ensure H1N1 does not generate recommendations or forecasts (historical database tracking only).

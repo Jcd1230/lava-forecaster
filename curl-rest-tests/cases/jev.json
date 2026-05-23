@@ -1,0 +1,115 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "jevc_risk_2_dose_accelerated_no_history_at_rec_age",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 18y",
+      "doses": [],
+      "group": "JEV",
+      "focus": "902"
+    },
+    {
+      "name": "jevc_risk_2_dose_accelerated_dose1_valid",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 6603d",
+      "doses": [
+        "birth + 18y:134"
+      ],
+      "group": "JEV",
+      "focus": "902"
+    },
+    {
+      "name": "jevc_risk_2_dose_accelerated_dose1_too_young",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 6598d",
+      "doses": [
+        "birth + 6570d:134"
+      ],
+      "group": "JEV",
+      "focus": "902"
+    },
+    {
+      "name": "jevc_risk_2_dose_accelerated_complete",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 6610d",
+      "doses": [
+        "birth + 6575d:134",
+        "birth + 6582d:134"
+      ],
+      "group": "JEV",
+      "focus": "902"
+    },
+    {
+      "name": "jevc_risk_2_dose_accelerated_dose2_too_soon",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 6609d",
+      "doses": [
+        "birth + 18y:134",
+        "birth + 6581d:134"
+      ],
+      "group": "JEV",
+      "focus": "902"
+    },
+    {
+      "name": "jevc_risk_2_dose_no_history_at_rec_age",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 2m",
+      "doses": [],
+      "group": "JEV",
+      "focus": "902"
+    },
+    {
+      "name": "jevc_risk_2_dose_dose1_valid",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 88d",
+      "doses": [
+        "birth + 2m:134"
+      ],
+      "group": "JEV",
+      "focus": "902"
+    },
+    {
+      "name": "jevc_risk_2_dose_dose1_too_young",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 83d",
+      "doses": [
+        "birth + 55d:134"
+      ],
+      "group": "JEV",
+      "focus": "902"
+    },
+    {
+      "name": "jevc_risk_2_dose_complete",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 116d",
+      "doses": [
+        "birth + 60d:134",
+        "birth + 88d:134"
+      ],
+      "group": "JEV",
+      "focus": "902"
+    },
+    {
+      "name": "jevc_risk_2_dose_dose2_too_soon",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 111d",
+      "doses": [
+        "birth + 2m:134",
+        "birth + 83d:134"
+      ],
+      "group": "JEV",
+      "focus": "902"
+    }
+  ]
+}

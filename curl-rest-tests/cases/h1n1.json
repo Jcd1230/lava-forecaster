@@ -1,0 +1,102 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "h1n1_1_dose_no_history_at_rec_age",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 6m",
+      "doses": [],
+      "group": "H1N1",
+      "focus": "890"
+    },
+    {
+      "name": "h1n1_1_dose_dose1_valid",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 210d",
+      "doses": [
+        "birth + 6m:128"
+      ],
+      "group": "H1N1",
+      "focus": "890"
+    },
+    {
+      "name": "h1n1_1_dose_dose1_too_young",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 205d",
+      "doses": [
+        "birth + 177d:128"
+      ],
+      "group": "H1N1",
+      "focus": "890"
+    },
+    {
+      "name": "h1n1_1_dose_complete",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 210d",
+      "doses": [
+        "birth + 182d:128"
+      ],
+      "group": "H1N1",
+      "focus": "890"
+    },
+    {
+      "name": "h1n1_2_dose_no_history_at_rec_age",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 6m",
+      "doses": [],
+      "group": "H1N1",
+      "focus": "890"
+    },
+    {
+      "name": "h1n1_2_dose_dose1_valid",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 210d",
+      "doses": [
+        "birth + 6m:128"
+      ],
+      "group": "H1N1",
+      "focus": "890"
+    },
+    {
+      "name": "h1n1_2_dose_dose1_too_young",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 205d",
+      "doses": [
+        "birth + 177d:128"
+      ],
+      "group": "H1N1",
+      "focus": "890"
+    },
+    {
+      "name": "h1n1_2_dose_complete",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 238d",
+      "doses": [
+        "birth + 182d:128",
+        "birth + 210d:128"
+      ],
+      "group": "H1N1",
+      "focus": "890"
+    },
+    {
+      "name": "h1n1_2_dose_dose2_too_soon",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 230d",
+      "doses": [
+        "birth + 6m:128",
+        "birth + 202d:128"
+      ],
+      "group": "H1N1",
+      "focus": "890"
+    }
+  ]
+}

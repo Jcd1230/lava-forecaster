@@ -629,8 +629,8 @@ def verify_equivalence(tc_name, java_res, rust_res, expected_res=None):
     # 2. Forecast compare
     forecast_match = True
     for field in ('status', 'earliest_date', 'recommended_date', 'overdue_date'):
-        j_val = j_fore.get(field)
-        r_val = r_fore.get(field)
+        j_val = j_fore.get(field) if j_fore else None
+        r_val = r_fore.get(field) if r_fore else None
         e_val = e_fore.get(field) if e_fore else None
         
         # normalize dates to strings / None
@@ -677,8 +677,8 @@ def print_result_table(tc_name, errors, eval_table, forecast, quiet=False):
     print(f"{'Field':<15} | {'Java Forecast':<18} | {'Rust Forecast':<18} | {'Expected':<18}")
     print("-" * 75)
     for field in ('status', 'earliest_date', 'recommended_date', 'overdue_date'):
-        j_val = str(forecast['java'].get(field) or '-')
-        r_val = str(forecast['rust'].get(field) or '-')
+        j_val = str((forecast['java'] or {}).get(field) or '-')
+        r_val = str((forecast['rust'] or {}).get(field) or '-')
         e_val = str((forecast['expected'] or {}).get(field) or '-')
         print(f"{field:<15} | {j_val:<18} | {r_val:<18} | {e_val:<18}")
 

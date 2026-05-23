@@ -15,6 +15,8 @@ pub mod typhoid;
 pub mod varicella;
 pub mod yellow_fever;
 pub mod zoster;
+pub mod jev;
+pub mod h1n1;
 
 use crate::engine::{
     ConditionalCompletionRule, CustomDoseNumberHook, CustomEvaluationHook, CustomForecastHook,
@@ -60,6 +62,8 @@ pub fn get_ruleset(group_name: &str) -> Option<&'static VaccineGroupDefinition> 
         m.insert("CHOLERA", cholera::definition());
         m.insert("TYPHOID", typhoid::definition());
         m.insert("YELLOW_FEVER", yellow_fever::definition());
+        m.insert("JEV", jev::definition());
+        m.insert("H1N1", h1n1::definition());
         m
     });
 
@@ -85,5 +89,7 @@ pub fn get_all_groups() -> Vec<&'static VaccineGroupDefinition> {
         get_ruleset("CHOLERA").unwrap(),
         get_ruleset("TYPHOID").unwrap(),
         get_ruleset("YELLOW_FEVER").unwrap(),
+        get_ruleset("JEV").unwrap(),
+        get_ruleset("H1N1").unwrap(),
     ]
 }
