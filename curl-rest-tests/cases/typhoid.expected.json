@@ -1,0 +1,141 @@
+{
+  "typhoid_risk_no_history_at_rec_age": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "typhoid_risk_dose1_valid": {
+    "evaluations": [
+      {
+        "date": "2022-01-01",
+        "cvx": "25",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "typhoid_risk_dose1_too_young": {
+    "evaluations": [
+      {
+        "date": "2021-12-27",
+        "cvx": "25",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "typhoid_risk_complete": {
+    "evaluations": [
+      {
+        "date": "2022-01-01",
+        "cvx": "25",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "typhoid_under_2y_no_doses": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "NotRecommended"
+    }
+  },
+  "typhoid_above_2y_no_doses": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "typhoid_above_2y_valid_cvx101": {
+    "evaluations": [
+      {
+        "date": "2022-01-01",
+        "cvx": "101",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "typhoid_above_2y_valid_cvx25": {
+    "evaluations": [
+      {
+        "date": "2026-01-01",
+        "cvx": "25",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "typhoid_under_2y_invalid_cvx101_eval_3y": {
+    "evaluations": [
+      {
+        "date": "2021-01-01",
+        "cvx": "101",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "typhoid_above_2y_invalid_cvx25_eval_10y": {
+    "evaluations": [
+      {
+        "date": "2022-01-01",
+        "cvx": "25",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  }
+}

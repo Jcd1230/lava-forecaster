@@ -117,9 +117,9 @@ To implement a group, follow the guidelines in the [Onboarding & Implementation 
 
 ## 15. Typhoid (`TYPHOID`)
 *Java Concept:* `TYPHOID` | *Focus Code:* `904`
-- [ ] Implement `TyphoidRiskSeries.yml`
-- [ ] Unconditionally attach warning supplemental text to all forecasts (including COMPLETE).
-- [ ] Implement conditional status overrides:
+- [x] Implement `TyphoidRiskSeries.yml`
+- [x] Unconditionally attach warning supplemental text to all forecasts (including COMPLETE).
+- [x] Implement conditional status overrides:
   - Age < 2y -> `Not Recommended`
   - Age >= 2y and not complete -> `Conditionally Recommended / HIGH_RISK`
   - Series complete -> `Conditionally Recommended / COMPLETE_HIGH_RISK` (due to travel re-exposure risks)

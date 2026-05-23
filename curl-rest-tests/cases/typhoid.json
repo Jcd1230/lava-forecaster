@@ -1,0 +1,109 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "typhoid_risk_no_history_at_rec_age",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 2y",
+      "doses": [],
+      "group": "TYPHOID",
+      "focus": "904"
+    },
+    {
+      "name": "typhoid_risk_dose1_valid",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 759d",
+      "doses": [
+        "birth + 2y:25"
+      ],
+      "group": "TYPHOID",
+      "focus": "904"
+    },
+    {
+      "name": "typhoid_risk_dose1_too_young",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 754d",
+      "doses": [
+        "birth + 726d:25"
+      ],
+      "group": "TYPHOID",
+      "focus": "904"
+    },
+    {
+      "name": "typhoid_risk_complete",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 759d",
+      "doses": [
+        "birth + 731d:25"
+      ],
+      "group": "TYPHOID",
+      "focus": "904"
+    },
+    {
+      "name": "typhoid_under_2y_no_doses",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 1y",
+      "doses": [],
+      "group": "TYPHOID",
+      "focus": "904"
+    },
+    {
+      "name": "typhoid_above_2y_no_doses",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 10y",
+      "doses": [],
+      "group": "TYPHOID",
+      "focus": "904"
+    },
+    {
+      "name": "typhoid_above_2y_valid_cvx101",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 10y",
+      "doses": [
+        "birth + 2y:101"
+      ],
+      "group": "TYPHOID",
+      "focus": "904"
+    },
+    {
+      "name": "typhoid_above_2y_valid_cvx25",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 10y",
+      "doses": [
+        "birth + 6y:25"
+      ],
+      "group": "TYPHOID",
+      "focus": "904"
+    },
+    {
+      "name": "typhoid_under_2y_invalid_cvx101_eval_3y",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 3y",
+      "doses": [
+        "birth + 1y:101"
+      ],
+      "group": "TYPHOID",
+      "focus": "904"
+    },
+    {
+      "name": "typhoid_above_2y_invalid_cvx25_eval_10y",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 10y",
+      "doses": [
+        "birth + 2y:25"
+      ],
+      "group": "TYPHOID",
+      "focus": "904"
+    }
+  ]
+}

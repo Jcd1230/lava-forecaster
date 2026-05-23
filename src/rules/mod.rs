@@ -1,18 +1,19 @@
+pub mod cholera;
 pub mod dtp;
 pub mod hep_b;
 pub mod hepa;
 pub mod hib;
 pub mod hpv;
+pub mod influenza;
 pub mod mcv;
 pub mod menb;
 pub mod mmr;
 pub mod pneumococcal;
 pub mod polio;
+pub mod rotavirus;
+pub mod typhoid;
 pub mod varicella;
 pub mod zoster;
-pub mod rotavirus;
-pub mod influenza;
-pub mod cholera;
 
 use crate::engine::{
     ConditionalCompletionRule, CustomDoseNumberHook, CustomEvaluationHook, CustomForecastHook,
@@ -56,6 +57,7 @@ pub fn get_ruleset(group_name: &str) -> Option<&'static VaccineGroupDefinition> 
         m.insert("ROTAVIRUS", rotavirus::definition());
         m.insert("INFLUENZA", influenza::definition());
         m.insert("CHOLERA", cholera::definition());
+        m.insert("TYPHOID", typhoid::definition());
         m
     });
 
@@ -79,5 +81,6 @@ pub fn get_all_groups() -> Vec<&'static VaccineGroupDefinition> {
         get_ruleset("ROTAVIRUS").unwrap(),
         get_ruleset("INFLUENZA").unwrap(),
         get_ruleset("CHOLERA").unwrap(),
+        get_ruleset("TYPHOID").unwrap(),
     ]
 }
