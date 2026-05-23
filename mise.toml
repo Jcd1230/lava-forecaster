@@ -30,7 +30,10 @@ run = "python3 curl-rest-tests/run_tests.py --compare"
 description = "Record Java ICE output as the expected snapshot results"
 run = "python3 curl-rest-tests/run_tests.py --record"
 
+[tasks.bootstrap-group-tests]
+description = "Generate baseline group cases and record Java snapshots"
+run = "python3 curl-rest-tests/bootstrap_group_tests.py"
+
 [tasks.scaffold]
 description = "Scaffold a new vaccine group module and registration"
 run = "bash scripts/scaffold_group.sh"
-

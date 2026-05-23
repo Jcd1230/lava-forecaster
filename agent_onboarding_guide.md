@@ -39,6 +39,17 @@ mise run scaffold menb MENB
 ```
 This generates `src/rules/menb/`, wires it into `src/rules/mod.rs`, and creates `curl-rest-tests/cases/menb.json`.
 
+### Step 0.5: Bootstrap Baseline Java Tests
+Before implementing custom logic, generate a conservative baseline test matrix from the legacy series YAML and record Java snapshots:
+```bash
+mise run bootstrap-group-tests -- --group <group_lower>
+```
+Example:
+```bash
+mise run bootstrap-group-tests -- --group cholera
+```
+This requires the Java ICE server to be running (`mise run run`). The bootstrap command refuses to overwrite existing `curl-rest-tests/cases/<group>.json` or `<group>.expected.json` unless `--force` is passed. It is intended to create a starting point only: after researching Drools rules, add targeted cases for edge behavior such as brand switches, same-day duplicates, age clamps, seasonal boundaries, and special recommendation overrides.
+
 ### Step A: Define the Schedules (`schedules.rs`)
 Create `src/rules/<vaccine_group>/schedules.rs` (or modify the scaffolded stub) and translate the series YAML definitions into our type-safe internal builder DSL.
 
