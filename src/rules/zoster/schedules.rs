@@ -11,16 +11,19 @@ pub fn zoster_2_dose_series() -> CompiledSeries {
         .vaccine_group("ZOSTER")
         .num_doses(2)
         .dose(1, |d| d
-            // No minimum age for evaluation — doses before age 50 are Valid but not recommended.
-            // The earliest_recommended_age drives the forecast, not a hard evaluation limit.
+            .abs_min_age("18y")
+            .min_age("50y")
             .earliest_recommended_age("50y")
             .cvx(allowed_cvx)
         )
         .dose(2, |d| d
+            .abs_min_age("50y")
+            .min_age("50y")
+            .earliest_recommended_age("50y")
             .cvx(allowed_cvx)
         )
         .interval(1, 2, |i| i
-            .abs_min_interval("28d")
+            .abs_min_interval("24d")
             .min_interval("28d")
             .earliest_recommended_interval("56d")
             .latest_recommended_interval("7m+4w")

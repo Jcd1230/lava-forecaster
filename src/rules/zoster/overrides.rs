@@ -31,6 +31,7 @@ pub fn zoster_custom_evaluation_hook(
             *status = DoseStatus::Accepted;
             reasons.clear();
             reasons.push(EvaluationReason::VaccineNotPartOfSeries);
+            reasons.push(EvaluationReason::OutsideRoutineSeries);
             return;
         }
 
@@ -56,7 +57,7 @@ pub fn zoster_custom_evaluation_hook(
 
 pub fn zoster_custom_forecast_hook(
     patient: &Patient,
-    _valid_doses: &[(NaiveDate, usize)],
+    valid_doses: &[(NaiveDate, usize)],
     history: &[Dose],
     _eval_date: NaiveDate,
     forecast: &mut SeriesForecast,
@@ -171,7 +172,7 @@ pub fn zoster_custom_forecast_hook(
 
     // If the patient has ever received old live zoster (CVX 121 or 188), there is no overdue date for the Shingrix dose.
     let has_old_zoster = history.iter().any(|d| is_old_zoster(&d.cvx));
-    if has_old_zoster {
+    if has_old_zoster && valid_doses.is_empty() {
         forecast.overdue_date = None;
     }
 }
