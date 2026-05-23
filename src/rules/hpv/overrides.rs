@@ -4,6 +4,14 @@ use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast,
 use crate::date_utils::{TimePeriod, add_years};
 use std::collections::HashMap;
 
+fn add_interval(date: NaiveDate, interval: &str) -> NaiveDate {
+    TimePeriod::parse(interval).unwrap().add_to(date)
+}
+
+fn latest_boundary(date: NaiveDate, interval: &str) -> NaiveDate {
+    add_interval(date, interval) - chrono::Duration::days(1)
+}
+
 pub fn hpv_custom_evaluation_hook(
     series_name: &str,
     target_dose_idx: usize,
@@ -28,6 +36,7 @@ pub fn hpv_custom_evaluation_hook(
                 *status = DoseStatus::Accepted;
                 reasons.clear();
                 reasons.push(EvaluationReason::AboveRecommendedAgeSeries);
+                reasons.push(EvaluationReason::OutsideRoutineSeries);
                 return;
             }
         }
@@ -50,17 +59,57 @@ pub fn hpv_custom_evaluation_hook(
 
 pub fn hpv_custom_forecast_hook(
     patient: &Patient,
-    _valid_doses: &[(NaiveDate, usize)],
+    valid_doses: &[(NaiveDate, usize)],
     _history: &[Dose],
     eval_date: NaiveDate,
     forecast: &mut SeriesForecast,
 ) {
+    if forecast.status == SeriesStatus::Complete {
+        return;
+    }
+
+    let age_15 = add_years(patient.birth_date, 15);
+    let age_27 = add_years(patient.birth_date, 27);
     let age_46 = add_years(patient.birth_date, 46);
+
+    if eval_date >= age_27 && eval_date < age_46 {
+        forecast.status = SeriesStatus::ConditionallyRecommended;
+        forecast.earliest_date = None;
+        forecast.recommended_date = None;
+        forecast.overdue_date = None;
+        return;
+    }
+
     if eval_date >= age_46 {
         forecast.status = SeriesStatus::NotRecommended;
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
+        return;
+    }
+
+    if valid_doses.is_empty() {
+        if eval_date >= age_15 {
+            forecast.overdue_date = Some(age_15 - chrono::Duration::days(1));
+        }
+        return;
+    }
+
+    let first_valid_date = valid_doses[0].0;
+    let started_at_or_after_15 = first_valid_date >= age_15;
+
+    if valid_doses.len() == 1 && started_at_or_after_15 {
+        forecast.overdue_date = Some(latest_boundary(first_valid_date, "16w"));
+        return;
+    }
+
+    if valid_doses.len() >= 2 {
+        forecast.earliest_date = Some(add_interval(first_valid_date, "5m"));
+        forecast.recommended_date = Some(add_interval(first_valid_date, "6m"));
+        forecast.overdue_date = Some(latest_boundary(
+            first_valid_date,
+            if started_at_or_after_15 { "7m+4w" } else { "13m+4w" },
+        ));
     }
 }
 

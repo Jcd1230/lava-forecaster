@@ -52,6 +52,9 @@ pub fn mcv_custom_evaluation_hook(
                         if !reasons.contains(&EvaluationReason::BelowMinimumAge) {
                             reasons.push(EvaluationReason::BelowMinimumAge);
                         }
+                        if !reasons.contains(&EvaluationReason::OutsideRoutineSeries) {
+                            reasons.push(EvaluationReason::OutsideRoutineSeries);
+                        }
                     }
                 }
             }
@@ -66,6 +69,7 @@ pub fn mcv_custom_evaluation_hook(
                 *status = DoseStatus::Accepted;
                 reasons.clear();
                 reasons.push(EvaluationReason::AboveRecommendedAgeSeries);
+                reasons.push(EvaluationReason::OutsideRoutineSeries);
             }
         }
     }
