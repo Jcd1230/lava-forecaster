@@ -123,136 +123,157 @@ fn evaluate_patient_all_groups(
 
 fn run_server() -> Result<(), Box<dyn std::error::Error>> {
     use tiny_http::{Header, Response, Server, StatusCode};
+    use std::sync::Arc;
+    use std::thread;
+    use rayon::prelude::*;
 
     let addr = "0.0.0.0:8081";
-    let server = Server::http(addr).map_err(|e| format!("Failed to start server: {}", e))?;
+    let server = Arc::new(Server::http(addr).map_err(|e| format!("Failed to start server: {}", e))?);
     println!("Rust PoC REST server listening on http://{}", addr);
 
-    for mut request in server.incoming_requests() {
-        let req_start = Instant::now();
+    let num_workers = thread::available_parallelism()
+        .map(|n| n.get())
+        .unwrap_or(4);
+    println!("Starting {} HTTP server worker threads", num_workers);
 
-        if request.method() != &tiny_http::Method::Post {
-            let response =
-                Response::from_string("Method not allowed").with_status_code(StatusCode(405));
-            let _ = request.respond(response);
-            continue;
-        }
+    let mut workers = Vec::new();
+    for i in 0..num_workers {
+        let server = server.clone();
+        workers.push(thread::spawn(move || {
+            for mut request in server.incoming_requests() {
+                let req_start = Instant::now();
 
-        let url = request.url().to_string();
-        if url != "/evaluate"
-            && url != "/opencds-decision-support-service/api/resources/evaluate"
-            && url != "/evaluate_bulk"
-        {
-            let response = Response::from_string("Not Found").with_status_code(StatusCode(404));
-            let _ = request.respond(response);
-            continue;
-        }
-
-        let mut body = String::new();
-        if let Err(e) = request.as_reader().read_to_string(&mut body) {
-            let response = Response::from_string(format!("Failed to read body: {}", e))
-                .with_status_code(StatusCode(400));
-            let _ = request.respond(response);
-            continue;
-        }
-
-        if url == "/evaluate_bulk" {
-            let req: models::BulkForecastRequest = match serde_json::from_str(&body) {
-                Ok(r) => r,
-                Err(e) => {
+                if request.method() != &tiny_http::Method::Post {
                     let response =
-                        Response::from_string(format!("Failed to parse bulk request: {}", e))
+                        Response::from_string("Method not allowed").with_status_code(StatusCode(405));
+                    let _ = request.respond(response);
+                    continue;
+                }
+
+                let url = request.url().to_string();
+                if url != "/evaluate"
+                    && url != "/opencds-decision-support-service/api/resources/evaluate"
+                    && url != "/evaluate_bulk"
+                {
+                    let response = Response::from_string("Not Found").with_status_code(StatusCode(404));
+                    let _ = request.respond(response);
+                    continue;
+                }
+
+                let mut body = String::new();
+                if let Err(e) = request.as_reader().read_to_string(&mut body) {
+                    let response = Response::from_string(format!("Failed to read body: {}", e))
+                        .with_status_code(StatusCode(400));
+                    let _ = request.respond(response);
+                    continue;
+                }
+
+                if url == "/evaluate_bulk" {
+                    let req: models::BulkForecastRequest = match serde_json::from_str(&body) {
+                        Ok(r) => r,
+                        Err(e) => {
+                            let response =
+                                Response::from_string(format!("Failed to parse bulk request: {}", e))
+                                    .with_status_code(StatusCode(400));
+                            let _ = request.respond(response);
+                            continue;
+                        }
+                    };
+
+                    let responses: Vec<ForecastResponse> = req.requests
+                        .into_par_iter()
+                        .map(|single_req| {
+                            let results = evaluate_patient_all_groups(
+                                &single_req.patient,
+                                &single_req.history,
+                                single_req.execution_date,
+                            );
+                            ForecastResponse {
+                                vaccine_groups: results,
+                            }
+                        })
+                        .collect();
+
+                    let response_data = models::BulkForecastResponse { responses };
+                    let response_json = match serde_json::to_string(&response_data) {
+                        Ok(j) => j,
+                        Err(e) => {
+                            let response =
+                                Response::from_string(format!("Failed to serialize bulk response: {}", e))
+                                    .with_status_code(StatusCode(500));
+                            let _ = request.respond(response);
+                            continue;
+                        }
+                    };
+
+                    let elapsed = req_start.elapsed();
+                    println!(
+                        "INFO [Worker {}]: processed Bulk request (size {}) in {:?}",
+                        i,
+                        response_data.responses.len(),
+                        elapsed
+                    );
+
+                    let elapsed_us = elapsed.as_micros().to_string();
+                    let response = Response::from_string(response_json)
+                        .with_header(
+                            Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..]).unwrap(),
+                        )
+                        .with_header(
+                            Header::from_bytes(&b"X-Process-Time-Us"[..], elapsed_us.into_bytes()).unwrap(),
+                        );
+                    let _ = request.respond(response);
+                    continue;
+                }
+
+                let is_legacy = body.contains("evaluationRequest");
+                let format_str = if is_legacy { "Legacy" } else { "Simplified" };
+
+                let req = match parse_request(&body) {
+                    Ok(r) => r,
+                    Err(e) => {
+                        let response = Response::from_string(format!("Failed to parse request: {}", e))
                             .with_status_code(StatusCode(400));
-                    let _ = request.respond(response);
-                    continue;
-                }
-            };
+                        let _ = request.respond(response);
+                        continue;
+                    }
+                };
 
-            let mut responses = Vec::new();
-            for single_req in req.requests {
-                let results = evaluate_patient_all_groups(
-                    &single_req.patient,
-                    &single_req.history,
-                    single_req.execution_date,
-                );
-                responses.push(ForecastResponse {
+                let results = evaluate_patient_all_groups(&req.patient, &req.history, req.execution_date);
+
+                let response_data = ForecastResponse {
                     vaccine_groups: results,
-                });
-            }
+                };
 
-            let response_data = models::BulkForecastResponse { responses };
-            let response_json = match serde_json::to_string(&response_data) {
-                Ok(j) => j,
-                Err(e) => {
-                    let response =
-                        Response::from_string(format!("Failed to serialize bulk response: {}", e))
-                            .with_status_code(StatusCode(500));
-                    let _ = request.respond(response);
-                    continue;
-                }
-            };
+                let response_json = match serde_json::to_string(&response_data) {
+                    Ok(j) => j,
+                    Err(e) => {
+                        let response =
+                            Response::from_string(format!("Failed to serialize response: {}", e))
+                                .with_status_code(StatusCode(500));
+                        let _ = request.respond(response);
+                        continue;
+                    }
+                };
 
-            let elapsed = req_start.elapsed();
-            println!(
-                "INFO: processed Bulk request (size {}) in {:?}",
-                response_data.responses.len(),
-                elapsed
-            );
+                let elapsed = req_start.elapsed();
+                println!("INFO [Worker {}]: processed {} request in {:?}", i, format_str, elapsed);
 
-            let elapsed_us = elapsed.as_micros().to_string();
-            let response = Response::from_string(response_json)
-                .with_header(
-                    Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..]).unwrap(),
-                )
-                .with_header(
-                    Header::from_bytes(&b"X-Process-Time-Us"[..], elapsed_us.into_bytes()).unwrap(),
-                );
-            let _ = request.respond(response);
-            continue;
-        }
-
-        let is_legacy = body.contains("evaluationRequest");
-        let format_str = if is_legacy { "Legacy" } else { "Simplified" };
-
-        let req = match parse_request(&body) {
-            Ok(r) => r,
-            Err(e) => {
-                let response = Response::from_string(format!("Failed to parse request: {}", e))
-                    .with_status_code(StatusCode(400));
+                let elapsed_us = elapsed.as_micros().to_string();
+                let response = Response::from_string(response_json)
+                    .with_header(
+                        Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..]).unwrap(),
+                    )
+                    .with_header(
+                        Header::from_bytes(&b"X-Process-Time-Us"[..], elapsed_us.into_bytes()).unwrap(),
+                    );
                 let _ = request.respond(response);
-                continue;
             }
-        };
+        }));
+    }
 
-        let results = evaluate_patient_all_groups(&req.patient, &req.history, req.execution_date);
-
-        let response_data = ForecastResponse {
-            vaccine_groups: results,
-        };
-
-        let response_json = match serde_json::to_string(&response_data) {
-            Ok(j) => j,
-            Err(e) => {
-                let response =
-                    Response::from_string(format!("Failed to serialize response: {}", e))
-                        .with_status_code(StatusCode(500));
-                let _ = request.respond(response);
-                continue;
-            }
-        };
-
-        let elapsed = req_start.elapsed();
-        println!("INFO: processed {} request in {:?}", format_str, elapsed);
-
-        let elapsed_us = elapsed.as_micros().to_string();
-        let response = Response::from_string(response_json)
-            .with_header(
-                Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..]).unwrap(),
-            )
-            .with_header(
-                Header::from_bytes(&b"X-Process-Time-Us"[..], elapsed_us.into_bytes()).unwrap(),
-            );
-        let _ = request.respond(response);
+    for worker in workers {
+        worker.join().unwrap();
     }
 
     Ok(())
