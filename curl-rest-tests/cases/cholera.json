@@ -1,0 +1,65 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "cholera_1_dose_risk_no_history_at_rec_age",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 2y",
+      "doses": [],
+      "group": "CHOLERA",
+      "focus": "901"
+    },
+    {
+      "name": "cholera_1_dose_risk_dose1_valid",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 759d",
+      "doses": [
+        "birth + 2y:174"
+      ],
+      "group": "CHOLERA",
+      "focus": "901"
+    },
+    {
+      "name": "cholera_1_dose_risk_dose1_too_young",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 754d",
+      "doses": [
+        "birth + 726d:174"
+      ],
+      "group": "CHOLERA",
+      "focus": "901"
+    },
+    {
+      "name": "cholera_1_dose_risk_complete",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 759d",
+      "doses": [
+        "birth + 731d:174"
+      ],
+      "group": "CHOLERA",
+      "focus": "901"
+    },
+    {
+      "name": "cholera_under_2y_no_history",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 1y",
+      "doses": [],
+      "group": "CHOLERA",
+      "focus": "901"
+    },
+    {
+      "name": "cholera_over_65y_no_history",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 70y",
+      "doses": [],
+      "group": "CHOLERA",
+      "focus": "901"
+    }
+  ]
+}

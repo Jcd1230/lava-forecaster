@@ -108,9 +108,9 @@ To implement a group, follow the guidelines in the [Onboarding & Implementation 
 
 ## 14. Cholera (`CHOLERA`)
 *Java Concept:* `CHOLERA` | *Focus Code:* `901`
-- [ ] Implement `Cholera1DoseRiskSeries.yml`
-- [ ] Unconditionally attach warning supplemental text to all forecasts (except COMPLETE).
-- [ ] Implement three-tier age-gated recommendations:
+- [x] Implement `Cholera1DoseRiskSeries.yml`
+- [x] Unconditionally attach warning supplemental text to all forecasts (except COMPLETE).
+- [x] Implement three-tier age-gated recommendations:
   - Age < 2y -> `Not Recommended`
   - Age 2y-64y -> `Conditionally Recommended / HIGH_RISK`
   - Age >= 65y -> `Not Recommended / TOO_OLD`

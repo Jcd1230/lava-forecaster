@@ -1,0 +1,59 @@
+{
+  "cholera_1_dose_risk_no_history_at_rec_age": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cholera_1_dose_risk_dose1_valid": {
+    "evaluations": [
+      {
+        "date": "2022-01-01",
+        "cvx": "174",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "cholera_1_dose_risk_dose1_too_young": {
+    "evaluations": [
+      {
+        "date": "2021-12-27",
+        "cvx": "174",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "cholera_1_dose_risk_complete": {
+    "evaluations": [
+      {
+        "date": "2022-01-01",
+        "cvx": "174",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  }
+}
