@@ -1,0 +1,85 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "yellow_fever_risk_no_history_at_rec_age",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 9m",
+      "doses": [],
+      "group": "YELLOW_FEVER",
+      "focus": "905"
+    },
+    {
+      "name": "yellow_fever_risk_dose1_valid",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 302d",
+      "doses": [
+        "birth + 9m:37"
+      ],
+      "group": "YELLOW_FEVER",
+      "focus": "905"
+    },
+    {
+      "name": "yellow_fever_risk_dose1_too_young",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 209d",
+      "doses": [
+        "birth + 181d:37"
+      ],
+      "group": "YELLOW_FEVER",
+      "focus": "905"
+    },
+    {
+      "name": "yellow_fever_risk_complete",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 302d",
+      "doses": [
+        "birth + 274d:37"
+      ],
+      "group": "YELLOW_FEVER",
+      "focus": "905"
+    },
+    {
+      "name": "yellow_fever_under_6m",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 4m",
+      "doses": [],
+      "group": "YELLOW_FEVER",
+      "focus": "905"
+    },
+    {
+      "name": "yellow_fever_6m_to_9m",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 7m",
+      "doses": [],
+      "group": "YELLOW_FEVER",
+      "focus": "905"
+    },
+    {
+      "name": "yellow_fever_above_9m",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 10m",
+      "doses": [],
+      "group": "YELLOW_FEVER",
+      "focus": "905"
+    },
+    {
+      "name": "yellow_fever_cross_group_mmr_pushed",
+      "dob": "2020-01-01",
+      "gender": "F",
+      "eval_date": "birth + 11m + 25d",
+      "doses": [
+        "birth + 11m + 20d:37"
+      ],
+      "group": "MMR",
+      "focus": "500"
+    }
+  ]
+}

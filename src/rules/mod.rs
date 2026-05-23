@@ -13,6 +13,7 @@ pub mod polio;
 pub mod rotavirus;
 pub mod typhoid;
 pub mod varicella;
+pub mod yellow_fever;
 pub mod zoster;
 
 use crate::engine::{
@@ -58,6 +59,7 @@ pub fn get_ruleset(group_name: &str) -> Option<&'static VaccineGroupDefinition> 
         m.insert("INFLUENZA", influenza::definition());
         m.insert("CHOLERA", cholera::definition());
         m.insert("TYPHOID", typhoid::definition());
+        m.insert("YELLOW_FEVER", yellow_fever::definition());
         m
     });
 
@@ -82,5 +84,6 @@ pub fn get_all_groups() -> Vec<&'static VaccineGroupDefinition> {
         get_ruleset("INFLUENZA").unwrap(),
         get_ruleset("CHOLERA").unwrap(),
         get_ruleset("TYPHOID").unwrap(),
+        get_ruleset("YELLOW_FEVER").unwrap(),
     ]
 }

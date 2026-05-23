@@ -1,0 +1,95 @@
+{
+  "yellow_fever_risk_no_history_at_rec_age": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "yellow_fever_risk_dose1_valid": {
+    "evaluations": [
+      {
+        "date": "2020-10-01",
+        "cvx": "37",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "yellow_fever_risk_dose1_too_young": {
+    "evaluations": [
+      {
+        "date": "2020-06-30",
+        "cvx": "37",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "yellow_fever_risk_complete": {
+    "evaluations": [
+      {
+        "date": "2020-10-01",
+        "cvx": "37",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "yellow_fever_under_6m": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "NotRecommended"
+    }
+  },
+  "yellow_fever_6m_to_9m": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "yellow_fever_above_9m": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "ConditionallyRecommended"
+    }
+  },
+  "yellow_fever_cross_group_mmr_pushed": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2021-01-01",
+      "recommended_date": "2021-01-01",
+      "overdue_date": "2021-05-28",
+      "status": "NotComplete"
+    }
+  }
+}

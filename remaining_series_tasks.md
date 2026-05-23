@@ -126,14 +126,14 @@ To implement a group, follow the guidelines in the [Onboarding & Implementation 
 
 ## 16. Yellow Fever (`YELLOW_FEVER`)
 *Java Concept:* `YELLOW_FEVER` | *Focus Code:* `905`
-- [ ] Implement `YellowFeverRiskSeries.yml`
-- [ ] Attach live virus warning supplemental text to all recommendations.
-- [ ] Implement four-tier age-gated recommendations:
+- [x] Implement `YellowFeverRiskSeries.yml`
+- [x] Attach live virus warning supplemental text to all recommendations.
+- [x] Implement four-tier age-gated recommendations:
   - Age < 6 months -> `Not Recommended`
   - Age 6m-8m -> `Conditionally Recommended / BELOW_REC_AGE_SERIES + HIGH_RISK`
   - Age >= 9 months -> `Conditionally Recommended / HIGH_RISK`
   - Series complete -> `Conditionally Recommended / COMPLETE_HIGH_RISK`
-- [ ] Implement cross-group live-virus override: if YF series is completed and YF dose was < 30 days before another live vaccine's earliest forecast date, push that other forecast date to YF date + 30 days.
+- [x] Implement cross-group live-virus override: if YF series is completed and YF dose was < 30 days before another live vaccine's earliest forecast date, push that other forecast date to YF date + 30 days.
 
 ## 17. Historical H1N1 Influenza (`H1N1`)
 *Java Concept:* `INFLUENZA_H1N1` | *Focus Code:* `890`
