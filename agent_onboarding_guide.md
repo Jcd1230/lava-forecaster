@@ -284,6 +284,49 @@ All testing and verification commands are managed via `mise`:
    mise run test-group -- <group_lower>
    ```
 
+### Workflow for Fixing an Existing Parity Bucket
+
+When working an already-ported group that still differs from Java, use a tighter compare loop:
+
+1. Produce a fresh full-CDSi baseline log and keep it under `curl-rest-tests/tmp/`:
+    ```bash
+    python3 curl-rest-tests/run_tests.py --compare --cdsi > curl-rest-tests/tmp/ice_cdsi_compare_<label>.txt 2>&1
+    ```
+2. Pull the target group's failures from that log and cluster them by behavior rather than by individual case name.
+3. Run the target group only:
+    ```bash
+    python3 curl-rest-tests/run_tests.py --group cdsi_<group_lower> --compare
+    ```
+4. For edge-case debugging, run a single case with full output:
+    ```bash
+    python3 curl-rest-tests/run_tests.py --group cdsi_<group_lower> --case <test_case_name> --compare -v
+    ```
+5. After the group passes, run a new full-CDSi compare into a second saved log.
+6. Compare per-group failure counts between the old and new logs to confirm that only the target bucket moved.
+
+### Quick Compare-Log Commands
+
+- Check whether a bucket is still present in a full compare log:
+  ```bash
+  rg 'CDSI_HPV' curl-rest-tests/tmp/ice_cdsi_compare_<label>.txt
+  ```
+  No matches means that group no longer has failures.
+
+- Diff failure counts between two saved full-CDSi logs:
+  ```bash
+  awk '/FAIL:/{g=$NF; sub(/[()]/, "", g); sub(/[()]/, "", g); count[g]++} END {for (g in count) print g, count[g]}' curl-rest-tests/tmp/ice_cdsi_compare_before.txt | sort > curl-rest-tests/tmp/before.counts
+  awk '/FAIL:/{g=$NF; sub(/[()]/, "", g); sub(/[()]/, "", g); count[g]++} END {for (g in count) print g, count[g]}' curl-rest-tests/tmp/ice_cdsi_compare_after.txt | sort > curl-rest-tests/tmp/after.counts
+  join -a1 -a2 -e0 -o 0,1.2,2.2 curl-rest-tests/tmp/before.counts curl-rest-tests/tmp/after.counts | awk '$2 != $3'
+  ```
+
+### Debugging Heuristics That Save Time
+
+- Verify **selected series** before changing interval or age rules. Several groups differ from Java because the wrong series is selected, not because the active series rule is wrong.
+- Forecast dates often key off **valid/effective dose history**, not all administered doses. If Rust dates are too early, compare against Java using only valid doses in the selected series.
+- Be cautious with adult policy rules such as `ConditionallyRecommended` and `NotRecommended`: Java often applies them only when no relevant series history exists. Started series frequently remain `NotComplete` with real forecast dates.
+- `Accepted` does not necessarily mean “counts toward completion.” If Java treats the dose as ignored for completion, Rust may need `Accepted` plus `OutsideRoutineSeries`.
+- If a compare case is still confusing, run the Rust binary directly on a one-off request JSON and inspect the raw `selected_series`, evaluations, and forecast output.
+
 ### Formatting Scope
 
 Avoid broad `cargo fmt` / `rustfmt` while porting a single vaccine group unless you intend to accept formatting changes across the Rust module tree. Because the crate uses `mod.rs` declarations for all vaccine groups, formatting from the crate root can touch sibling modules unrelated to the current task. Keep formatting scoped to files you intentionally changed and review `jj diff --name-only` before committing.
