@@ -684,6 +684,22 @@ fn get_same_day_priority(group: &str, cvx: &str, birth_date: NaiveDate, dose_dat
                 0
             }
         }
+        "ROTAVIRUS" => {
+            let policy_change = NaiveDate::from_ymd_opt(2000, 1, 1).unwrap();
+            if dose_date >= policy_change {
+                match cvx {
+                    "119" => 1,
+                    "74" => 2,
+                    _ => 0,
+                }
+            } else {
+                match cvx {
+                    "74" => 0,
+                    "119" => 2,
+                    _ => 1,
+                }
+            }
+        }
         _ => 0,
     }
 }

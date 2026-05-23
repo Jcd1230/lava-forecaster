@@ -1,0 +1,107 @@
+{
+  "histories": {},
+  "test_cases": [
+    {
+      "name": "rotavirus_standard_case_no_shots",
+      "dob": "2026-01-01",
+      "gender": "F",
+      "eval_date": "birth + 2m",
+      "doses": [],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "rotavirus_2dose_standard",
+      "dob": "2026-01-01",
+      "gender": "F",
+      "eval_date": "birth + 6m",
+      "doses": [
+        "birth + 2m:119",
+        "birth + 4m:119"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "rotavirus_3dose_standard",
+      "dob": "2026-01-01",
+      "gender": "F",
+      "eval_date": "birth + 8m",
+      "doses": [
+        "birth + 2m:116",
+        "birth + 4m:116",
+        "birth + 6m:116"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "rotavirus_initiation_clamp",
+      "dob": "2026-01-01",
+      "gender": "F",
+      "eval_date": "birth + 105d",
+      "doses": [],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "rotavirus_age_clamp_dose",
+      "dob": "2026-01-01",
+      "gender": "F",
+      "eval_date": "birth + 9m",
+      "doses": [
+        "birth + 2m:119",
+        "birth + 8m:119"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "rotavirus_age_clamp_forecast",
+      "dob": "2026-01-01",
+      "gender": "F",
+      "eval_date": "birth + 8m",
+      "doses": [
+        "birth + 2m:119"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "rotavirus_unspecified_selection",
+      "dob": "2026-01-01",
+      "gender": "F",
+      "eval_date": "birth + 6m",
+      "doses": [
+        "birth + 2m:119",
+        "birth + 4m:122"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "rotavirus_duplicate_after_2000",
+      "dob": "2010-01-01",
+      "gender": "F",
+      "eval_date": "birth + 6m",
+      "doses": [
+        "birth + 2m:119",
+        "birth + 2m:74"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    },
+    {
+      "name": "rotavirus_duplicate_before_2000",
+      "dob": "1999-01-01",
+      "gender": "F",
+      "eval_date": "birth + 6m",
+      "doses": [
+        "birth + 2m:119",
+        "birth + 2m:74"
+      ],
+      "group": "ROTAVIRUS",
+      "focus": "820"
+    }
+  ]
+}

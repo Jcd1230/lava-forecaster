@@ -1,0 +1,174 @@
+{
+  "rotavirus_standard_case_no_shots": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2026-02-12",
+      "recommended_date": "2026-03-01",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "rotavirus_2dose_standard": {
+    "evaluations": [
+      {
+        "date": "2026-03-01",
+        "cvx": "119",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2026-05-01",
+        "cvx": "119",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "rotavirus_3dose_standard": {
+    "evaluations": [
+      {
+        "date": "2026-03-01",
+        "cvx": "116",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2026-05-01",
+        "cvx": "116",
+        "status": "Valid",
+        "dose_number": 2
+      },
+      {
+        "date": "2026-07-01",
+        "cvx": "116",
+        "status": "Valid",
+        "dose_number": 3
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "rotavirus_initiation_clamp": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "NotRecommended"
+    }
+  },
+  "rotavirus_age_clamp_dose": {
+    "evaluations": [
+      {
+        "date": "2026-03-01",
+        "cvx": "119",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2026-09-01",
+        "cvx": "119",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  },
+  "rotavirus_age_clamp_forecast": {
+    "evaluations": [
+      {
+        "date": "2026-03-01",
+        "cvx": "119",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2026-03-29",
+      "recommended_date": "2026-05-01",
+      "overdue_date": "2026-06-28",
+      "status": "NotComplete"
+    }
+  },
+  "rotavirus_unspecified_selection": {
+    "evaluations": [
+      {
+        "date": "2026-03-01",
+        "cvx": "119",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2026-05-01",
+        "cvx": "122",
+        "status": "Valid",
+        "dose_number": 2
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2026-05-29",
+      "recommended_date": "2026-07-01",
+      "overdue_date": "2026-08-28",
+      "status": "NotComplete"
+    }
+  },
+  "rotavirus_duplicate_after_2000": {
+    "evaluations": [
+      {
+        "date": "2010-03-01",
+        "cvx": "119",
+        "status": "Valid",
+        "dose_number": 1
+      },
+      {
+        "date": "2010-03-01",
+        "cvx": "74",
+        "status": "Invalid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2010-03-29",
+      "recommended_date": "2010-05-01",
+      "overdue_date": "2010-06-28",
+      "status": "NotComplete"
+    }
+  },
+  "rotavirus_duplicate_before_2000": {
+    "evaluations": [
+      {
+        "date": "1999-03-01",
+        "cvx": "119",
+        "status": "Invalid",
+        "dose_number": 1
+      },
+      {
+        "date": "1999-03-01",
+        "cvx": "74",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "1999-03-29",
+      "recommended_date": "1999-05-01",
+      "overdue_date": "1999-06-28",
+      "status": "NotComplete"
+    }
+  }
+}

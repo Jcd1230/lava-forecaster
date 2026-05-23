@@ -14,7 +14,7 @@ import xml.etree.ElementTree as ET
 
 # Configuration
 ICE_BASE_URI = os.environ.get("ICE_BASE_URI", "http://localhost:8080")
-JAVA_ENDPOINT = f"{ICE_BASE_URI}/opencds-decision-support-service/api/resources/evaluate"
+JAVA_ENDPOINT = f"{ICE_BASE_URI}/opencds-decision-support-service/api/resources/evaluateAtSpecifiedTime"
 RUST_POC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../ice-rust-forecaster-poc"))
 CASES_DIR = os.path.join(os.path.dirname(__file__), "cases")
 TMP_DIR = os.path.join(os.path.dirname(__file__), "tmp")
