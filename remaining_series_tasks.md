@@ -74,14 +74,14 @@ To implement a group, follow the guidelines in the [Onboarding & Implementation 
 *Java Concept:* `COVID_19` | *Focus Code:* `850`
 > [!NOTE]
 > This is a highly complex, multi-session effort. It involves seasonal agenda group routing.
-- [ ] Implement September 2023 season rules (age < 5y vs >= 5y).
-- [ ] Implement August 2025 season rules (age < 2y, 2y-64y, >= 65y).
-- [ ] Implement CVX-specific minimum interval overrides (e.g. CVX 313 -> CVX 313: 17 days absolute min; non-313 -> any COVID: 52 days).
-- [ ] Implement Moderna dose-skip logic for infants (<2y series) with pre-season doses.
-- [ ] Implement age-based series auto-switching (switch to >=65y 2-dose series if patient turns 65 within 12 months of season start).
-- [ ] Enforce complex duplicate-same-day preference rules (Janssen order, Moderna preferred over Pfizer, approved vs WHO-only, etc.).
-- [ ] Overdue/Forecast date adjustments based on vaccine brand and interval-dependent supplemental text.
-- [ ] Map series completion to `Not Recommended / COMPLETE_HIGH_RISK`.
+- [x] Implement September 2023 season rules (age < 5y vs >= 5y).
+- [x] Implement August 2025 season rules (age < 2y, 2y-64y, >= 65y).
+- [x] Implement CVX-specific minimum interval overrides (e.g. CVX 313 -> CVX 313: 17 days absolute min; non-313 -> any COVID: 52 days).
+- [x] Implement Moderna dose-skip logic for infants (<2y series) with pre-season doses.
+- [x] Implement age-based series auto-switching (switch to >=65y 2-dose series if patient turns 65 within 12 months of season start).
+- [x] Enforce complex duplicate-same-day preference rules (Janssen order, Moderna preferred over Pfizer, approved vs WHO-only, etc.).
+- [x] Overdue/Forecast date adjustments based on vaccine brand and interval-dependent supplemental text.
+- [x] Map series completion to `Not Recommended / COMPLETE_HIGH_RISK`.
 
 ## 11. Mpox (`MPOX`)
 *Java Concept:* `MPOX` | *Focus Code:* `860`
