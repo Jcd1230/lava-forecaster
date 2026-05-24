@@ -10,75 +10,325 @@ pub fn is_pertussis_vaccine(cvx: &str) -> bool {
     !DT_TD_CVX.contains(&cvx)
 }
 
+fn is_adolescent_tdap_completed(ctx: &EvaluationContext) -> bool {
+    ctx.valid_doses.iter().any(|(v_date, _)| {
+        let is_tdap = ctx.history.iter().any(|d| d.date == *v_date && (d.cvx == "115" || d.cvx == "198"));
+        let age_ge_10 = *v_date >= add_years(ctx.patient.birth_date, 10);
+        is_tdap && age_ge_10
+    })
+}
+
+fn get_last_pertussis_date_before(ctx: &EvaluationContext, date: NaiveDate) -> Option<NaiveDate> {
+    ctx.history.iter()
+        .filter(|d| d.date < date && is_pertussis_vaccine(&d.cvx))
+        .map(|d| d.date)
+        .max()
+}
+
 pub fn dtp_custom_evaluation_hook(
-    _series_name: &str,
-    _target_dose_idx: usize,
-    _ctx: &EvaluationContext,
-    _reasons: &mut Vec<EvaluationReason>,
-    _status: &mut DoseStatus,
+    series_name: &str,
+    target_dose_idx: usize,
+    ctx: &EvaluationContext,
+    reasons: &mut Vec<EvaluationReason>,
+    status: &mut DoseStatus,
 ) {
-    // Optional/Placeholder
+    if series_name != "DTP_5_DOSE_SERIES" && series_name != "DTP_3_DOSE_SERIES" {
+        return;
+    }
+    if let Some(dose) = ctx.current_dose {
+        let birth_date = ctx.patient.birth_date;
+        let age_7_minus_4d = add_years(birth_date, 7) - chrono::Duration::days(4);
+        let is_tdap = dose.cvx == "115" || dose.cvx == "198";
+        let is_td = dose.cvx == "09" || dose.cvx == "113" || dose.cvx == "138" || dose.cvx == "139" || dose.cvx == "196";
+        
+        if dose.date < age_7_minus_4d {
+            if is_tdap && series_name == "DTP_5_DOSE_SERIES" && target_dose_idx <= 3 {
+                *status = DoseStatus::Invalid;
+                reasons.retain(|r| *r != EvaluationReason::BelowMinimumAge);
+                if !reasons.contains(&EvaluationReason::InsufficientAntigen) {
+                    reasons.push(EvaluationReason::InsufficientAntigen);
+                }
+            } else if is_td {
+                *status = DoseStatus::Invalid;
+                reasons.retain(|r| *r != EvaluationReason::BelowMinimumAge);
+                if !reasons.contains(&EvaluationReason::BelowMinimumAge) {
+                    reasons.push(EvaluationReason::BelowMinimumAge);
+                }
+            }
+        }
+    }
+}
+
+pub fn dtp_custom_dose_number_hook(
+    series_name: &str,
+    ctx: &EvaluationContext,
+) -> usize {
+    let mut next_dose = ctx.target_dose_number;
+    if series_name == "DTP_5_DOSE_SERIES" {
+        let ref_date = ctx.current_dose.map(|d| d.date).unwrap_or(ctx.eval_date);
+        let age_ge_7 = ref_date >= add_years(ctx.patient.birth_date, 7);
+        if age_ge_7 && ctx.valid_doses.len() >= 2 {
+            let birth_date = ctx.patient.birth_date;
+            let first_valid_dose_at_least_12m = ctx.valid_doses[0].0 >= add_months(birth_date, 12);
+            let any_valid_dose_at_least_4y = ctx.valid_doses.iter().any(|(v_date, _)| {
+                *v_date >= add_years(birth_date, 4)
+            });
+            if first_valid_dose_at_least_12m && any_valid_dose_at_least_4y {
+                if next_dose == 3 {
+                    next_dose = 4;
+                }
+            }
+        }
+    }
+    next_dose
+}
+
+pub fn dtp_custom_extra_dose_hook(
+    series_name: &str,
+    ctx: &EvaluationContext,
+) -> Option<(DoseStatus, Vec<EvaluationReason>)> {
+    if series_name != "DTP_5_DOSE_SERIES" && series_name != "DTP_3_DOSE_SERIES" {
+        return None;
+    }
+    let dose = ctx.current_dose?;
+    let birth_date = ctx.patient.birth_date;
+    
+    let t_completed = is_adolescent_tdap_completed(ctx);
+    if t_completed {
+        // Any subsequent dose is valid as a recurring decennial booster
+        return Some((DoseStatus::Valid, Vec::new()));
+    }
+    
+    let is_tdap = dose.cvx == "115" || dose.cvx == "198";
+    let age_ge_7 = dose.date >= add_years(birth_date, 7);
+    let age_ge_10 = dose.date >= add_years(birth_date, 10);
+    
+    if is_tdap && age_ge_7 {
+        if age_ge_10 {
+            if let Some(prev_p_date) = get_last_pertussis_date_before(ctx, dose.date) {
+                if dose.date < prev_p_date + chrono::Duration::days(28) {
+                    return Some((DoseStatus::Accepted, vec![EvaluationReason::BoosterDose]));
+                }
+            }
+            return Some((DoseStatus::Valid, Vec::new()));
+        } else {
+            let has_prior_tdap_ge_7 = ctx.valid_doses.iter().any(|(v_date, _)| {
+                let is_prior_tdap = ctx.history.iter().any(|d| d.date == *v_date && (d.cvx == "115" || d.cvx == "198"));
+                let prior_ge_7 = *v_date >= add_years(birth_date, 7);
+                is_prior_tdap && prior_ge_7
+            });
+            if !has_prior_tdap_ge_7 {
+                if let Some(prev_p_date) = get_last_pertussis_date_before(ctx, dose.date) {
+                    if dose.date < prev_p_date + chrono::Duration::days(28) {
+                        return Some((DoseStatus::Accepted, vec![EvaluationReason::BoosterDose]));
+                    }
+                }
+                return Some((DoseStatus::Valid, Vec::new()));
+            }
+        }
+    }
+    
+    Some((DoseStatus::Accepted, vec![EvaluationReason::BoosterDose]))
 }
 
 pub fn dtp_custom_forecast_hook(
     patient: &Patient,
-    _valid_doses: &[(NaiveDate, usize)],
+    valid_doses: &[(NaiveDate, usize)],
     history: &[Dose],
-    _eval_date: NaiveDate,
+    eval_date: NaiveDate,
     forecast: &mut SeriesForecast,
 ) {
-    if (forecast.series_name == "DTP_5_DOSE_SERIES" || forecast.series_name == "DTP_3_DOSE_SERIES")
-        && forecast.status == crate::models::SeriesStatus::Complete
-    {
-        let age_10 = add_years(patient.birth_date, 10);
-        let has_adolescent_tdap = history.iter().any(|dose| {
-            dose.date >= age_10 && (dose.cvx == "115" || dose.cvx == "198")
-        });
-        if !has_adolescent_tdap {
-            let is_booster_needed = if forecast.series_name == "DTP_3_DOSE_SERIES" {
-                let age_7 = add_years(patient.birth_date, 7);
-                history.iter().any(|dose| {
-                    dose.date >= age_7 && dose.date < age_10 && is_pertussis_vaccine(&dose.cvx)
-                })
+    if forecast.series_name != "DTP_5_DOSE_SERIES" && forecast.series_name != "DTP_3_DOSE_SERIES" {
+        return;
+    }
+    
+    // Check if the adolescent Tdap booster has been completed in valid doses.
+    let has_valid_tdap_ge_10 = valid_doses.iter().any(|(v_date, _)| {
+        let is_tdap = history.iter().any(|d| d.date == *v_date && (d.cvx == "115" || d.cvx == "198"));
+        let age_ge_10 = *v_date >= add_years(patient.birth_date, 10);
+        is_tdap && age_ge_10
+    });
+    
+    if forecast.status == crate::models::SeriesStatus::Complete {
+        forecast.status = crate::models::SeriesStatus::NotComplete;
+        forecast.reasons = vec!["NOT_COMPLETE".to_string()];
+        
+        if has_valid_tdap_ge_10 {
+            // Decennial booster needed
+            let last_valid_date = valid_doses.iter().map(|(d, _)| *d).max().unwrap_or(eval_date);
+            let earliest = add_years(last_valid_date, 5);
+            let recommended = add_years(last_valid_date, 10);
+            let overdue = add_years(last_valid_date, 10) + chrono::Duration::days(28) - chrono::Duration::days(1);
+            
+            forecast.earliest_date = Some(earliest);
+            forecast.recommended_date = Some(recommended);
+            forecast.overdue_date = Some(overdue);
+        } else {
+            // Adolescent Tdap booster needed
+            let mut earliest = add_years(patient.birth_date, 11);
+            let mut recommended = add_years(patient.birth_date, 11);
+            let mut overdue = add_years(patient.birth_date, 13) + chrono::Duration::days(28) - chrono::Duration::days(1);
+            
+            let exception_occurred = if forecast.series_name == "DTP_5_DOSE_SERIES" {
+                let age_4y_minus_4d = add_years(patient.birth_date, 4) - chrono::Duration::days(4);
+                let has_pertussis_ge_4y_minus_4d = valid_doses.iter().any(|(v_date, _)| {
+                    *v_date >= age_4y_minus_4d && history.iter().any(|d| d.date == *v_date && is_pertussis_vaccine(&d.cvx))
+                });
+                let age_7y = add_years(patient.birth_date, 7);
+                let pertussis_under_7_count = valid_doses.iter().filter(|(v_date, _)| {
+                    *v_date < age_7y && history.iter().any(|d| d.date == *v_date && is_pertussis_vaccine(&d.cvx))
+                }).count();
+                !has_pertussis_ge_4y_minus_4d || pertussis_under_7_count < 4
             } else {
-                true
+                false
             };
             
-            if is_booster_needed {
-                forecast.status = crate::models::SeriesStatus::NotComplete;
-                forecast.reasons = vec!["NOT_COMPLETE".to_string()];
-                
-                let exception_occurred = if forecast.series_name == "DTP_5_DOSE_SERIES" {
-                    let age_4y_minus_4d = add_years(patient.birth_date, 4) - chrono::Duration::days(4);
-                    let has_pertussis_at_least_4y = history.iter().any(|dose| {
-                        dose.date >= age_4y_minus_4d && is_pertussis_vaccine(&dose.cvx)
-                    });
-                    
-                    let age_7y = add_years(patient.birth_date, 7);
-                    let num_pertussis_under_7 = history.iter().filter(|dose| {
-                        dose.date < age_7y && is_pertussis_vaccine(&dose.cvx)
-                    }).count();
-                    
-                    !has_pertussis_at_least_4y || num_pertussis_under_7 < 4
+            if exception_occurred {
+                let age_7 = add_years(patient.birth_date, 7);
+                earliest = age_7;
+                recommended = age_7;
+                overdue = age_7;
+            }
+            
+            // Check 6-month interval from last pertussis shot
+            let last_pertussis_date = valid_doses.iter()
+                .filter(|(v_date, _)| history.iter().any(|d| d.date == *v_date && is_pertussis_vaccine(&d.cvx)))
+                .map(|(v_date, _)| *v_date)
+                .max();
+            if let Some(lp_date) = last_pertussis_date {
+                let min_interval_date = add_months(lp_date, 6);
+                earliest = earliest.max(min_interval_date);
+                recommended = recommended.max(min_interval_date);
+            }
+            
+            forecast.earliest_date = Some(earliest);
+            forecast.recommended_date = Some(recommended);
+            forecast.overdue_date = Some(overdue);
+        }
+    } else {
+        // Series is not complete
+        let age_7 = add_years(patient.birth_date, 7);
+        const ALLOWED_CVX: &[&str] = &[
+            "01", "20", "106", "107", "22", "50", "102", "110", "120", "130", "132", "146", "115", "28", "09", "138", "139", "113", "170", "195", "196", "198"
+        ];
+        let history_count = history.iter()
+            .filter(|d| ALLOWED_CVX.contains(&d.cvx.as_str()))
+            .count();
+        let six_by_seven = eval_date < age_7 && history_count >= 6;
+        
+        if six_by_seven {
+            forecast.earliest_date = Some(age_7);
+            forecast.recommended_date = Some(age_7);
+            forecast.overdue_date = Some(age_7);
+        } else if eval_date >= age_7 {
+            let earliest = forecast.earliest_date.unwrap_or(age_7).max(age_7);
+            let recommended = forecast.recommended_date.unwrap_or(age_7).max(age_7);
+            let overdue = forecast.overdue_date.unwrap_or(age_7).max(age_7);
+            forecast.earliest_date = Some(earliest);
+            forecast.recommended_date = Some(recommended);
+            forecast.overdue_date = Some(overdue);
+        }
+
+        // If the last shot in history was ignored, adjust forecast dates accordingly
+        let is_last_shot_ignored = history.last().map(|d| {
+            let age_7_minus_4d = age_7 - chrono::Duration::days(4);
+            let is_tdap = d.cvx == "115" || d.cvx == "198";
+            let is_td = d.cvx == "09" || d.cvx == "113" || d.cvx == "138" || d.cvx == "139" || d.cvx == "196";
+            if d.date < age_7_minus_4d {
+                if is_tdap {
+                    valid_doses.len() <= 2
                 } else {
-                    false
-                };
-                
-                if exception_occurred {
-                    let rec_date = add_years(patient.birth_date, 7);
-                    forecast.earliest_date = Some(rec_date);
-                    forecast.recommended_date = Some(rec_date);
-                    forecast.overdue_date = Some(rec_date);
-                } else {
-                    let early_date = crate::date_utils::TimePeriod::parse("11y").unwrap().add_to(patient.birth_date);
-                    forecast.earliest_date = Some(early_date);
-                    forecast.recommended_date = Some(early_date);
-                    
-                    let overdue_date = crate::date_utils::TimePeriod::parse("13y+4w").unwrap().add_to(patient.birth_date);
-                    forecast.overdue_date = overdue_date.pred_opt();
+                    is_td
                 }
+            } else {
+                false
+            }
+        }).unwrap_or(false);
+        
+        if is_last_shot_ignored {
+            if let Some((earliest, recommended, overdue)) = get_ignored_adjustments(patient, valid_doses, forecast) {
+                forecast.earliest_date = earliest;
+                forecast.recommended_date = recommended;
+                forecast.overdue_date = overdue;
             }
         }
+    }
+}
+
+fn add_days(date: NaiveDate, days: i64) -> NaiveDate {
+    date + chrono::Duration::days(days)
+}
+
+fn get_ignored_adjustments(
+    patient: &Patient,
+    valid_doses: &[(NaiveDate, usize)],
+    forecast: &SeriesForecast,
+) -> Option<(Option<NaiveDate>, Option<NaiveDate>, Option<NaiveDate>)> {
+    if valid_doses.is_empty() {
+        return None;
+    }
+    let (prev_date, _) = valid_doses.last()?;
+    let birth = patient.birth_date;
+    let next_dose_idx = valid_doses.len() + 1;
+    
+    if forecast.series_name == "DTP_5_DOSE_SERIES" {
+        match next_dose_idx {
+            2 => {
+                let min_age = add_days(birth, 70);
+                let min_int = add_days(*prev_date, 28);
+                let rec_age = add_months(birth, 4);
+                let rec_int = add_days(*prev_date, 28);
+                let overdue_age = add_months(birth, 5) + chrono::Duration::days(28);
+                let overdue_int = add_days(*prev_date, 91); // 13w
+                
+                let earliest = min_age.max(min_int);
+                let recommended = rec_age.max(rec_int);
+                let overdue = overdue_age.max(overdue_int) - chrono::Duration::days(1);
+                Some((Some(earliest), Some(recommended), Some(overdue)))
+            },
+            3 => {
+                let min_age = add_days(birth, 98);
+                let min_int = add_days(*prev_date, 28);
+                let rec_age = add_months(birth, 6);
+                let rec_int = add_days(*prev_date, 28);
+                let overdue_age = add_months(birth, 7) + chrono::Duration::days(28);
+                let overdue_int = add_days(*prev_date, 91); // 13w
+                
+                let earliest = min_age.max(min_int);
+                let recommended = rec_age.max(rec_int);
+                let overdue = overdue_age.max(overdue_int) - chrono::Duration::days(1);
+                Some((Some(earliest), Some(recommended), Some(overdue)))
+            },
+            4 => {
+                let min_age = add_months(birth, 15);
+                let min_int = add_months(*prev_date, 4);
+                let rec_age = add_months(birth, 15);
+                let rec_int = add_months(*prev_date, 6);
+                let overdue_age = add_months(birth, 19) + chrono::Duration::days(28);
+                let overdue_int = add_months(*prev_date, 13) + chrono::Duration::days(28);
+                
+                let earliest = min_age.max(min_int);
+                let recommended = rec_age.max(rec_int);
+                let overdue = overdue_age.max(overdue_int) - chrono::Duration::days(1);
+                Some((Some(earliest), Some(recommended), Some(overdue)))
+            },
+            5 => {
+                let min_age = add_years(birth, 4);
+                let min_int = add_months(*prev_date, 6);
+                let rec_age = add_years(birth, 4);
+                let rec_int = add_months(*prev_date, 6);
+                let overdue_age = add_years(birth, 7);
+                let overdue_int = add_years(*prev_date, 4) + chrono::Duration::days(28);
+                
+                let earliest = min_age.max(min_int);
+                let recommended = rec_age.max(rec_int);
+                let overdue = overdue_age.max(overdue_int) - chrono::Duration::days(1);
+                Some((Some(earliest), Some(recommended), Some(overdue)))
+            },
+            _ => None,
+        }
+    } else {
+        None
     }
 }
 
