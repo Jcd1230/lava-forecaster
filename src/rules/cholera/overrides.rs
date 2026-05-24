@@ -1,6 +1,6 @@
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
-use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus};
+use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus};
 
 pub fn cholera_custom_evaluation_hook(
     _series_name: &str,

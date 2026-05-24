@@ -3,7 +3,7 @@ use chrono::NaiveDate;
 use base64::{Engine as _, engine::general_purpose::STANDARD};
 use quick_xml::events::Event;
 use quick_xml::reader::Reader;
-use crate::models::{Patient, Gender, Dose, ForecastRequest};
+use crate::models::{Patient, Gender, Dose, ForecastRequest, Cvx};
 
 #[derive(Debug, Deserialize)]
 pub struct LegacyInteractionId {
@@ -61,7 +61,7 @@ fn handle_element(
     in_event: bool,
     birth_date: &mut Option<NaiveDate>,
     gender: &mut Gender,
-    current_cvx: &mut Option<String>,
+    current_cvx: &mut Option<Cvx>,
     current_date: &mut Option<NaiveDate>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match e.local_name().as_ref() {
@@ -91,7 +91,9 @@ fn handle_element(
             for attr in e.attributes() {
                 let attr = attr?;
                 if attr.key.as_ref() == b"code" {
-                    *current_cvx = Some(std::str::from_utf8(&attr.value)?.to_string());
+                    let code_str = std::str::from_utf8(&attr.value)?;
+                    let code_num = code_str.parse::<u16>()?;
+                    *current_cvx = Some(Cvx(code_num));
                 }
             }
         }

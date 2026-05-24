@@ -4,7 +4,7 @@ pub fn zoster_2_dose_series() -> CompiledSeries {
     // CVX 187 = Zoster recombinant (Shingrix) - the primary vaccine
     // CVX 121 = Zoster live (Zostavax) - old live vaccine, counts as Accepted
     // CVX 188 = Zoster recombinant, unspecified - also Accepted
-    let allowed_cvx = &["187", "121", "188"];
+    let allowed_cvx = &[187, 121, 188];
 
     CompiledSeries::builder("ZOSTER_2_DOSE_SERIES")
         .code("ZOSTER_2_DOSE_SERIES")

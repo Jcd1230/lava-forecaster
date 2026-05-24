@@ -1,7 +1,7 @@
 use crate::schedule::CompiledSeries;
 
 pub fn typhoid_risk_series() -> CompiledSeries {
-    let allowed_cvx = &["25", "101"];
+    let allowed_cvx = &[25, 101];
 
     CompiledSeries::builder("TYPHOID_RISK_SERIES")
         .code("TYPHOID_RISK_SERIES")

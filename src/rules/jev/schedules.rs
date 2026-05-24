@@ -1,7 +1,7 @@
 use crate::schedule::CompiledSeries;
 
 pub fn jevc_risk_2_dose_series() -> CompiledSeries {
-    let allowed_cvx = &["134"];
+    let allowed_cvx = &[134];
 
     CompiledSeries::builder("JEVC_RISK_2_DOSE_SERIES")
         .code("JEVC_RISK_2_DOSE_SERIES")
@@ -25,7 +25,7 @@ pub fn jevc_risk_2_dose_series() -> CompiledSeries {
 }
 
 pub fn jevc_risk_2_dose_accelerated_series() -> CompiledSeries {
-    let allowed_cvx = &["134"];
+    let allowed_cvx = &[134];
 
     CompiledSeries::builder("JEVC_RISK_2_DOSE_ACCELERATED_SERIES")
         .code("JEVC_RISK_2_DOSE_ACCELERATED_SERIES")

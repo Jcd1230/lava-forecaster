@@ -7,7 +7,7 @@ pub struct CompiledDoseRule {
     pub minimum_age: Option<TimePeriod>,
     pub earliest_recommended_age: Option<TimePeriod>,
     pub latest_recommended_age: Option<TimePeriod>,
-    pub allowed_cvx: Vec<String>,
+    pub allowed_cvx: &'static [u16],
 }
 
 #[derive(Debug, Clone)]
@@ -129,7 +129,7 @@ pub struct CompiledDoseRuleBuilder {
     minimum_age: Option<TimePeriod>,
     earliest_recommended_age: Option<TimePeriod>,
     latest_recommended_age: Option<TimePeriod>,
-    allowed_cvx: Vec<String>,
+    allowed_cvx: &'static [u16],
 }
 
 impl CompiledDoseRuleBuilder {
@@ -140,7 +140,7 @@ impl CompiledDoseRuleBuilder {
             minimum_age: None,
             earliest_recommended_age: None,
             latest_recommended_age: None,
-            allowed_cvx: Vec::new(),
+            allowed_cvx: &[],
         }
     }
 
@@ -164,8 +164,8 @@ impl CompiledDoseRuleBuilder {
         self
     }
 
-    pub fn cvx(mut self, codes: &[&str]) -> Self {
-        self.allowed_cvx = codes.iter().map(|s| s.to_string()).collect();
+    pub fn cvx(mut self, codes: &'static [u16]) -> Self {
+        self.allowed_cvx = codes;
         self
     }
 

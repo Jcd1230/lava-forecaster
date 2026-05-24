@@ -4,7 +4,7 @@ use rayon::prelude::*;
 
 use ice_rust_forecaster_poc::{
     parse_request, evaluate_patient_all_groups, rules,
-    models::{self, Dose, ForecastResponse, Gender, Patient, VaccineGroupForecast},
+    models::{self, Dose, ForecastResponse, Gender, Patient, VaccineGroupForecast, Cvx},
 };
 
 async fn evaluate_handler(
@@ -200,15 +200,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let history_a = vec![
         Dose {
             date: NaiveDate::from_ymd_opt(2020, 3, 1).unwrap(),
-            cvx: "10".to_string(),
+            cvx: Cvx(10),
         }, // Dose 1 (2 months) - OK
         Dose {
             date: NaiveDate::from_ymd_opt(2020, 5, 1).unwrap(),
-            cvx: "10".to_string(),
+            cvx: Cvx(10),
         }, // Dose 2 (4 months) - OK
         Dose {
             date: NaiveDate::from_ymd_opt(2020, 7, 1).unwrap(),
-            cvx: "10".to_string(),
+            cvx: Cvx(10),
         }, // Dose 3 (6 months) - OK
     ];
 
@@ -220,15 +220,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let history_b = vec![
         Dose {
             date: NaiveDate::from_ymd_opt(2020, 3, 1).unwrap(),
-            cvx: "10".to_string(),
+            cvx: Cvx(10),
         }, // Dose 1
         Dose {
             date: NaiveDate::from_ymd_opt(2020, 5, 1).unwrap(),
-            cvx: "10".to_string(),
+            cvx: Cvx(10),
         }, // Dose 2
         Dose {
             date: NaiveDate::from_ymd_opt(2024, 6, 1).unwrap(),
-            cvx: "10".to_string(),
+            cvx: Cvx(10),
         }, // Dose 3 (age 4y 5m, interval 4y)
     ];
 
@@ -240,19 +240,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let history_c = vec![
         Dose {
             date: NaiveDate::from_ymd_opt(2008, 2, 10).unwrap(),
-            cvx: "10".to_string(),
+            cvx: Cvx(10),
         }, // Dose 1
         Dose {
             date: NaiveDate::from_ymd_opt(2008, 3, 15).unwrap(),
-            cvx: "10".to_string(),
+            cvx: Cvx(10),
         }, // Dose 2
         Dose {
             date: NaiveDate::from_ymd_opt(2008, 4, 20).unwrap(),
-            cvx: "10".to_string(),
+            cvx: Cvx(10),
         }, // Dose 3
         Dose {
             date: NaiveDate::from_ymd_opt(2008, 5, 20).unwrap(),
-            cvx: "10".to_string(),
+            cvx: Cvx(10),
         }, // Dose 4 (min interval is 30 days, pre-2009 check should allow 24d)
     ];
 

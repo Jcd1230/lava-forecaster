@@ -1,7 +1,7 @@
 use crate::schedule::CompiledSeries;
 
 pub fn mcv_42_dose_series() -> CompiledSeries {
-    let allowed_cvx = &["147", "32", "114", "136", "108", "203", "316", "328"];
+    let allowed_cvx = &[147, 32, 114, 136, 108, 203, 316, 328];
 
     CompiledSeries::builder("MCV_42_DOSE_SERIES")
         .code("MCV_42_DOSE_SERIES")

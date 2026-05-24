@@ -6,19 +6,19 @@ pub mod rules;
 pub mod schedule;
 
 use chrono::NaiveDate;
-use models::{Dose, Patient, VaccineGroupForecast};
+use models::{Dose, Patient, VaccineGroupForecast, Cvx};
 
-fn is_single_antigen_mmr(cvx: &str) -> bool {
-    matches!(cvx, "3" | "4" | "5" | "6" | "7" | "03" | "04" | "05" | "06" | "07" | "38")
+fn is_single_antigen_mmr(cvx: Cvx) -> bool {
+    matches!(cvx.0, 3 | 4 | 5 | 6 | 7 | 38)
 }
 
 fn has_same_day_separate_mmr_and_varicella(history: &[Dose], eval_date: NaiveDate) -> bool {
     let has_mmr = history
         .iter()
-        .any(|dose| dose.date == eval_date && is_single_antigen_mmr(&dose.cvx));
+        .any(|dose| dose.date == eval_date && is_single_antigen_mmr(dose.cvx));
     let has_varicella = history
         .iter()
-        .any(|dose| dose.date == eval_date && matches!(dose.cvx.as_str(), "21"));
+        .any(|dose| dose.date == eval_date && dose.cvx.0 == 21);
 
     has_mmr && has_varicella
 }
@@ -39,17 +39,6 @@ pub fn evaluate_patient_all_groups(
     history: &[Dose],
     eval_date: NaiveDate,
 ) -> Vec<VaccineGroupForecast> {
-    let normalized_history: Vec<Dose> = history.iter()
-        .map(|d| {
-            let mut cvx = d.cvx.clone();
-            if cvx.len() == 1 && cvx.chars().next().map_or(false, |c| c.is_ascii_digit()) {
-                cvx = format!("0{}", cvx);
-            }
-            Dose { date: d.date, cvx }
-        })
-        .collect();
-    let history = &normalized_history;
-
     let mut results = Vec::new();
     for ruleset in rules::get_all_groups() {
         if let Some(group_selection) = ruleset.group_selection {
@@ -106,7 +95,7 @@ pub fn evaluate_patient_all_groups(
     if yf_complete {
         let last_yf_dose = history
             .iter()
-            .filter(|d| d.cvx == "37" || d.cvx == "183" || d.cvx == "184")
+            .filter(|d| d.cvx.0 == 37 || d.cvx.0 == 183 || d.cvx.0 == 184)
             .map(|d| d.date)
             .max();
 

@@ -1,18 +1,16 @@
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
-use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
+use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
 use crate::date_utils::{TimePeriod, compare_elapsed};
 
-pub fn is_hib_cvx(cvx: &str) -> bool {
-    const HIB_CVX: &[&str] = &[
-        "17", "22", "46", "47", "48", "49", "50", "51", "102", "120", "132", "146", "148", "170", "198"
-    ];
-    HIB_CVX.contains(&cvx)
+pub fn is_hib_cvx(cvx: Cvx) -> bool {
+    const HIB_CVX: &[u16] = &[17, 22, 46, 47, 48, 49, 50, 51, 102, 120, 132, 146, 148, 170, 198];
+    HIB_CVX.contains(&cvx.0)
 }
 
-pub fn is_omp_cvx(cvx: &str) -> bool {
-    const OMP_CVX: &[&str] = &["49", "51"];
-    OMP_CVX.contains(&cvx)
+pub fn is_omp_cvx(cvx: Cvx) -> bool {
+    const OMP_CVX: &[u16] = &[49, 51];
+    OMP_CVX.contains(&cvx.0)
 }
 
 fn count_valid_doses_before(valid_doses: &[(NaiveDate, usize)], cutoff: NaiveDate) -> usize {
@@ -118,7 +116,7 @@ pub fn hib_custom_evaluation_hook(
     let admin_date = dose.date;
 
     // 1. Booster Check (CVX 50)
-    if dose.cvx == "50" {
+    if dose.cvx.0 == 50 {
         let tp_1y_4d = TimePeriod::parse("1y-4d").unwrap();
         let tp_5y = TimePeriod::parse("5y").unwrap();
         let age_ge_1y_4d = compare_elapsed(birth, admin_date, &tp_1y_4d) != std::cmp::Ordering::Less;
@@ -158,7 +156,7 @@ pub fn hib_custom_evaluation_hook(
         let tp_1y_4d = TimePeriod::parse("1y-4d").unwrap();
         let age_lt_1y_4d = compare_elapsed(birth, admin_date, &tp_1y_4d) == std::cmp::Ordering::Less;
         if age_lt_1y_4d {
-            let hib_cvx = &["17", "22", "46", "47", "48", "49", "50", "51", "102", "120", "132", "146", "148", "170", "198"];
+            let hib_cvx = &[17, 22, 46, 47, 48, 49, 50, 51, 102, 120, 132, 146, 148, 170, 198];
             let count_before_7m = ctx.count_cvx_before(hib_cvx, "7m");
             if count_before_7m == 0 {
                 *status = DoseStatus::Invalid;
@@ -298,7 +296,7 @@ pub fn hib_custom_switch_hook(
     let tp_12m = TimePeriod::parse("12m").unwrap();
 
     if let Some(dose) = ctx.current_dose {
-        if is_omp_cvx(&dose.cvx) {
+        if is_omp_cvx(dose.cvx) {
             // Case 1: First dose, < 7m, is OMP
             if ctx.valid_doses.is_empty() {
                 if compare_elapsed(birth, dose.date, &tp_7m) == std::cmp::Ordering::Less {
@@ -310,7 +308,7 @@ pub fn hib_custom_switch_hook(
                 let first_valid = ctx.valid_doses[0];
                 let first_dose = ctx.history.iter().find(|d| d.date == first_valid.0);
                 if let Some(fd) = first_dose {
-                    if is_omp_cvx(&fd.cvx) && compare_elapsed(birth, fd.date, &tp_7m) == std::cmp::Ordering::Less {
+                    if is_omp_cvx(fd.cvx) && compare_elapsed(birth, fd.date, &tp_7m) == std::cmp::Ordering::Less {
                         if compare_elapsed(birth, dose.date, &tp_12m) == std::cmp::Ordering::Less {
                             return Some("HIB_OMP_SERIES");
                         }
@@ -333,7 +331,7 @@ fn matches_omp_criteria_from_eval(patient: &Patient, forecast: &VaccineGroupFore
     let tp_12m = TimePeriod::parse("12m").unwrap();
 
     let valid_omp_doses: Vec<&crate::models::DoseEvaluation> = forecast.evaluations.iter()
-        .filter(|e| e.status == DoseStatus::Valid && is_omp_cvx(&e.cvx))
+        .filter(|e| e.status == DoseStatus::Valid && is_omp_cvx(e.cvx))
         .collect();
 
     let total_hib_evals = forecast.evaluations.len();

@@ -1,7 +1,7 @@
 use chrono::{Datelike, NaiveDate};
 use crate::date_utils::{add_months, add_years, compare_elapsed, TimePeriod};
 use crate::engine::EvaluationContext;
-use crate::models::{
+use crate::models::{Cvx, 
     Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus,
     VaccineGroupForecast,
 };
@@ -39,15 +39,15 @@ fn infant_recommendation_date(birth_date: NaiveDate, eval_date: NaiveDate) -> Na
     ))
 }
 
-fn availability_cutoff(series_name: &str, cvx: &str) -> Option<NaiveDate> {
+fn availability_cutoff(series_name: &str, cvx: Cvx) -> Option<NaiveDate> {
     match series_name {
-        "RSV_ADULT_SERIES" => match cvx {
-            "303" | "304" | "305" | "314" | "326" => Some(date(2023, 6, 21)),
+        "RSV_ADULT_SERIES" => match cvx.0 {
+            303 | 304 | 305 | 314 | 326 => Some(date(2023, 6, 21)),
             _ => None,
         },
-        "RSV_INFANT_SERIES" => match cvx {
-            "332" => Some(date(2025, 6, 9)),
-            "304" | "306" | "307" | "315" => Some(date(2023, 8, 3)),
+        "RSV_INFANT_SERIES" => match cvx.0 {
+            332 => Some(date(2025, 6, 9)),
+            304 | 306 | 307 | 315 => Some(date(2023, 8, 3)),
             _ => None,
         },
         _ => None,
@@ -65,7 +65,7 @@ pub fn rsv_custom_evaluation_hook(
         return;
     };
 
-    if let Some(cutoff) = availability_cutoff(series_name, &dose.cvx) {
+    if let Some(cutoff) = availability_cutoff(series_name, dose.cvx) {
         if dose.date < cutoff {
             *status = DoseStatus::Invalid;
             reasons.clear();

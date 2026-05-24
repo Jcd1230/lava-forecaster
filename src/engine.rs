@@ -1,7 +1,7 @@
 use chrono::NaiveDate;
 use crate::models::{
     Dose, DoseEvaluation, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus,
-    Patient, VaccineGroupForecast
+    Patient, VaccineGroupForecast, Cvx
 };
 use crate::schedule::CompiledSeries;
 use crate::date_utils::{TimePeriod, compare_elapsed};
@@ -47,7 +47,7 @@ impl<'a> EvaluationContext<'a> {
     }
 
     /// Checks if a specific CVX code was administered but is not in the valid doses
-    pub fn has_invalid_cvx(&self, cvx: &str) -> bool {
+    pub fn has_invalid_cvx(&self, cvx: Cvx) -> bool {
         let has_cvx = self.history.iter().any(|d| d.cvx == cvx);
         let valid_has_cvx = self.valid_doses.iter().any(|(date, _)| {
             self.history.iter().any(|d| d.cvx == cvx && d.date == *date)
@@ -56,11 +56,11 @@ impl<'a> EvaluationContext<'a> {
     }
 
     /// Counts how many doses matching any of the provided CVX codes were administered before the specified age
-    pub fn count_cvx_before(&self, cvx_list: &[&str], age_str: &str) -> usize {
+    pub fn count_cvx_before(&self, cvx_list: &[u16], age_str: &str) -> usize {
         let tp = TimePeriod::parse(age_str).unwrap();
         let cutoff = tp.add_to(self.patient.birth_date);
         self.history.iter()
-            .filter(|d| cvx_list.contains(&d.cvx.as_str()) && d.date < cutoff)
+            .filter(|d| cvx_list.contains(&d.cvx.0) && d.date < cutoff)
             .count()
     }
 }
@@ -177,10 +177,10 @@ impl EvaluationEngine {
         let mut sorted_history: Vec<Dose> = history.iter()
             .filter(|dose| {
                 if group_series.is_empty() {
-                    self.series.doses.iter().any(|d_rule| d_rule.allowed_cvx.contains(&dose.cvx))
+                    self.series.doses.iter().any(|d_rule| d_rule.allowed_cvx.contains(&dose.cvx.0))
                 } else {
                     group_series.iter().any(|s| {
-                        s.doses.iter().any(|d_rule| d_rule.allowed_cvx.contains(&dose.cvx))
+                        s.doses.iter().any(|d_rule| d_rule.allowed_cvx.contains(&dose.cvx.0))
                     })
                 }
             })
@@ -191,8 +191,8 @@ impl EvaluationEngine {
                 a.date.cmp(&b.date)
             } else {
                 let group = &self.series.vaccine_group;
-                let prio_a = get_same_day_priority(group, &a.cvx, patient.birth_date, a.date);
-                let prio_b = get_same_day_priority(group, &b.cvx, patient.birth_date, b.date);
+                let prio_a = get_same_day_priority(group, a.cvx, patient.birth_date, a.date);
+                let prio_b = get_same_day_priority(group, b.cvx, patient.birth_date, b.date);
                 prio_a.cmp(&prio_b)
             }
         });
@@ -222,12 +222,12 @@ impl EvaluationEngine {
 
             // Same-day duplicate check
             let is_duplicate = i > 0 && sorted_history[i - 1].date == dose.date && {
-                let prev_cvx = &sorted_history[i - 1].cvx;
-                let cur_cvx = &dose.cvx;
+                let prev_cvx = sorted_history[i - 1].cvx;
+                let cur_cvx = dose.cvx;
                 if active_series.vaccine_group == "MMR" {
-                    let has_m = |c: &str| matches!(c, "03" | "04" | "05" | "94" | "3" | "4" | "5");
-                    let has_mu = |c: &str| matches!(c, "03" | "07" | "38" | "94" | "3" | "7");
-                    let has_r = |c: &str| matches!(c, "03" | "04" | "06" | "38" | "94" | "3" | "4" | "6");
+                    let has_m = |c: Cvx| matches!(c.0, 3 | 4 | 5 | 94);
+                    let has_mu = |c: Cvx| matches!(c.0, 3 | 7 | 38 | 94);
+                    let has_r = |c: Cvx| matches!(c.0, 3 | 4 | 6 | 38 | 94);
                     (has_m(prev_cvx) && has_m(cur_cvx)) || (has_mu(prev_cvx) && has_mu(cur_cvx)) || (has_r(prev_cvx) && has_r(cur_cvx))
                 } else {
                     true
@@ -237,7 +237,7 @@ impl EvaluationEngine {
                 let prev_dose_num = evaluations.last().and_then(|e| e.dose_number).unwrap_or(target_dose_idx);
                 evaluations.push(DoseEvaluation {
                     dose_date: dose.date,
-                    cvx: dose.cvx.clone(),
+                    cvx: dose.cvx,
                     status: DoseStatus::Invalid,
                     reasons: vec![EvaluationReason::DuplicateShotSameDay],
                     dose_number: Some(prev_dose_num),
@@ -251,7 +251,7 @@ impl EvaluationEngine {
                 let output_dose_number = std::cmp::min(target_dose_idx, valid_doses.len() + 1);
                 evaluations.push(DoseEvaluation {
                     dose_date: dose.date,
-                    cvx: dose.cvx.clone(),
+                    cvx: dose.cvx,
                     status: DoseStatus::Invalid,
                     reasons: vec![EvaluationReason::PriorToDOB],
                     dose_number: Some(output_dose_number),
@@ -297,7 +297,7 @@ impl EvaluationEngine {
                         }
                         evaluations.push(DoseEvaluation {
                             dose_date: dose.date,
-                            cvx: dose.cvx.clone(),
+                            cvx: dose.cvx,
                             status,
                             reasons,
                             dose_number: Some(output_dose_number),
@@ -310,7 +310,7 @@ impl EvaluationEngine {
                 let output_dose_number = std::cmp::min(target_dose_idx, valid_doses.len() + 1);
                 evaluations.push(DoseEvaluation {
                     dose_date: dose.date,
-                    cvx: dose.cvx.clone(),
+                    cvx: dose.cvx,
                     status: DoseStatus::Accepted, // Mark accepted as extra dose
                     reasons: vec![EvaluationReason::BoosterDose],
                     dose_number: Some(output_dose_number),
@@ -359,7 +359,7 @@ impl EvaluationEngine {
             let mut is_valid = true;
 
             // Check vaccine code eligibility
-            if !dose_rule.allowed_cvx.contains(&dose.cvx) {
+            if !dose_rule.allowed_cvx.contains(&dose.cvx.0) {
                 is_valid = false;
                 reasons.push(EvaluationReason::VaccineNotPartOfSeries);
             }
@@ -403,7 +403,7 @@ impl EvaluationEngine {
 
             evaluations.push(DoseEvaluation {
                 dose_date: dose.date,
-                cvx: dose.cvx.clone(),
+                cvx: dose.cvx,
                 status,
                 reasons,
                 dose_number: Some(output_dose_number),
@@ -580,10 +580,10 @@ impl EvaluationEngine {
 
         // Get the most recent shot date for any dose belonging to this series
         let last_shot_date = history.iter()
-            .filter(|d| active_series.doses.iter().any(|d_rule| d_rule.allowed_cvx.contains(&d.cvx)))
+            .filter(|d| active_series.doses.iter().any(|d_rule| d_rule.allowed_cvx.contains(&d.cvx.0)))
             .filter(|d| {
                 !(active_series.vaccine_group == "PNEUMOCOCCAL"
-                    && d.cvx == "33"
+                    && d.cvx.0 == 33
                     && compare_elapsed(
                         patient.birth_date,
                         d.date,
@@ -717,46 +717,47 @@ impl EvaluationEngine {
     }
 }
 
-fn get_same_day_priority(group: &str, cvx: &str, birth_date: NaiveDate, dose_date: NaiveDate) -> i32 {
+fn get_same_day_priority(group: &str, cvx: Cvx, birth_date: NaiveDate, dose_date: NaiveDate) -> i32 {
+    let cvx_code = cvx.0;
     match group {
-        "MMR" => match cvx {
-            "94" => 0,
-            "03" => 1,
-            "04" | "05" => 2,
+        "MMR" => match cvx_code {
+            94 => 0,
+            3 => 1,
+            4 | 5 => 2,
             _ => 3,
         },
-        "POLIO" => match cvx {
-            "02" | "182" => 1,
+        "POLIO" => match cvx_code {
+            2 | 182 => 1,
             _ => 0,
         },
         "HEP_A" => {
             let age_19 = crate::date_utils::add_years(birth_date, 19);
             if dose_date >= age_19 {
-                if cvx == "52" { 0 } else { 1 }
+                if cvx_code == 52 { 0 } else { 1 }
             } else {
-                if cvx == "52" { 1 } else { 0 }
+                if cvx_code == 52 { 1 } else { 0 }
             }
         }
-        "VARICELLA" => match cvx {
-            "94" => 0,
-            "21" => 1,
+        "VARICELLA" => match cvx_code {
+            94 => 0,
+            21 => 1,
             _ => 2,
         },
-        "DTP" => match cvx {
-            "115" | "198" => 1, // Tdap
-            "09" | "28" | "113" | "138" | "139" | "195" | "196" => 2, // DT/Td
+        "DTP" => match cvx_code {
+            115 | 198 => 1, // Tdap
+            9 | 28 | 113 | 138 | 139 | 195 | 196 => 2, // DT/Td
             _ => 0, // DTaP/DTP combo/single
         },
-        "HEP_B" => match cvx {
-            "104" | "110" | "146" => 0,
+        "HEP_B" => match cvx_code {
+            104 | 110 | 146 => 0,
             _ => 1,
         },
         "MENB" => {
             let policy_change = NaiveDate::from_ymd_opt(2024, 10, 25).unwrap();
             if dose_date < policy_change {
-                match cvx {
-                    "163" | "328" => 0,
-                    "162" | "316" => 1,
+                match cvx_code {
+                    163 | 328 => 0,
+                    162 | 316 => 1,
                     _ => 2,
                 }
             } else {
@@ -766,23 +767,23 @@ fn get_same_day_priority(group: &str, cvx: &str, birth_date: NaiveDate, dose_dat
         "ROTAVIRUS" => {
             let policy_change = NaiveDate::from_ymd_opt(2000, 1, 1).unwrap();
             if dose_date >= policy_change {
-                match cvx {
-                    "119" => 1,
-                    "74" => 2,
+                match cvx_code {
+                    119 => 1,
+                    74 => 2,
                     _ => 0,
                 }
             } else {
-                match cvx {
-                    "74" => 0,
-                    "119" => 2,
+                match cvx_code {
+                    74 => 0,
+                    119 => 2,
                     _ => 1,
                 }
             }
         }
-        "MPOX" => match cvx {
-            "206" => 0,
-            "75" | "105" => 1,
-            "325" => 2,
+        "MPOX" => match cvx_code {
+            206 => 0,
+            75 | 105 => 1,
+            325 => 2,
             _ => 3,
         },
         _ => 0,

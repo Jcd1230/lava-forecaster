@@ -1,7 +1,7 @@
 use crate::schedule::CompiledSeries;
 
 pub fn mmr_2_dose_series() -> CompiledSeries {
-    let allowed_cvx = &["03", "04", "05", "06", "07", "38", "94"];
+    let allowed_cvx = &[3, 4, 5, 6, 7, 38, 94];
 
     CompiledSeries::builder("MMR_2_DOSE_SERIES")
         .code("MMR_2_DOSE_SERIES")

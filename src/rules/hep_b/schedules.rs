@@ -1,8 +1,6 @@
 use crate::schedule::CompiledSeries;
 
-const ALLOWED_CVX: &[&str] = &[
-    "08", "42", "43", "44", "45", "51", "102", "104", "110", "132", "146", "189", "198", "220"
-];
+const ALLOWED_CVX: &[u16] = &[8, 42, 43, 44, 45, 51, 102, 104, 110, 132, 146, 189, 198, 220];
 
 pub fn hep_b_3_dose_child_adolescent_series() -> CompiledSeries {
     CompiledSeries::builder("HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES")
@@ -113,13 +111,13 @@ pub fn hep_b_3_dose_twinrix_series() -> CompiledSeries {
             .abs_min_age("18y-4d")
             .min_age("18y")
             .earliest_recommended_age("18y")
-            .cvx(&["104"])
+            .cvx(&[104])
         )
         .dose(2, |d| d
-            .cvx(&["104"])
+            .cvx(&[104])
         )
         .dose(3, |d| d
-            .cvx(&["43", "104", "220"])
+            .cvx(&[43, 104, 220])
         )
         .interval(1, 2, |i| i
             .abs_min_interval("24d")
@@ -143,16 +141,16 @@ pub fn hep_b_4_dose_accelerated_twinrix_series() -> CompiledSeries {
             .abs_min_age("18y-4d")
             .min_age("18y")
             .earliest_recommended_age("18y")
-            .cvx(&["104"])
+            .cvx(&[104])
         )
         .dose(2, |d| d
-            .cvx(&["104"])
+            .cvx(&[104])
         )
         .dose(3, |d| d
-            .cvx(&["104"])
+            .cvx(&[104])
         )
         .dose(4, |d| d
-            .cvx(&["43", "104", "220"])
+            .cvx(&[43, 104, 220])
         )
         .interval(1, 2, |i| i
             .abs_min_interval("7d")
@@ -178,10 +176,10 @@ pub fn hep_b_adult_2_dose_series() -> CompiledSeries {
             .min_age("18y")
             .earliest_recommended_age("18y")
             .latest_recommended_age("18y")
-            .cvx(&["189"])
+            .cvx(&[189])
         )
         .dose(2, |d| d
-            .cvx(&["189"])
+            .cvx(&[189])
         )
         .interval(1, 2, |i| i
             .abs_min_interval("24d")

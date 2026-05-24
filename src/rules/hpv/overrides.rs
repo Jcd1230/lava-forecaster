@@ -1,11 +1,11 @@
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
-use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
+use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
 use crate::date_utils::{TimePeriod, add_years};
 use std::collections::HashMap;
 
-fn is_hpv_cvx(cvx: &str) -> bool {
-    matches!(cvx, "62" | "118" | "137" | "165")
+fn is_hpv_cvx(cvx: Cvx) -> bool {
+    matches!(cvx.0, 62 | 118 | 137 | 165)
 }
 
 fn add_interval(date: NaiveDate, interval: &str) -> NaiveDate {
@@ -25,7 +25,7 @@ pub fn hpv_custom_evaluation_hook(
 ) {
     if let Some(dose) = ctx.current_dose {
         // 1. Gender-specific restriction: CVX 118 (bivalent) is not licensed for males
-        if dose.cvx == "118" && ctx.patient.gender == crate::models::Gender::Male {
+        if dose.cvx.0 == 118 && ctx.patient.gender == crate::models::Gender::Male {
             *status = DoseStatus::Accepted;
             reasons.clear();
             reasons.push(EvaluationReason::VaccineNotLicensedForMales);
@@ -81,7 +81,7 @@ pub fn hpv_custom_forecast_hook(
     let age_27 = add_years(patient.birth_date, 27);
     let age_46 = add_years(patient.birth_date, 46);
 
-    let has_hpv_history = _history.iter().any(|dose| is_hpv_cvx(&dose.cvx));
+    let has_hpv_history = _history.iter().any(|dose| is_hpv_cvx(dose.cvx));
 
     if !has_hpv_history && eval_date >= age_27 && eval_date < age_46 {
         forecast.status = SeriesStatus::ConditionallyRecommended;
@@ -109,7 +109,7 @@ pub fn hpv_custom_forecast_hook(
     let first_valid_date = valid_doses[0].0;
     let started_at_or_after_15 = first_valid_date >= age_15;
     let latest_hpv_dose_date = _history.iter()
-        .filter(|dose| is_hpv_cvx(&dose.cvx))
+        .filter(|dose| is_hpv_cvx(dose.cvx))
         .map(|dose| dose.date)
         .max()
         .unwrap_or(first_valid_date);

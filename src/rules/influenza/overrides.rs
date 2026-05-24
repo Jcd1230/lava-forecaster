@@ -1,6 +1,6 @@
 use chrono::{Datelike, NaiveDate};
 use crate::engine::EvaluationContext;
-use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast, DoseEvaluation};
+use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast, DoseEvaluation};
 
 pub struct SeasonDates {
     pub start: NaiveDate,
@@ -108,7 +108,7 @@ pub fn influenza_custom_evaluation_hook(
     }
 
     // 3. Vaccine Not Allowed In US
-    if matches!(dose.cvx.as_str(), "194" | "200" | "201" | "202" | "231" | "331") {
+    if matches!(dose.cvx.0, 194 | 200 | 201 | 202 | 231 | 331) {
         *status = DoseStatus::Invalid;
         reasons.retain(|r| *r != EvaluationReason::VaccineNotPartOfSeries);
         if !reasons.contains(&EvaluationReason::VaccineNotAllowedInUs) {
@@ -117,7 +117,7 @@ pub fn influenza_custom_evaluation_hook(
     }
 
     // 4. CVX 161 Age Limit and Suppression
-    if dose.cvx == "161" {
+    if dose.cvx.0 == 161 {
         let tp_3y = crate::date_utils::TimePeriod::parse("3y-1d").unwrap();
         let limit = tp_3y.add_to(ctx.patient.birth_date);
         if dose.date > limit {
@@ -190,10 +190,10 @@ pub fn influenza_custom_forecast_hook(
 }
 
 fn count_valid_prior_doses(history: &[Dose], patient: &Patient, active_season_start: NaiveDate) -> usize {
-    let disallowed_cvx = ["194", "200", "201", "202", "231", "331"];
+    let disallowed_cvx = [194, 200, 201, 202, 231, 331];
     let mut eligible_doses: Vec<NaiveDate> = history.iter()
         .filter(|d| d.date < active_season_start)
-        .filter(|d| !disallowed_cvx.contains(&d.cvx.as_str()))
+        .filter(|d| !disallowed_cvx.contains(&d.cvx.0))
         .filter(|d| {
             let tp_6m_4d = crate::date_utils::TimePeriod::parse("6m-4d").unwrap();
             let abs_min_date = tp_6m_4d.add_to(patient.birth_date);
@@ -237,7 +237,7 @@ fn check_1dose_conditions_2012_2014(history: &[Dose], patient: &Patient, active_
     
     let prior_before_2010_count = count_valid_prior_doses_before_2010(history, patient);
     let has_h1n1 = history.iter().any(|d| {
-        matches!(d.cvx.as_str(), "125" | "126" | "127" | "128") &&
+        matches!(d.cvx.0, 125 | 126 | 127 | 128) &&
         d.date >= NaiveDate::from_ymd_opt(2009, 10, 1).unwrap() &&
         d.date <= NaiveDate::from_ymd_opt(2010, 6, 30).unwrap()
     });
@@ -246,10 +246,10 @@ fn check_1dose_conditions_2012_2014(history: &[Dose], patient: &Patient, active_
 }
 
 fn get_latest_valid_prior_dose_date(history: &[Dose], patient: &Patient, active_season_start: NaiveDate) -> Option<NaiveDate> {
-    let disallowed_cvx = ["194", "200", "201", "202", "231", "331"];
+    let disallowed_cvx = [194, 200, 201, 202, 231, 331];
     history.iter()
         .filter(|d| d.date < active_season_start)
-        .filter(|d| !disallowed_cvx.contains(&d.cvx.as_str()))
+        .filter(|d| !disallowed_cvx.contains(&d.cvx.0))
         .filter(|d| {
             let tp_6m_4d = crate::date_utils::TimePeriod::parse("6m-4d").unwrap();
             let abs_min_date = tp_6m_4d.add_to(patient.birth_date);
@@ -261,10 +261,10 @@ fn get_latest_valid_prior_dose_date(history: &[Dose], patient: &Patient, active_
 
 fn count_valid_prior_doses_before_2010(history: &[Dose], patient: &Patient) -> usize {
     let cutoff = NaiveDate::from_ymd_opt(2010, 7, 1).unwrap();
-    let disallowed_cvx = ["194", "200", "201", "202", "231", "331"];
+    let disallowed_cvx = [194, 200, 201, 202, 231, 331];
     let mut eligible_doses: Vec<NaiveDate> = history.iter()
         .filter(|d| d.date < cutoff)
-        .filter(|d| !disallowed_cvx.contains(&d.cvx.as_str()))
+        .filter(|d| !disallowed_cvx.contains(&d.cvx.0))
         .filter(|d| {
             let tp_6m_4d = crate::date_utils::TimePeriod::parse("6m-4d").unwrap();
             let abs_min_date = tp_6m_4d.add_to(patient.birth_date);
@@ -327,24 +327,20 @@ fn evaluate_history_seasonally(patient: &Patient, history: &[Dose]) -> Vec<DoseE
                 }
 
                 // 3. US disallowed vaccine check
-                if matches!(dose.cvx.as_str(), "194" | "200" | "201" | "202" | "231" | "331") {
+                if matches!(dose.cvx.0, 194 | 200 | 201 | 202 | 231 | 331) {
                     status = DoseStatus::Invalid;
                     reasons.push(EvaluationReason::VaccineNotAllowedInUs);
                 }
 
                 // 4. Allowed CVX check
-                const ALLOWED_CVX: &[&str] = &[
-                    "151", "144", "149", "88", "111", "155", "15", "141", "153", "16",
-                    "135", "150", "140", "158", "161", "166", "168", "171", "185", "186",
-                    "194", "197", "200", "201", "202", "205", "231", "320", "331", "333",
-                ];
-                if !ALLOWED_CVX.contains(&dose.cvx.as_str()) {
+                const ALLOWED_CVX: &[u16] = &[151, 144, 149, 88, 111, 155, 15, 141, 153, 16, 135, 150, 140, 158, 161, 166, 168, 171, 185, 186, 194, 197, 200, 201, 202, 205, 231, 320, 331, 333];
+                if !ALLOWED_CVX.contains(&dose.cvx.0) {
                     status = DoseStatus::Invalid;
                     reasons.push(EvaluationReason::VaccineNotPartOfSeries);
                 }
 
                 // 5. CVX 161 pediatric restriction check
-                if dose.cvx == "161" {
+                if dose.cvx.0 == 161 {
                     let tp_3y = crate::date_utils::TimePeriod::parse("3y-1d").unwrap();
                     let limit = tp_3y.add_to(patient.birth_date);
                     if dose.date > limit {

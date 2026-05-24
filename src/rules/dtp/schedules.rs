@@ -1,8 +1,6 @@
 use crate::schedule::CompiledSeries;
 
-const ALLOWED_CVX: &[&str] = &[
-    "01", "20", "106", "107", "22", "50", "102", "110", "120", "130", "132", "146", "115", "28", "09", "138", "139", "113", "170", "195", "196", "198"
-];
+const ALLOWED_CVX: &[u16] = &[1, 20, 106, 107, 22, 50, 102, 110, 120, 130, 132, 146, 115, 28, 9, 138, 139, 113, 170, 195, 196, 198];
 
 pub fn dtp_3_dose_series() -> CompiledSeries {
     CompiledSeries::builder("DTP_3_DOSE_SERIES")

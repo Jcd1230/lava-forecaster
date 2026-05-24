@@ -1,7 +1,7 @@
 use chrono::NaiveDate;
 use crate::date_utils::{add_years, add_months, compare_elapsed, TimePeriod};
 use crate::engine::EvaluationContext;
-use crate::models::{
+use crate::models::{Cvx, 
     Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus,
     VaccineGroupForecast, DoseEvaluation,
 };
@@ -52,25 +52,22 @@ fn has_in_season_dose_before_age(patient: &Patient, history: &[Dose], age: &str)
 fn get_min_interval_days(
     patient: &Patient,
     prior_dose: &DoseEvaluation,
-    current_dose_cvx: &str,
+    current_dose_cvx: Cvx,
     current_dose_date: NaiveDate,
     active_series_name: &str,
     season_valid_doses_len: usize,
 ) -> i64 {
     let season = get_covid_season(current_dose_date);
     
-    let is_pfizer = |cvx: &str| {
-        matches!(
-            cvx,
-            "208" | "217" | "218" | "219" | "300" | "301" | "302" | "308" | "309" | "310" | "502"
-        )
+    let is_pfizer = |cvx: Cvx| {
+        matches!(cvx.0, 208 | 217 | 218 | 219 | 300 | 301 | 302 | 308 | 309 | 310 | 502)
     };
-    let is_novavax = |cvx: &str| matches!(cvx, "211" | "313");
-    let is_unspecified = |cvx: &str| cvx == "213";
+    let is_novavax = |cvx: Cvx| matches!(cvx.0, 211 | 313);
+    let is_unspecified = |cvx: Cvx| cvx.0 == 213;
 
-    let is_same_brand_or_unspec = (is_pfizer(&prior_dose.cvx) && is_pfizer(current_dose_cvx))
-        || (is_novavax(&prior_dose.cvx) && is_novavax(current_dose_cvx))
-        || is_unspecified(&prior_dose.cvx)
+    let is_same_brand_or_unspec = (is_pfizer(prior_dose.cvx) && is_pfizer(current_dose_cvx))
+        || (is_novavax(prior_dose.cvx) && is_novavax(current_dose_cvx))
+        || is_unspecified(prior_dose.cvx)
         || is_unspecified(current_dose_cvx);
 
     if season == "COVID_19_AUG_2025_SEASON" {
@@ -104,8 +101,8 @@ fn get_min_interval_days(
                     24
                 }
             } else {
-                let is_novavax_or_unspec = |cvx: &str| is_novavax(cvx) || is_unspecified(cvx);
-                if is_novavax_or_unspec(&prior_dose.cvx) && is_novavax_or_unspec(current_dose_cvx) && is_same_brand_or_unspec {
+                let is_novavax_or_unspec = |cvx: Cvx| is_novavax(cvx) || is_unspecified(cvx);
+                if is_novavax_or_unspec(prior_dose.cvx) && is_novavax_or_unspec(current_dose_cvx) && is_same_brand_or_unspec {
                     17
                 } else {
                     52
@@ -146,22 +143,19 @@ pub fn evaluate_doses_seasonally(
         else {
             // 3. Authorization check
             let mut auth_ok = true;
-            if (dose.cvx == "308" || dose.cvx == "309" || dose.cvx == "310" || dose.cvx == "311" || dose.cvx == "312")
+            if (dose.cvx.0 == 308 || dose.cvx.0 == 309 || dose.cvx.0 == 310 || dose.cvx.0 == 311 || dose.cvx.0 == 312)
                 && dose.date < NaiveDate::from_ymd_opt(2023, 9, 11).unwrap()
             {
                 auth_ok = false;
             }
-            if dose.cvx == "313" && dose.date < NaiveDate::from_ymd_opt(2023, 10, 3).unwrap() {
+            if dose.cvx.0 == 313 && dose.date < NaiveDate::from_ymd_opt(2023, 10, 3).unwrap() {
                 auth_ok = false;
             }
-            let is_pandemic_cvx = matches!(
-                dose.cvx.as_str(),
-                "207" | "208" | "211" | "212" | "217" | "218" | "219" | "221" | "228" | "229" | "272" | "300" | "301" | "302" | "502" | "519"
-            );
+            let is_pandemic_cvx = matches!(dose.cvx.0, 207 | 208 | 211 | 212 | 217 | 218 | 219 | 221 | 228 | 229 | 272 | 300 | 301 | 302 | 502 | 519);
             if is_pandemic_cvx && dose.date >= NaiveDate::from_ymd_opt(2023, 9, 12).unwrap() {
                 auth_ok = false;
             }
-            if dose.cvx == "334" && dose.date < NaiveDate::from_ymd_opt(2025, 8, 27).unwrap() {
+            if dose.cvx.0 == 334 && dose.date < NaiveDate::from_ymd_opt(2025, 8, 27).unwrap() {
                 auth_ok = false;
             }
 
@@ -208,14 +202,14 @@ pub fn evaluate_doses_seasonally(
                     reasons.push(EvaluationReason::BelowMinimumAge);
                 } else {
                     // Novavax GTE 5y season start restriction in prior seasons
-                    let is_novavax = matches!(dose.cvx.as_str(), "211" | "313");
+                    let is_novavax = matches!(dose.cvx.0, 211 | 313);
                     if is_novavax && (season == "COVID_19_SEP_2023_SEASON" || season == "COVID_19_AUG_2024_SEASON") {
                         let season_start_dt = get_season_start_date(season);
                         let age_at_season_start = compare_elapsed(patient.birth_date, season_start_dt, &TimePeriod::parse("5y").unwrap());
                         let novavax_count_in_season = sorted_history.iter()
                             .filter(|d| {
                                 let d_season = get_covid_season(d.date);
-                                d_season == season && (d.cvx == "211" || d.cvx == "313")
+                                d_season == season && (d.cvx.0 == 211 || d.cvx.0 == 313)
                             })
                             .count();
                         if age_at_season_start != std::cmp::Ordering::Less && novavax_count_in_season < 2 {
@@ -250,7 +244,7 @@ pub fn evaluate_doses_seasonally(
                             "COVID_19_AUG_2025_SEASON".to_string()
                         }
                     } else {
-                        let is_pediatric = matches!(dose.cvx.as_str(), "219" | "228" | "272" | "302" | "308" | "311");
+                        let is_pediatric = matches!(dose.cvx.0, 219 | 228 | 272 | 302 | 308 | 311);
                         if is_pediatric {
                             "PRIOR_SEASONS_LT5".to_string()
                         } else {
@@ -269,7 +263,7 @@ pub fn evaluate_doses_seasonally(
                     let mut min_interval_days = get_min_interval_days(
                         patient,
                         last_prior,
-                        &dose.cvx,
+                        dose.cvx,
                         dose.date,
                         active_series_name,
                         season_valid_doses_len,
@@ -305,7 +299,7 @@ pub fn evaluate_doses_seasonally(
                 "COVID_19_AUG_2025_SEASON".to_string()
             }
         } else {
-            let is_pediatric = matches!(dose.cvx.as_str(), "219" | "228" | "272" | "302" | "308" | "311");
+            let is_pediatric = matches!(dose.cvx.0, 219 | 228 | 272 | 302 | 308 | 311);
             if is_pediatric {
                 "PRIOR_SEASONS_LT5".to_string()
             } else {
@@ -326,15 +320,12 @@ pub fn evaluate_doses_seasonally(
             let mut num = season_valid_doses.len();
             if active_series_name == "COVID_19_AUG_2025_LT_2_SERIES" && season == "COVID_19_AUG_2025_SEASON" {
                 let prior_moderna_count = sorted_history.iter()
-                    .filter(|d| d.date < season_start() && (d.cvx == "311" || d.cvx == "312"))
+                    .filter(|d| d.date < season_start() && (d.cvx.0 == 311 || d.cvx.0 == 312))
                     .count();
                 let prior_valid_count = sorted_history.iter()
                     .filter(|d| d.date < season_start())
                     .filter(|d| {
-                        matches!(
-                            d.cvx.as_str(),
-                            "213" | "308" | "309" | "310" | "311" | "312" | "313"
-                        )
+                        matches!(d.cvx.0, 213 | 308 | 309 | 310 | 311 | 312 | 313)
                     })
                     .count();
                 let is_skipped = prior_moderna_count == 1 || prior_valid_count >= 2;
@@ -348,15 +339,12 @@ pub fn evaluate_doses_seasonally(
             let mut num = season_valid_doses.len() + 1;
             if active_series_name == "COVID_19_AUG_2025_LT_2_SERIES" && season == "COVID_19_AUG_2025_SEASON" {
                 let prior_moderna_count = sorted_history.iter()
-                    .filter(|d| d.date < season_start() && (d.cvx == "311" || d.cvx == "312"))
+                    .filter(|d| d.date < season_start() && (d.cvx.0 == 311 || d.cvx.0 == 312))
                     .count();
                 let prior_valid_count = sorted_history.iter()
                     .filter(|d| d.date < season_start())
                     .filter(|d| {
-                        matches!(
-                            d.cvx.as_str(),
-                            "213" | "308" | "309" | "310" | "311" | "312" | "313"
-                        )
+                        matches!(d.cvx.0, 213 | 308 | 309 | 310 | 311 | 312 | 313)
                     })
                     .count();
                 let is_skipped = prior_moderna_count == 1 || prior_valid_count >= 2;
@@ -448,15 +436,12 @@ pub fn covid19_custom_forecast_hook(
     if active_series_name == "COVID_19_AUG_2025_LT_2_SERIES" {
         // Skip check
         let prior_moderna_count = history.iter()
-            .filter(|d| d.date < season_start() && (d.cvx == "311" || d.cvx == "312"))
+            .filter(|d| d.date < season_start() && (d.cvx.0 == 311 || d.cvx.0 == 312))
             .count();
         let prior_valid_count = history.iter()
             .filter(|d| d.date < season_start())
             .filter(|d| {
-                matches!(
-                    d.cvx.as_str(),
-                    "213" | "308" | "309" | "310" | "311" | "312" | "313"
-                )
+                matches!(d.cvx.0, 213 | 308 | 309 | 310 | 311 | 312 | 313)
             })
             .count();
         let is_skipped = prior_moderna_count == 1 || prior_valid_count >= 2;
@@ -526,10 +511,7 @@ pub fn covid19_custom_forecast_hook(
                     let mut recommended = season_start().max(age_6m);
                     if let Some(last) = last_prior_dose_date {
                         let last_dose = history.iter().find(|d| d.date == last).unwrap();
-                        let is_pfizer_novavax_unspec = matches!(
-                            last_dose.cvx.as_str(),
-                            "208" | "217" | "218" | "219" | "300" | "301" | "302" | "308" | "309" | "310" | "211" | "313" | "213"
-                        );
+                        let is_pfizer_novavax_unspec = matches!(last_dose.cvx.0, 208 | 211 | 213 | 217 | 218 | 219 | 300 | 301 | 302 | 308 | 309 | 310 | 313);
                         if is_pfizer_novavax_unspec {
                             earliest = earliest.max(last + chrono::Duration::days(17));
                             recommended = recommended.max(last + chrono::Duration::days(21));
@@ -584,7 +566,7 @@ pub fn covid19_custom_forecast_hook(
 
                 if let Some(last) = last_prior_dose_date {
                     let last_dose = history.iter().find(|d| d.date == last).unwrap();
-                    if last_dose.cvx == "313" {
+                    if last_dose.cvx.0 == 313 {
                         earliest = earliest.max(last + chrono::Duration::days(17));
                         recommended = recommended.max(last + chrono::Duration::days(17));
                     } else {
@@ -640,7 +622,7 @@ pub fn covid19_custom_forecast_hook(
 
                 if let Some(last) = last_prior_dose_date {
                     let last_dose = history.iter().find(|d| d.date == last).unwrap();
-                    if last_dose.cvx == "313" {
+                    if last_dose.cvx.0 == 313 {
                         earliest = earliest.max(last + chrono::Duration::days(17));
                         recommended = recommended.max(last + chrono::Duration::days(17));
                     } else {

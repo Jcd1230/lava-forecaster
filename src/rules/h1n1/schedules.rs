@@ -1,7 +1,7 @@
 use crate::schedule::CompiledSeries;
 
 pub fn h1n1_1_dose_series() -> CompiledSeries {
-    let allowed_cvx = &["125", "126", "127", "128"];
+    let allowed_cvx = &[125, 126, 127, 128];
 
     CompiledSeries::builder("H1N1_1_DOSE_SERIES")
         .code("H1N1_1_DOSE_SERIES")
@@ -17,7 +17,7 @@ pub fn h1n1_1_dose_series() -> CompiledSeries {
 }
 
 pub fn h1n1_2_dose_series() -> CompiledSeries {
-    let allowed_cvx = &["125", "126", "127", "128"];
+    let allowed_cvx = &[125, 126, 127, 128];
 
     CompiledSeries::builder("H1N1_2_DOSE_SERIES")
         .code("H1N1_2_DOSE_SERIES")

@@ -1,7 +1,7 @@
 use crate::schedule::CompiledSeries;
 
 pub fn hepa_2_dose_series() -> CompiledSeries {
-    let allowed_cvx = &["31", "52", "83", "84", "85", "104"];
+    let allowed_cvx = &[31, 52, 83, 84, 85, 104];
 
     CompiledSeries::builder("HEP_A_2_DOSE_CHILD_ADULT_SERIES")
         .code("HEP_A_2_DOSE_CHILD_ADULT_SERIES")
@@ -31,7 +31,7 @@ pub fn hepa_2_dose_series() -> CompiledSeries {
 }
 
 pub fn hepa_adult_3_dose_series() -> CompiledSeries {
-    let allowed_cvx = &["31", "52", "83", "84", "85", "104"];
+    let allowed_cvx = &[31, 52, 83, 84, 85, 104];
 
     CompiledSeries::builder("HEP_A_ADULT_3_DOSE_SERIES")
         .code("HEP_A_ADULT_3_DOSE_SERIES")
@@ -63,8 +63,8 @@ pub fn hepa_adult_3_dose_series() -> CompiledSeries {
 }
 
 pub fn hepa_4_dose_twinrix_series() -> CompiledSeries {
-    let twinrix_cvx = &["104"];
-    let other_cvx = &["31", "52", "83", "84", "85", "104"];
+    let twinrix_cvx = &[104];
+    let other_cvx = &[31, 52, 83, 84, 85, 104];
 
     CompiledSeries::builder("HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES")
         .code("HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES")

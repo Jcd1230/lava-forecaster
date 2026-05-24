@@ -1,7 +1,7 @@
 use chrono::NaiveDate;
 use crate::engine::{EvaluationContext, ParameterOverrideRule, ConditionalCompletionRule, RecommendationOverrideRule};
 use crate::date_utils::{TimePeriod, compare_elapsed, add_years, add_months};
-use crate::models::{Patient, SeriesForecast, Dose, DoseStatus, EvaluationReason, VaccineGroupForecast, DoseEvaluation};
+use crate::models::{Cvx, Patient, SeriesForecast, Dose, DoseStatus, EvaluationReason, VaccineGroupForecast, DoseEvaluation};
 use std::collections::HashMap;
 
 pub fn polio_parameter_overrides() -> Vec<ParameterOverrideRule> {
@@ -211,8 +211,8 @@ pub fn polio_custom_forecast_hook(
     // Interval calculation from last administered polio shot (excluding ignored ones)
     let last_non_ignored_dose = history.iter()
         .filter(|d| {
-            let is_cvx_178_179 = d.cvx == "178" || d.cvx == "179";
-            let is_cvx_02_182_after_2016 = (d.cvx == "02" || d.cvx == "182") && d.date >= NaiveDate::from_ymd_opt(2016, 4, 1).unwrap();
+            let is_cvx_178_179 = d.cvx.0 == 178 || d.cvx.0 == 179;
+            let is_cvx_02_182_after_2016 = (d.cvx.0 == 2 || d.cvx.0 == 182) && d.date >= NaiveDate::from_ymd_opt(2016, 4, 1).unwrap();
             !(is_cvx_178_179 || is_cvx_02_182_after_2016)
         })
         .last();
@@ -267,8 +267,8 @@ pub fn polio_custom_evaluation_hook(
     }
 
     if let Some(dose) = ctx.current_dose {
-        let is_cvx_178_179 = dose.cvx == "178" || dose.cvx == "179";
-        let is_cvx_02_182_after_2016 = (dose.cvx == "02" || dose.cvx == "182") && dose.date >= NaiveDate::from_ymd_opt(2016, 4, 1).unwrap();
+        let is_cvx_178_179 = dose.cvx.0 == 178 || dose.cvx.0 == 179;
+        let is_cvx_02_182_after_2016 = (dose.cvx.0 == 2 || dose.cvx.0 == 182) && dose.date >= NaiveDate::from_ymd_opt(2016, 4, 1).unwrap();
         
         if is_cvx_178_179 || is_cvx_02_182_after_2016 {
             *status = DoseStatus::Invalid;
@@ -313,8 +313,8 @@ pub fn polio_custom_extra_dose_hook(
 
     let dose = ctx.current_dose?;
     
-    let is_cvx_178_179 = dose.cvx == "178" || dose.cvx == "179";
-    let is_cvx_02_182_after_2016 = (dose.cvx == "02" || dose.cvx == "182") && dose.date >= NaiveDate::from_ymd_opt(2016, 4, 1).unwrap();
+    let is_cvx_178_179 = dose.cvx.0 == 178 || dose.cvx.0 == 179;
+    let is_cvx_02_182_after_2016 = (dose.cvx.0 == 2 || dose.cvx.0 == 182) && dose.date >= NaiveDate::from_ymd_opt(2016, 4, 1).unwrap();
     
     if is_cvx_178_179 || is_cvx_02_182_after_2016 {
         return Some((DoseStatus::Invalid, vec![EvaluationReason::MissingAntigen]));
@@ -344,12 +344,12 @@ pub fn polio_group_selection(
         valid_doses.sort_by_key(|e| e.dose_date);
         
         if valid_doses.len() >= 2 {
-            if valid_doses[0].cvx == "324" && valid_doses[1].cvx == "324" {
+            if valid_doses[0].cvx.0 == 324 && valid_doses[1].cvx.0 == 324 {
                 let second_fipv_date = valid_doses[1].dose_date;
                 let mut has_other_valid_before = false;
                 if let Some(four_dose_forecast) = candidate_forecasts.get("POLIO_4_DOSE_SERIES") {
                     for e in &four_dose_forecast.evaluations {
-                        if e.status == DoseStatus::Valid && e.dose_date < second_fipv_date && e.cvx != "324" {
+                        if e.status == DoseStatus::Valid && e.dose_date < second_fipv_date && e.cvx.0 != 324 {
                             has_other_valid_before = true;
                             break;
                         }

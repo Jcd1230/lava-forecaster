@@ -1,13 +1,13 @@
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
-use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus};
+use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus};
 use crate::date_utils::{TimePeriod, add_years};
 
-fn get_vaccine_min_age(cvx: &str) -> Option<TimePeriod> {
-    let s = match cvx {
-        "114" | "147" => "9m-4d",
-        "136" => "2m-4d",
-        "203" | "108" | "32" => "2y-4d",
+fn get_vaccine_min_age(cvx: Cvx) -> Option<TimePeriod> {
+    let s = match cvx.0 {
+        114 | 147 => "9m-4d",
+        136 => "2m-4d",
+        203 | 108 | 32 => "2y-4d",
         _ => return None,
     };
     TimePeriod::parse(s).ok()
@@ -45,7 +45,7 @@ pub fn mcv_custom_evaluation_hook(
         if target_dose_idx == 1 {
             let abs_min_age_10y = add_years(birth_date, 10);
             if dose.date < abs_min_age_10y {
-                if let Some(min_age_tp) = get_vaccine_min_age(&dose.cvx) {
+                if let Some(min_age_tp) = get_vaccine_min_age(dose.cvx) {
                     let min_age_date = min_age_tp.add_to(birth_date);
                     if dose.date >= min_age_date {
                         *status = DoseStatus::Accepted;

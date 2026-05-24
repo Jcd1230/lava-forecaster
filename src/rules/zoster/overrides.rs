@@ -1,22 +1,22 @@
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
-use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast};
+use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast};
 use crate::rules::helpers::{clamp_date_at_least, interval_days_between};
 
 /// CVX codes for old live zoster vaccines (Zostavax and variants).
 /// These are not valid doses for the recombinant series but are tracked as Accepted.
-fn is_old_zoster(cvx: &str) -> bool {
-    cvx == "121" || cvx == "188"
+fn is_old_zoster(cvx: Cvx) -> bool {
+    cvx.0 == 121 || cvx.0 == 188
 }
 
 /// CVX code for recombinant zoster vaccine (Shingrix).
-fn is_shingrix(cvx: &str) -> bool {
-    cvx == "187"
+fn is_shingrix(cvx: Cvx) -> bool {
+    cvx.0 == 187
 }
 
 /// CVX code for adult varicella (for live-virus forecast spacing).
-fn is_adult_varicella(cvx: &str) -> bool {
-    cvx == "21"
+fn is_adult_varicella(cvx: Cvx) -> bool {
+    cvx.0 == 21
 }
 
 pub fn zoster_custom_evaluation_hook(
@@ -28,7 +28,7 @@ pub fn zoster_custom_evaluation_hook(
 ) {
     if let Some(dose) = ctx.current_dose {
         // Rule 1: CVX 121/188 (old live zoster) → always Accepted/VaccineNotPartOfSeries
-        if is_old_zoster(&dose.cvx) {
+        if is_old_zoster(dose.cvx) {
             *status = DoseStatus::Accepted;
             reasons.clear();
             reasons.push(EvaluationReason::VaccineNotPartOfSeries);
@@ -38,9 +38,9 @@ pub fn zoster_custom_evaluation_hook(
 
         // Rule 2: CVX 187 given < 52 days after a prior CVX 121 or CVX 188 → Invalid/BelowMinimumInterval
         // (or on the same day as a CVX 121/188)
-        if is_shingrix(&dose.cvx) {
+        if is_shingrix(dose.cvx) {
             for prior in ctx.history {
-                if is_old_zoster(&prior.cvx) && prior.date <= dose.date {
+                if is_old_zoster(prior.cvx) && prior.date <= dose.date {
                     let gap = interval_days_between(prior.date, dose.date);
                     if gap < 52 {
                         *status = DoseStatus::Invalid;
@@ -79,12 +79,12 @@ pub fn zoster_custom_forecast_hook(
     // 8 weeks (56 days) after the last dose.
     // Also applies if the last CVX 21 (adult varicella) was given.
     let last_live_zoster = history.iter()
-        .filter(|d| is_old_zoster(&d.cvx))
+        .filter(|d| is_old_zoster(d.cvx))
         .map(|d| d.date)
         .max();
 
     let last_adult_varicella = history.iter()
-        .filter(|d| is_adult_varicella(&d.cvx))
+        .filter(|d| is_adult_varicella(d.cvx))
         .map(|d| d.date)
         .max();
 
@@ -106,10 +106,10 @@ pub fn zoster_custom_forecast_hook(
     // CVX 187 still anchors the next recombinant-dose forecast interval.
     let last_invalid_shingrix_after_live = history
         .iter()
-        .filter(|dose| is_shingrix(&dose.cvx))
+        .filter(|dose| is_shingrix(dose.cvx))
         .filter(|dose| {
             history.iter().any(|prior| {
-                is_old_zoster(&prior.cvx)
+                is_old_zoster(prior.cvx)
                     && prior.date <= dose.date
                     && interval_days_between(prior.date, dose.date) < 52
             })
@@ -133,7 +133,7 @@ pub fn zoster_custom_forecast_hook(
     }
 
     // If the patient has ever received old live zoster (CVX 121 or 188), there is no overdue date for the Shingrix dose.
-    let has_old_zoster = history.iter().any(|d| is_old_zoster(&d.cvx));
+    let has_old_zoster = history.iter().any(|d| is_old_zoster(d.cvx));
     if has_old_zoster && valid_doses.is_empty() {
         forecast.overdue_date = None;
     }

@@ -7,7 +7,7 @@ use ice_rust_forecaster_poc::{
     evaluate_patient_all_groups,
     models::{
         Dose, DoseEvaluation, DoseStatus, EvaluationReason, ExpectedResults,
-        Gender, Patient, SeriesForecast, SeriesStatus, UnifiedTestCase,
+        Gender, Patient, SeriesForecast, SeriesStatus, UnifiedTestCase, Cvx,
     },
 };
 
@@ -123,9 +123,9 @@ impl RelativeDateResolver {
 }
 
 // Java ICE XML Payload Builder
-fn generate_xml_payload(dob: NaiveDate, gender: Gender, doses: &[(NaiveDate, String)]) -> String {
+fn generate_xml_payload(dob: NaiveDate, gender: Gender, doses: &[(NaiveDate, Cvx)]) -> String {
     let mut sae_templates = Vec::new();
-    for (idx, &(dt, ref cvx)) in doses.iter().enumerate() {
+    for (idx, &(dt, cvx)) in doses.iter().enumerate() {
         let dt_str = dt.format("%Y%m%d").to_string();
         sae_templates.push(format!(
             r#"                    <substanceAdministrationEvent>
@@ -138,7 +138,7 @@ fn generate_xml_payload(dob: NaiveDate, gender: Gender, doses: &[(NaiveDate, Str
                         </substance>
                         <administrationTimeInterval high="{}" low="{}"/>
                     </substanceAdministrationEvent>"#,
-            1000 + idx, cvx, dt_str, dt_str
+            1000 + idx, cvx.0, dt_str, dt_str
         ));
     }
 
@@ -184,7 +184,7 @@ fn generate_xml_payload(dob: NaiveDate, gender: Gender, doses: &[(NaiveDate, Str
 fn build_evaluate_payload(
     dob: NaiveDate,
     gender: Gender,
-    doses: &[(NaiveDate, String)],
+    doses: &[(NaiveDate, Cvx)],
     eval_date: NaiveDate,
 ) -> serde_json::Value {
     let xml_content = generate_xml_payload(dob, gender, doses);
@@ -276,7 +276,7 @@ fn process_element(
     tag_stack: &[String],
     focus_code: &str,
     outer_date: &mut Option<NaiveDate>,
-    outer_cvx: &mut Option<String>,
+    outer_cvx: &mut Option<Cvx>,
     inner_focus_matched: &mut bool,
     inner_status: &mut Option<String>,
     inner_dose_number: &mut Option<usize>,
@@ -331,7 +331,10 @@ fn process_element(
                 for attr in attributes {
                     if let Ok(a) = attr {
                         if a.key.as_ref() == b"code" {
-                            *outer_cvx = Some(String::from_utf8_lossy(a.value.as_ref()).into_owned());
+                            let raw_cvx = String::from_utf8_lossy(a.value.as_ref());
+                            if let Ok(n) = raw_cvx.parse::<u16>() {
+                                *outer_cvx = Some(Cvx(n));
+                            }
                         }
                     }
                 }
@@ -562,7 +565,7 @@ fn parse_legacy_xml(xml_content: &str, focus_code: &str) -> ExpectedResults {
 
                                 evaluations.push(DoseEvaluation {
                                     dose_date: dt,
-                                    cvx: cvx.clone(),
+                                    cvx: *cvx,
                                     status: map_legacy_dose_status(st),
                                     dose_number: inner_dose_number,
                                     reasons: mapped_reasons,
@@ -662,15 +665,12 @@ fn import_python_cases(input_file: &Path, output_dir: &Path) {
         for dose_str in tc.doses {
             let parts: Vec<&str> = dose_str.split(':').collect();
             let date_expr = parts[0];
-            let mut cvx = parts[1].to_string();
-            if cvx.len() == 1 && cvx.chars().next().map_or(false, |c| c.is_ascii_digit()) {
-                cvx = format!("0{}", cvx);
-            }
+            let cvx_num = parts[1].parse::<u16>().unwrap();
             let resolved_date = resolver.resolve(date_expr);
             resolver.dose_dates.push(resolved_date);
             resolved_doses.push(Dose {
                 date: resolved_date,
-                cvx,
+                cvx: Cvx(cvx_num),
             });
         }
 
@@ -734,9 +734,9 @@ fn main() {
                 let content = fs::read_to_string(&path).unwrap();
                 if let Ok(mut tc) = serde_json::from_str::<UnifiedTestCase>(&content) {
                     println!("Recording Java snapshot for: {}", tc.name);
-                    let doses_tuples: Vec<(NaiveDate, String)> = tc.history
+                    let doses_tuples: Vec<(NaiveDate, Cvx)> = tc.history
                         .iter()
-                        .map(|d| (d.date, d.cvx.clone()))
+                        .map(|d| (d.date, d.cvx))
                         .collect();
                     let payload = build_evaluate_payload(
                         tc.patient.birth_date,

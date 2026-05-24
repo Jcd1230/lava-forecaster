@@ -1,8 +1,8 @@
 use crate::schedule::CompiledSeries;
 
 pub fn pneumococcal_series() -> CompiledSeries {
-    let child_pcv = &["100", "133", "177", "215", "216", "109", "152"];
-    let adult_pneumo = &["215", "216", "327", "133", "33"];
+    let child_pcv = &[100, 133, 177, 215, 216, 109, 152];
+    let adult_pneumo = &[215, 216, 327, 133, 33];
 
     CompiledSeries::builder("PNEUMOCOCCAL_SERIES")
         .code("PNEUMOCOCCAL_SERIES")
@@ -36,7 +36,7 @@ pub fn pneumococcal_series() -> CompiledSeries {
                 .latest_recommended_age("16m+4w")
                 .cvx(child_pcv)
         })
-        .dose(5, |d| d.cvx(&["133", "215", "216"]))
+        .dose(5, |d| d.cvx(&[133, 215, 216]))
         .dose(6, |d| {
             d.abs_min_age("19y")
                 .min_age("50y")

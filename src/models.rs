@@ -8,16 +8,79 @@ pub enum Gender {
     Unknown,
 }
 
+/// A CDC CVX code stored as a compact integer.
+/// Serializes/deserializes as a zero-padded string ("03") for API compatibility.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Cvx(pub u16);
+
+impl Cvx {
+    pub fn new(n: u16) -> Self { Self(n) }
+    pub fn as_u16(self) -> u16 { self.0 }
+}
+
+impl std::fmt::Display for Cvx {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if self.0 < 10 {
+            write!(f, "0{}", self.0)
+        } else {
+            write!(f, "{}", self.0)
+        }
+    }
+}
+
+impl Serialize for Cvx {
+    fn serialize<S: serde::Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        // Always emit zero-padded 2-digit minimum: "03", "21", "310"
+        if self.0 < 10 {
+            s.serialize_str(&format!("0{}", self.0))
+        } else {
+            s.serialize_str(&self.0.to_string())
+        }
+    }
+}
+
+impl<'de> Deserialize<'de> for Cvx {
+    fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        struct CvxVisitor;
+        impl<'de> serde::de::Visitor<'de> for CvxVisitor {
+            type Value = Cvx;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("a CVX string (e.g. \"03\") or integer")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                value.parse::<u16>().map(Cvx).map_err(|_| serde::de::Error::custom("invalid CVX string"))
+            }
+
+            fn visit_u64<E>(self, value: u64) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                if value <= u16::MAX as u64 {
+                    Ok(Cvx(value as u16))
+                } else {
+                    Err(serde::de::Error::custom("CVX integer out of bounds"))
+                }
+            }
+        }
+        d.deserialize_any(CvxVisitor)
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Patient {
     pub birth_date: NaiveDate,
     pub gender: Gender,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Dose {
     pub date: NaiveDate,
-    pub cvx: String,
+    pub cvx: Cvx,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
@@ -51,7 +114,7 @@ pub enum EvaluationReason {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DoseEvaluation {
     pub dose_date: NaiveDate,
-    pub cvx: String,
+    pub cvx: Cvx,
     pub status: DoseStatus,
     pub reasons: Vec<EvaluationReason>,
     // The designated target dose number in the series

@@ -1,32 +1,30 @@
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
-use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus};
+use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus};
 use crate::rules::helpers::{clamp_date_at_least, age_ge, age_lt};
 
-fn is_live_virus(cvx: &str) -> bool {
-    const LIVE_VIRUS: &[&str] = &[
-        "03", "04", "05", "06", "07", "21", "37", "38", "75", "94", "105", "111", "121", "125", "149", "151", "183", "184", "325", "333"
-    ];
-    LIVE_VIRUS.contains(&cvx)
+fn is_live_virus(cvx: Cvx) -> bool {
+    const LIVE_VIRUS: &[u16] = &[3, 4, 5, 6, 7, 21, 37, 38, 75, 94, 105, 111, 121, 125, 149, 151, 183, 184, 325, 333];
+    LIVE_VIRUS.contains(&cvx.0)
 }
 
-fn is_mmr_group(cvx: &str) -> bool {
-    const MMR_CVX: &[&str] = &["03", "04", "05", "06", "07", "38", "94"];
-    MMR_CVX.contains(&cvx)
+fn is_mmr_group(cvx: Cvx) -> bool {
+    const MMR_CVX: &[u16] = &[3, 4, 5, 6, 7, 38, 94];
+    MMR_CVX.contains(&cvx.0)
 }
 
 fn has_same_day_mixed_live_virus(history: &[Dose], eval_date: NaiveDate) -> bool {
     let has_mmr_live = history
         .iter()
-        .any(|dose| dose.date == eval_date && is_mmr_group(&dose.cvx));
+        .any(|dose| dose.date == eval_date && is_mmr_group(dose.cvx));
     let has_non_mmr_live = history
         .iter()
-        .any(|dose| dose.date == eval_date && is_live_virus(&dose.cvx) && !is_mmr_group(&dose.cvx));
+        .any(|dose| dose.date == eval_date && is_live_virus(dose.cvx) && !is_mmr_group(dose.cvx));
 
     has_mmr_live && has_non_mmr_live
 }
 
-fn get_valid_doses_cvx(ctx: &EvaluationContext) -> Vec<String> {
+fn get_valid_doses_cvx(ctx: &EvaluationContext) -> Vec<Cvx> {
     let mut cvxs = Vec::new();
     let mut history_idx = 0;
     for &(valid_date, _) in ctx.valid_doses {
@@ -53,7 +51,7 @@ pub fn mmr_custom_evaluation_hook(
 
         // 1. Outside Routine Series for Dose 1
         if target_dose_idx == 1 {
-            if dose.cvx == "03" || dose.cvx == "04" || dose.cvx == "05" {
+            if dose.cvx.0 == 3 || dose.cvx.0 == 4 || dose.cvx.0 == 5 {
                 if age_ge(birth_date, dose.date, "6m-4d") && age_lt(birth_date, dose.date, "1y-4d") {
                     *status = DoseStatus::Accepted;
                     reasons.clear();
@@ -79,19 +77,19 @@ pub fn mmr_custom_evaluation_hook(
         let mut valid_r_count = 0;
         let valid_cvxs = get_valid_doses_cvx(ctx);
         for cvx in &valid_cvxs {
-            if matches!(cvx.as_str(), "03" | "04" | "05" | "94") {
+            if matches!(cvx.0, 3 | 4 | 5 | 94) {
                 valid_m_count += 1;
             }
-            if matches!(cvx.as_str(), "03" | "07" | "38" | "94") {
+            if matches!(cvx.0, 3 | 7 | 38 | 94) {
                 valid_mu_count += 1;
             }
-            if matches!(cvx.as_str(), "03" | "04" | "06" | "38" | "94") {
+            if matches!(cvx.0, 3 | 4 | 6 | 38 | 94) {
                 valid_r_count += 1;
             }
         }
-        let has_m = matches!(dose.cvx.as_str(), "03" | "04" | "05" | "94");
-        let has_mu = matches!(dose.cvx.as_str(), "03" | "07" | "38" | "94");
-        let has_r = matches!(dose.cvx.as_str(), "03" | "04" | "06" | "38" | "94");
+        let has_m = matches!(dose.cvx.0, 3 | 4 | 5 | 94);
+        let has_mu = matches!(dose.cvx.0, 3 | 7 | 38 | 94);
+        let has_r = matches!(dose.cvx.0, 3 | 4 | 6 | 38 | 94);
         let mut redundant = true;
         if has_m && valid_m_count < 2 {
             redundant = false;
@@ -110,12 +108,12 @@ pub fn mmr_custom_evaluation_hook(
         }
 
         // 3. Live Virus Conflict
-        if is_live_virus(&dose.cvx) {
+        if is_live_virus(dose.cvx) {
             for prev in ctx.history {
-                if prev.date < dose.date && is_live_virus(&prev.cvx) {
-                    let is_both_mmr = is_mmr_group(&dose.cvx) && is_mmr_group(&prev.cvx);
+                if prev.date < dose.date && is_live_virus(prev.cvx) {
+                    let is_both_mmr = is_mmr_group(dose.cvx) && is_mmr_group(prev.cvx);
                     let required_days = if is_both_mmr {
-                        if dose.cvx == "94" || prev.cvx == "94" {
+                        if dose.cvx.0 == 94 || prev.cvx.0 == 94 {
                             28
                         } else {
                             24
@@ -171,7 +169,7 @@ pub fn mmr_custom_forecast_hook(
         } else {
             // Case 3: Adjust earliest and recommended dates based on live virus conflict in history
             let last_live_virus = history.iter()
-                .filter(|d| is_live_virus(&d.cvx))
+                .filter(|d| is_live_virus(d.cvx))
                 .map(|d| d.date)
                 .max();
 
@@ -210,9 +208,9 @@ pub fn mmr_custom_dose_number_hook(
 
     let valid_cvxs = get_valid_doses_cvx(ctx);
     for cvx in &valid_cvxs {
-        let has_m = matches!(cvx.as_str(), "03" | "04" | "05" | "94");
-        let has_mu = matches!(cvx.as_str(), "03" | "07" | "38" | "94");
-        let has_r = matches!(cvx.as_str(), "03" | "04" | "06" | "38" | "94");
+        let has_m = matches!(cvx.0, 3 | 4 | 5 | 94);
+        let has_mu = matches!(cvx.0, 3 | 7 | 38 | 94);
+        let has_r = matches!(cvx.0, 3 | 4 | 6 | 38 | 94);
 
         let covers_new_d1 = (has_m && !m1) || (has_mu && !mu1) || (has_r && !r1);
         if covers_new_d1 {
@@ -227,9 +225,9 @@ pub fn mmr_custom_dose_number_hook(
     }
 
     if let Some(current_dose) = ctx.current_dose {
-        let has_m = matches!(current_dose.cvx.as_str(), "03" | "04" | "05" | "94");
-        let has_mu = matches!(current_dose.cvx.as_str(), "03" | "07" | "38" | "94");
-        let has_r = matches!(current_dose.cvx.as_str(), "03" | "04" | "06" | "38" | "94");
+        let has_m = matches!(current_dose.cvx.0, 3 | 4 | 5 | 94);
+        let has_mu = matches!(current_dose.cvx.0, 3 | 7 | 38 | 94);
+        let has_r = matches!(current_dose.cvx.0, 3 | 4 | 6 | 38 | 94);
 
         let covers_new_d1 = (has_m && !m1) || (has_mu && !mu1) || (has_r && !r1);
         if covers_new_d1 {
@@ -264,9 +262,9 @@ pub fn mmr_custom_completion_hook(ctx: &EvaluationContext) -> bool {
 
     let valid_cvxs = get_valid_doses_cvx(ctx);
     for cvx in &valid_cvxs {
-        let has_m = matches!(cvx.as_str(), "03" | "04" | "05" | "94");
-        let has_mu = matches!(cvx.as_str(), "03" | "07" | "38" | "94");
-        let has_r = matches!(cvx.as_str(), "03" | "04" | "06" | "38" | "94");
+        let has_m = matches!(cvx.0, 3 | 4 | 5 | 94);
+        let has_mu = matches!(cvx.0, 3 | 7 | 38 | 94);
+        let has_r = matches!(cvx.0, 3 | 4 | 6 | 38 | 94);
 
         let covers_new_d1 = (has_m && !m1) || (has_mu && !mu1) || (has_r && !r1);
         if covers_new_d1 {

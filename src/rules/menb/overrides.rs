@@ -1,6 +1,6 @@
 use crate::date_utils::{add_years, TimePeriod};
 use crate::engine::EvaluationContext;
-use crate::models::{
+use crate::models::{Cvx, 
     Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus, VaccineGroupForecast,
 };
 use chrono::NaiveDate;
@@ -17,12 +17,12 @@ fn policy_change_date() -> NaiveDate {
     .unwrap()
 }
 
-fn is_4c(cvx: &str) -> bool {
-    matches!(cvx, "163" | "328")
+fn is_4c(cvx: Cvx) -> bool {
+    matches!(cvx.0, 163 | 328)
 }
 
-fn is_fhbp(cvx: &str) -> bool {
-    matches!(cvx, "162" | "316")
+fn is_fhbp(cvx: Cvx) -> bool {
+    matches!(cvx.0, 162 | 316)
 }
 
 fn is_4c_series(series_name: &str) -> bool {
@@ -33,7 +33,7 @@ fn is_fhbp_series(series_name: &str) -> bool {
     series_name.starts_with("MEN_BF_HBP")
 }
 
-fn is_opposite_family(series_name: &str, cvx: &str) -> bool {
+fn is_opposite_family(series_name: &str, cvx: Cvx) -> bool {
     (is_4c_series(series_name) && is_fhbp(cvx)) || (is_fhbp_series(series_name) && is_4c(cvx))
 }
 
@@ -88,16 +88,16 @@ fn choose_series<'a>(
 fn latest_family(history: &[Dose]) -> Option<&'static str> {
     history
         .iter()
-        .filter(|dose| is_4c(&dose.cvx) || is_fhbp(&dose.cvx))
+        .filter(|dose| is_4c(dose.cvx) || is_fhbp(dose.cvx))
         .max_by_key(|dose| dose.date)
-        .map(|dose| if is_4c(&dose.cvx) { "4C" } else { "FHBP" })
+        .map(|dose| if is_4c(dose.cvx) { "4C" } else { "FHBP" })
 }
 
 fn has_mixed_brand_same_day(dose: &Dose, history: &[Dose]) -> bool {
     history.iter().any(|other| {
         other.date == dose.date
-            && ((is_4c(&dose.cvx) && is_fhbp(&other.cvx))
-                || (is_fhbp(&dose.cvx) && is_4c(&other.cvx)))
+            && ((is_4c(dose.cvx) && is_fhbp(other.cvx))
+                || (is_fhbp(dose.cvx) && is_4c(other.cvx)))
     })
 }
 
@@ -113,7 +113,7 @@ pub fn menb_custom_evaluation_hook(
     };
 
     let age_10 = add_years(ctx.patient.birth_date, 10);
-    if matches!(dose.cvx.as_str(), "162" | "163")
+    if matches!(dose.cvx.0, 162 | 163)
         && dose.date >= age_10
         && reasons.contains(&EvaluationReason::BelowMinimumAge)
     {
@@ -129,7 +129,7 @@ pub fn menb_custom_evaluation_hook(
         return;
     }
 
-    if is_opposite_family(series_name, &dose.cvx) {
+    if is_opposite_family(series_name, dose.cvx) {
         *status = DoseStatus::Accepted;
         reasons.clear();
         reasons.push(EvaluationReason::VaccineNotCountedBasedOnMostRecentVaccineGiven);
@@ -144,7 +144,7 @@ pub fn menb_custom_evaluation_hook(
         return;
     }
 
-    if series_name == "MEN_B_4_C_2_DOSE_SERIES" && target_dose_idx == 2 && is_4c(&dose.cvx) {
+    if series_name == "MEN_B_4_C_2_DOSE_SERIES" && target_dose_idx == 2 && is_4c(dose.cvx) {
         if let Some((dose1_date, _)) = ctx.valid_doses.first() {
             let threshold = if dose.date >= policy_change {
                 TimePeriod::parse("6m-4d").unwrap().add_to(*dose1_date)
@@ -225,7 +225,7 @@ pub fn menb_custom_forecast_hook(
             } else {
                 let last_4c_shot = history
                     .iter()
-                    .filter(|dose| is_4c(&dose.cvx))
+                    .filter(|dose| is_4c(dose.cvx))
                     .map(|dose| dose.date)
                     .max()
                     .unwrap_or(*dose1_date);
@@ -253,10 +253,10 @@ pub fn menb_custom_switch_hook(
     ctx: &EvaluationContext,
 ) -> Option<&'static str> {
     let dose = ctx.current_dose?;
-    if is_4c(&dose.cvx) && current_series_name.starts_with("MEN_BF_HBP") {
+    if is_4c(dose.cvx) && current_series_name.starts_with("MEN_BF_HBP") {
         return Some("MEN_B_4_C_2_DOSE_SERIES");
     }
-    if is_fhbp(&dose.cvx) && current_series_name.starts_with("MEN_B_4_C") {
+    if is_fhbp(dose.cvx) && current_series_name.starts_with("MEN_B_4_C") {
         return Some("MEN_BF_HBP_2_DOSE_SERIES");
     }
     None

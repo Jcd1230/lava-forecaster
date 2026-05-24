@@ -1,6 +1,6 @@
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
-use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
+use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
 use crate::rules::helpers::{clamp_date_at_least, age_ge, interval_ge, interval_lt};
 use std::collections::HashMap;
 
@@ -13,7 +13,7 @@ pub fn hepa_custom_switch_hook(
         return None;
     }
     if let Some(dose) = ctx.current_dose {
-        if dose.cvx == "104" {
+        if dose.cvx.0 == 104 {
             let birth_date = ctx.patient.birth_date;
             if target_dose_idx == 1 {
                 if age_ge(birth_date, dose.date, "19y") {
@@ -27,7 +27,7 @@ pub fn hepa_custom_switch_hook(
                     }
 
                     // Case B: Dose 1 is CVX 104 at >= 18y-4d, and interval is >= 24d and < 6m-4d
-                    if let Some(dose_1) = ctx.history.iter().find(|d| d.date == prev_date && d.cvx == "104") {
+                    if let Some(dose_1) = ctx.history.iter().find(|d| d.date == prev_date && d.cvx.0 == 104) {
                         if age_ge(birth_date, dose_1.date, "18y-4d") 
                             && interval_ge(prev_date, dose.date, "24d") 
                             && interval_lt(prev_date, dose.date, "6m-4d") 
@@ -150,7 +150,7 @@ pub fn hepa_group_selection(
                 let d2 = valid_doses_4[1];
                 
                 // No prior valid doses before d1 (this is implicitly true because d1 is index 0)
-                if d1.cvx == "104" && d2.cvx == "104" 
+                if d1.cvx.0 == 104 && d2.cvx.0 == 104 
                     && interval_ge(d1.dose_date, d2.dose_date, "7d") 
                     && interval_lt(d1.dose_date, d2.dose_date, "24d") 
                 {
@@ -168,13 +168,13 @@ pub fn hepa_group_selection(
                 
                 if !valid_doses_3.is_empty() {
                     let d1 = valid_doses_3[0];
-                    if d1.cvx == "104" {
+                    if d1.cvx.0 == 104 {
                         if valid_doses_3.len() == 1 {
                             selected = "HEP_A_ADULT_3_DOSE_SERIES".to_string();
                         } else {
                             let d2 = valid_doses_3[1];
                             
-                            if (d1.cvx == "104" || d2.cvx == "104") 
+                            if (d1.cvx.0 == 104 || d2.cvx.0 == 104) 
                                 && interval_ge(d1.dose_date, d2.dose_date, "24d") 
                                 && interval_lt(d1.dose_date, d2.dose_date, "6m-4d") 
                             {
@@ -246,14 +246,14 @@ pub fn hepa_group_selection(
         let mut valid_dates_other = Vec::new();
         if let Some(f3) = candidate_forecasts.get("HEP_A_ADULT_3_DOSE_SERIES") {
             for e in &f3.evaluations {
-                if e.status == DoseStatus::Valid && e.cvx == "104" {
+                if e.status == DoseStatus::Valid && e.cvx.0 == 104 {
                     valid_dates_other.push(e.dose_date);
                 }
             }
         }
         if let Some(f4) = candidate_forecasts.get("HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES") {
             for e in &f4.evaluations {
-                if e.status == DoseStatus::Valid && e.cvx == "104" {
+                if e.status == DoseStatus::Valid && e.cvx.0 == 104 {
                     valid_dates_other.push(e.dose_date);
                 }
             }

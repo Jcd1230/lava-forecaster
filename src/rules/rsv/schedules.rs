@@ -1,7 +1,7 @@
 use crate::schedule::CompiledSeries;
 
 pub fn rsv_infant_series() -> CompiledSeries {
-	let allowed_cvx = &["304", "306", "307", "315", "332"];
+	let allowed_cvx = &[304, 306, 307, 315, 332];
 
 	CompiledSeries::builder("RSV_INFANT_SERIES")
 		.code("RSV_INFANT_SERIES")
@@ -17,7 +17,7 @@ pub fn rsv_infant_series() -> CompiledSeries {
 }
 
 pub fn rsv_adult_series() -> CompiledSeries {
-	let allowed_cvx = &["303", "304", "305", "314", "326"];
+	let allowed_cvx = &[303, 304, 305, 314, 326];
 
 	CompiledSeries::builder("RSV_ADULT_SERIES")
 		.code("RSV_ADULT_SERIES")
