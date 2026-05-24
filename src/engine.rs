@@ -633,7 +633,8 @@ impl EvaluationEngine {
             (hook)(patient, valid_doses, history, eval_date, &mut forecast);
         }
 
-        if let Some(last_date) = last_shot_date {
+        let last_group_date = history.iter().map(|d| d.date).max();
+        if let Some(last_date) = last_group_date {
             if let Some(ref mut earliest) = forecast.earliest_date {
                 if *earliest < last_date {
                     *earliest = last_date;

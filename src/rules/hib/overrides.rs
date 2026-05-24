@@ -193,16 +193,6 @@ pub fn hib_custom_forecast_hook(
         }
     }
 
-    // Check if patient received CVX 50 and there are no valid doses
-    let has_cvx50 = history.iter().any(|d| d.cvx == "50");
-    if valid_doses.is_empty() && has_cvx50 {
-        forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
-        forecast.latest_date = None;
-        return;
-    }
 
 
     // Removed the manual >= 5 years age check since it is now
@@ -265,6 +255,30 @@ pub fn hib_custom_forecast_hook(
             if effective_before_15m < 4 {
                 forecast.recommended_date = Some(date_15m);
                 forecast.earliest_date = Some(date_15m);
+            }
+        }
+    }
+
+    // Space by 28-day repeat interval from the last invalid dose in history
+    let last_dose = history.iter().max_by_key(|d| d.date);
+    if let Some(ld) = last_dose {
+        let is_valid = valid_doses.iter().any(|(date, _)| *date == ld.date);
+        if !is_valid {
+            let repeat_date = ld.date + chrono::Duration::days(28);
+            if let Some(ref mut earliest) = forecast.earliest_date {
+                if *earliest < repeat_date {
+                    *earliest = repeat_date;
+                }
+            }
+            if let Some(ref mut recommended) = forecast.recommended_date {
+                if *recommended < repeat_date {
+                    *recommended = repeat_date;
+                }
+            }
+            if let Some(ref mut overdue) = forecast.overdue_date {
+                if *overdue < repeat_date {
+                    *overdue = repeat_date;
+                }
             }
         }
     }

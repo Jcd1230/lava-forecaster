@@ -108,9 +108,15 @@ pub fn pneumococcal_custom_evaluation_hook(
 
     if target_dose_idx <= 5 {
         if dose.cvx == "33" {
-            *status = DoseStatus::Accepted;
-            reasons.clear();
-            reasons.push(EvaluationReason::VaccineNotPartOfSeries);
+            if age_lt(birth, dose.date, "2y") {
+                *status = DoseStatus::Invalid;
+                reasons.clear();
+                reasons.push(EvaluationReason::BelowMinimumAge);
+            } else {
+                *status = DoseStatus::Accepted;
+                reasons.clear();
+                reasons.push(EvaluationReason::VaccineNotPartOfSeries);
+            }
             return;
         }
 

@@ -30,7 +30,7 @@
       "earliest_date": null,
       "recommended_date": null,
       "overdue_date": null,
-      "status": "NotRecommended"
+      "status": "Complete"
     }
   },
   "pneumococcal_adult_pcv20_complete": {
@@ -76,12 +76,12 @@
       {
         "date": "2020-03-01",
         "cvx": "33",
-        "status": "Accepted",
+        "status": "Invalid",
         "dose_number": 1
       }
     ],
     "forecast": {
-      "earliest_date": "2020-02-12",
+      "earliest_date": "2020-03-01",
       "recommended_date": "2020-03-01",
       "overdue_date": "2020-04-28",
       "status": "NotComplete"

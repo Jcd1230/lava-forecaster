@@ -9,7 +9,7 @@ fn is_combo_child_hepb_cvx(cvx: &str) -> bool {
 }
 
 fn is_birth_monovalent_hepb(dose: &Dose, birth_date: NaiveDate) -> bool {
-    matches!(dose.cvx.as_str(), "8" | "42" | "45") && dose.date <= birth_date + chrono::Duration::days(1)
+    matches!(dose.cvx.as_str(), "08" | "8" | "42" | "45") && dose.date <= birth_date + chrono::Duration::days(1)
 }
 
 fn dose_date(valid_doses: &[(NaiveDate, usize)], dose_number: usize) -> Option<NaiveDate> {
@@ -274,7 +274,7 @@ pub fn hep_b_custom_forecast_hook(
 
     if history.len() == 3
         && history.iter().filter(|dose| dose.cvx == "110").count() == 1
-        && history.iter().filter(|dose| matches!(dose.cvx.as_str(), "8" | "42" | "45")).count() == 2
+        && history.iter().filter(|dose| matches!(dose.cvx.as_str(), "08" | "8" | "42" | "45")).count() == 2
         && forecast.status == SeriesStatus::NotComplete
         && eval_date >= patient.birth_date + chrono::Duration::days(168)
     {
@@ -615,8 +615,15 @@ pub fn hep_b_group_selection(
         // Child/Adolescent can also use Twinrix if administered at >= 18y-4d
         series_priority.push("HEP_B_3_DOSE_TWINRIX_SERIES");
         series_priority.push("HEP_B_4_DOSE_ACCELERATED_TWINRIX_SERIES");
-        series_priority.push("HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES");
-        series_priority.push("HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES");
+        
+        let has_birth_dose = history.iter().any(|d| is_birth_monovalent_hepb(d, patient.birth_date));
+        if has_birth_dose {
+            series_priority.push("HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES");
+            series_priority.push("HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES");
+        } else {
+            series_priority.push("HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES");
+            series_priority.push("HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES");
+        }
     }
 
     if !is_adult && child_requires_four_dose_series(patient, history, &[]) {
