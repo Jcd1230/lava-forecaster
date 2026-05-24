@@ -1,0 +1,59 @@
+{
+  "covid19_aug2025_naive_infant": {
+    "evaluations": [],
+    "forecast": {
+      "earliest_date": "2025-11-10",
+      "recommended_date": "2025-11-10",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "covid19_aug2025_infant_dose1_moderna": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "311",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-12-08",
+      "recommended_date": "2025-12-08",
+      "overdue_date": "2026-01-04",
+      "status": "NotComplete"
+    }
+  },
+  "covid19_aug2025_adult_with_prior_dose": {
+    "evaluations": [
+      {
+        "date": "2023-08-08",
+        "cvx": "300",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": "2025-08-27",
+      "recommended_date": "2025-08-27",
+      "overdue_date": null,
+      "status": "NotComplete"
+    }
+  },
+  "covid19_aug2025_adult_current_season_complete": {
+    "evaluations": [
+      {
+        "date": "2025-11-10",
+        "cvx": "309",
+        "status": "Valid",
+        "dose_number": 1
+      }
+    ],
+    "forecast": {
+      "earliest_date": null,
+      "recommended_date": null,
+      "overdue_date": null,
+      "status": "Complete"
+    }
+  }
+}
