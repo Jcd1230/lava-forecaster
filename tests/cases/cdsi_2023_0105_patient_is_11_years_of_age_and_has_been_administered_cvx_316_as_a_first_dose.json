@@ -1,0 +1,40 @@
+{
+  "name": "cdsi_2023_0105_patient_is_11_years_of_age_and_has_been_administered_cvx_316_as_a_first_dose",
+  "group": "MCV",
+  "focus_code": "830",
+  "patient": {
+    "birth_date": "2014-11-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-11-10",
+      "cvx": "316"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "316",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MCV",
+        "earliest_date": "2030-11-10",
+        "recommended_date": "2030-11-10",
+        "overdue_date": "2031-12-07",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

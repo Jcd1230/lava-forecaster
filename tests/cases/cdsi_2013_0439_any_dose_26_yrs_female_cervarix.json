@@ -1,0 +1,40 @@
+{
+  "name": "cdsi_2013_0439_any_dose_26_yrs_female_cervarix",
+  "group": "HPV",
+  "focus_code": "840",
+  "patient": {
+    "birth_date": "1986-05-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2012-05-02",
+      "cvx": "118"
+    }
+  ],
+  "execution_date": "2012-05-02",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2012-05-02",
+        "cvx": "118",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HPV",
+        "earliest_date": "2012-05-30",
+        "recommended_date": "2012-05-30",
+        "overdue_date": "2012-08-21",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

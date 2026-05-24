@@ -1,0 +1,41 @@
+{
+  "name": "jevc_risk_2_dose_accelerated_dose1_valid",
+  "group": "JEV",
+  "focus_code": "902",
+  "patient": {
+    "birth_date": "2020-01-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2038-01-01",
+      "cvx": "134"
+    }
+  ],
+  "execution_date": "2038-01-29",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2038-01-01",
+        "cvx": "134",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "JEV",
+        "earliest_date": "2038-01-08",
+        "recommended_date": "2038-01-08",
+        "overdue_date": "2038-01-28",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

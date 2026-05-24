@@ -1,0 +1,27 @@
+{
+  "name": "cdsi_2013_0772_15_weeks_old_with_no_rota_vax_no_forecast_for_rotavirus",
+  "group": "ROTAVIRUS",
+  "focus_code": "820",
+  "patient": {
+    "birth_date": "2025-07-28",
+    "gender": "Female"
+  },
+  "history": [],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "ROTAVIRUS",
+        "earliest_date": "2025-09-08",
+        "recommended_date": "2025-09-28",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "cdsi_2025_0039_patient_is_6_months_5_days_of_age_with_no_previous_administered_dose_of_the_covid_19_vaccine",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "2025-05-15",
+    "gender": "Female"
+  },
+  "history": [],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": "2025-11-15",
+        "recommended_date": "2025-11-15",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "name": "cdsi_2024_0022_male_age_34_years_with_a_dose_of_the_hpv_vaccine",
+  "group": "HPV",
+  "focus_code": "840",
+  "patient": {
+    "birth_date": "1991-11-10",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2025-11-10",
+      "cvx": "165"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "165",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HPV",
+        "earliest_date": "2025-12-08",
+        "recommended_date": "2025-12-08",
+        "overdue_date": "2026-03-01",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

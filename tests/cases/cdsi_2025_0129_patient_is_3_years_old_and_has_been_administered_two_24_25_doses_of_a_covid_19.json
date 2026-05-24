@@ -1,0 +1,52 @@
+{
+  "name": "cdsi_2025_0129_patient_is_3_years_old_and_has_been_administered_two_24_25_doses_of_a_covid_19",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "2022-03-01",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2024-02-01",
+      "cvx": "311"
+    },
+    {
+      "date": "2024-03-21",
+      "cvx": "311"
+    }
+  ],
+  "execution_date": "2025-09-01",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2024-02-01",
+        "cvx": "311",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2024-03-21",
+        "cvx": "311",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": "2025-08-27",
+        "recommended_date": "2025-08-27",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "ConditionallyRecommended",
+        "reasons": [
+          "HIGH_RISK",
+          "CLINICAL_PATIENT_DISCRETION"
+        ]
+      }
+    ]
+  }
+}

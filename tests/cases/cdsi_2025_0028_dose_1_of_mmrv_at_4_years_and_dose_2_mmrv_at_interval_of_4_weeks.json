@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2025_0028_dose_1_of_mmrv_at_4_years_and_dose_2_mmrv_at_interval_of_4_weeks",
+  "group": "MMR",
+  "focus_code": "500",
+  "patient": {
+    "birth_date": "2021-10-13",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-10-13",
+      "cvx": "94"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "94"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-10-13",
+        "cvx": "94",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "94",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MMR",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

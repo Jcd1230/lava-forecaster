@@ -1,0 +1,28 @@
+{
+  "name": "cdsi_2024_0055_patient_is_almost_75_years_of_age_and_hasn_t_been_administered_any_doses_of_the_rsv_vaccine",
+  "group": "RSV",
+  "focus_code": "875",
+  "patient": {
+    "birth_date": "1950-12-10",
+    "gender": "Female"
+  },
+  "history": [],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "RSV",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "ConditionallyRecommended",
+        "reasons": [
+          "HIGH_RISK",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

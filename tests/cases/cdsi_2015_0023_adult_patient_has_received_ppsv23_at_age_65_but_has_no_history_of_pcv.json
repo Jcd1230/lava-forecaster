@@ -1,0 +1,41 @@
+{
+  "name": "cdsi_2015_0023_adult_patient_has_received_ppsv23_at_age_65_but_has_no_history_of_pcv",
+  "group": "PNEUMOCOCCAL",
+  "focus_code": "750",
+  "patient": {
+    "birth_date": "1960-10-25",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-11-10",
+      "cvx": "33"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "33",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "PNEUMOCOCCAL",
+        "earliest_date": "2026-11-10",
+        "recommended_date": "2026-11-10",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE",
+          "ADMINISTER_PCV15_PCV20_OR_PCV21"
+        ]
+      }
+    ]
+  }
+}

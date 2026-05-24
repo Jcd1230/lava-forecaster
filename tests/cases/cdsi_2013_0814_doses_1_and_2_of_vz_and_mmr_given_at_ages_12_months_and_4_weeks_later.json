@@ -1,0 +1,59 @@
+{
+  "name": "cdsi_2013_0814_doses_1_and_2_of_vz_and_mmr_given_at_ages_12_months_and_4_weeks_later",
+  "group": "VARICELLA",
+  "focus_code": "600",
+  "patient": {
+    "birth_date": "2024-10-14",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-10-13",
+      "cvx": "03"
+    },
+    {
+      "date": "2025-10-13",
+      "cvx": "21"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "03"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "21"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-10-13",
+        "cvx": "21",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "21",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "VARICELLA",
+        "earliest_date": "2026-02-02",
+        "recommended_date": "2028-10-14",
+        "overdue_date": "2031-11-10",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

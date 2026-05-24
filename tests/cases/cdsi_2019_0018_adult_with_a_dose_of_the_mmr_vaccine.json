@@ -1,0 +1,40 @@
+{
+  "name": "cdsi_2019_0018_adult_with_a_dose_of_the_mmr_vaccine",
+  "group": "MMR",
+  "focus_code": "500",
+  "patient": {
+    "birth_date": "1990-11-10",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2025-11-10",
+      "cvx": "03"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "03",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MMR",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

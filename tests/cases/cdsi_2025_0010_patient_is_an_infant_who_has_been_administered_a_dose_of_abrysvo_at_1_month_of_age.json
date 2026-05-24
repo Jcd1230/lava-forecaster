@@ -1,0 +1,41 @@
+{
+  "name": "cdsi_2025_0010_patient_is_an_infant_who_has_been_administered_a_dose_of_abrysvo_at_1_month_of_age",
+  "group": "RSV",
+  "focus_code": "875",
+  "patient": {
+    "birth_date": "2025-11-01",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2025-12-01",
+      "cvx": "305"
+    }
+  ],
+  "execution_date": "2025-12-01",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-12-01",
+        "cvx": "305",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "RSV",
+        "earliest_date": "2025-12-01",
+        "recommended_date": "2025-12-01",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

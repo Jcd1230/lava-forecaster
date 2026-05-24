@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2013_0235_2_pediarix_at_7_yrs_1_at_less_than_12_mo",
+  "group": "HEP_B",
+  "focus_code": "100",
+  "patient": {
+    "birth_date": "2018-11-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2019-02-10",
+      "cvx": "110"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "110"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2019-02-10",
+        "cvx": "110",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "110",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HEP_B",
+        "earliest_date": "2026-01-05",
+        "recommended_date": "2026-01-05",
+        "overdue_date": "2026-01-05",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

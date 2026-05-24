@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2013_0524_2_at_4_years",
+  "group": "MMR",
+  "focus_code": "500",
+  "patient": {
+    "birth_date": "2021-11-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2023-02-10",
+      "cvx": "03"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "03"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2023-02-10",
+        "cvx": "03",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "03",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MMR",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2024_0040_patient_is_17_years_of_age_with_a_second_dose_of_the_men_b_vaccine_trumemba_at_an_interval_6_months_5_days",
+  "group": "MENB",
+  "focus_code": "835",
+  "patient": {
+    "birth_date": "2008-05-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-05-10",
+      "cvx": "162"
+    },
+    {
+      "date": "2025-11-05",
+      "cvx": "162"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-05-10",
+        "cvx": "162",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-05",
+        "cvx": "162",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MENB",
+        "earliest_date": "2026-03-05",
+        "recommended_date": "2026-03-05",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

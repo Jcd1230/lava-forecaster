@@ -1,0 +1,62 @@
+{
+  "name": "cdsi_2013_0259_dose_2_to_3_pediarix_interval_8_weeks_4_days",
+  "group": "HEP_B",
+  "focus_code": "100",
+  "patient": {
+    "birth_date": "2025-05-26",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-07-20",
+      "cvx": "110"
+    },
+    {
+      "date": "2025-09-19",
+      "cvx": "110"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "110"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-07-20",
+        "cvx": "110",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-09-19",
+        "cvx": "110",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "110",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HEP_B",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

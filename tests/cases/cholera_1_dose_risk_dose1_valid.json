@@ -1,0 +1,40 @@
+{
+  "name": "cholera_1_dose_risk_dose1_valid",
+  "group": "CHOLERA",
+  "focus_code": "901",
+  "patient": {
+    "birth_date": "2020-01-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2022-01-01",
+      "cvx": "174"
+    }
+  ],
+  "execution_date": "2022-01-29",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2022-01-01",
+        "cvx": "174",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "CHOLERA",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

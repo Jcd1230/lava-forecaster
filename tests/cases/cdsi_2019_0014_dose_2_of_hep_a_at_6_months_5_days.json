@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2019_0014_dose_2_of_hep_a_at_6_months_5_days",
+  "group": "HEP_A",
+  "focus_code": "810",
+  "patient": {
+    "birth_date": "2007-05-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-05-10",
+      "cvx": "52"
+    },
+    {
+      "date": "2025-11-05",
+      "cvx": "52"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-05-10",
+        "cvx": "52",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-05",
+        "cvx": "52",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HEP_A",
+        "earliest_date": "2026-05-05",
+        "recommended_date": "2026-05-05",
+        "overdue_date": "2026-05-05",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

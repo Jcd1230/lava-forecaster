@@ -1,0 +1,51 @@
+{
+  "name": "mpox_same_day_206_beats_325",
+  "group": "MPOX",
+  "focus_code": "860",
+  "patient": {
+    "birth_date": "2020-01-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2020-01-02",
+      "cvx": "325"
+    },
+    {
+      "date": "2020-01-02",
+      "cvx": "206"
+    }
+  ],
+  "execution_date": "2020-02-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2020-01-02",
+        "cvx": "325",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2020-01-02",
+        "cvx": "206",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MPOX",
+        "earliest_date": "2020-01-30",
+        "recommended_date": "2020-01-30",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "cdsi_2013_0198_newborn_testing_no_vaccinations_to_date",
+  "group": "HEP_B",
+  "focus_code": "100",
+  "patient": {
+    "birth_date": "2025-11-10",
+    "gender": "Female"
+  },
+  "history": [],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "HEP_B",
+        "earliest_date": "2025-11-10",
+        "recommended_date": "2025-11-10",
+        "overdue_date": "2025-12-07",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

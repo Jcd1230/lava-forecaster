@@ -1,0 +1,41 @@
+{
+  "name": "cdsi_2025_0036_dose_1_of_pcv_13_at_2_months",
+  "group": "PNEUMOCOCCAL",
+  "focus_code": "750",
+  "patient": {
+    "birth_date": "2023-06-04",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2023-08-04",
+      "cvx": "133"
+    }
+  ],
+  "execution_date": "2023-08-04",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2023-08-04",
+        "cvx": "133",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "PNEUMOCOCCAL",
+        "earliest_date": "2023-09-01",
+        "recommended_date": "2023-10-04",
+        "overdue_date": "2023-12-01",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

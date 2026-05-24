@@ -1,0 +1,28 @@
+{
+  "name": "cdsi_2023_0032_patient_is_an_infant_born_in_june_with_an_assessment_date_in_november_and_hasn_t_received_a_rsv_vaccine",
+  "group": "RSV",
+  "focus_code": "875",
+  "patient": {
+    "birth_date": "2025-06-01",
+    "gender": "Female"
+  },
+  "history": [],
+  "execution_date": "2025-11-01",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "RSV",
+        "earliest_date": "2025-10-01",
+        "recommended_date": "2025-10-01",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

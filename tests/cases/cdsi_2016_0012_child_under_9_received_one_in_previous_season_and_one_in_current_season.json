@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2016_0012_child_under_9_received_one_in_previous_season_and_one_in_current_season",
+  "group": "INFLUENZA",
+  "focus_code": "800",
+  "patient": {
+    "birth_date": "2024-06-01",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2024-12-01",
+      "cvx": "88"
+    },
+    {
+      "date": "2025-09-01",
+      "cvx": "88"
+    }
+  ],
+  "execution_date": "2025-09-01",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2024-12-01",
+        "cvx": "88",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-09-01",
+        "cvx": "88",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "INFLUENZA",
+        "earliest_date": "2025-09-29",
+        "recommended_date": "2025-09-29",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

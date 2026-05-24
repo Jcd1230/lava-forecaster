@@ -1,0 +1,40 @@
+{
+  "name": "rotavirus_age_clamp_forecast",
+  "group": "ROTAVIRUS",
+  "focus_code": "820",
+  "patient": {
+    "birth_date": "2026-01-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2026-03-01",
+      "cvx": "119"
+    }
+  ],
+  "execution_date": "2026-09-01",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2026-03-01",
+        "cvx": "119",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "ROTAVIRUS",
+        "earliest_date": "2026-03-29",
+        "recommended_date": "2026-05-01",
+        "overdue_date": "2026-06-28",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

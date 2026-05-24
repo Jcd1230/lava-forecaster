@@ -1,0 +1,52 @@
+{
+  "name": "jevc_risk_2_dose_dose2_too_soon",
+  "group": "JEV",
+  "focus_code": "902",
+  "patient": {
+    "birth_date": "2020-01-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2020-03-01",
+      "cvx": "134"
+    },
+    {
+      "date": "2020-03-24",
+      "cvx": "134"
+    }
+  ],
+  "execution_date": "2020-04-21",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2020-03-01",
+        "cvx": "134",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2020-03-24",
+        "cvx": "134",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "JEV",
+        "earliest_date": "2020-04-21",
+        "recommended_date": "2020-04-21",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

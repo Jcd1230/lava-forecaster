@@ -1,0 +1,62 @@
+{
+  "name": "cdsi_2013_0438_3_11_yrs_6_mo_male_cervarix",
+  "group": "HPV",
+  "focus_code": "840",
+  "patient": {
+    "birth_date": "2000-05-01",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2011-05-01",
+      "cvx": "118"
+    },
+    {
+      "date": "2011-07-01",
+      "cvx": "118"
+    },
+    {
+      "date": "2011-11-01",
+      "cvx": "118"
+    }
+  ],
+  "execution_date": "2011-11-01",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2011-05-01",
+        "cvx": "118",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2011-07-01",
+        "cvx": "118",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2011-11-01",
+        "cvx": "118",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HPV",
+        "earliest_date": "2011-11-01",
+        "recommended_date": "2011-11-01",
+        "overdue_date": "2013-05-28",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "name": "cdsi_2013_0172_invalid_dose_1st_season",
+  "group": "INFLUENZA",
+  "focus_code": "800",
+  "patient": {
+    "birth_date": "2025-05-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-09-01",
+      "cvx": "140"
+    }
+  ],
+  "execution_date": "2025-09-01",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-09-01",
+        "cvx": "140",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "INFLUENZA",
+        "earliest_date": "2025-11-01",
+        "recommended_date": "2025-11-01",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

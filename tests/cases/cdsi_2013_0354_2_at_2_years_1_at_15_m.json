@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2013_0354_2_at_2_years_1_at_15_m",
+  "group": "HIB",
+  "focus_code": "300",
+  "patient": {
+    "birth_date": "2023-11-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-02-10",
+      "cvx": "48"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "48"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-02-10",
+        "cvx": "48",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "48",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HIB",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

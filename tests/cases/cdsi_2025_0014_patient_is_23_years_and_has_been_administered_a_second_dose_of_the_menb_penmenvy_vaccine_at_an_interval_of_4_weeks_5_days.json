@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2025_0014_patient_is_23_years_and_has_been_administered_a_second_dose_of_the_menb_penmenvy_vaccine_at_an_interval_of_4_weeks_5_days",
+  "group": "MENB",
+  "focus_code": "835",
+  "patient": {
+    "birth_date": "2002-10-18",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-10-18",
+      "cvx": "163"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "328"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-10-18",
+        "cvx": "163",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "328",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MENB",
+        "earliest_date": "2026-04-18",
+        "recommended_date": "2026-04-18",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

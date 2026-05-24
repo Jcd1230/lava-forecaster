@@ -1,0 +1,73 @@
+{
+  "name": "cdsi_2013_0307_4_at_15_months_of_age_interval_between_3_4_8_weeks",
+  "group": "HIB",
+  "focus_code": "300",
+  "patient": {
+    "birth_date": "2024-08-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2024-10-10",
+      "cvx": "48"
+    },
+    {
+      "date": "2024-12-10",
+      "cvx": "48"
+    },
+    {
+      "date": "2025-02-10",
+      "cvx": "48"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "48"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2024-10-10",
+        "cvx": "48",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2024-12-10",
+        "cvx": "48",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-02-10",
+        "cvx": "48",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "48",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 4
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HIB",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

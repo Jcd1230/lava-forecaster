@@ -1,0 +1,62 @@
+{
+  "name": "cdsi_2013_0661_mixed_opv_ipv_where_3_is_after_age_4_and_6_months_after_previous_dose_patient_complete",
+  "group": "POLIO",
+  "focus_code": "400",
+  "patient": {
+    "birth_date": "2011-10-16",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2011-12-16",
+      "cvx": "02"
+    },
+    {
+      "date": "2012-02-16",
+      "cvx": "02"
+    },
+    {
+      "date": "2016-10-16",
+      "cvx": "10"
+    }
+  ],
+  "execution_date": "2016-10-16",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2011-12-16",
+        "cvx": "02",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2012-02-16",
+        "cvx": "02",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2016-10-16",
+        "cvx": "10",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "POLIO",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

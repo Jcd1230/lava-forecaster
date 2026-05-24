@@ -1,0 +1,27 @@
+{
+  "name": "cdsi_2013_0482_female_age_14_hpv_recommended",
+  "group": "HPV",
+  "focus_code": "840",
+  "patient": {
+    "birth_date": "2011-11-10",
+    "gender": "Female"
+  },
+  "history": [],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "HPV",
+        "earliest_date": "2020-11-10",
+        "recommended_date": "2022-11-10",
+        "overdue_date": "2024-12-07",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

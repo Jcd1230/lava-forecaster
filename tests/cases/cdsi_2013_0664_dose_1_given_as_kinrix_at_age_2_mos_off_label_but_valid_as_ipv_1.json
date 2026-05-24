@@ -1,0 +1,40 @@
+{
+  "name": "cdsi_2013_0664_dose_1_given_as_kinrix_at_age_2_mos_off_label_but_valid_as_ipv_1",
+  "group": "POLIO",
+  "focus_code": "400",
+  "patient": {
+    "birth_date": "2025-09-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-11-10",
+      "cvx": "130"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "130",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "POLIO",
+        "earliest_date": "2025-12-08",
+        "recommended_date": "2026-01-10",
+        "overdue_date": "2026-03-09",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

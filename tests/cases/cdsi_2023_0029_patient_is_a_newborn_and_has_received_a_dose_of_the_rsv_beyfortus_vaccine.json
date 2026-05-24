@@ -1,0 +1,40 @@
+{
+  "name": "cdsi_2023_0029_patient_is_a_newborn_and_has_received_a_dose_of_the_rsv_beyfortus_vaccine",
+  "group": "RSV",
+  "focus_code": "875",
+  "patient": {
+    "birth_date": "2025-08-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-10-02",
+      "cvx": "306"
+    }
+  ],
+  "execution_date": "2025-10-02",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-10-02",
+        "cvx": "306",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "RSV",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

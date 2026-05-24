@@ -1,0 +1,40 @@
+{
+  "name": "hib_booster_cvx50_invalid",
+  "group": "HIB",
+  "focus_code": "300",
+  "patient": {
+    "birth_date": "2020-01-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2020-03-01",
+      "cvx": "50"
+    }
+  ],
+  "execution_date": "2020-07-01",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2020-03-01",
+        "cvx": "50",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HIB",
+        "earliest_date": "2020-03-29",
+        "recommended_date": "2020-03-29",
+        "overdue_date": "2020-04-28",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

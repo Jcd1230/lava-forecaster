@@ -1,0 +1,73 @@
+{
+  "name": "cdsi_2013_0614_dose_3_pcv_20_to_dose_4_interval_8_weeks_series_complete",
+  "group": "PNEUMOCOCCAL",
+  "focus_code": "750",
+  "patient": {
+    "birth_date": "2024-10-15",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-04-15",
+      "cvx": "216"
+    },
+    {
+      "date": "2025-08-15",
+      "cvx": "216"
+    },
+    {
+      "date": "2025-09-15",
+      "cvx": "216"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "216"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-04-15",
+        "cvx": "216",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-08-15",
+        "cvx": "216",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-09-15",
+        "cvx": "216",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "216",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "PNEUMOCOCCAL",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

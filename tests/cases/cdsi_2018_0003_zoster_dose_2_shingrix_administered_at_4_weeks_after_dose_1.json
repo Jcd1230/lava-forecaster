@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2018_0003_zoster_dose_2_shingrix_administered_at_4_weeks_after_dose_1",
+  "group": "ZOSTER",
+  "focus_code": "620",
+  "patient": {
+    "birth_date": "1975-10-13",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-10-13",
+      "cvx": "187"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "187"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-10-13",
+        "cvx": "187",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "187",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "ZOSTER",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "name": "cdsi_2025_0076_patient_is_17_years_of_age_and_has_been_previously_administered_a_second_dose_of_a_moderna_covid_19_vaccine_at_an_interval_of_three_weeks",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "2008-05-05",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2023-08-01",
+      "cvx": "300"
+    },
+    {
+      "date": "2023-08-22",
+      "cvx": "312"
+    }
+  ],
+  "execution_date": "2025-09-22",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2023-08-01",
+        "cvx": "300",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2023-08-22",
+        "cvx": "312",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": "2025-08-27",
+        "recommended_date": "2025-08-27",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "ConditionallyRecommended",
+        "reasons": [
+          "HIGH_RISK",
+          "CLINICAL_PATIENT_DISCRETION"
+        ]
+      }
+    ]
+  }
+}

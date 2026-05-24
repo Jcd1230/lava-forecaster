@@ -1,0 +1,62 @@
+{
+  "name": "cdsi_2024_0019_female_age_42_years_with_three_doses_of_the_hpv_vaccine",
+  "group": "HPV",
+  "focus_code": "840",
+  "patient": {
+    "birth_date": "1983-05-13",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-05-13",
+      "cvx": "165"
+    },
+    {
+      "date": "2025-06-10",
+      "cvx": "165"
+    },
+    {
+      "date": "2025-10-13",
+      "cvx": "165"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-05-13",
+        "cvx": "165",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-06-10",
+        "cvx": "165",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-10-13",
+        "cvx": "165",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HPV",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "name": "zoster_06_cvx187_too_soon_after_121",
+  "group": "ZOSTER",
+  "focus_code": "620",
+  "patient": {
+    "birth_date": "1965-01-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-01-01",
+      "cvx": "121"
+    },
+    {
+      "date": "2025-02-01",
+      "cvx": "187"
+    }
+  ],
+  "execution_date": "2025-03-31",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-01-01",
+        "cvx": "121",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-02-01",
+        "cvx": "187",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "ZOSTER",
+        "earliest_date": "2025-03-01",
+        "recommended_date": "2025-03-29",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "name": "cdsi_2013_0670_kinrix_as_dose_4_at_age_4_years_5_days",
+  "group": "POLIO",
+  "focus_code": "400",
+  "patient": {
+    "birth_date": "2021-11-15",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2022-01-08",
+      "cvx": "110"
+    },
+    {
+      "date": "2022-03-04",
+      "cvx": "110"
+    },
+    {
+      "date": "2022-07-14",
+      "cvx": "110"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "130"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2022-01-08",
+        "cvx": "110",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2022-03-04",
+        "cvx": "110",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2022-07-14",
+        "cvx": "110",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "130",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 4
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "POLIO",
+        "earliest_date": "2026-05-10",
+        "recommended_date": "2026-05-10",
+        "overdue_date": "2028-12-12",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

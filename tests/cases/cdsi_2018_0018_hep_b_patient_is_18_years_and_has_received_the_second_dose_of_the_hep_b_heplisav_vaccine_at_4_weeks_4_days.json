@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2018_0018_hep_b_patient_is_18_years_and_has_received_the_second_dose_of_the_hep_b_heplisav_vaccine_at_4_weeks_4_days",
+  "group": "HEP_B",
+  "focus_code": "100",
+  "patient": {
+    "birth_date": "2007-10-17",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-10-17",
+      "cvx": "189"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "189"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-10-17",
+        "cvx": "189",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "189",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HEP_B",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

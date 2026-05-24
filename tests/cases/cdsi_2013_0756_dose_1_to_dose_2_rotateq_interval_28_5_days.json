@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2013_0756_dose_1_to_dose_2_rotateq_interval_28_5_days",
+  "group": "ROTAVIRUS",
+  "focus_code": "820",
+  "patient": {
+    "birth_date": "2025-08-30",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-10-18",
+      "cvx": "116"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "116"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-10-18",
+        "cvx": "116",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "116",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "ROTAVIRUS",
+        "earliest_date": "2025-12-08",
+        "recommended_date": "2025-12-30",
+        "overdue_date": "2026-02-26",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

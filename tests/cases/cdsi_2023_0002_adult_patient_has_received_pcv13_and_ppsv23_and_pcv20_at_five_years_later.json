@@ -1,0 +1,63 @@
+{
+  "name": "cdsi_2023_0002_adult_patient_has_received_pcv13_and_ppsv23_and_pcv20_at_five_years_later",
+  "group": "PNEUMOCOCCAL",
+  "focus_code": "750",
+  "patient": {
+    "birth_date": "1954-11-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2019-11-10",
+      "cvx": "133"
+    },
+    {
+      "date": "2020-11-10",
+      "cvx": "33"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "216"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2019-11-10",
+        "cvx": "133",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2020-11-10",
+        "cvx": "33",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "216",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "PNEUMOCOCCAL",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "ConditionallyRecommended",
+        "reasons": [
+          "CLINICAL_PATIENT_DISCRETION",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

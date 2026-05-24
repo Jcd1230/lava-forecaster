@@ -98,6 +98,10 @@ pub type CustomExtraDoseHook = fn(
     ctx: &EvaluationContext,
 ) -> Option<(DoseStatus, Vec<EvaluationReason>)>;
 
+pub type CustomCompletionHook = fn(
+    ctx: &EvaluationContext,
+) -> bool;
+
 pub type GroupSelectionAndPostProcess = fn(
     patient: &Patient,
     history: &[Dose],
@@ -143,6 +147,7 @@ pub struct EvaluationEngine {
     pub custom_evaluation_hook: Option<CustomEvaluationHook>,
     pub custom_dose_number_hook: Option<CustomDoseNumberHook>,
     pub custom_extra_dose_hook: Option<CustomExtraDoseHook>,
+    pub custom_completion_hook: Option<CustomCompletionHook>,
 }
 
 impl EvaluationEngine {
@@ -157,6 +162,7 @@ impl EvaluationEngine {
             custom_evaluation_hook: None,
             custom_dose_number_hook: None,
             custom_extra_dose_hook: None,
+            custom_completion_hook: None,
         }
     }
 
@@ -215,7 +221,18 @@ impl EvaluationEngine {
             }
 
             // Same-day duplicate check
-            let is_duplicate = i > 0 && sorted_history[i - 1].date == dose.date;
+            let is_duplicate = i > 0 && sorted_history[i - 1].date == dose.date && {
+                let prev_cvx = &sorted_history[i - 1].cvx;
+                let cur_cvx = &dose.cvx;
+                if active_series.vaccine_group == "MMR" {
+                    let has_m = |c: &str| matches!(c, "03" | "04" | "05" | "94" | "3" | "4" | "5");
+                    let has_mu = |c: &str| matches!(c, "03" | "07" | "38" | "94" | "3" | "7");
+                    let has_r = |c: &str| matches!(c, "03" | "04" | "06" | "38" | "94" | "3" | "4" | "6");
+                    (has_m(prev_cvx) && has_m(cur_cvx)) || (has_mu(prev_cvx) && has_mu(cur_cvx)) || (has_r(prev_cvx) && has_r(cur_cvx))
+                } else {
+                    true
+                }
+            };
             if is_duplicate {
                 let prev_dose_num = evaluations.last().and_then(|e| e.dose_number).unwrap_or(target_dose_idx);
                 evaluations.push(DoseEvaluation {
@@ -408,12 +425,40 @@ impl EvaluationEngine {
                 }
             }
 
-            if valid_doses.len() == active_series.num_doses {
+            let series_completed = if let Some(hook) = self.custom_completion_hook {
+                (hook)(&ctx_complete)
+            } else {
+                valid_doses.iter().any(|(_, num)| *num == active_series.num_doses)
+            };
+            if series_completed {
                 is_completed = true;
             }
 
             i += 1;
         }
+
+        let series_completed = if let Some(hook) = self.custom_completion_hook {
+            let ctx_end = EvaluationContext::new(
+                patient,
+                &sorted_history,
+                &valid_doses,
+                None,
+                0,
+                eval_date,
+                &active_series.name,
+            );
+            (hook)(&ctx_end)
+        } else {
+            evaluations.iter().any(|e| {
+                (e.status == DoseStatus::Valid || 
+                 (e.status == DoseStatus::Accepted && 
+                  !e.reasons.contains(&EvaluationReason::OutsideRoutineSeries) &&
+                  !e.reasons.contains(&EvaluationReason::VaccineNotLicensedForMales))) &&
+                e.dose_number == Some(active_series.num_doses)
+            })
+        };
+
+        let is_completed = is_completed || series_completed;
 
         let satisfied_count = evaluations.iter()
             .filter(|e| {
@@ -424,7 +469,6 @@ impl EvaluationEngine {
             })
             .count();
 
-        let is_completed = is_completed || satisfied_count >= active_series.num_doses;
 
         // 4. Recommendation / Forecasting
         let forecast = self.generate_forecast(

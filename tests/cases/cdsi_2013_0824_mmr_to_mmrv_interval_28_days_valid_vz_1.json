@@ -1,0 +1,44 @@
+{
+  "name": "cdsi_2013_0824_mmr_to_mmrv_interval_28_days_valid_vz_1",
+  "group": "VARICELLA",
+  "focus_code": "600",
+  "patient": {
+    "birth_date": "2024-10-13",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-10-13",
+      "cvx": "03"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "94"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "94",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "VARICELLA",
+        "earliest_date": "2026-02-02",
+        "recommended_date": "2028-10-13",
+        "overdue_date": "2031-11-09",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

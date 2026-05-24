@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2024_0050_patient_is_3_months_of_age_and_has_been_administered_2_doses_of_fipv_polio_vaccine",
+  "group": "POLIO",
+  "focus_code": "400",
+  "patient": {
+    "birth_date": "2025-07-27",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-09-27",
+      "cvx": "324"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "324"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-09-27",
+        "cvx": "324",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "324",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "POLIO",
+        "earliest_date": "2025-12-08",
+        "recommended_date": "2025-12-08",
+        "overdue_date": "2026-01-23",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

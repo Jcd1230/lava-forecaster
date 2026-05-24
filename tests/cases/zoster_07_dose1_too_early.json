@@ -1,0 +1,40 @@
+{
+  "name": "zoster_07_dose1_too_early",
+  "group": "ZOSTER",
+  "focus_code": "620",
+  "patient": {
+    "birth_date": "1975-01-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2024-09-01",
+      "cvx": "187"
+    }
+  ],
+  "execution_date": "2025-01-09",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2024-09-01",
+        "cvx": "187",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "ZOSTER",
+        "earliest_date": "2025-01-01",
+        "recommended_date": "2025-01-01",
+        "overdue_date": "2025-04-28",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

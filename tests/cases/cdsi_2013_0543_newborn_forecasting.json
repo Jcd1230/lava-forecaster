@@ -1,0 +1,27 @@
+{
+  "name": "cdsi_2013_0543_newborn_forecasting",
+  "group": "MMR",
+  "focus_code": "500",
+  "patient": {
+    "birth_date": "2025-11-10",
+    "gender": "Female"
+  },
+  "history": [],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "MMR",
+        "earliest_date": "2026-11-10",
+        "recommended_date": "2026-11-10",
+        "overdue_date": "2027-04-06",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

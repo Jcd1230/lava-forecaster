@@ -1,0 +1,51 @@
+{
+  "name": "hpv_child_2dose_standard",
+  "group": "HPV",
+  "focus_code": "840",
+  "patient": {
+    "birth_date": "2010-01-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2021-01-01",
+      "cvx": "165"
+    },
+    {
+      "date": "2021-07-01",
+      "cvx": "165"
+    }
+  ],
+  "execution_date": "2021-07-31",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2021-01-01",
+        "cvx": "165",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2021-07-01",
+        "cvx": "165",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HPV",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

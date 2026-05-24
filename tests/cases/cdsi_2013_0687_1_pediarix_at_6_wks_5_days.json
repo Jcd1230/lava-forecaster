@@ -1,0 +1,40 @@
+{
+  "name": "cdsi_2013_0687_1_pediarix_at_6_wks_5_days",
+  "group": "POLIO",
+  "focus_code": "400",
+  "patient": {
+    "birth_date": "2025-10-04",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-11-10",
+      "cvx": "110"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "110",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "POLIO",
+        "earliest_date": "2025-11-15",
+        "recommended_date": "2025-12-04",
+        "overdue_date": "2026-01-31",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

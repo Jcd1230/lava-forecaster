@@ -1,0 +1,44 @@
+{
+  "name": "cdsi_2025_0030_dose_1_of_varicella_at_12_months_and_dose_2_mmrv_at_4_years_of_age",
+  "group": "MMR",
+  "focus_code": "500",
+  "patient": {
+    "birth_date": "2021-11-10",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2022-11-10",
+      "cvx": "21"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "94"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "94",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MMR",
+        "earliest_date": "2025-12-08",
+        "recommended_date": "2025-12-08",
+        "overdue_date": "2028-12-07",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

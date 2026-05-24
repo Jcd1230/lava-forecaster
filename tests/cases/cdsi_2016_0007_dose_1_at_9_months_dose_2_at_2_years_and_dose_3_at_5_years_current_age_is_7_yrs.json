@@ -1,0 +1,62 @@
+{
+  "name": "cdsi_2016_0007_dose_1_at_9_months_dose_2_at_2_years_and_dose_3_at_5_years_current_age_is_7_yrs",
+  "group": "DTP",
+  "focus_code": "200",
+  "patient": {
+    "birth_date": "2018-11-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2019-08-10",
+      "cvx": "107"
+    },
+    {
+      "date": "2020-11-10",
+      "cvx": "107"
+    },
+    {
+      "date": "2023-11-10",
+      "cvx": "107"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2019-08-10",
+        "cvx": "107",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2020-11-10",
+        "cvx": "107",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2023-11-10",
+        "cvx": "107",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "DTP",
+        "earliest_date": "2024-05-10",
+        "recommended_date": "2024-05-10",
+        "overdue_date": "2024-05-10",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

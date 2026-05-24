@@ -1,0 +1,27 @@
+{
+  "name": "rotavirus_initiation_clamp",
+  "group": "ROTAVIRUS",
+  "focus_code": "820",
+  "patient": {
+    "birth_date": "2026-01-01",
+    "gender": "Female"
+  },
+  "history": [],
+  "execution_date": "2026-04-16",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "ROTAVIRUS",
+        "earliest_date": "2026-02-12",
+        "recommended_date": "2026-03-01",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "name": "cdsi_2013_0546_doses_1_and_2_of_mmr_and_vz_at_ages_12_and_13_months",
+  "group": "MMR",
+  "focus_code": "500",
+  "patient": {
+    "birth_date": "2024-10-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-10-10",
+      "cvx": "03"
+    },
+    {
+      "date": "2025-10-10",
+      "cvx": "21"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "03"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "21"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-10-10",
+        "cvx": "03",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "03",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MMR",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

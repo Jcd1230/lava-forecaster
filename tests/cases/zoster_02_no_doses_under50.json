@@ -1,0 +1,27 @@
+{
+  "name": "zoster_02_no_doses_under50",
+  "group": "ZOSTER",
+  "focus_code": "620",
+  "patient": {
+    "birth_date": "1980-01-01",
+    "gender": "Female"
+  },
+  "history": [],
+  "execution_date": "2025-01-09",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "ZOSTER",
+        "earliest_date": "2030-01-01",
+        "recommended_date": "2030-01-01",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "name": "cdsi_2025_0096_patient_is_5_years_of_age_and_was_administered_three_covid_19_vaccines_in_previous_seasons_and_one_2025_2026_moderna_covid_19_vaccine",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "2020-03-15",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2022-09-23",
+      "cvx": "228"
+    },
+    {
+      "date": "2022-10-23",
+      "cvx": "300"
+    },
+    {
+      "date": "2023-09-13",
+      "cvx": "309"
+    },
+    {
+      "date": "2025-10-03",
+      "cvx": "311"
+    }
+  ],
+  "execution_date": "2025-10-03",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2022-09-23",
+        "cvx": "228",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2022-10-23",
+        "cvx": "300",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2023-09-13",
+        "cvx": "309",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2025-10-03",
+        "cvx": "311",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

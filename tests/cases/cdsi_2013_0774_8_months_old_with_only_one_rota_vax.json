@@ -1,0 +1,40 @@
+{
+  "name": "cdsi_2013_0774_8_months_old_with_only_one_rota_vax",
+  "group": "ROTAVIRUS",
+  "focus_code": "820",
+  "patient": {
+    "birth_date": "2025-03-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-06-10",
+      "cvx": "119"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-06-10",
+        "cvx": "119",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "ROTAVIRUS",
+        "earliest_date": "2025-07-08",
+        "recommended_date": "2025-07-10",
+        "overdue_date": "2025-09-06",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "name": "mcv_1_dose_routine",
+  "group": "MCV",
+  "focus_code": "830",
+  "patient": {
+    "birth_date": "2014-01-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-01-01",
+      "cvx": "114"
+    }
+  ],
+  "execution_date": "2030-01-01",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-01-01",
+        "cvx": "114",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MCV",
+        "earliest_date": "2030-01-01",
+        "recommended_date": "2030-01-01",
+        "overdue_date": "2031-01-28",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

@@ -1,7 +1,7 @@
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus};
-use crate::date_utils::{add_years};
+use crate::rules::helpers::{clamp_date_at_least, interval_days_between, age_ge};
 
 fn is_live_virus(cvx: &str) -> bool {
     const LIVE_VIRUS: &[&str] = &[
@@ -30,10 +30,9 @@ pub fn varicella_custom_evaluation_hook(
 
         // 1. Absolute Minimum Interval 1->2 Override if administered at >= 13 years of age
         if target_dose_idx == 2 {
-            let age_13 = add_years(birth_date, 13);
-            if dose.date >= age_13 {
+            if age_ge(birth_date, dose.date, "13y") {
                 if let Some((prev_date, _)) = ctx.valid_doses.last() {
-                    let interval_days = (dose.date - *prev_date).num_days();
+                    let interval_days = interval_days_between(*prev_date, dose.date);
                     if interval_days >= 24 {
                         reasons.retain(|r| *r != EvaluationReason::BelowMinimumInterval);
                         if reasons.is_empty() {
@@ -104,8 +103,7 @@ pub fn varicella_custom_forecast_hook(
 
     // 2. Patient age >= 13 years interval overrides
     if forecast.status != SeriesStatus::Complete && valid_doses.len() == 1 {
-        let age_13 = add_years(patient.birth_date, 13);
-        if eval_date >= age_13 {
+        if age_ge(patient.birth_date, eval_date, "13y") {
             let dose1_date = valid_doses[0].0;
             let override_date = dose1_date + chrono::Duration::days(28);
 
@@ -124,25 +122,12 @@ pub fn varicella_custom_forecast_hook(
         if let Some(last_date) = last_live_virus {
             let conflict_free_date = last_date + chrono::Duration::days(28);
 
-            if let Some(ref mut earliest) = forecast.earliest_date {
-                if *earliest < conflict_free_date {
-                    *earliest = conflict_free_date;
-                }
-            } else {
-                forecast.earliest_date = Some(conflict_free_date);
-            }
+            clamp_date_at_least(&mut forecast.earliest_date, conflict_free_date);
+            clamp_date_at_least(&mut forecast.recommended_date, conflict_free_date);
 
-            if let Some(ref mut recommended) = forecast.recommended_date {
-                if *recommended < conflict_free_date {
-                    *recommended = conflict_free_date;
-                }
-            } else {
-                forecast.recommended_date = Some(conflict_free_date);
-            }
-
-            if let (Some(earliest), Some(recommended)) = (forecast.earliest_date, forecast.recommended_date.as_mut()) {
-                if *recommended < earliest {
-                    *recommended = earliest;
+            if let Some(earliest) = forecast.earliest_date {
+                if forecast.recommended_date.is_some() {
+                    clamp_date_at_least(&mut forecast.recommended_date, earliest);
                 }
             }
         }

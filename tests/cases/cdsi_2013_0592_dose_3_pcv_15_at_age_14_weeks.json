@@ -1,0 +1,63 @@
+{
+  "name": "cdsi_2013_0592_dose_3_pcv_15_at_age_14_weeks",
+  "group": "PNEUMOCOCCAL",
+  "focus_code": "750",
+  "patient": {
+    "birth_date": "2025-08-04",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-09-15",
+      "cvx": "215"
+    },
+    {
+      "date": "2025-10-13",
+      "cvx": "215"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "215"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-09-15",
+        "cvx": "215",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-10-13",
+        "cvx": "215",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "215",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "PNEUMOCOCCAL",
+        "earliest_date": "2026-08-04",
+        "recommended_date": "2026-08-04",
+        "overdue_date": "2026-12-31",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

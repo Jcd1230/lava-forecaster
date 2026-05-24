@@ -1,0 +1,62 @@
+{
+  "name": "hepa_adult_3dose",
+  "group": "HEP_A",
+  "focus_code": "810",
+  "patient": {
+    "birth_date": "2000-01-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2019-01-15",
+      "cvx": "104"
+    },
+    {
+      "date": "2019-02-15",
+      "cvx": "104"
+    },
+    {
+      "date": "2019-07-15",
+      "cvx": "104"
+    }
+  ],
+  "execution_date": "2019-07-14",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2019-01-15",
+        "cvx": "104",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2019-02-15",
+        "cvx": "104",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2019-07-15",
+        "cvx": "104",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HEP_A",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

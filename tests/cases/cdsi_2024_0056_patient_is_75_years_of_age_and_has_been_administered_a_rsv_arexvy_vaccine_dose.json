@@ -1,0 +1,40 @@
+{
+  "name": "cdsi_2024_0056_patient_is_75_years_of_age_and_has_been_administered_a_rsv_arexvy_vaccine_dose",
+  "group": "RSV",
+  "focus_code": "875",
+  "patient": {
+    "birth_date": "1950-10-07",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2025-11-10",
+      "cvx": "303"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "303",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "RSV",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

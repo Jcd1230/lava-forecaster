@@ -1,0 +1,62 @@
+{
+  "name": "hib_late_initiation_8m",
+  "group": "HIB",
+  "focus_code": "300",
+  "patient": {
+    "birth_date": "2020-01-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2020-09-01",
+      "cvx": "17"
+    },
+    {
+      "date": "2020-11-01",
+      "cvx": "17"
+    },
+    {
+      "date": "2021-04-01",
+      "cvx": "17"
+    }
+  ],
+  "execution_date": "2021-07-01",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2020-09-01",
+        "cvx": "17",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2020-11-01",
+        "cvx": "17",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2021-04-01",
+        "cvx": "17",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HIB",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

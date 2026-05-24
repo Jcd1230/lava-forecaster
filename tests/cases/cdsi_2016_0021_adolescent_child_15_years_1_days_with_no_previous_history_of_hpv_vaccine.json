@@ -1,0 +1,27 @@
+{
+  "name": "cdsi_2016_0021_adolescent_child_15_years_1_days_with_no_previous_history_of_hpv_vaccine",
+  "group": "HPV",
+  "focus_code": "840",
+  "patient": {
+    "birth_date": "2010-11-11",
+    "gender": "Male"
+  },
+  "history": [],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "HPV",
+        "earliest_date": "2019-11-11",
+        "recommended_date": "2021-11-11",
+        "overdue_date": "2023-12-08",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

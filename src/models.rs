@@ -107,3 +107,20 @@ pub struct BulkForecastResponse {
     pub responses: Vec<ForecastResponse>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ExpectedResults {
+    pub evaluations: Vec<DoseEvaluation>,
+    pub forecasts: Vec<SeriesForecast>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UnifiedTestCase {
+    pub name: String,
+    pub group: String,
+    pub focus_code: String,
+    pub patient: Patient,
+    pub history: Vec<Dose>,
+    pub execution_date: NaiveDate,
+    pub expected: Option<ExpectedResults>,
+}
+

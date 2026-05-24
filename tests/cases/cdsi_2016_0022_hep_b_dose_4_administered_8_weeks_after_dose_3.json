@@ -1,0 +1,73 @@
+{
+  "name": "cdsi_2016_0022_hep_b_dose_4_administered_8_weeks_after_dose_3",
+  "group": "HEP_B",
+  "focus_code": "100",
+  "patient": {
+    "birth_date": "2025-03-20",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-06-20",
+      "cvx": "08"
+    },
+    {
+      "date": "2025-08-22",
+      "cvx": "08"
+    },
+    {
+      "date": "2025-10-11",
+      "cvx": "08"
+    },
+    {
+      "date": "2025-11-07",
+      "cvx": "08"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-06-20",
+        "cvx": "08",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-08-22",
+        "cvx": "08",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-10-11",
+        "cvx": "08",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2025-11-07",
+        "cvx": "08",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 4
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HEP_B",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

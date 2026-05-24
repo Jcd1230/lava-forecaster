@@ -1,0 +1,44 @@
+{
+  "name": "cdsi_2015_0019_zoster_mmr_to_zoster_interval_28_1_days",
+  "group": "ZOSTER",
+  "focus_code": "620",
+  "patient": {
+    "birth_date": "1968-03-12",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2019-07-17",
+      "cvx": "03"
+    },
+    {
+      "date": "2019-08-13",
+      "cvx": "121"
+    }
+  ],
+  "execution_date": "2019-08-14",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2019-08-13",
+        "cvx": "121",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "ZOSTER",
+        "earliest_date": "2019-10-08",
+        "recommended_date": "2019-10-08",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

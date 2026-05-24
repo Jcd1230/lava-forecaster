@@ -1,0 +1,28 @@
+{
+  "name": "rsv_newborn_preseason_recommended_oct1",
+  "group": "RSV",
+  "focus_code": "875",
+  "patient": {
+    "birth_date": "2025-08-21",
+    "gender": "Male"
+  },
+  "history": [],
+  "execution_date": "2025-08-21",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "RSV",
+        "earliest_date": "2025-10-01",
+        "recommended_date": "2025-10-01",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

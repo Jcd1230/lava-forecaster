@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2025_0109_patient_is_8_months_of_age_and_has_received_the_second_dose_of_the_moderna_2025_2026_vaccine_at_4_weeks_4_days",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "2025-02-17",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-10-17",
+      "cvx": "311"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "311"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-10-17",
+        "cvx": "311",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "311",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

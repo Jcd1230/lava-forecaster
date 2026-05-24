@@ -29,6 +29,7 @@ pub fn definition() -> VaccineGroupDefinition {
         custom_evaluation_hook: Some(overrides::hep_b_custom_evaluation_hook),
         custom_dose_number_hook: None,
         custom_extra_dose_hook: None,
+        custom_completion_hook: None,
         group_selection: Some(overrides::hep_b_group_selection),
     }
 }

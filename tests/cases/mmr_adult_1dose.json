@@ -1,0 +1,40 @@
+{
+  "name": "mmr_adult_1dose",
+  "group": "MMR",
+  "focus_code": "500",
+  "patient": {
+    "birth_date": "2000-01-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2020-01-01",
+      "cvx": "03"
+    }
+  ],
+  "execution_date": "2026-05-19",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2020-01-01",
+        "cvx": "03",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MMR",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

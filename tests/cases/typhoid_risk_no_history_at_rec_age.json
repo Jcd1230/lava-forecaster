@@ -1,0 +1,28 @@
+{
+  "name": "typhoid_risk_no_history_at_rec_age",
+  "group": "TYPHOID",
+  "focus_code": "904",
+  "patient": {
+    "birth_date": "2020-01-01",
+    "gender": "Female"
+  },
+  "history": [],
+  "execution_date": "2022-01-01",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "TYPHOID",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotRecommended",
+        "reasons": [
+          "SUPPLEMENTAL_TEXT",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

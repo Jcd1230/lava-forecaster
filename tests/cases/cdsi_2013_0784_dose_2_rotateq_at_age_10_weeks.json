@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2013_0784_dose_2_rotateq_at_age_10_weeks",
+  "group": "ROTAVIRUS",
+  "focus_code": "820",
+  "patient": {
+    "birth_date": "2025-09-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-10-13",
+      "cvx": "116"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "116"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-10-13",
+        "cvx": "116",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "116",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "ROTAVIRUS",
+        "earliest_date": "2025-12-08",
+        "recommended_date": "2026-03-01",
+        "overdue_date": "2026-04-28",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

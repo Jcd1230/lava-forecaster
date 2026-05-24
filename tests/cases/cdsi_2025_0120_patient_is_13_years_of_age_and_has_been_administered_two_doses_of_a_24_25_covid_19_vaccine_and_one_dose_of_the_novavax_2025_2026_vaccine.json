@@ -1,0 +1,62 @@
+{
+  "name": "cdsi_2025_0120_patient_is_13_years_of_age_and_has_been_administered_two_doses_of_a_24_25_covid_19_vaccine_and_one_dose_of_the_novavax_2025_2026_vaccine",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "2012-02-27",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-03-17",
+      "cvx": "313"
+    },
+    {
+      "date": "2025-04-17",
+      "cvx": "312"
+    },
+    {
+      "date": "2025-09-01",
+      "cvx": "313"
+    }
+  ],
+  "execution_date": "2025-09-01",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-03-17",
+        "cvx": "313",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-04-17",
+        "cvx": "312",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-09-01",
+        "cvx": "313",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

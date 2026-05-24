@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2018_0009_zoster_zvl_and_rzv_shingrix_vaccine_doses_administered_on_the_same_day_time",
+  "group": "ZOSTER",
+  "focus_code": "620",
+  "patient": {
+    "birth_date": "1969-02-14",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2019-02-27",
+      "cvx": "121"
+    },
+    {
+      "date": "2019-02-27",
+      "cvx": "187"
+    }
+  ],
+  "execution_date": "2019-05-12",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2019-02-27",
+        "cvx": "121",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2019-02-27",
+        "cvx": "187",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "ZOSTER",
+        "earliest_date": "2019-04-24",
+        "recommended_date": "2019-04-24",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

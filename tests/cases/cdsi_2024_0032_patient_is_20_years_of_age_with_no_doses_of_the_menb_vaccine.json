@@ -1,0 +1,27 @@
+{
+  "name": "cdsi_2024_0032_patient_is_20_years_of_age_with_no_doses_of_the_menb_vaccine",
+  "group": "MENB",
+  "focus_code": "835",
+  "patient": {
+    "birth_date": "2005-11-10",
+    "gender": "Female"
+  },
+  "history": [],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "MENB",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "ConditionallyRecommended",
+        "reasons": [
+          "CLINICAL_PATIENT_DISCRETION"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "typhoid_under_2y_invalid_cvx101_eval_3y",
+  "group": "TYPHOID",
+  "focus_code": "904",
+  "patient": {
+    "birth_date": "2020-01-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2021-01-01",
+      "cvx": "101"
+    }
+  ],
+  "execution_date": "2023-01-01",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2021-01-01",
+        "cvx": "101",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "TYPHOID",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "ConditionallyRecommended",
+        "reasons": [
+          "HIGH_RISK",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

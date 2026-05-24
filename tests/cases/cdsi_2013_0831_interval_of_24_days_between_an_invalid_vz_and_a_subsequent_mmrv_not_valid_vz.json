@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2013_0831_interval_of_24_days_between_an_invalid_vz_and_a_subsequent_mmrv_not_valid_vz",
+  "group": "VARICELLA",
+  "focus_code": "600",
+  "patient": {
+    "birth_date": "2024-10-22",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-10-17",
+      "cvx": "21"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "94"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-10-17",
+        "cvx": "21",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "94",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "VARICELLA",
+        "earliest_date": "2025-12-08",
+        "recommended_date": "2025-12-08",
+        "overdue_date": "2026-03-21",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

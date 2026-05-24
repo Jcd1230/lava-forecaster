@@ -1,0 +1,28 @@
+{
+  "name": "jevc_risk_2_dose_accelerated_no_history_at_rec_age",
+  "group": "JEV",
+  "focus_code": "902",
+  "patient": {
+    "birth_date": "2020-01-01",
+    "gender": "Female"
+  },
+  "history": [],
+  "execution_date": "2038-01-01",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "JEV",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "ConditionallyRecommended",
+        "reasons": [
+          "HIGH_RISK",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "name": "cdsi_2013_0638_dose_3_at_4_years_4_days_but_not_six_months_after_dose_2_child_will_need_another",
+  "group": "POLIO",
+  "focus_code": "400",
+  "patient": {
+    "birth_date": "2021-11-14",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2022-11-14",
+      "cvx": "10"
+    },
+    {
+      "date": "2025-06-14",
+      "cvx": "10"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "10"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2022-11-14",
+        "cvx": "10",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-06-14",
+        "cvx": "10",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "10",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "POLIO",
+        "earliest_date": "2026-05-10",
+        "recommended_date": "2026-05-10",
+        "overdue_date": "2028-12-11",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

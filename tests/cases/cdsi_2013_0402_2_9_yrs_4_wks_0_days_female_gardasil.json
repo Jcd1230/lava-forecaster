@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2013_0402_2_9_yrs_4_wks_0_days_female_gardasil",
+  "group": "HPV",
+  "focus_code": "840",
+  "patient": {
+    "birth_date": "2016-10-13",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-10-13",
+      "cvx": "165"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "165"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-10-13",
+        "cvx": "165",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "165",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HPV",
+        "earliest_date": "2026-03-13",
+        "recommended_date": "2026-04-13",
+        "overdue_date": "2026-12-10",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

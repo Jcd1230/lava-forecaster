@@ -1,0 +1,84 @@
+{
+  "name": "cdsi_2024_0016_patient_receives_an_optional_5th_dose",
+  "group": "DTP",
+  "focus_code": "200",
+  "patient": {
+    "birth_date": "2020-04-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2020-06-10",
+      "cvx": "20"
+    },
+    {
+      "date": "2020-10-10",
+      "cvx": "20"
+    },
+    {
+      "date": "2021-05-13",
+      "cvx": "20"
+    },
+    {
+      "date": "2024-04-18",
+      "cvx": "20"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "20"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2020-06-10",
+        "cvx": "20",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2020-10-10",
+        "cvx": "20",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2021-05-13",
+        "cvx": "20",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2024-04-18",
+        "cvx": "20",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 4
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "20",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 5
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "DTP",
+        "earliest_date": "2031-04-10",
+        "recommended_date": "2031-04-10",
+        "overdue_date": "2033-05-07",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "yellow_fever_above_9m",
+  "group": "YELLOW_FEVER",
+  "focus_code": "905",
+  "patient": {
+    "birth_date": "2020-01-01",
+    "gender": "Female"
+  },
+  "history": [],
+  "execution_date": "2020-11-01",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "YELLOW_FEVER",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "ConditionallyRecommended",
+        "reasons": [
+          "HIGH_RISK",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "name": "cdsi_2025_0057_patient_is_3_years_of_age_and_has_been_administered_four_previous_doses_of_a_pfizer_covid_19_vaccine",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "2022-07-25",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2023-05-23",
+      "cvx": "302"
+    },
+    {
+      "date": "2023-06-13",
+      "cvx": "302"
+    },
+    {
+      "date": "2023-08-08",
+      "cvx": "302"
+    },
+    {
+      "date": "2024-09-09",
+      "cvx": "308"
+    }
+  ],
+  "execution_date": "2025-09-19",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2023-05-23",
+        "cvx": "302",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2023-06-13",
+        "cvx": "302",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2023-08-08",
+        "cvx": "302",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2024-09-09",
+        "cvx": "308",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": "2025-08-27",
+        "recommended_date": "2025-08-27",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "ConditionallyRecommended",
+        "reasons": [
+          "HIGH_RISK",
+          "CLINICAL_PATIENT_DISCRETION"
+        ]
+      }
+    ]
+  }
+}

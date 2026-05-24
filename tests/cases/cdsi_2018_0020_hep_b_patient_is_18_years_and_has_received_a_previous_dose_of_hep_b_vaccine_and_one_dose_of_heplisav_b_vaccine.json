@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2018_0020_hep_b_patient_is_18_years_and_has_received_a_previous_dose_of_hep_b_vaccine_and_one_dose_of_heplisav_b_vaccine",
+  "group": "HEP_B",
+  "focus_code": "100",
+  "patient": {
+    "birth_date": "2007-11-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2022-11-10",
+      "cvx": "08"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "189"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2022-11-10",
+        "cvx": "08",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "189",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HEP_B",
+        "earliest_date": "2026-01-05",
+        "recommended_date": "2026-01-05",
+        "overdue_date": "2026-01-05",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

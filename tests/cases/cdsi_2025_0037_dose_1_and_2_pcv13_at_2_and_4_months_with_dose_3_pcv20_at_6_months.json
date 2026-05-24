@@ -1,0 +1,63 @@
+{
+  "name": "cdsi_2025_0037_dose_1_and_2_pcv13_at_2_and_4_months_with_dose_3_pcv20_at_6_months",
+  "group": "PNEUMOCOCCAL",
+  "focus_code": "750",
+  "patient": {
+    "birth_date": "2025-03-29",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2025-05-29",
+      "cvx": "133"
+    },
+    {
+      "date": "2025-07-29",
+      "cvx": "133"
+    },
+    {
+      "date": "2025-09-29",
+      "cvx": "216"
+    }
+  ],
+  "execution_date": "2025-09-29",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-05-29",
+        "cvx": "133",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-07-29",
+        "cvx": "133",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-09-29",
+        "cvx": "216",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "PNEUMOCOCCAL",
+        "earliest_date": "2026-03-29",
+        "recommended_date": "2026-03-29",
+        "overdue_date": "2026-08-25",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

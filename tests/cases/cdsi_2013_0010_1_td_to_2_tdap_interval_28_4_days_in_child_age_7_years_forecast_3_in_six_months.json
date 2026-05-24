@@ -1,0 +1,53 @@
+{
+  "name": "cdsi_2013_0010_1_td_to_2_tdap_interval_28_4_days_in_child_age_7_years_forecast_3_in_six_months",
+  "group": "DTP",
+  "focus_code": "200",
+  "patient": {
+    "birth_date": "2017-07-14",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-10-17",
+      "cvx": "09"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "115"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-10-17",
+        "cvx": "09",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "115",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "DTP",
+        "earliest_date": "2026-05-10",
+        "recommended_date": "2026-05-10",
+        "overdue_date": "2026-05-10",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE",
+          "ADMINISTER_TDAP_OR_TD",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

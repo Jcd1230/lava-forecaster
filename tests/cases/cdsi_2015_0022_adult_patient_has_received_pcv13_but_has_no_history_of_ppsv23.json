@@ -1,0 +1,41 @@
+{
+  "name": "cdsi_2015_0022_adult_patient_has_received_pcv13_but_has_no_history_of_ppsv23",
+  "group": "PNEUMOCOCCAL",
+  "focus_code": "750",
+  "patient": {
+    "birth_date": "1960-10-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-02-03",
+      "cvx": "133"
+    }
+  ],
+  "execution_date": "2025-10-01",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-02-03",
+        "cvx": "133",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "PNEUMOCOCCAL",
+        "earliest_date": "2026-02-03",
+        "recommended_date": "2026-02-03",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE",
+          "ADMINISTER_PCV20_OR_PCV21"
+        ]
+      }
+    ]
+  }
+}

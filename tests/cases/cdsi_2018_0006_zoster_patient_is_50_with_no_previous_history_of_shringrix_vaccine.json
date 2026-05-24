@@ -1,0 +1,27 @@
+{
+  "name": "cdsi_2018_0006_zoster_patient_is_50_with_no_previous_history_of_shringrix_vaccine",
+  "group": "ZOSTER",
+  "focus_code": "620",
+  "patient": {
+    "birth_date": "1975-11-10",
+    "gender": "Female"
+  },
+  "history": [],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "ZOSTER",
+        "earliest_date": "2025-11-10",
+        "recommended_date": "2025-11-10",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

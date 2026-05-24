@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2025_0063_patient_is_19_years_of_age_with_a_fall_2025_2026_pfizer_covid_19_vaccine_administered_at_8_weeks_4_days_after_previous_dose",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "2006-03-08",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-07-29",
+      "cvx": "309"
+    },
+    {
+      "date": "2025-09-19",
+      "cvx": "309"
+    }
+  ],
+  "execution_date": "2025-09-19",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-07-29",
+        "cvx": "309",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-09-19",
+        "cvx": "309",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

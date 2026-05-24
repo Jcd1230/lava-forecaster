@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2025_0093_patient_is_57_years_of_age_and_has_been_administered_two_previous_doses_of_the_moderna_covid_19_vaccine",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "1968-03-02",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2023-06-22",
+      "cvx": "229"
+    },
+    {
+      "date": "2024-08-23",
+      "cvx": "312"
+    }
+  ],
+  "execution_date": "2025-09-23",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2023-06-22",
+        "cvx": "229",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2024-08-23",
+        "cvx": "312",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": "2025-08-27",
+        "recommended_date": "2025-08-27",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "name": "hepa_child_2dose",
+  "group": "HEP_A",
+  "focus_code": "810",
+  "patient": {
+    "birth_date": "2020-01-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2021-01-01",
+      "cvx": "83"
+    },
+    {
+      "date": "2021-07-01",
+      "cvx": "83"
+    }
+  ],
+  "execution_date": "2021-06-30",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2021-01-01",
+        "cvx": "83",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2021-07-01",
+        "cvx": "83",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HEP_A",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

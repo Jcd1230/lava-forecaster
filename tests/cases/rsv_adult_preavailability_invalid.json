@@ -1,0 +1,41 @@
+{
+  "name": "rsv_adult_preavailability_invalid",
+  "group": "RSV",
+  "focus_code": "875",
+  "patient": {
+    "birth_date": "1963-01-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2023-06-20",
+      "cvx": "303"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2023-06-20",
+        "cvx": "303",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "RSV",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "ConditionallyRecommended",
+        "reasons": [
+          "HIGH_RISK",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

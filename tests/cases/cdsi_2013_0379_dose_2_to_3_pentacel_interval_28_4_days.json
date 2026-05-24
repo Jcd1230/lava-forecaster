@@ -1,0 +1,62 @@
+{
+  "name": "cdsi_2013_0379_dose_2_to_3_pentacel_interval_28_4_days",
+  "group": "HIB",
+  "focus_code": "300",
+  "patient": {
+    "birth_date": "2025-06-15",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-08-15",
+      "cvx": "120"
+    },
+    {
+      "date": "2025-10-15",
+      "cvx": "120"
+    },
+    {
+      "date": "2025-11-08",
+      "cvx": "120"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-08-15",
+        "cvx": "120",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-10-15",
+        "cvx": "120",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-11-08",
+        "cvx": "120",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HIB",
+        "earliest_date": "2026-06-15",
+        "recommended_date": "2026-06-15",
+        "overdue_date": "2026-11-11",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

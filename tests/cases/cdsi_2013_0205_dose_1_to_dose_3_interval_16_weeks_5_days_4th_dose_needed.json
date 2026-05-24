@@ -1,0 +1,62 @@
+{
+  "name": "cdsi_2013_0205_dose_1_to_dose_3_interval_16_weeks_5_days_4th_dose_needed",
+  "group": "HEP_B",
+  "focus_code": "100",
+  "patient": {
+    "birth_date": "2025-04-25",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-07-26",
+      "cvx": "08"
+    },
+    {
+      "date": "2025-09-01",
+      "cvx": "08"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "08"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-07-26",
+        "cvx": "08",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-09-01",
+        "cvx": "08",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "08",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HEP_B",
+        "earliest_date": "2025-11-15",
+        "recommended_date": "2025-11-15",
+        "overdue_date": "2027-03-28",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

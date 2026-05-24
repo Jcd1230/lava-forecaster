@@ -1,0 +1,41 @@
+{
+  "name": "cdsi_2025_0001_patient_is_55_years_of_age_and_has_been_administered_a_dose_of_the_pneumococcal_vaccine_pcv15",
+  "group": "PNEUMOCOCCAL",
+  "focus_code": "750",
+  "patient": {
+    "birth_date": "1970-10-26",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2025-11-10",
+      "cvx": "215"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "215",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "PNEUMOCOCCAL",
+        "earliest_date": "2026-11-10",
+        "recommended_date": "2026-11-10",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

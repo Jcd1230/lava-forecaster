@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2013_0719_pentacel_at_7_yrs_1_at_age_12_mo_off_label_use",
+  "group": "POLIO",
+  "focus_code": "400",
+  "patient": {
+    "birth_date": "2018-11-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2019-04-19",
+      "cvx": "10"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "120"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2019-04-19",
+        "cvx": "10",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "120",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "POLIO",
+        "earliest_date": "2026-05-10",
+        "recommended_date": "2026-05-10",
+        "overdue_date": "2026-05-10",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

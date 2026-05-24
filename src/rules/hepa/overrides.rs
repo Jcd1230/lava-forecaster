@@ -1,7 +1,7 @@
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
-use crate::date_utils::{TimePeriod, add_years, add_months};
+use crate::rules::helpers::{clamp_date_at_least, age_ge, interval_ge, interval_lt};
 use std::collections::HashMap;
 
 pub fn hepa_custom_switch_hook(
@@ -15,25 +15,23 @@ pub fn hepa_custom_switch_hook(
     if let Some(dose) = ctx.current_dose {
         if dose.cvx == "104" {
             let birth_date = ctx.patient.birth_date;
-            let age_19 = add_years(birth_date, 19);
             if target_dose_idx == 1 {
-                if dose.date >= age_19 {
+                if age_ge(birth_date, dose.date, "19y") {
                     return Some("HEP_A_ADULT_3_DOSE_SERIES");
                 }
             } else if target_dose_idx == 2 {
                 if let Some(&(prev_date, _)) = ctx.valid_doses.last() {
-                    let age_18_minus_4d = TimePeriod::parse("18y-4d").unwrap().add_to(birth_date);
-                    let date_6m_minus_4d = TimePeriod::parse("6m-4d").unwrap().add_to(prev_date);
-                    let interval_24d = TimePeriod::parse("24d").unwrap().add_to(prev_date);
-                    
                     // Case A: age at dose 2 >= 19y and interval >= 24d
-                    if dose.date >= age_19 && dose.date >= interval_24d {
+                    if age_ge(birth_date, dose.date, "19y") && interval_ge(prev_date, dose.date, "24d") {
                         return Some("HEP_A_ADULT_3_DOSE_SERIES");
                     }
 
                     // Case B: Dose 1 is CVX 104 at >= 18y-4d, and interval is >= 24d and < 6m-4d
                     if let Some(dose_1) = ctx.history.iter().find(|d| d.date == prev_date && d.cvx == "104") {
-                        if dose_1.date >= age_18_minus_4d && dose.date >= interval_24d && dose.date < date_6m_minus_4d {
+                        if age_ge(birth_date, dose_1.date, "18y-4d") 
+                            && interval_ge(prev_date, dose.date, "24d") 
+                            && interval_lt(prev_date, dose.date, "6m-4d") 
+                        {
                             return Some("HEP_A_ADULT_3_DOSE_SERIES");
                         }
                     }
@@ -55,8 +53,7 @@ pub fn hepa_custom_evaluation_hook(
         if series_name == "HEP_A_ADULT_3_DOSE_SERIES" && target_dose_idx == 3 {
             if ctx.valid_doses.len() >= 2 {
                 let dose_1_date = ctx.valid_doses[0].0;
-                let min_int = TimePeriod::parse("6m-4d").unwrap().add_to(dose_1_date);
-                if dose.date < min_int {
+                if interval_lt(dose_1_date, dose.date, "6m-4d") {
                     *status = DoseStatus::Invalid;
                     if !reasons.contains(&EvaluationReason::BelowMinimumInterval) {
                         reasons.push(EvaluationReason::BelowMinimumInterval);
@@ -66,8 +63,7 @@ pub fn hepa_custom_evaluation_hook(
         } else if series_name == "HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES" && target_dose_idx == 4 {
             if ctx.valid_doses.len() >= 3 {
                 let dose_1_date = ctx.valid_doses[0].0;
-                let min_int = TimePeriod::parse("12m-4d").unwrap().add_to(dose_1_date);
-                if dose.date < min_int {
+                if interval_lt(dose_1_date, dose.date, "12m-4d") {
                     *status = DoseStatus::Invalid;
                     if !reasons.contains(&EvaluationReason::BelowMinimumInterval) {
                         reasons.push(EvaluationReason::BelowMinimumInterval);
@@ -75,15 +71,6 @@ pub fn hepa_custom_evaluation_hook(
                 }
             }
         }
-    }
-}
-
-fn max_date(d1: Option<NaiveDate>, d2: Option<NaiveDate>) -> NaiveDate {
-    match (d1, d2) {
-        (Some(a), Some(b)) => std::cmp::max(a, b),
-        (Some(a), None) => a,
-        (None, Some(b)) => b,
-        (None, None) => panic!("max_date called with two Nones"),
     }
 }
 
@@ -94,26 +81,25 @@ pub fn hepa_custom_forecast_hook(
     eval_date: NaiveDate,
     forecast: &mut SeriesForecast,
 ) {
-    let age_19 = add_years(patient.birth_date, 19);
-    
     if valid_doses.is_empty() {
-        if eval_date >= age_19 {
+        if age_ge(patient.birth_date, eval_date, "19y") {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.recommended_date = Some(add_years(patient.birth_date, 2));
-            forecast.earliest_date = Some(add_years(patient.birth_date, 2));
+            let age_2 = crate::date_utils::add_years(patient.birth_date, 2);
+            forecast.recommended_date = Some(age_2);
+            forecast.earliest_date = Some(age_2);
             forecast.overdue_date = None;
         }
     } else {
         if forecast.series_name == "HEP_A_ADULT_3_DOSE_SERIES" && valid_doses.len() == 2 {
             let dose_1_date = valid_doses[0].0;
-            let rec_date = add_months(dose_1_date, 6);
-            forecast.earliest_date = Some(max_date(forecast.earliest_date, Some(rec_date)));
-            forecast.recommended_date = Some(max_date(forecast.recommended_date, Some(rec_date)));
+            let rec_date = crate::date_utils::add_months(dose_1_date, 6);
+            clamp_date_at_least(&mut forecast.earliest_date, rec_date);
+            clamp_date_at_least(&mut forecast.recommended_date, rec_date);
         } else if forecast.series_name == "HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES" && valid_doses.len() == 3 {
             let dose_1_date = valid_doses[0].0;
-            let rec_date = add_months(dose_1_date, 12);
-            forecast.earliest_date = Some(max_date(forecast.earliest_date, Some(rec_date)));
-            forecast.recommended_date = Some(max_date(forecast.recommended_date, Some(rec_date)));
+            let rec_date = crate::date_utils::add_months(dose_1_date, 12);
+            clamp_date_at_least(&mut forecast.earliest_date, rec_date);
+            clamp_date_at_least(&mut forecast.recommended_date, rec_date);
         }
     }
 }
@@ -148,9 +134,8 @@ pub fn hepa_group_selection(
 
     if let Some(fd2) = first_valid_dose_2 {
         let birth_date = patient.birth_date;
-        let age_18_minus_4d = TimePeriod::parse("18y-4d").unwrap().add_to(birth_date);
         
-        if fd2.dose_date >= age_18_minus_4d {
+        if age_ge(birth_date, fd2.dose_date, "18y-4d") {
             // Patient >= 18y-4d at Dose 1. Default initially is 2-dose.
             
             // Check Override 1: Select 4-dose Accelerated Twinrix series
@@ -163,11 +148,12 @@ pub fn hepa_group_selection(
             if valid_doses_4.len() >= 2 {
                 let d1 = valid_doses_4[0];
                 let d2 = valid_doses_4[1];
-                let interval_7d = TimePeriod::parse("7d").unwrap().add_to(d1.dose_date);
-                let interval_24d = TimePeriod::parse("24d").unwrap().add_to(d1.dose_date);
                 
                 // No prior valid doses before d1 (this is implicitly true because d1 is index 0)
-                if d1.cvx == "104" && d2.cvx == "104" && d2.dose_date >= interval_7d && d2.dose_date < interval_24d {
+                if d1.cvx == "104" && d2.cvx == "104" 
+                    && interval_ge(d1.dose_date, d2.dose_date, "7d") 
+                    && interval_lt(d1.dose_date, d2.dose_date, "24d") 
+                {
                     selected = "HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES".to_string();
                     twinrix_selected = true;
                 }
@@ -187,10 +173,11 @@ pub fn hepa_group_selection(
                             selected = "HEP_A_ADULT_3_DOSE_SERIES".to_string();
                         } else {
                             let d2 = valid_doses_3[1];
-                            let interval_24d = TimePeriod::parse("24d").unwrap().add_to(d1.dose_date);
-                            let interval_6m_minus_4d = TimePeriod::parse("6m-4d").unwrap().add_to(d1.dose_date);
                             
-                            if (d1.cvx == "104" || d2.cvx == "104") && d2.dose_date >= interval_24d && d2.dose_date < interval_6m_minus_4d {
+                            if (d1.cvx == "104" || d2.cvx == "104") 
+                                && interval_ge(d1.dose_date, d2.dose_date, "24d") 
+                                && interval_lt(d1.dose_date, d2.dose_date, "6m-4d") 
+                            {
                                 selected = "HEP_A_ADULT_3_DOSE_SERIES".to_string();
                             }
                         }

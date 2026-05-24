@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2013_0455_1_9_yrs_2_11_yr_6_mo",
+  "group": "HPV",
+  "focus_code": "840",
+  "patient": {
+    "birth_date": "2014-05-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2023-05-10",
+      "cvx": "165"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "165"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2023-05-10",
+        "cvx": "165",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "165",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HPV",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

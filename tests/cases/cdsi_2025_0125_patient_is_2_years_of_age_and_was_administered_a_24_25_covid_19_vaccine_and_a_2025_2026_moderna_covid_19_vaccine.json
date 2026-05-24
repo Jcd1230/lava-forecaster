@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2025_0125_patient_is_2_years_of_age_and_was_administered_a_24_25_covid_19_vaccine_and_a_2025_2026_moderna_covid_19_vaccine",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "2022-11-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2024-10-17",
+      "cvx": "311"
+    },
+    {
+      "date": "2025-09-20",
+      "cvx": "311"
+    }
+  ],
+  "execution_date": "2025-09-20",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2024-10-17",
+        "cvx": "311",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-09-20",
+        "cvx": "311",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

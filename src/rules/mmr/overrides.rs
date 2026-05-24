@@ -1,7 +1,7 @@
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus};
-use crate::date_utils::{TimePeriod, add_years};
+use crate::rules::helpers::{clamp_date_at_least, age_ge, age_lt};
 
 fn is_live_virus(cvx: &str) -> bool {
     const LIVE_VIRUS: &[&str] = &[
@@ -26,6 +26,21 @@ fn has_same_day_mixed_live_virus(history: &[Dose], eval_date: NaiveDate) -> bool
     has_mmr_live && has_non_mmr_live
 }
 
+fn get_valid_doses_cvx(ctx: &EvaluationContext) -> Vec<String> {
+    let mut cvxs = Vec::new();
+    let mut history_idx = 0;
+    for &(valid_date, _) in ctx.valid_doses {
+        while history_idx < ctx.history.len() && ctx.history[history_idx].date != valid_date {
+            history_idx += 1;
+        }
+        if history_idx < ctx.history.len() {
+            cvxs.push(ctx.history[history_idx].cvx.clone());
+            history_idx += 1;
+        }
+    }
+    cvxs
+}
+
 pub fn mmr_custom_evaluation_hook(
     _series_name: &str,
     target_dose_idx: usize,
@@ -39,9 +54,7 @@ pub fn mmr_custom_evaluation_hook(
         // 1. Outside Routine Series for Dose 1
         if target_dose_idx == 1 {
             if dose.cvx == "03" || dose.cvx == "04" || dose.cvx == "05" {
-                let date_6m_minus_4d = TimePeriod::parse("6m-4d").unwrap().add_to(birth_date);
-                let date_1y_minus_4d = TimePeriod::parse("1y-4d").unwrap().add_to(birth_date);
-                if dose.date >= date_6m_minus_4d && dose.date < date_1y_minus_4d {
+                if age_ge(birth_date, dose.date, "6m-4d") && age_lt(birth_date, dose.date, "1y-4d") {
                     *status = DoseStatus::Accepted;
                     reasons.clear();
                     reasons.push(EvaluationReason::OutsideRoutineSeries);
@@ -52,13 +65,48 @@ pub fn mmr_custom_evaluation_hook(
 
         // 2. Adult Dose 2 Booster/Completion
         if target_dose_idx == 2 {
-            let age_19 = add_years(birth_date, 19);
-            if dose.date >= age_19 {
+            if age_ge(birth_date, dose.date, "19y") {
                 *status = DoseStatus::Accepted;
                 reasons.clear();
                 reasons.push(EvaluationReason::BoosterDose);
                 return; // Skip further checks
             }
+        }
+
+        // Redundancy check: if the dose components are already fully satisfied by previous valid doses
+        let mut valid_m_count = 0;
+        let mut valid_mu_count = 0;
+        let mut valid_r_count = 0;
+        let valid_cvxs = get_valid_doses_cvx(ctx);
+        for cvx in &valid_cvxs {
+            if matches!(cvx.as_str(), "03" | "04" | "05" | "94") {
+                valid_m_count += 1;
+            }
+            if matches!(cvx.as_str(), "03" | "07" | "38" | "94") {
+                valid_mu_count += 1;
+            }
+            if matches!(cvx.as_str(), "03" | "04" | "06" | "38" | "94") {
+                valid_r_count += 1;
+            }
+        }
+        let has_m = matches!(dose.cvx.as_str(), "03" | "04" | "05" | "94");
+        let has_mu = matches!(dose.cvx.as_str(), "03" | "07" | "38" | "94");
+        let has_r = matches!(dose.cvx.as_str(), "03" | "04" | "06" | "38" | "94");
+        let mut redundant = true;
+        if has_m && valid_m_count < 2 {
+            redundant = false;
+        }
+        if has_mu && valid_mu_count < 2 {
+            redundant = false;
+        }
+        if has_r && valid_r_count < 2 {
+            redundant = false;
+        }
+        if redundant {
+            *status = DoseStatus::Accepted;
+            reasons.clear();
+            reasons.push(EvaluationReason::BoosterDose);
+            return;
         }
 
         // 3. Live Virus Conflict
@@ -95,13 +143,13 @@ pub fn mmr_custom_forecast_hook(
     eval_date: NaiveDate,
     forecast: &mut SeriesForecast,
 ) {
-    let age_19 = add_years(patient.birth_date, 19);
     let pre_1957 = NaiveDate::from_ymd_opt(1957, 1, 1).unwrap();
 
     // Case 1: Series is Complete (either already completed or adult completion)
     let is_completed = forecast.status == SeriesStatus::Complete;
     let is_adult_complete = !valid_doses.is_empty() && (
-        eval_date >= age_19 || forecast.recommended_date.map(|d| d >= age_19).unwrap_or(false)
+        age_ge(patient.birth_date, eval_date, "19y")
+        || forecast.recommended_date.map(|d| age_ge(patient.birth_date, d, "19y")).unwrap_or(false)
     );
 
     if is_completed || is_adult_complete {
@@ -130,19 +178,12 @@ pub fn mmr_custom_forecast_hook(
             if let Some(last_date) = last_live_virus {
                 let conflict_free_date = last_date + chrono::Duration::days(28);
                 
-                if let Some(ref mut earliest) = forecast.earliest_date {
-                    if *earliest < conflict_free_date {
-                        *earliest = conflict_free_date;
-                    }
-                }
-                if let Some(ref mut recommended) = forecast.recommended_date {
-                    if *recommended < conflict_free_date {
-                        *recommended = conflict_free_date;
-                    }
-                }
-                if let (Some(earliest), Some(recommended)) = (forecast.earliest_date, forecast.recommended_date.as_mut()) {
-                    if *recommended < earliest {
-                        *recommended = earliest;
+                clamp_date_at_least(&mut forecast.earliest_date, conflict_free_date);
+                clamp_date_at_least(&mut forecast.recommended_date, conflict_free_date);
+
+                if let Some(earliest) = forecast.earliest_date {
+                    if forecast.recommended_date.is_some() {
+                        clamp_date_at_least(&mut forecast.recommended_date, earliest);
                     }
                 }
             }
@@ -153,4 +194,93 @@ pub fn mmr_custom_forecast_hook(
             }
         }
     }
+}
+
+pub fn mmr_custom_dose_number_hook(
+    _series_name: &str,
+    ctx: &EvaluationContext,
+) -> usize {
+    let mut m1 = false;
+    let mut mu1 = false;
+    let mut r1 = false;
+
+    let mut m2 = false;
+    let mut mu2 = false;
+    let mut r2 = false;
+
+    let valid_cvxs = get_valid_doses_cvx(ctx);
+    for cvx in &valid_cvxs {
+        let has_m = matches!(cvx.as_str(), "03" | "04" | "05" | "94");
+        let has_mu = matches!(cvx.as_str(), "03" | "07" | "38" | "94");
+        let has_r = matches!(cvx.as_str(), "03" | "04" | "06" | "38" | "94");
+
+        let covers_new_d1 = (has_m && !m1) || (has_mu && !mu1) || (has_r && !r1);
+        if covers_new_d1 {
+            m1 = m1 || has_m;
+            mu1 = mu1 || has_mu;
+            r1 = r1 || has_r;
+        } else {
+            m2 = m2 || has_m;
+            mu2 = mu2 || has_mu;
+            r2 = r2 || has_r;
+        }
+    }
+
+    if let Some(current_dose) = ctx.current_dose {
+        let has_m = matches!(current_dose.cvx.as_str(), "03" | "04" | "05" | "94");
+        let has_mu = matches!(current_dose.cvx.as_str(), "03" | "07" | "38" | "94");
+        let has_r = matches!(current_dose.cvx.as_str(), "03" | "04" | "06" | "38" | "94");
+
+        let covers_new_d1 = (has_m && !m1) || (has_mu && !mu1) || (has_r && !r1);
+        if covers_new_d1 {
+            1
+        } else {
+            2
+        }
+    } else {
+        // Forecasting mode (current_dose is None)
+        let d1_satisfied = m1 && mu1 && r1;
+        if !d1_satisfied {
+            1
+        } else {
+            let d2_satisfied = m2 && mu2 && r2;
+            if !d2_satisfied {
+                2
+            } else {
+                3
+            }
+        }
+    }
+}
+
+pub fn mmr_custom_completion_hook(ctx: &EvaluationContext) -> bool {
+    let mut m1 = false;
+    let mut mu1 = false;
+    let mut r1 = false;
+
+    let mut m2 = false;
+    let mut mu2 = false;
+    let mut r2 = false;
+
+    let valid_cvxs = get_valid_doses_cvx(ctx);
+    for cvx in &valid_cvxs {
+        let has_m = matches!(cvx.as_str(), "03" | "04" | "05" | "94");
+        let has_mu = matches!(cvx.as_str(), "03" | "07" | "38" | "94");
+        let has_r = matches!(cvx.as_str(), "03" | "04" | "06" | "38" | "94");
+
+        let covers_new_d1 = (has_m && !m1) || (has_mu && !mu1) || (has_r && !r1);
+        if covers_new_d1 {
+            m1 = m1 || has_m;
+            mu1 = mu1 || has_mu;
+            r1 = r1 || has_r;
+        } else {
+            m2 = m2 || has_m;
+            mu2 = mu2 || has_mu;
+            r2 = r2 || has_r;
+        }
+    }
+
+    let d1_satisfied = m1 && mu1 && r1;
+    let d2_satisfied = m2 && mu2 && r2;
+    d1_satisfied && d2_satisfied
 }

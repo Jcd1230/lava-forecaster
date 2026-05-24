@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2013_0228_dose_2_at_28_4_days",
+  "group": "HEP_B",
+  "focus_code": "100",
+  "patient": {
+    "birth_date": "2025-10-17",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-10-17",
+      "cvx": "08"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "08"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-10-17",
+        "cvx": "08",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "08",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HEP_B",
+        "earliest_date": "2026-04-03",
+        "recommended_date": "2026-04-17",
+        "overdue_date": "2027-06-13",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

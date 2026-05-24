@@ -1,0 +1,44 @@
+{
+  "name": "cdsi_2013_0559_28_day_interval_between_invalid_vz_and_subsequent_mmrv_valid_mmr_and_vz",
+  "group": "MMR",
+  "focus_code": "500",
+  "patient": {
+    "birth_date": "2024-10-18",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-10-13",
+      "cvx": "21"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "94"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "94",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MMR",
+        "earliest_date": "2025-12-08",
+        "recommended_date": "2028-10-18",
+        "overdue_date": "2031-11-14",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

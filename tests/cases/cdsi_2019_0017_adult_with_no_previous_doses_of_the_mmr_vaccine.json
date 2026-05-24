@@ -1,0 +1,27 @@
+{
+  "name": "cdsi_2019_0017_adult_with_no_previous_doses_of_the_mmr_vaccine",
+  "group": "MMR",
+  "focus_code": "500",
+  "patient": {
+    "birth_date": "1990-11-10",
+    "gender": "Male"
+  },
+  "history": [],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "MMR",
+        "earliest_date": "1991-11-10",
+        "recommended_date": "1991-11-10",
+        "overdue_date": "1992-04-06",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "cdsi_2013_0273_child_2_months_no_shots_1_forecasted_at_2_months_of_age",
+  "group": "HIB",
+  "focus_code": "300",
+  "patient": {
+    "birth_date": "2025-11-10",
+    "gender": "Female"
+  },
+  "history": [],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "HIB",
+        "earliest_date": "2025-12-22",
+        "recommended_date": "2026-01-10",
+        "overdue_date": "2026-03-09",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

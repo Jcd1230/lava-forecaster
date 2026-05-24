@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2024_0076_patient_is_16_years_of_age_with_two_doses_of_the_menb_bexsero_vaccine_4_weeks_a_part",
+  "group": "MENB",
+  "focus_code": "835",
+  "patient": {
+    "birth_date": "2008-01-10",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2024-02-13",
+      "cvx": "163"
+    },
+    {
+      "date": "2024-03-12",
+      "cvx": "163"
+    }
+  ],
+  "execution_date": "2024-03-12",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2024-02-13",
+        "cvx": "163",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2024-03-12",
+        "cvx": "163",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MENB",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "name": "cdsi_2013_0538_6_single_antigen_doses_2_measles_2_mumps_2_rubella",
+  "group": "MMR",
+  "focus_code": "500",
+  "patient": {
+    "birth_date": "2020-09-15",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2021-09-15",
+      "cvx": "07"
+    },
+    {
+      "date": "2021-10-13",
+      "cvx": "06"
+    },
+    {
+      "date": "2021-11-10",
+      "cvx": "05"
+    },
+    {
+      "date": "2025-09-15",
+      "cvx": "07"
+    },
+    {
+      "date": "2025-10-13",
+      "cvx": "06"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "05"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2021-09-15",
+        "cvx": "07",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2021-10-13",
+        "cvx": "06",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2021-11-10",
+        "cvx": "05",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-09-15",
+        "cvx": "07",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-10-13",
+        "cvx": "06",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "05",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MMR",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

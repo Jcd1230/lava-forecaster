@@ -1,0 +1,28 @@
+{
+  "name": "cholera_under_2y_no_history",
+  "group": "CHOLERA",
+  "focus_code": "901",
+  "patient": {
+    "birth_date": "2020-01-01",
+    "gender": "Female"
+  },
+  "history": [],
+  "execution_date": "2021-01-01",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "CHOLERA",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotRecommended",
+        "reasons": [
+          "SUPPLEMENTAL_TEXT",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "cdsi_2024_0044_patient_is_24_years_of_age_and_has_not_been_administered_a_dose_of_the_men_b_vaccine",
+  "group": "MENB",
+  "focus_code": "835",
+  "patient": {
+    "birth_date": "2001-11-10",
+    "gender": "Male"
+  },
+  "history": [],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "MENB",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "ConditionallyRecommended",
+        "reasons": [
+          "CLINICAL_PATIENT_DISCRETION"
+        ]
+      }
+    ]
+  }
+}

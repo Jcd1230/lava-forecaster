@@ -1,0 +1,62 @@
+{
+  "name": "cdsi_2024_0077_patient_is_17_years_of_age_and_has_been_administered_three_doses_of_the_meningococcal_vaccine_bexsero",
+  "group": "MENB",
+  "focus_code": "835",
+  "patient": {
+    "birth_date": "2008-11-06",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-05-06",
+      "cvx": "163"
+    },
+    {
+      "date": "2025-07-01",
+      "cvx": "163"
+    },
+    {
+      "date": "2025-11-06",
+      "cvx": "163"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-05-06",
+        "cvx": "163",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-07-01",
+        "cvx": "163",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-11-06",
+        "cvx": "163",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MENB",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

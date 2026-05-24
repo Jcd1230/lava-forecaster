@@ -1,0 +1,95 @@
+{
+  "name": "cdsi_2013_0034_6_dtap_before_age_4_nothing_more_until_tdap_at_age_7_even_if_some_are_invalid",
+  "group": "DTP",
+  "focus_code": "200",
+  "patient": {
+    "birth_date": "2022-05-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2022-07-10",
+      "cvx": "107"
+    },
+    {
+      "date": "2022-09-10",
+      "cvx": "107"
+    },
+    {
+      "date": "2022-11-10",
+      "cvx": "107"
+    },
+    {
+      "date": "2024-05-10",
+      "cvx": "107"
+    },
+    {
+      "date": "2024-08-10",
+      "cvx": "107"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "107"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2022-07-10",
+        "cvx": "107",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2022-09-10",
+        "cvx": "107",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2022-11-10",
+        "cvx": "107",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2024-05-10",
+        "cvx": "107",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 4
+      },
+      {
+        "dose_date": "2024-08-10",
+        "cvx": "107",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 5
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "107",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 5
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "DTP",
+        "earliest_date": "2029-05-10",
+        "recommended_date": "2029-05-10",
+        "overdue_date": "2029-05-10",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "name": "cdsi_2013_0070_tdap_at_age_11_to_child_up_to_date_with_dtap",
+  "group": "DTP",
+  "focus_code": "200",
+  "patient": {
+    "birth_date": "2014-09-04",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2014-11-06",
+      "cvx": "107"
+    },
+    {
+      "date": "2015-01-08",
+      "cvx": "107"
+    },
+    {
+      "date": "2015-03-10",
+      "cvx": "107"
+    },
+    {
+      "date": "2015-10-05",
+      "cvx": "107"
+    },
+    {
+      "date": "2018-11-10",
+      "cvx": "107"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "115"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2014-11-06",
+        "cvx": "107",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2015-01-08",
+        "cvx": "107",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2015-03-10",
+        "cvx": "107",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2015-10-05",
+        "cvx": "107",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 4
+      },
+      {
+        "dose_date": "2018-11-10",
+        "cvx": "107",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 5
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "115",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 6
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "DTP",
+        "earliest_date": "2030-11-10",
+        "recommended_date": "2035-11-10",
+        "overdue_date": "2035-12-07",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE",
+          "ADMINISTER_TDAP_OR_TD",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

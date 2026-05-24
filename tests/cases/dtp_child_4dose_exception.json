@@ -1,0 +1,73 @@
+{
+  "name": "dtp_child_4dose_exception",
+  "group": "DTP",
+  "focus_code": "200",
+  "patient": {
+    "birth_date": "2018-01-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2018-03-01",
+      "cvx": "106"
+    },
+    {
+      "date": "2018-05-01",
+      "cvx": "106"
+    },
+    {
+      "date": "2018-07-01",
+      "cvx": "106"
+    },
+    {
+      "date": "2022-01-01",
+      "cvx": "106"
+    }
+  ],
+  "execution_date": "2026-05-20",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2018-03-01",
+        "cvx": "106",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2018-05-01",
+        "cvx": "106",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2018-07-01",
+        "cvx": "106",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2022-01-01",
+        "cvx": "106",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 4
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "DTP",
+        "earliest_date": "2029-01-01",
+        "recommended_date": "2029-01-01",
+        "overdue_date": "2031-01-28",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

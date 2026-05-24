@@ -1,0 +1,62 @@
+{
+  "name": "cdsi_2025_0077_patient_is_2_years_of_age_and_has_been_administered_a_previous_dose_of_a_pfizer_vaccine_and_two_doses_of_moderna_covid_19_vaccine",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "2023-07-02",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2023-07-12",
+      "cvx": "302"
+    },
+    {
+      "date": "2023-08-04",
+      "cvx": "229"
+    },
+    {
+      "date": "2025-10-06",
+      "cvx": "311"
+    }
+  ],
+  "execution_date": "2025-10-06",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2023-07-12",
+        "cvx": "302",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2023-08-04",
+        "cvx": "229",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-10-06",
+        "cvx": "311",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "typhoid_risk_dose1_too_young",
+  "group": "TYPHOID",
+  "focus_code": "904",
+  "patient": {
+    "birth_date": "2020-01-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2021-12-27",
+      "cvx": "25"
+    }
+  ],
+  "execution_date": "2022-01-24",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2021-12-27",
+        "cvx": "25",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "TYPHOID",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "ConditionallyRecommended",
+        "reasons": [
+          "HIGH_RISK",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

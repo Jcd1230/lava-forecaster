@@ -1,0 +1,62 @@
+{
+  "name": "cdsi_2013_0068_tdap_as_dose_3_to_7_years_old",
+  "group": "DTP",
+  "focus_code": "200",
+  "patient": {
+    "birth_date": "2018-03-30",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-04-09",
+      "cvx": "107"
+    },
+    {
+      "date": "2025-05-07",
+      "cvx": "107"
+    },
+    {
+      "date": "2025-11-07",
+      "cvx": "115"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-04-09",
+        "cvx": "107",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-05-07",
+        "cvx": "107",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-11-07",
+        "cvx": "115",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "DTP",
+        "earliest_date": "2029-03-30",
+        "recommended_date": "2029-03-30",
+        "overdue_date": "2031-04-26",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

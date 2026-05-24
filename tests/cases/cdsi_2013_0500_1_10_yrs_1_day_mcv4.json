@@ -1,0 +1,40 @@
+{
+  "name": "cdsi_2013_0500_1_10_yrs_1_day_mcv4",
+  "group": "MCV",
+  "focus_code": "830",
+  "patient": {
+    "birth_date": "2015-11-11",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-11-10",
+      "cvx": "136"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "136",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MCV",
+        "earliest_date": "2026-11-11",
+        "recommended_date": "2026-11-11",
+        "overdue_date": "2028-12-08",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

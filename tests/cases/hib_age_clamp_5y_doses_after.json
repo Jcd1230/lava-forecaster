@@ -1,0 +1,51 @@
+{
+  "name": "hib_age_clamp_5y_doses_after",
+  "group": "HIB",
+  "focus_code": "300",
+  "patient": {
+    "birth_date": "2015-01-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2015-03-01",
+      "cvx": "17"
+    },
+    {
+      "date": "2020-01-01",
+      "cvx": "17"
+    }
+  ],
+  "execution_date": "2021-01-01",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2015-03-01",
+        "cvx": "17",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2020-01-01",
+        "cvx": "17",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HIB",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "ConditionallyRecommended",
+        "reasons": [
+          "HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2024_0015_patient_is_16_years_of_age_and_has_been_administered_two_doses_of_the_meningococcal_vaccine_cvx_316",
+  "group": "MCV",
+  "focus_code": "830",
+  "patient": {
+    "birth_date": "2009-10-06",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2025-09-06",
+      "cvx": "316"
+    },
+    {
+      "date": "2025-11-01",
+      "cvx": "316"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-09-06",
+        "cvx": "316",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-01",
+        "cvx": "316",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MCV",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

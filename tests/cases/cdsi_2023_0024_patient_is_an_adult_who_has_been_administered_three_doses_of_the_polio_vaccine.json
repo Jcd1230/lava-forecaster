@@ -1,0 +1,63 @@
+{
+  "name": "cdsi_2023_0024_patient_is_an_adult_who_has_been_administered_three_doses_of_the_polio_vaccine",
+  "group": "POLIO",
+  "focus_code": "400",
+  "patient": {
+    "birth_date": "1995-04-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-04-10",
+      "cvx": "10"
+    },
+    {
+      "date": "2025-05-08",
+      "cvx": "10"
+    },
+    {
+      "date": "2025-11-08",
+      "cvx": "10"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-04-10",
+        "cvx": "10",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-05-08",
+        "cvx": "10",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-11-08",
+        "cvx": "10",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "POLIO",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

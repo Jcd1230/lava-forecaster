@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2025_0119_patient_is_13_years_of_age_and_has_been_administered_two_doses_of_a_covid_19_vaccine_in_a_previous_season",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "2012-07-21",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2024-08-27",
+      "cvx": "313"
+    },
+    {
+      "date": "2024-09-25",
+      "cvx": "309"
+    }
+  ],
+  "execution_date": "2025-08-27",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2024-08-27",
+        "cvx": "313",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2024-09-25",
+        "cvx": "309",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": "2024-10-16",
+        "recommended_date": "2024-10-16",
+        "overdue_date": "2024-11-19",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

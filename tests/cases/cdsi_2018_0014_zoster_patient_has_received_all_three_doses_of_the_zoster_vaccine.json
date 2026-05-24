@@ -1,0 +1,62 @@
+{
+  "name": "cdsi_2018_0014_zoster_patient_has_received_all_three_doses_of_the_zoster_vaccine",
+  "group": "ZOSTER",
+  "focus_code": "620",
+  "patient": {
+    "birth_date": "1968-07-12",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2019-07-30",
+      "cvx": "121"
+    },
+    {
+      "date": "2019-09-24",
+      "cvx": "187"
+    },
+    {
+      "date": "2019-11-19",
+      "cvx": "187"
+    }
+  ],
+  "execution_date": "2024-07-30",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2019-07-30",
+        "cvx": "121",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2019-09-24",
+        "cvx": "187",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2019-11-19",
+        "cvx": "187",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "ZOSTER",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

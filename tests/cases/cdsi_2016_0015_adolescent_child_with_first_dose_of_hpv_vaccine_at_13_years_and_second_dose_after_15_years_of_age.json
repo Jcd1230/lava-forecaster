@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2016_0015_adolescent_child_with_first_dose_of_hpv_vaccine_at_13_years_and_second_dose_after_15_years_of_age",
+  "group": "HPV",
+  "focus_code": "840",
+  "patient": {
+    "birth_date": "2010-10-10",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2023-10-24",
+      "cvx": "165"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "165"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2023-10-24",
+        "cvx": "165",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "165",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HPV",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

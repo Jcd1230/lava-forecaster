@@ -20,6 +20,7 @@ pub fn definition() -> VaccineGroupDefinition {
         custom_evaluation_hook: Some(overrides::covid19_custom_evaluation_hook),
         custom_dose_number_hook: None,
         custom_extra_dose_hook: None,
+        custom_completion_hook: None,
         group_selection: Some(overrides::covid19_group_selection),
     }
 }

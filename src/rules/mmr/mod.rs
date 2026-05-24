@@ -15,8 +15,9 @@ pub fn definition() -> VaccineGroupDefinition {
         custom_forecast_hook: Some(overrides::mmr_custom_forecast_hook),
         custom_switch_hook: None,
         custom_evaluation_hook: Some(overrides::mmr_custom_evaluation_hook),
-        custom_dose_number_hook: None,
+        custom_dose_number_hook: Some(overrides::mmr_custom_dose_number_hook),
         custom_extra_dose_hook: None,
+        custom_completion_hook: Some(overrides::mmr_custom_completion_hook),
         group_selection: None,
     }
 }

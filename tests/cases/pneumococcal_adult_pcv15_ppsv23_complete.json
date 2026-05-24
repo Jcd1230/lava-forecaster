@@ -1,0 +1,51 @@
+{
+  "name": "pneumococcal_adult_pcv15_ppsv23_complete",
+  "group": "PNEUMOCOCCAL",
+  "focus_code": "750",
+  "patient": {
+    "birth_date": "1970-01-01",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2021-01-15",
+      "cvx": "215"
+    },
+    {
+      "date": "2022-01-15",
+      "cvx": "33"
+    }
+  ],
+  "execution_date": "2022-02-01",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2021-01-15",
+        "cvx": "215",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2022-01-15",
+        "cvx": "33",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "PNEUMOCOCCAL",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "cdsi_2013_0508_age_22_no_doses_no_forecast",
+  "group": "MCV",
+  "focus_code": "830",
+  "patient": {
+    "birth_date": "2003-11-10",
+    "gender": "Female"
+  },
+  "history": [],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "MCV",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "ConditionallyRecommended",
+        "reasons": [
+          "HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

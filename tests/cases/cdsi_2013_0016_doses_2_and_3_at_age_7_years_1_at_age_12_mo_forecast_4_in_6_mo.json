@@ -1,0 +1,64 @@
+{
+  "name": "cdsi_2013_0016_doses_2_and_3_at_age_7_years_1_at_age_12_mo_forecast_4_in_6_mo",
+  "group": "DTP",
+  "focus_code": "200",
+  "patient": {
+    "birth_date": "2018-10-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2019-06-10",
+      "cvx": "107"
+    },
+    {
+      "date": "2025-10-10",
+      "cvx": "09"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "115"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2019-06-10",
+        "cvx": "107",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-10-10",
+        "cvx": "09",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "115",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "DTP",
+        "earliest_date": "2026-05-10",
+        "recommended_date": "2026-05-10",
+        "overdue_date": "2026-05-10",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE",
+          "ADMINISTER_TDAP_OR_TD",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

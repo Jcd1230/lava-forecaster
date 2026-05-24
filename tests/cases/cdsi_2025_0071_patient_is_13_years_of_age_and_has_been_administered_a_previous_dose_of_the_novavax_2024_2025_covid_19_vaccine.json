@@ -1,0 +1,41 @@
+{
+  "name": "cdsi_2025_0071_patient_is_13_years_of_age_and_has_been_administered_a_previous_dose_of_the_novavax_2024_2025_covid_19_vaccine",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "2012-08-04",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2024-09-09",
+      "cvx": "313"
+    }
+  ],
+  "execution_date": "2025-10-01",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2024-09-09",
+        "cvx": "313",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": "2025-08-27",
+        "recommended_date": "2025-08-27",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "ConditionallyRecommended",
+        "reasons": [
+          "HIGH_RISK",
+          "CLINICAL_PATIENT_DISCRETION"
+        ]
+      }
+    ]
+  }
+}

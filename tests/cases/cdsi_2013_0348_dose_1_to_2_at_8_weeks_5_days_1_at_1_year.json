@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2013_0348_dose_1_to_2_at_8_weeks_5_days_1_at_1_year",
+  "group": "HIB",
+  "focus_code": "300",
+  "patient": {
+    "birth_date": "2024-09-20",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-09-20",
+      "cvx": "48"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "49"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-09-20",
+        "cvx": "48",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "49",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HIB",
+        "earliest_date": "2026-01-05",
+        "recommended_date": "2026-01-05",
+        "overdue_date": "2026-02-16",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

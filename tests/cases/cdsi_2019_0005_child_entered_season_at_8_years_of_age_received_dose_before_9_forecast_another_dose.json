@@ -1,0 +1,40 @@
+{
+  "name": "cdsi_2019_0005_child_entered_season_at_8_years_of_age_received_dose_before_9_forecast_another_dose",
+  "group": "INFLUENZA",
+  "focus_code": "800",
+  "patient": {
+    "birth_date": "2016-09-01",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2025-08-31",
+      "cvx": "88"
+    }
+  ],
+  "execution_date": "2025-09-01",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-08-31",
+        "cvx": "88",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "INFLUENZA",
+        "earliest_date": "2025-09-28",
+        "recommended_date": "2025-09-28",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

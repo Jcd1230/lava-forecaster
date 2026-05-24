@@ -1,6 +1,7 @@
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast};
+use crate::rules::helpers::{clamp_date_at_least, interval_days_between};
 
 /// CVX codes for old live zoster vaccines (Zostavax and variants).
 /// These are not valid doses for the recombinant series but are tracked as Accepted.
@@ -40,7 +41,7 @@ pub fn zoster_custom_evaluation_hook(
         if is_shingrix(&dose.cvx) {
             for prior in ctx.history {
                 if is_old_zoster(&prior.cvx) && prior.date <= dose.date {
-                    let gap = (dose.date - prior.date).num_days();
+                    let gap = interval_days_between(prior.date, dose.date);
                     if gap < 52 {
                         *status = DoseStatus::Invalid;
                         if !reasons.contains(&EvaluationReason::BelowMinimumInterval) {
@@ -70,21 +71,8 @@ pub fn zoster_custom_forecast_hook(
     // Age 50 clamp: The entire Zoster series is recommended starting at age 50.
     let age_50 = crate::date_utils::add_years(patient.birth_date, 50);
 
-    if let Some(ref mut earliest) = forecast.earliest_date {
-        if *earliest < age_50 {
-            *earliest = age_50;
-        }
-    } else {
-        forecast.earliest_date = Some(age_50);
-    }
-
-    if let Some(ref mut recommended) = forecast.recommended_date {
-        if *recommended < age_50 {
-            *recommended = age_50;
-        }
-    } else {
-        forecast.recommended_date = Some(age_50);
-    }
+    clamp_date_at_least(&mut forecast.earliest_date, age_50);
+    clamp_date_at_least(&mut forecast.recommended_date, age_50);
 
     // Live-virus spacing rule:
     // If the last CVX 121/188 (old zoster) was administered, forecast dates must be at least
@@ -110,21 +98,8 @@ pub fn zoster_custom_forecast_hook(
     if let Some(last_date) = live_virus_date {
         let spacing_date = last_date + chrono::Duration::days(56); // 8 weeks
 
-        if let Some(ref mut earliest) = forecast.earliest_date {
-            if *earliest < spacing_date {
-                *earliest = spacing_date;
-            }
-        } else {
-            forecast.earliest_date = Some(spacing_date);
-        }
-
-        if let Some(ref mut recommended) = forecast.recommended_date {
-            if *recommended < spacing_date {
-                *recommended = spacing_date;
-            }
-        } else {
-            forecast.recommended_date = Some(spacing_date);
-        }
+        clamp_date_at_least(&mut forecast.earliest_date, spacing_date);
+        clamp_date_at_least(&mut forecast.recommended_date, spacing_date);
     }
 
     // If a recombinant zoster dose was attempted too soon after live zoster, the failed
@@ -136,7 +111,7 @@ pub fn zoster_custom_forecast_hook(
             history.iter().any(|prior| {
                 is_old_zoster(&prior.cvx)
                     && prior.date <= dose.date
-                    && (dose.date - prior.date).num_days() < 52
+                    && interval_days_between(prior.date, dose.date) < 52
             })
         })
         .map(|dose| dose.date)
@@ -146,21 +121,8 @@ pub fn zoster_custom_forecast_hook(
         let earliest_date = last_invalid_date + chrono::Duration::days(28);
         let recommended_date = last_invalid_date + chrono::Duration::days(56);
 
-        if let Some(ref mut earliest) = forecast.earliest_date {
-            if *earliest < earliest_date {
-                *earliest = earliest_date;
-            }
-        } else {
-            forecast.earliest_date = Some(earliest_date);
-        }
-
-        if let Some(ref mut recommended) = forecast.recommended_date {
-            if *recommended < recommended_date {
-                *recommended = recommended_date;
-            }
-        } else {
-            forecast.recommended_date = Some(recommended_date);
-        }
+        clamp_date_at_least(&mut forecast.earliest_date, earliest_date);
+        clamp_date_at_least(&mut forecast.recommended_date, recommended_date);
     }
 
     // Ensure recommended >= earliest after all adjustments

@@ -1,0 +1,40 @@
+{
+  "name": "hpv_male_cervarix_exception",
+  "group": "HPV",
+  "focus_code": "840",
+  "patient": {
+    "birth_date": "2000-01-01",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2021-01-01",
+      "cvx": "118"
+    }
+  ],
+  "execution_date": "2021-01-31",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2021-01-01",
+        "cvx": "118",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HPV",
+        "earliest_date": "2021-01-01",
+        "recommended_date": "2021-01-01",
+        "overdue_date": "2021-01-01",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

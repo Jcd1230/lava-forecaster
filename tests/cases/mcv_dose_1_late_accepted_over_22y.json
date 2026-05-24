@@ -1,0 +1,40 @@
+{
+  "name": "mcv_dose_1_late_accepted_over_22y",
+  "group": "MCV",
+  "focus_code": "830",
+  "patient": {
+    "birth_date": "2000-01-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2023-01-01",
+      "cvx": "114"
+    }
+  ],
+  "execution_date": "2025-01-01",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2023-01-01",
+        "cvx": "114",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MCV",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "ConditionallyRecommended",
+        "reasons": [
+          "HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

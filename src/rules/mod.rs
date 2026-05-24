@@ -1,3 +1,4 @@
+pub mod helpers;
 pub mod cholera;
 pub mod dtp;
 pub mod hep_b;
@@ -24,7 +25,7 @@ pub mod covid19;
 use crate::engine::{
     ConditionalCompletionRule, CustomDoseNumberHook, CustomEvaluationHook, CustomExtraDoseHook,
     CustomForecastHook, CustomSwitchHook, GroupSelectionAndPostProcess, ParameterOverrideRule,
-    RecommendationOverrideRule,
+    RecommendationOverrideRule, CustomCompletionHook,
 };
 use crate::schedule::CompiledSeries;
 use std::collections::HashMap;
@@ -41,6 +42,7 @@ pub struct VaccineGroupDefinition {
     pub custom_evaluation_hook: Option<CustomEvaluationHook>,
     pub custom_dose_number_hook: Option<CustomDoseNumberHook>,
     pub custom_extra_dose_hook: Option<CustomExtraDoseHook>,
+    pub custom_completion_hook: Option<CustomCompletionHook>,
     pub group_selection: Option<GroupSelectionAndPostProcess>,
 }
 

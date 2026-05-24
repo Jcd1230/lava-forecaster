@@ -1,0 +1,73 @@
+{
+  "name": "cdsi_2013_0655_dose_3_to_dose_4_interval_6_m_5_days",
+  "group": "POLIO",
+  "focus_code": "400",
+  "patient": {
+    "birth_date": "2021-10-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2022-10-10",
+      "cvx": "10"
+    },
+    {
+      "date": "2023-10-10",
+      "cvx": "10"
+    },
+    {
+      "date": "2025-05-10",
+      "cvx": "10"
+    },
+    {
+      "date": "2025-11-05",
+      "cvx": "10"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2022-10-10",
+        "cvx": "10",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2023-10-10",
+        "cvx": "10",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-05-10",
+        "cvx": "10",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2025-11-05",
+        "cvx": "10",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 4
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "POLIO",
+        "earliest_date": "2026-05-05",
+        "recommended_date": "2026-05-05",
+        "overdue_date": "2028-11-06",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

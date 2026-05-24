@@ -1,0 +1,62 @@
+{
+  "name": "cdsi_2024_0028_male_age_34_years_with_third_dose_of_hpv_administered_at_an_interval_of_5_months_5_days_from_dose_1",
+  "group": "HPV",
+  "focus_code": "840",
+  "patient": {
+    "birth_date": "1991-05-10",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2025-06-10",
+      "cvx": "165"
+    },
+    {
+      "date": "2025-07-08",
+      "cvx": "165"
+    },
+    {
+      "date": "2025-11-05",
+      "cvx": "165"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-06-10",
+        "cvx": "165",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-07-08",
+        "cvx": "165",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-11-05",
+        "cvx": "165",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HPV",
+        "earliest_date": "2026-01-28",
+        "recommended_date": "2026-03-05",
+        "overdue_date": "2026-03-05",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

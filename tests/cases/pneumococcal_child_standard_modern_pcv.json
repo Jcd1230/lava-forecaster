@@ -1,0 +1,73 @@
+{
+  "name": "pneumococcal_child_standard_modern_pcv",
+  "group": "PNEUMOCOCCAL",
+  "focus_code": "750",
+  "patient": {
+    "birth_date": "2020-01-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2020-03-01",
+      "cvx": "133"
+    },
+    {
+      "date": "2020-05-01",
+      "cvx": "133"
+    },
+    {
+      "date": "2020-07-01",
+      "cvx": "133"
+    },
+    {
+      "date": "2021-04-01",
+      "cvx": "215"
+    }
+  ],
+  "execution_date": "2021-07-01",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2020-03-01",
+        "cvx": "133",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2020-05-01",
+        "cvx": "133",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2020-07-01",
+        "cvx": "133",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2021-04-01",
+        "cvx": "215",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 4
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "PNEUMOCOCCAL",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

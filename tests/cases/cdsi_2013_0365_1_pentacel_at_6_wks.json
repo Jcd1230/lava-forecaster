@@ -1,0 +1,40 @@
+{
+  "name": "cdsi_2013_0365_1_pentacel_at_6_wks",
+  "group": "HIB",
+  "focus_code": "300",
+  "patient": {
+    "birth_date": "2025-09-29",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-11-10",
+      "cvx": "120"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "120",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HIB",
+        "earliest_date": "2025-12-08",
+        "recommended_date": "2026-01-29",
+        "overdue_date": "2026-03-28",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

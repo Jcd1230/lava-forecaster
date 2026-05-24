@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2013_0194_dose_2_at_18_months_series_complete",
+  "group": "HEP_A",
+  "focus_code": "810",
+  "patient": {
+    "birth_date": "2024-05-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-05-10",
+      "cvx": "85"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "85"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-05-10",
+        "cvx": "85",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "85",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HEP_A",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

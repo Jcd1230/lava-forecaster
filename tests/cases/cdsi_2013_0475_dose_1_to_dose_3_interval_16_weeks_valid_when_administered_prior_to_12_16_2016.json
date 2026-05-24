@@ -1,0 +1,62 @@
+{
+  "name": "cdsi_2013_0475_dose_1_to_dose_3_interval_16_weeks_valid_when_administered_prior_to_12_16_2016",
+  "group": "HPV",
+  "focus_code": "840",
+  "patient": {
+    "birth_date": "1996-03-21",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2008-04-18",
+      "cvx": "137"
+    },
+    {
+      "date": "2008-05-16",
+      "cvx": "137"
+    },
+    {
+      "date": "2008-08-08",
+      "cvx": "137"
+    }
+  ],
+  "execution_date": "2008-08-08",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2008-04-18",
+        "cvx": "137",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2008-05-16",
+        "cvx": "137",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2008-08-08",
+        "cvx": "137",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HPV",
+        "earliest_date": "2008-10-31",
+        "recommended_date": "2008-12-08",
+        "overdue_date": "2009-06-14",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

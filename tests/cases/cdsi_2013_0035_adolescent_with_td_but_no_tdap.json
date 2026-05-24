@@ -1,0 +1,95 @@
+{
+  "name": "cdsi_2013_0035_adolescent_with_td_but_no_tdap",
+  "group": "DTP",
+  "focus_code": "200",
+  "patient": {
+    "birth_date": "2013-03-02",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2013-05-02",
+      "cvx": "107"
+    },
+    {
+      "date": "2013-07-02",
+      "cvx": "107"
+    },
+    {
+      "date": "2013-09-02",
+      "cvx": "107"
+    },
+    {
+      "date": "2014-06-05",
+      "cvx": "107"
+    },
+    {
+      "date": "2018-05-30",
+      "cvx": "107"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "09"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2013-05-02",
+        "cvx": "107",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2013-07-02",
+        "cvx": "107",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2013-09-02",
+        "cvx": "107",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2014-06-05",
+        "cvx": "107",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 4
+      },
+      {
+        "dose_date": "2018-05-30",
+        "cvx": "107",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 5
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "09",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 6
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "DTP",
+        "earliest_date": "2025-11-10",
+        "recommended_date": "2025-11-10",
+        "overdue_date": "2026-03-29",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

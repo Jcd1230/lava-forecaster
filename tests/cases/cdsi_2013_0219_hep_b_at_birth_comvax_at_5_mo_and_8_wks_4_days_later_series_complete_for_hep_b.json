@@ -1,0 +1,62 @@
+{
+  "name": "cdsi_2013_0219_hep_b_at_birth_comvax_at_5_mo_and_8_wks_4_days_later_series_complete_for_hep_b",
+  "group": "HEP_B",
+  "focus_code": "100",
+  "patient": {
+    "birth_date": "2006-05-05",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2006-05-05",
+      "cvx": "08"
+    },
+    {
+      "date": "2006-10-05",
+      "cvx": "51"
+    },
+    {
+      "date": "2006-11-26",
+      "cvx": "51"
+    }
+  ],
+  "execution_date": "2006-11-26",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2006-05-05",
+        "cvx": "08",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2006-10-05",
+        "cvx": "51",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2006-11-26",
+        "cvx": "51",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HEP_B",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

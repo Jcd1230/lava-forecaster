@@ -1,0 +1,27 @@
+{
+  "name": "cdsi_2019_0007_male_age_26_no_hpv_doses",
+  "group": "HPV",
+  "focus_code": "840",
+  "patient": {
+    "birth_date": "1999-11-10",
+    "gender": "Male"
+  },
+  "history": [],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "HPV",
+        "earliest_date": "2008-11-10",
+        "recommended_date": "2010-11-10",
+        "overdue_date": "2014-11-09",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

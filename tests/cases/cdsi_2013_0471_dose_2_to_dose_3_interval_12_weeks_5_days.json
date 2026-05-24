@@ -1,0 +1,62 @@
+{
+  "name": "cdsi_2013_0471_dose_2_to_dose_3_interval_12_weeks_5_days",
+  "group": "HPV",
+  "focus_code": "840",
+  "patient": {
+    "birth_date": "2015-06-23",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-06-23",
+      "cvx": "165"
+    },
+    {
+      "date": "2025-08-23",
+      "cvx": "165"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "165"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-06-23",
+        "cvx": "165",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-08-23",
+        "cvx": "165",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "165",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HPV",
+        "earliest_date": "2026-02-02",
+        "recommended_date": "2026-03-10",
+        "overdue_date": "2026-08-19",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

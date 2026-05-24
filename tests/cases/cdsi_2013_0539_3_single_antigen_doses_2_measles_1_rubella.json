@@ -1,0 +1,62 @@
+{
+  "name": "cdsi_2013_0539_3_single_antigen_doses_2_measles_1_rubella",
+  "group": "MMR",
+  "focus_code": "500",
+  "patient": {
+    "birth_date": "2023-11-29",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-01-06",
+      "cvx": "05"
+    },
+    {
+      "date": "2025-06-23",
+      "cvx": "06"
+    },
+    {
+      "date": "2025-11-10",
+      "cvx": "05"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-01-06",
+        "cvx": "05",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-06-23",
+        "cvx": "06",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "05",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MMR",
+        "earliest_date": "2025-12-08",
+        "recommended_date": "2025-12-08",
+        "overdue_date": "2025-12-08",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

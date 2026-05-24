@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2024_0071_opv_bivalent_administered_after_april_2016",
+  "group": "POLIO",
+  "focus_code": "400",
+  "patient": {
+    "birth_date": "2015-09-13",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2016-02-06",
+      "cvx": "02"
+    },
+    {
+      "date": "2016-05-06",
+      "cvx": "178"
+    }
+  ],
+  "execution_date": "2016-05-06",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2016-02-06",
+        "cvx": "02",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2016-05-06",
+        "cvx": "178",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "POLIO",
+        "earliest_date": "2016-05-06",
+        "recommended_date": "2016-05-06",
+        "overdue_date": "2016-05-06",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

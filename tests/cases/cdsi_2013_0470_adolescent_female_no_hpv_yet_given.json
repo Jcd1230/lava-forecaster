@@ -1,0 +1,27 @@
+{
+  "name": "cdsi_2013_0470_adolescent_female_no_hpv_yet_given",
+  "group": "HPV",
+  "focus_code": "840",
+  "patient": {
+    "birth_date": "2017-06-03",
+    "gender": "Female"
+  },
+  "history": [],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "HPV",
+        "earliest_date": "2026-06-03",
+        "recommended_date": "2028-06-03",
+        "overdue_date": "2030-06-30",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

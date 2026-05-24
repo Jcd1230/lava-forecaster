@@ -1,0 +1,51 @@
+{
+  "name": "rotavirus_duplicate_after_2000",
+  "group": "ROTAVIRUS",
+  "focus_code": "820",
+  "patient": {
+    "birth_date": "2010-01-01",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2010-03-01",
+      "cvx": "119"
+    },
+    {
+      "date": "2010-03-01",
+      "cvx": "74"
+    }
+  ],
+  "execution_date": "2010-07-01",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2010-03-01",
+        "cvx": "119",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2010-03-01",
+        "cvx": "74",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "ROTAVIRUS",
+        "earliest_date": "2010-03-29",
+        "recommended_date": "2010-05-01",
+        "overdue_date": "2010-06-28",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

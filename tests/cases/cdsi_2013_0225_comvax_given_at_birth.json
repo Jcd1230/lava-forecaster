@@ -1,0 +1,40 @@
+{
+  "name": "cdsi_2013_0225_comvax_given_at_birth",
+  "group": "HEP_B",
+  "focus_code": "100",
+  "patient": {
+    "birth_date": "2006-10-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2006-10-10",
+      "cvx": "51"
+    }
+  ],
+  "execution_date": "2006-10-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2006-10-10",
+        "cvx": "51",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HEP_B",
+        "earliest_date": "2006-11-07",
+        "recommended_date": "2006-11-10",
+        "overdue_date": "2007-02-06",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

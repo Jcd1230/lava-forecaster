@@ -1,0 +1,62 @@
+{
+  "name": "cdsi_2013_0021_1_tdap_2_td_to_child_7_years_old_with_6_mo_4_day_interval_between_doses_2_and_3",
+  "group": "DTP",
+  "focus_code": "200",
+  "patient": {
+    "birth_date": "2018-03-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-03-10",
+      "cvx": "09"
+    },
+    {
+      "date": "2025-05-10",
+      "cvx": "115"
+    },
+    {
+      "date": "2025-11-06",
+      "cvx": "09"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-03-10",
+        "cvx": "09",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-05-10",
+        "cvx": "115",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-11-06",
+        "cvx": "09",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "DTP",
+        "earliest_date": "2029-03-10",
+        "recommended_date": "2029-03-10",
+        "overdue_date": "2031-04-06",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

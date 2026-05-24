@@ -1,0 +1,51 @@
+{
+  "name": "cdsi_2025_0127_patient_is_7_months_of_age_and_has_been_administered_two_doses_of_a_2025_2026_covid_19_vaccine",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "2025-04-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-10-10",
+      "cvx": "311"
+    },
+    {
+      "date": "2025-11-07",
+      "cvx": "311"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-10-10",
+        "cvx": "311",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-11-07",
+        "cvx": "311",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

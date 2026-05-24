@@ -1,0 +1,41 @@
+{
+  "name": "cdsi_2024_0102_patient_is_47_years_of_age_and_was_administered_a_previous_dose_of_ppsv23",
+  "group": "PNEUMOCOCCAL",
+  "focus_code": "750",
+  "patient": {
+    "birth_date": "1978-03-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-03-10",
+      "cvx": "33"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-03-10",
+        "cvx": "33",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "PNEUMOCOCCAL",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "ConditionallyRecommended",
+        "reasons": [
+          "HIGH_RISK",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

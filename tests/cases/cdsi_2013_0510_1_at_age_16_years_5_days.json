@@ -1,0 +1,40 @@
+{
+  "name": "cdsi_2013_0510_1_at_age_16_years_5_days",
+  "group": "MCV",
+  "focus_code": "830",
+  "patient": {
+    "birth_date": "2009-11-15",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2025-11-10",
+      "cvx": "147"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-11-10",
+        "cvx": "147",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MCV",
+        "earliest_date": "2026-01-05",
+        "recommended_date": "2026-01-05",
+        "overdue_date": "2026-12-12",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

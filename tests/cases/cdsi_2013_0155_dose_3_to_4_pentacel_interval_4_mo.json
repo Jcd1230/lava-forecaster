@@ -1,0 +1,73 @@
+{
+  "name": "cdsi_2013_0155_dose_3_to_4_pentacel_interval_4_mo",
+  "group": "DTP",
+  "focus_code": "200",
+  "patient": {
+    "birth_date": "2024-10-07",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2024-12-07",
+      "cvx": "120"
+    },
+    {
+      "date": "2025-04-07",
+      "cvx": "120"
+    },
+    {
+      "date": "2025-07-07",
+      "cvx": "120"
+    },
+    {
+      "date": "2025-11-07",
+      "cvx": "120"
+    }
+  ],
+  "execution_date": "2025-11-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2024-12-07",
+        "cvx": "120",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-04-07",
+        "cvx": "120",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-07-07",
+        "cvx": "120",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2025-11-07",
+        "cvx": "120",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 4
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "DTP",
+        "earliest_date": "2028-10-07",
+        "recommended_date": "2028-10-07",
+        "overdue_date": "2031-10-06",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "name": "cdsi_2013_0619_4_doses_of_pcv_7_and_1_dose_of_pcv_13_series_complete",
+  "group": "PNEUMOCOCCAL",
+  "focus_code": "750",
+  "patient": {
+    "birth_date": "2008-06-06",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2008-08-06",
+      "cvx": "100"
+    },
+    {
+      "date": "2008-10-06",
+      "cvx": "100"
+    },
+    {
+      "date": "2008-12-06",
+      "cvx": "100"
+    },
+    {
+      "date": "2009-12-06",
+      "cvx": "100"
+    },
+    {
+      "date": "2012-03-05",
+      "cvx": "133"
+    }
+  ],
+  "execution_date": "2012-03-05",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2008-08-06",
+        "cvx": "100",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2008-10-06",
+        "cvx": "100",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2008-12-06",
+        "cvx": "100",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2009-12-06",
+        "cvx": "100",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 4
+      },
+      {
+        "dose_date": "2012-03-05",
+        "cvx": "133",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 5
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "PNEUMOCOCCAL",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

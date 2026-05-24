@@ -18,6 +18,7 @@ pub fn definition() -> VaccineGroupDefinition {
         custom_evaluation_hook: Some(overrides::polio_custom_evaluation_hook),
         custom_dose_number_hook: None,
         custom_extra_dose_hook: Some(overrides::polio_custom_extra_dose_hook),
+        custom_completion_hook: None,
         group_selection: Some(overrides::polio_group_selection),
     }
 }
