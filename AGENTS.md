@@ -53,6 +53,8 @@ When reducing Java-vs-Rust discrepancies for an existing group, use this loop:
 5. After the group passes, re-run the full CDSi compare into a new log under `curl-rest-tests/tmp/`.
 6. Diff per-group failure counts between the previous and new full-compare logs to check for regressions outside the target group.
 
+For detailed mismatch-routing guidance, use [parity_workflow_notes.md](file:///home/jason/projects/ice/parity_workflow_notes.md). For the fuller source-of-truth map and implementation touchpoints, use [agent_onboarding_guide.md](file:///home/jason/projects/ice/agent_onboarding_guide.md).
+
 ## At-a-Glance Compare Triage
 
 - List failing groups from a saved full compare:
@@ -72,8 +74,10 @@ When reducing Java-vs-Rust discrepancies for an existing group, use this loop:
 - Adult recommendation statuses may only apply when **no relevant dose history exists**. Once a series has started, Java often keeps the forecast `NotComplete` instead of switching to `ConditionallyRecommended`.
 - If Java marks a shot as effectively ignored for completion, Rust often needs `Accepted` plus `OutsideRoutineSeries` to avoid falsely completing the series.
 - When a failing case is ambiguous, run the Rust forecaster directly on a hand-built request JSON and inspect `selected_series`, evaluations, and forecasts before patching.
+- For existing parity buckets, prefer raw `python3 curl-rest-tests/run_tests.py --compare ...` commands so compare logging stays explicit. Use `mise run test-record` / `mise run test-compare` when you intentionally want snapshot recording behavior.
 
 ## Version Control (Jujutsu / jj-vcs)
 
 - **Primary VCS**: This project primarily uses Jujutsu (`jj`) for version control.
 - **Commit Guideline**: Developers and agents must run `jj commit -m "..."` after completing meaningful units of work to save progress and maintain a clean repository history.
+- **Task Scope**: Keep parity work to one vaccine bucket per revision when practical, validate the target-group compare and a fresh full compare, then commit.

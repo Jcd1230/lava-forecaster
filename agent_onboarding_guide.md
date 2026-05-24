@@ -304,6 +304,58 @@ When working an already-ported group that still differs from Java, use a tighter
 5. After the group passes, run a new full-CDSi compare into a second saved log.
 6. Compare per-group failure counts between the old and new logs to confirm that only the target bucket moved.
 
+### Source-of-Truth Map for Existing Buckets
+
+For parity fixes on already-ported groups, use this reading order before changing code:
+
+1. Saved full compare log under `curl-rest-tests/tmp/` to identify the current bucket and representative failure shapes.
+2. Targeted group compare output to confirm the current mismatch set.
+3. Raw case inputs in `curl-rest-tests/cases/<group>.json`.
+4. Expected Java snapshots in `curl-rest-tests/cases/<group>.expected.json`.
+5. Java `Evaluation^<Group>.dslr` for dose validity and reason mismatches.
+6. Java `Recommendation^<Group>.dslr` for forecast date and forecast status mismatches.
+7. Java `SeriesSelection.drl` if the selected series or effective dose numbering looks wrong.
+8. Supporting-data YAML under `ice-supporting-data/Series/`.
+9. Rust `overrides.rs`, then `mod.rs`, then `schedules.rs`.
+
+The raw case JSON wins over the case label if the wording and dates disagree.
+
+### Mismatch-to-Code Routing
+
+- Dose evaluation mismatch:
+    - Read Java evaluation rules first.
+    - Then inspect Rust `custom_evaluation_hook` and any dose-number logic.
+- Forecast date or forecast status mismatch:
+    - Read Java recommendation rules first.
+    - Then inspect Rust `custom_forecast_hook`.
+- Wrong selected series or wrong dose numbering:
+    - Read Java series-selection rules and supporting-data YAML.
+    - Then inspect Rust `group_selection`, `custom_switch_hook`, and `custom_dose_number_hook`.
+- Same-day duplicate issues:
+    - Check engine same-day priority handling before editing the vaccine-group module.
+
+For already-ported groups, check selection and overrides before changing `schedules.rs`. Many parity defects come from post-processing semantics rather than schedule-table definitions.
+
+### Command Choice: Raw Runner vs `mise`
+
+- Prefer raw `python3 curl-rest-tests/run_tests.py --compare ...` commands while debugging an existing parity bucket so saved logs and runner behavior stay explicit.
+- Use `mise run test-record` or `mise run test-compare` when you intentionally want recording behavior.
+- Use `mise run scaffold` and `mise run bootstrap-group-tests` when starting a genuinely new group.
+
+### Direct Rust Inspection for Ambiguous Cases
+
+If compare output still does not make the failure mode obvious, run the Rust binary directly on a one-off request file.
+
+1. Save a simplified or legacy-format request JSON in the workspace.
+2. From the Rust crate directory, run:
+    ```bash
+    cargo run -- /path/to/request.json
+    ```
+3. Read stderr for the parsed patient/history debug output.
+4. Read stdout for the full forecast response JSON.
+
+This is the fastest way to inspect selected vaccine-group output, evaluations, and forecast dates without involving the Java compare harness.
+
 ### Quick Compare-Log Commands
 
 - Check whether a bucket is still present in a full compare log:
