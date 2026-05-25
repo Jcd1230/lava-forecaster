@@ -119,13 +119,13 @@ pub fn influenza_custom_evaluation_hook(
 
     // 4. CVX 161 Age Limit and Suppression
     if dose.cvx.0 == cvx!("161") {
-        let tp_3y = crate::date_utils::TimePeriod::parse("3y-1d").unwrap();
+        let tp_3y = crate::time_period!("3y-1d");
         let limit = tp_3y.add_to(ctx.patient.birth_date);
         if dose.date > limit {
             *status = DoseStatus::Invalid;
             reasons.retain(|r| *r != EvaluationReason::VaccineNotPartOfSeries);
             
-            let tp_9y = crate::date_utils::TimePeriod::parse("9y").unwrap();
+            let tp_9y = crate::time_period!("9y");
             let age_9y_date = tp_9y.add_to(ctx.patient.birth_date);
             let is_patient_ge_9y = ctx.eval_date >= age_9y_date || dose.date >= age_9y_date;
 
@@ -180,7 +180,7 @@ pub fn influenza_custom_forecast_hook(
         if rec_date > active_season.end {
             let last_dose = history.iter().max_by_key(|d| d.date);
             if let Some(last) = last_dose {
-                let tp_6m_4d = crate::date_utils::TimePeriod::parse("6m-4d").unwrap();
+                let tp_6m_4d = crate::time_period!("6m-4d");
                 let age_6m_4d = tp_6m_4d.add_to(patient.birth_date);
                 if last.date >= age_6m_4d {
                     forecast.recommended_date = Some(last.date + chrono::Duration::days(28));
@@ -196,7 +196,7 @@ fn count_valid_prior_doses(history: &[Dose], patient: &Patient, active_season_st
         .filter(|d| d.date < active_season_start)
         .filter(|d| !disallowed_cvx.contains(&d.cvx.0))
         .filter(|d| {
-            let tp_6m_4d = crate::date_utils::TimePeriod::parse("6m-4d").unwrap();
+            let tp_6m_4d = crate::time_period!("6m-4d");
             let abs_min_date = tp_6m_4d.add_to(patient.birth_date);
             d.date >= abs_min_date
         })
@@ -252,7 +252,7 @@ fn get_latest_valid_prior_dose_date(history: &[Dose], patient: &Patient, active_
         .filter(|d| d.date < active_season_start)
         .filter(|d| !disallowed_cvx.contains(&d.cvx.0))
         .filter(|d| {
-            let tp_6m_4d = crate::date_utils::TimePeriod::parse("6m-4d").unwrap();
+            let tp_6m_4d = crate::time_period!("6m-4d");
             let abs_min_date = tp_6m_4d.add_to(patient.birth_date);
             d.date >= abs_min_date
         })
@@ -267,7 +267,7 @@ fn count_valid_prior_doses_before_2010(history: &[Dose], patient: &Patient) -> u
         .filter(|d| d.date < cutoff)
         .filter(|d| !disallowed_cvx.contains(&d.cvx.0))
         .filter(|d| {
-            let tp_6m_4d = crate::date_utils::TimePeriod::parse("6m-4d").unwrap();
+            let tp_6m_4d = crate::time_period!("6m-4d");
             let abs_min_date = tp_6m_4d.add_to(patient.birth_date);
             d.date >= abs_min_date
         })
@@ -320,7 +320,7 @@ fn evaluate_history_seasonally(patient: &Patient, history: &[Dose]) -> Vec<DoseE
                 reasons.push(EvaluationReason::DuplicateShotSameDay);
             } else {
                 // 2. Age limit check (minimum age 6m - 4d)
-                let tp_6m_4d = crate::date_utils::TimePeriod::parse("6m-4d").unwrap();
+                let tp_6m_4d = crate::time_period!("6m-4d");
                 let abs_min_age_date = tp_6m_4d.add_to(patient.birth_date);
                 if dose.date < abs_min_age_date {
                     status = DoseStatus::Invalid;
@@ -342,11 +342,11 @@ fn evaluate_history_seasonally(patient: &Patient, history: &[Dose]) -> Vec<DoseE
 
                 // 5. CVX 161 pediatric restriction check
                 if dose.cvx.0 == cvx!("161") {
-                    let tp_3y = crate::date_utils::TimePeriod::parse("3y-1d").unwrap();
+                    let tp_3y = crate::time_period!("3y-1d");
                     let limit = tp_3y.add_to(patient.birth_date);
                     if dose.date > limit {
                         status = DoseStatus::Invalid;
-                        let tp_9y = crate::date_utils::TimePeriod::parse("9y").unwrap();
+                        let tp_9y = crate::time_period!("9y");
                         let age_9y_date = tp_9y.add_to(patient.birth_date);
                         let is_patient_ge_9y = dose.date >= age_9y_date;
                         if !is_patient_ge_9y {
@@ -404,11 +404,11 @@ pub fn influenza_group_selection(
     let active_season_name = get_active_season_name(eval_date);
     let is_default_season = active_season_name == "DEFAULT_INFLUENZA_SEASON";
     
-    let tp_9y = crate::date_utils::TimePeriod::parse("9y").unwrap();
+    let tp_9y = crate::time_period!("9y");
     let age_9y = tp_9y.add_to(patient.birth_date);
     let is_under_9y = eval_date < age_9y;
 
-    let tp_10y = crate::date_utils::TimePeriod::parse("10y").unwrap();
+    let tp_10y = crate::time_period!("10y");
     let age_10y = tp_10y.add_to(patient.birth_date);
     let is_under_10y = eval_date < age_10y;
     

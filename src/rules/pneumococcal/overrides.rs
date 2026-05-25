@@ -129,7 +129,7 @@ pub fn pneumococcal_custom_evaluation_hook(
             let has_no_modern_pcv = !has_valid_modern_pcv(ctx.valid_doses, ctx.history);
             if has_no_modern_pcv && MODERN_PCV_CVX.contains(&dose.cvx.0) {
                 if let Some((prev_date, _)) = ctx.valid_doses.last() {
-                    if compare_elapsed(*prev_date, dose.date, &TimePeriod::parse("52d").unwrap())
+                    if compare_elapsed(*prev_date, dose.date, &crate::time_period!("52d"))
                         == std::cmp::Ordering::Less
                     {
                         *status = DoseStatus::Invalid;
@@ -170,7 +170,7 @@ pub fn pneumococcal_custom_evaluation_hook(
                 .max();
 
             if let Some(last_retry_attempt) = last_retry_attempt {
-                if compare_elapsed(last_retry_attempt, dose.date, &TimePeriod::parse("52d").unwrap())
+                if compare_elapsed(last_retry_attempt, dose.date, &crate::time_period!("52d"))
                     == std::cmp::Ordering::Less
                 {
                     *status = DoseStatus::Invalid;
@@ -334,9 +334,9 @@ pub fn pneumococcal_custom_forecast_hook(
             == Some(cvx!("33"))
         && age_lt(birth, eval_date, "2y")
     {
-        let earliest = TimePeriod::parse("42d").unwrap().add_to(birth);
-        let recommended = TimePeriod::parse("2m").unwrap().add_to(birth).max(earliest);
-        let overdue = TimePeriod::parse("3m+4w").unwrap().add_to(birth).pred_opt();
+        let earliest = crate::time_period!("42d").add_to(birth);
+        let recommended = crate::time_period!("2m").add_to(birth).max(earliest);
+        let overdue = crate::time_period!("3m+4w").add_to(birth).pred_opt();
         forecast.earliest_date = Some(earliest);
         forecast.recommended_date = Some(recommended);
         forecast.overdue_date = overdue;
@@ -385,7 +385,7 @@ pub fn pneumococcal_custom_forecast_hook(
         && history.last().is_some_and(|dose| {
             is_pneumo_cvx(dose.cvx)
                 && (age_ge(birth, dose.date, "24m") || child_complete)
-                && age_lt(birth, TimePeriod::parse("8w").unwrap().add_to(dose.date), "5y")
+                && age_lt(birth, crate::time_period!("8w").add_to(dose.date), "5y")
         })
     {
         forecast.earliest_date = None;
@@ -399,7 +399,7 @@ pub fn pneumococcal_custom_forecast_hook(
     if valid_doses.iter().map(|(_, n)| *n).max().unwrap_or(1) >= 6 {
         if let Some(last) = last_ppsv_or_unspecified {
             if has_adult_pcv13 || has_adult_pcv15 || has_adult_modern_pcv {
-                let date = TimePeriod::parse("5y").unwrap().add_to(last);
+                let date = crate::time_period!("5y").add_to(last);
                 if matches!(forecast.recommended_date, Some(current) if date > current) {
                     forecast.recommended_date = Some(date);
                 }
@@ -413,7 +413,7 @@ pub fn pneumococcal_custom_forecast_hook(
             .map(|d| d.date)
             .max()
         {
-            let date = TimePeriod::parse("1y").unwrap().add_to(last_pcv);
+            let date = crate::time_period!("1y").add_to(last_pcv);
             if matches!(forecast.recommended_date, Some(current) if date > current) {
                 forecast.recommended_date = Some(date);
             }
@@ -425,7 +425,7 @@ pub fn pneumococcal_custom_forecast_hook(
 
     if forecast.recommended_date.is_none() {
         let ref_date = if age_ge(birth, eval_date, "5y") {
-            TimePeriod::parse("50y").unwrap().add_to(birth)
+            crate::time_period!("50y").add_to(birth)
         } else if age_ge(birth, eval_date, "24m") {
             eval_date
         } else {

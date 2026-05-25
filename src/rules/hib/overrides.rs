@@ -49,8 +49,8 @@ pub fn hib_custom_dose_number_hook(
         compare_elapsed(birth, ref_date, &tp) == std::cmp::Ordering::Less
     };
 
-    let tp_7m = TimePeriod::parse("7m").unwrap();
-    let tp_12m = TimePeriod::parse("12m").unwrap();
+    let tp_7m = crate::time_period!("7m");
+    let tp_12m = crate::time_period!("12m");
 
     // Forecast-time skip rules only apply when there are no valid doses at all.
     // Once a series has started, Java keeps forecasting from the effective
@@ -118,8 +118,8 @@ pub fn hib_custom_evaluation_hook(
 
     // 1. Booster Check (CVX 50)
     if dose.cvx.0 == cvx!("50") {
-        let tp_1y_4d = TimePeriod::parse("1y-4d").unwrap();
-        let tp_5y = TimePeriod::parse("5y").unwrap();
+        let tp_1y_4d = crate::time_period!("1y-4d");
+        let tp_5y = crate::time_period!("5y");
         let age_ge_1y_4d = compare_elapsed(birth, admin_date, &tp_1y_4d) != std::cmp::Ordering::Less;
         let age_ge_5y = compare_elapsed(birth, admin_date, &tp_5y) != std::cmp::Ordering::Less;
 
@@ -138,7 +138,7 @@ pub fn hib_custom_evaluation_hook(
     }
 
     // 2. Age Clamp (>= 5y)
-    let tp_5y = TimePeriod::parse("5y").unwrap();
+    let tp_5y = crate::time_period!("5y");
     let age_ge_5y = compare_elapsed(birth, admin_date, &tp_5y) != std::cmp::Ordering::Less;
     if age_ge_5y {
         let num_doses = if series_name == "HIB_OMP_SERIES" { 3 } else { 4 };
@@ -154,7 +154,7 @@ pub fn hib_custom_evaluation_hook(
 
     // 3. Below Absolute Minimum Age for Final Dose of 4-Dose Series
     if series_name == "HIB_4_DOSE_SERIES" && target_dose_idx == 4 {
-        let tp_1y_4d = TimePeriod::parse("1y-4d").unwrap();
+        let tp_1y_4d = crate::time_period!("1y-4d");
         let age_lt_1y_4d = compare_elapsed(birth, admin_date, &tp_1y_4d) == std::cmp::Ordering::Less;
         if age_lt_1y_4d {
             let hib_cvx = &[cvx!("17"), cvx!("22"), cvx!("46"), cvx!("47"), cvx!("48"), cvx!("49"), cvx!("50"), cvx!("51"), cvx!("102"), cvx!("120"), cvx!("132"), cvx!("146"), cvx!("148"), cvx!("170"), cvx!("198")];
@@ -177,7 +177,7 @@ pub fn hib_custom_forecast_hook(
     forecast: &mut SeriesForecast,
 ) {
     let birth = patient.birth_date;
-    let age_5y = TimePeriod::parse("5y").unwrap().add_to(birth);
+    let age_5y = crate::time_period!("5y").add_to(birth);
 
     if eval_date >= age_5y {
         let doses_required = if forecast.series_name == "HIB_OMP_SERIES" { 3 } else { 4 };
@@ -202,9 +202,9 @@ pub fn hib_custom_forecast_hook(
     // Once a catch-up dose has already satisfied the skipped target, forecasting
     // should fall back to the generic next-dose timing.
     if forecast.series_name == "HIB_4_DOSE_SERIES" && forecast.status != SeriesStatus::Complete && valid_doses.is_empty() {
-        let tp_7m = TimePeriod::parse("7m").unwrap();
-        let tp_12m = TimePeriod::parse("12m").unwrap();
-        let tp_15m = TimePeriod::parse("15m").unwrap();
+        let tp_7m = crate::time_period!("7m");
+        let tp_12m = crate::time_period!("12m");
+        let tp_15m = crate::time_period!("15m");
 
         let date_7m = tp_7m.add_to(birth);
         let date_12m = tp_12m.add_to(birth);
@@ -293,8 +293,8 @@ pub fn hib_custom_switch_hook(
     }
 
     let birth = ctx.patient.birth_date;
-    let tp_7m = TimePeriod::parse("7m").unwrap();
-    let tp_12m = TimePeriod::parse("12m").unwrap();
+    let tp_7m = crate::time_period!("7m");
+    let tp_12m = crate::time_period!("12m");
 
     if let Some(dose) = ctx.current_dose {
         if is_omp_cvx(dose.cvx) {
@@ -328,8 +328,8 @@ fn is_series_complete(forecast: &VaccineGroupForecast) -> bool {
 
 fn matches_omp_criteria_from_eval(patient: &Patient, forecast: &VaccineGroupForecast) -> bool {
     let birth = patient.birth_date;
-    let tp_7m = TimePeriod::parse("7m").unwrap();
-    let tp_12m = TimePeriod::parse("12m").unwrap();
+    let tp_7m = crate::time_period!("7m");
+    let tp_12m = crate::time_period!("12m");
 
     let valid_omp_doses: Vec<&crate::models::DoseEvaluation> = forecast.evaluations.iter()
         .filter(|e| e.status == DoseStatus::Valid && is_omp_cvx(e.cvx))

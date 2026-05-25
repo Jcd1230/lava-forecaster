@@ -34,8 +34,8 @@ pub fn yellow_fever_custom_forecast_hook(
     }
 
     let birth = patient.birth_date;
-    let tp_6m = crate::date_utils::TimePeriod::parse("6m").unwrap();
-    let tp_9m = crate::date_utils::TimePeriod::parse("9m").unwrap();
+    let tp_6m = crate::time_period!("6m");
+    let tp_9m = crate::time_period!("9m");
 
     let age_6m_date = tp_6m.add_to(birth);
     let age_9m_date = tp_9m.add_to(birth);

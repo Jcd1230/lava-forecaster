@@ -30,8 +30,8 @@ pub fn cholera_custom_forecast_hook(
     }
 
     let birth = patient.birth_date;
-    let tp_2y = crate::date_utils::TimePeriod::parse("2y").unwrap();
-    let tp_65y = crate::date_utils::TimePeriod::parse("65y").unwrap();
+    let tp_2y = crate::time_period!("2y");
+    let tp_65y = crate::time_period!("65y");
 
     let age_2y_date = tp_2y.add_to(birth);
     let age_65y_date = tp_65y.add_to(birth);

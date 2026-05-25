@@ -587,7 +587,7 @@ impl EvaluationEngine {
                     && compare_elapsed(
                         patient.birth_date,
                         d.date,
-                        &TimePeriod::parse("2y").unwrap(),
+                        &crate::time_period!("2y"),
                     ) == std::cmp::Ordering::Less)
             })
             .map(|d| d.date)

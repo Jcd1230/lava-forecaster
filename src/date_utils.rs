@@ -1,6 +1,6 @@
 use chrono::{Datelike, Days, NaiveDate};
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DurationUnit {
     Days,
     Weeks,
@@ -8,15 +8,28 @@ pub enum DurationUnit {
     Years,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TimePeriodPart {
     pub value: i32,
     pub unit: DurationUnit,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TimePeriod {
-    pub parts: Vec<TimePeriodPart>,
+    pub parts: [Option<TimePeriodPart>; 2],
+}
+
+#[macro_export]
+macro_rules! time_period {
+    ($s:expr) => {
+        {
+            const TP: $crate::date_utils::TimePeriod = match $crate::date_utils::TimePeriod::parse_const($s) {
+                Ok(tp) => tp,
+                Err(e) => panic!("{}", e),
+            };
+            TP
+        }
+    };
 }
 
 fn last_day_of_month(year: i32, month: u32) -> u32 {
@@ -96,80 +109,106 @@ pub fn add_years(date: NaiveDate, duration: i32) -> NaiveDate {
 
 impl TimePeriod {
     pub fn parse(s: &str) -> Result<Self, String> {
-        let mut parts = Vec::new();
-        let chars: Vec<char> = s.chars().filter(|c| !c.is_whitespace()).collect();
+        Self::parse_const(s).map_err(|e| e.to_string())
+    }
+
+    pub const fn parse_const(s: &str) -> Result<Self, &'static str> {
+        let bytes = s.as_bytes();
+        let mut parts = [None, None];
+        let mut part_idx = 0;
         let mut i = 0;
         
-        while i < chars.len() {
-            // Read sign if present, or number
-            let mut sign = 1;
-            if chars[i] == '+' {
+        while i < bytes.len() {
+            // Skip whitespace
+            while i < bytes.len() && (bytes[i] == b' ' || bytes[i] == b'\t' || bytes[i] == b'\n' || bytes[i] == b'\r') {
                 i += 1;
-            } else if chars[i] == '-' {
+            }
+            if i >= bytes.len() {
+                break;
+            }
+            
+            let mut sign = 1;
+            if bytes[i] == b'+' {
+                i += 1;
+            } else if bytes[i] == b'-' {
                 sign = -1;
                 i += 1;
             }
             
-            if i >= chars.len() || !chars[i].is_ascii_digit() {
-                return Err(format!("Expected digit at position {} in {}", i, s));
-            }
-            
-            let mut num_str = String::new();
-            while i < chars.len() && chars[i].is_ascii_digit() {
-                num_str.push(chars[i]);
+            // Skip whitespace after sign
+            while i < bytes.len() && (bytes[i] == b' ' || bytes[i] == b'\t') {
                 i += 1;
             }
             
-            let num: i32 = num_str.parse().map_err(|e| format!("{}", e))?;
-            let signed_value = num * sign;
-            
-            if i >= chars.len() {
-                return Err(format!("Expected unit character at the end of {}", s));
+            if i >= bytes.len() || bytes[i] < b'0' || bytes[i] > b'9' {
+                return Err("Expected digit");
             }
             
-            let unit = match chars[i].to_ascii_lowercase() {
-                'd' => DurationUnit::Days,
-                'w' => DurationUnit::Weeks,
-                'm' => DurationUnit::Months,
-                'y' => DurationUnit::Years,
-                _ => return Err(format!("Unknown unit character '{}'", chars[i])),
+            let mut num: i32 = 0;
+            while i < bytes.len() && bytes[i] >= b'0' && bytes[i] <= b'9' {
+                num = num * 10 + (bytes[i] - b'0') as i32;
+                i += 1;
+            }
+            
+            let signed_value = num * sign;
+            
+            // Skip whitespace before unit
+            while i < bytes.len() && (bytes[i] == b' ' || bytes[i] == b'\t') {
+                i += 1;
+            }
+            
+            if i >= bytes.len() {
+                return Err("Expected unit character");
+            }
+            
+            let unit = match bytes[i] {
+                b'd' | b'D' => DurationUnit::Days,
+                b'w' | b'W' => DurationUnit::Weeks,
+                b'm' | b'M' => DurationUnit::Months,
+                b'y' | b'Y' => DurationUnit::Years,
+                _ => return Err("Unknown unit character"),
             };
             i += 1;
             
-            parts.push(TimePeriodPart {
-                value: signed_value,
-                unit,
-            });
+            if part_idx >= 2 {
+                return Err("TimePeriod cannot have more than 2 parts in this representation");
+            }
+            parts[part_idx] = Some(TimePeriodPart { value: signed_value, unit });
+            part_idx += 1;
         }
         
         Ok(TimePeriod { parts })
     }
 
     pub fn add_to(&self, mut date: NaiveDate) -> NaiveDate {
-        for part in &self.parts {
-            match part.unit {
-                DurationUnit::Days => {
-                    if part.value >= 0 {
-                        date = date.checked_add_days(Days::new(part.value as u64)).unwrap();
-                    } else {
-                        date = date.checked_sub_days(Days::new((-part.value) as u64)).unwrap();
+        let mut idx = 0;
+        while idx < self.parts.len() {
+            if let Some(ref part) = self.parts[idx] {
+                match part.unit {
+                    DurationUnit::Days => {
+                        if part.value >= 0 {
+                            date = date.checked_add_days(Days::new(part.value as u64)).unwrap();
+                        } else {
+                            date = date.checked_sub_days(Days::new((-part.value) as u64)).unwrap();
+                        }
                     }
-                }
-                DurationUnit::Weeks => {
-                    let total_days = part.value * 7;
-                    if total_days >= 0 {
-                        date = date.checked_add_days(Days::new(total_days as u64)).unwrap();
-                    } else {
-                        date = date.checked_sub_days(Days::new((-total_days) as u64)).unwrap();
+                    DurationUnit::Weeks => {
+                        let total_days = part.value * 7;
+                        if total_days >= 0 {
+                            date = date.checked_add_days(Days::new(total_days as u64)).unwrap();
+                        } else {
+                            date = date.checked_sub_days(Days::new((-total_days) as u64)).unwrap();
+                        }
                     }
-                }
-                DurationUnit::Months => {
-                    date = add_months(date, part.value);
-                }
-                DurationUnit::Years => {
-                    date = add_years(date, part.value);
+                    DurationUnit::Months => {
+                        date = add_months(date, part.value);
+                    }
+                    DurationUnit::Years => {
+                        date = add_years(date, part.value);
+                    }
                 }
             }
+            idx += 1;
         }
         date
     }
@@ -189,20 +228,20 @@ mod tests {
         let birth = NaiveDate::from_ymd_opt(2020, 1, 1).unwrap();
         
         // Single unit
-        let tp1 = TimePeriod::parse("42d").unwrap();
+        let tp1 = crate::time_period!("42d");
         assert_eq!(tp1.add_to(birth), NaiveDate::from_ymd_opt(2020, 2, 12).unwrap());
         
         // Sign prefix
-        let tp2 = TimePeriod::parse("2m").unwrap();
+        let tp2 = crate::time_period!("2m");
         assert_eq!(tp2.add_to(birth), NaiveDate::from_ymd_opt(2020, 3, 1).unwrap());
         
         // Plus/Minus
-        let tp3 = TimePeriod::parse("4y-4d").unwrap();
+        let tp3 = crate::time_period!("4y-4d");
         assert_eq!(tp3.add_to(birth), NaiveDate::from_ymd_opt(2023, 12, 28).unwrap());
         
         // Rollover month add logic: August 31st + 1 month -> October 1st
         let aug31 = NaiveDate::from_ymd_opt(2020, 8, 31).unwrap();
-        let tp_1m = TimePeriod::parse("1m").unwrap();
+        let tp_1m = crate::time_period!("1m");
         assert_eq!(tp_1m.add_to(aug31), NaiveDate::from_ymd_opt(2020, 10, 1).unwrap());
         
         // August 30th + 1 month -> September 30th (no rollover)

@@ -93,7 +93,7 @@ fn get_min_interval_days(
         }
     } else {
         let season_start_dt = get_season_start_date(season);
-        let age_at_season_start = compare_elapsed(patient.birth_date, season_start_dt, &TimePeriod::parse("5y").unwrap());
+        let age_at_season_start = compare_elapsed(patient.birth_date, season_start_dt, &crate::time_period!("5y"));
         if season_valid_doses_len == 1 {
             if age_at_season_start == std::cmp::Ordering::Less {
                 if is_same_brand_or_unspec {
@@ -170,7 +170,7 @@ pub fn evaluate_doses_seasonally(
                     if active_series_name == "COVID_19_AUG_2025_GTE_65_SERIES" {
                         let age_65 = add_years(patient.birth_date, 65);
                         let within_12m_of_65 = season_start() < age_65
-                            && compare_elapsed(season_start(), age_65, &TimePeriod::parse("12m").unwrap())
+                            && compare_elapsed(season_start(), age_65, &crate::time_period!("12m"))
                                 != std::cmp::Ordering::Greater;
                         if dose.date < age_65 && !within_12m_of_65 {
                             is_valid_age = false;
@@ -181,7 +181,7 @@ pub fn evaluate_doses_seasonally(
                             is_valid_age = false;
                         }
                     } else {
-                        let age_6m_4d = TimePeriod::parse("6m-4d").unwrap().add_to(patient.birth_date);
+                        let age_6m_4d = crate::time_period!("6m-4d").add_to(patient.birth_date);
                         if dose.date < age_6m_4d {
                             is_valid_age = false;
                         }
@@ -192,7 +192,7 @@ pub fn evaluate_doses_seasonally(
                         is_valid_age = false;
                     }
                 } else {
-                    let age_6m_4d = TimePeriod::parse("6m-4d").unwrap().add_to(patient.birth_date);
+                    let age_6m_4d = crate::time_period!("6m-4d").add_to(patient.birth_date);
                     if dose.date < age_6m_4d {
                         is_valid_age = false;
                     }
@@ -206,7 +206,7 @@ pub fn evaluate_doses_seasonally(
                     let is_novavax = matches!(dose.cvx.0, cvx!("211") | cvx!("313"));
                     if is_novavax && (season == "COVID_19_SEP_2023_SEASON" || season == "COVID_19_AUG_2024_SEASON") {
                         let season_start_dt = get_season_start_date(season);
-                        let age_at_season_start = compare_elapsed(patient.birth_date, season_start_dt, &TimePeriod::parse("5y").unwrap());
+                        let age_at_season_start = compare_elapsed(patient.birth_date, season_start_dt, &crate::time_period!("5y"));
                         let novavax_count_in_season = sorted_history.iter()
                             .filter(|d| {
                                 let d_season = get_covid_season(d.date);
@@ -250,7 +250,7 @@ pub fn evaluate_doses_seasonally(
                             "PRIOR_SEASONS_LT5".to_string()
                         } else {
                             let season_start_dt = get_season_start_date(season);
-                            let age_at_season_start = compare_elapsed(patient.birth_date, season_start_dt, &TimePeriod::parse("5y").unwrap());
+                            let age_at_season_start = compare_elapsed(patient.birth_date, season_start_dt, &crate::time_period!("5y"));
                             if age_at_season_start != std::cmp::Ordering::Less {
                                 season.to_string()
                             } else {
@@ -305,7 +305,7 @@ pub fn evaluate_doses_seasonally(
                 "PRIOR_SEASONS_LT5".to_string()
             } else {
                 let season_start_dt = get_season_start_date(season);
-                let age_at_season_start = compare_elapsed(patient.birth_date, season_start_dt, &TimePeriod::parse("5y").unwrap());
+                let age_at_season_start = compare_elapsed(patient.birth_date, season_start_dt, &crate::time_period!("5y"));
                 if age_at_season_start != std::cmp::Ordering::Less {
                     season.to_string()
                 } else {
@@ -430,7 +430,7 @@ pub fn covid19_custom_forecast_hook(
         .filter(|d| get_covid_season(d.date) == "COVID_19_AUG_2025_SEASON")
         .max_by_key(|d| d.date);
 
-    let age_6m = TimePeriod::parse("6m").unwrap().add_to(patient.birth_date);
+    let age_6m = crate::time_period!("6m").add_to(patient.birth_date);
     let age_2y = add_years(patient.birth_date, 2);
     let age_65y = add_years(patient.birth_date, 65);
 
@@ -491,7 +491,7 @@ pub fn covid19_custom_forecast_hook(
                 let anchor_dose = last_current_season_dose.unwrap();
                 let earliest = anchor_dose.date + chrono::Duration::days(28);
                 let recommended = anchor_dose.date + chrono::Duration::days(28);
-                let overdue = TimePeriod::parse("8w").unwrap().add_to(anchor_dose.date).pred_opt();
+                let overdue = crate::time_period!("8w").add_to(anchor_dose.date).pred_opt();
 
                 forecast.earliest_date = Some(earliest);
                 forecast.recommended_date = Some(recommended);
@@ -658,7 +658,7 @@ pub fn covid19_group_selection(
     } else {
         let age_65 = add_years(patient.birth_date, 65);
         let within_12m_of_65 = season_start() < age_65
-            && compare_elapsed(season_start(), age_65, &TimePeriod::parse("12m").unwrap())
+            && compare_elapsed(season_start(), age_65, &crate::time_period!("12m"))
                 != std::cmp::Ordering::Greater;
 
         if age_ge(patient.birth_date, eval_date, "65y") 

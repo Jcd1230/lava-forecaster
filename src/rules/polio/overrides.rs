@@ -20,8 +20,8 @@ pub fn polio_parameter_overrides() -> Vec<ParameterOverrideRule> {
                 }
                 false
             },
-            override_abs_min_age: Some(TimePeriod::parse("122d").unwrap()),
-            override_abs_min_interval_from_dose: Some((3, TimePeriod::parse("24d").unwrap())),
+            override_abs_min_age: Some(crate::time_period!("122d")),
+            override_abs_min_interval_from_dose: Some((3, crate::time_period!("24d"))),
         },
         // Pre-2009 Overrides for POLIO_FRACTIONAL_IPV_SERIES:
         // "If dose 5 administered before 8/7/2009: abs_min_age = 122d, abs_min_interval for dose 4 = 24d"
@@ -36,8 +36,8 @@ pub fn polio_parameter_overrides() -> Vec<ParameterOverrideRule> {
                 }
                 false
             },
-            override_abs_min_age: Some(TimePeriod::parse("122d").unwrap()),
-            override_abs_min_interval_from_dose: Some((4, TimePeriod::parse("24d").unwrap())),
+            override_abs_min_age: Some(crate::time_period!("122d")),
+            override_abs_min_interval_from_dose: Some((4, crate::time_period!("24d"))),
         }
     ]
 }
@@ -56,14 +56,14 @@ pub fn polio_completion_rules() -> Vec<ConditionalCompletionRule> {
                     let age_ok = compare_elapsed(
                         birth_date,
                         dose_3_date,
-                        &TimePeriod::parse("4y-4d").unwrap(),
+                        &crate::time_period!("4y-4d"),
                     ) != std::cmp::Ordering::Less;
                     
                     let dose_2_date = ctx.valid_doses[1].0;
                     let interval_ok = compare_elapsed(
                         dose_2_date,
                         dose_3_date,
-                        &TimePeriod::parse("6m-4d").unwrap(),
+                        &crate::time_period!("6m-4d"),
                     ) != std::cmp::Ordering::Less;
                     
                     age_ok && interval_ok
@@ -84,14 +84,14 @@ pub fn polio_completion_rules() -> Vec<ConditionalCompletionRule> {
                     let age_ok = compare_elapsed(
                         birth_date,
                         dose_4_date,
-                        &TimePeriod::parse("4y-4d").unwrap(),
+                        &crate::time_period!("4y-4d"),
                     ) != std::cmp::Ordering::Less;
                     
                     let dose_3_date = ctx.valid_doses[2].0;
                     let interval_ok = compare_elapsed(
                         dose_3_date,
                         dose_4_date,
-                        &TimePeriod::parse("6m-4d").unwrap(),
+                        &crate::time_period!("6m-4d"),
                     ) != std::cmp::Ordering::Less;
                     
                     age_ok && interval_ok
@@ -113,8 +113,8 @@ pub fn polio_recommendation_overrides() -> Vec<RecommendationOverrideRule> {
             condition: |ctx| {
                 ctx.active_series_name == "POLIO_4_DOSE_SERIES" && ctx.eval_date < NaiveDate::from_ymd_opt(2009, 8, 7).unwrap()
             },
-            override_min_age: Some(TimePeriod::parse("126d").unwrap()),
-            override_min_interval: Some(TimePeriod::parse("28d").unwrap()),
+            override_min_age: Some(crate::time_period!("126d")),
+            override_min_interval: Some(crate::time_period!("28d")),
         },
         // Pre-2009 Forecast Recommendations for POLIO_FRACTIONAL_IPV_SERIES:
         // "If evaluation date is before 8/7/2009, min_age of dose 5 is 126d and min_interval for dose 4 is 28d"
@@ -124,8 +124,8 @@ pub fn polio_recommendation_overrides() -> Vec<RecommendationOverrideRule> {
             condition: |ctx| {
                 ctx.active_series_name == "POLIO_FRACTIONAL_IPV_SERIES" && ctx.eval_date < NaiveDate::from_ymd_opt(2009, 8, 7).unwrap()
             },
-            override_min_age: Some(TimePeriod::parse("126d").unwrap()),
-            override_min_interval: Some(TimePeriod::parse("28d").unwrap()),
+            override_min_age: Some(crate::time_period!("126d")),
+            override_min_interval: Some(crate::time_period!("28d")),
         }
     ]
 }
@@ -223,16 +223,16 @@ pub fn polio_custom_forecast_hook(
         let should_apply_interval = if target_dose > 1 {
             true
         } else {
-            let abs_min_age_dose_1 = TimePeriod::parse("38d").unwrap().add_to(patient.birth_date);
+            let abs_min_age_dose_1 = crate::time_period!("38d").add_to(patient.birth_date);
             last_dose.date >= abs_min_age_dose_1
         };
 
         if should_apply_interval {
             let min_interval = if (forecast.series_name == "POLIO_4_DOSE_SERIES" && target_dose == 4)
                 || (forecast.series_name == "POLIO_FRACTIONAL_IPV_SERIES" && target_dose == 5) {
-                TimePeriod::parse("6m").unwrap()
+                crate::time_period!("6m")
             } else {
-                TimePeriod::parse("28d").unwrap()
+                crate::time_period!("28d")
             };
             
             let min_interval_date = min_interval.add_to(last_dose.date);
@@ -289,7 +289,7 @@ pub fn polio_custom_evaluation_hook(
                     let interval_ok = compare_elapsed(
                         *prev_date,
                         dose.date,
-                        &TimePeriod::parse("6m-4d").unwrap(),
+                        &crate::time_period!("6m-4d"),
                     ) != std::cmp::Ordering::Less;
                     
                     if interval_ok {

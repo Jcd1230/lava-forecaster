@@ -64,7 +64,7 @@ pub fn jev_custom_forecast_hook(
     }
 
     if valid_doses.is_empty() {
-        let age_2m = TimePeriod::parse("2m").unwrap().add_to(patient.birth_date);
+        let age_2m = crate::time_period!("2m").add_to(patient.birth_date);
         if eval_date < age_2m {
             forecast.status = SeriesStatus::NotRecommended;
             forecast.reasons = vec!["JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP".to_string()];
@@ -89,7 +89,7 @@ pub fn jev_custom_forecast_hook(
 
         if forecast.series_name == "JEVC_RISK_2_DOSE_ACCELERATED_SERIES" {
             let prev_dose_date = valid_doses[0].0;
-            let age_66_minus_7d = TimePeriod::parse("66y-7d").unwrap().add_to(patient.birth_date);
+            let age_66_minus_7d = crate::time_period!("66y-7d").add_to(patient.birth_date);
             
             if prev_dose_date >= age_66_minus_7d {
                 forecast.overdue_date = None;
@@ -121,7 +121,7 @@ pub fn jev_group_selection(
 
     let age_at_reference = first_valid_dose_date.unwrap_or(eval_date);
     
-    let tp_18y_minus_4d = TimePeriod::parse("18y-4d").unwrap();
+    let tp_18y_minus_4d = crate::time_period!("18y-4d");
     let age_18_minus_4d = tp_18y_minus_4d.add_to(patient.birth_date);
     let age_66 = add_years(patient.birth_date, 66);
 

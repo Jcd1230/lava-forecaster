@@ -148,9 +148,9 @@ pub fn menb_custom_evaluation_hook(
     if series_name == "MEN_B_4_C_2_DOSE_SERIES" && target_dose_idx == 2 && is_4c(dose.cvx) {
         if let Some((dose1_date, _)) = ctx.valid_doses.first() {
             let threshold = if dose.date >= policy_change {
-                TimePeriod::parse("6m-4d").unwrap().add_to(*dose1_date)
+                crate::time_period!("6m-4d").add_to(*dose1_date)
             } else {
-                TimePeriod::parse("1m-4d").unwrap().add_to(*dose1_date)
+                crate::time_period!("1m-4d").add_to(*dose1_date)
             };
 
             if dose.date < threshold {
@@ -170,7 +170,7 @@ pub fn menb_custom_evaluation_hook(
         && target_dose_idx == 3
     {
         if let Some((dose1_date, _)) = ctx.valid_doses.first() {
-            let threshold = TimePeriod::parse("6m-4d").unwrap().add_to(*dose1_date);
+            let threshold = crate::time_period!("6m-4d").add_to(*dose1_date);
             if dose.date >= threshold {
                 *status = DoseStatus::Valid;
                 reasons.retain(|reason| *reason != EvaluationReason::BelowMinimumInterval);
@@ -220,7 +220,7 @@ pub fn menb_custom_forecast_hook(
     if forecast.series_name == "MEN_B_4_C_2_DOSE_SERIES" {
         if let Some((dose1_date, _)) = valid_doses.first() {
             if *dose1_date >= policy_change_date() {
-                let anchor = TimePeriod::parse("6m").unwrap().add_to(*dose1_date);
+                let anchor = crate::time_period!("6m").add_to(*dose1_date);
                 forecast.earliest_date = Some(forecast.earliest_date.map_or(anchor, |date| date.max(anchor)));
                 forecast.recommended_date = Some(forecast.recommended_date.map_or(anchor, |date| date.max(anchor)));
             } else {
@@ -230,7 +230,7 @@ pub fn menb_custom_forecast_hook(
                     .map(|dose| dose.date)
                     .max()
                     .unwrap_or(*dose1_date);
-                let anchor = TimePeriod::parse("1m").unwrap().add_to(last_4c_shot);
+                let anchor = crate::time_period!("1m").add_to(last_4c_shot);
                 forecast.earliest_date = Some(anchor);
                 forecast.recommended_date = Some(anchor);
             }
@@ -239,7 +239,7 @@ pub fn menb_custom_forecast_hook(
 
     if matches!(forecast.series_name.as_str(), "MEN_B_4_C_3_DOSE_SERIES" | "MEN_BF_HBP_3_DOSE_SERIES") {
         if let Some((dose1_date, _)) = valid_doses.first() {
-            let anchor = TimePeriod::parse("6m").unwrap().add_to(*dose1_date);
+            let anchor = crate::time_period!("6m").add_to(*dose1_date);
             forecast.earliest_date = Some(forecast.earliest_date.map_or(anchor, |date| date.max(anchor)));
             forecast.recommended_date = Some(forecast.recommended_date.map_or(anchor, |date| date.max(anchor)));
         }

@@ -51,8 +51,8 @@ pub fn hpv_custom_evaluation_hook(
             if ctx.valid_doses.len() >= 2 {
                 let dose_1_date = ctx.valid_doses[0].0;
                 let dose_2_date = ctx.valid_doses[1].0;
-                let min_int_1_3 = TimePeriod::parse("5m-4d").unwrap().add_to(dose_1_date);
-                let min_int_2_3 = TimePeriod::parse("80d").unwrap().add_to(dose_2_date);
+                let min_int_1_3 = crate::time_period!("5m-4d").add_to(dose_1_date);
+                let min_int_2_3 = crate::time_period!("80d").add_to(dose_2_date);
                 if dose.date < min_int_1_3 || dose.date < min_int_2_3 {
                     *status = DoseStatus::Invalid;
                     if !reasons.contains(&EvaluationReason::BelowMinimumInterval) {

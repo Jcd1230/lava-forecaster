@@ -15,7 +15,7 @@ pub fn rotavirus_custom_evaluation_hook(
     };
 
     // Strict age clamp: Any dose given at age > 8 months is evaluated as Accepted/AboveRecommendedAgeSeries
-    let tp_8m = crate::date_utils::TimePeriod::parse("8m").unwrap();
+    let tp_8m = crate::time_period!("8m");
     let is_age_gt_8m = crate::date_utils::compare_elapsed(ctx.patient.birth_date, dose.date, &tp_8m) == std::cmp::Ordering::Greater;
 
     if is_age_gt_8m {
@@ -44,7 +44,7 @@ pub fn rotavirus_custom_forecast_hook(
     }
 
     // Strict age clamp: if patient is currently > 8 months, or will be > 8 months as of the recommended date due
-    let tp_8m = crate::date_utils::TimePeriod::parse("8m").unwrap();
+    let tp_8m = crate::time_period!("8m");
     let date_8m = tp_8m.add_to(birth);
 
     let is_currently_gt_8m = eval_date > date_8m;
@@ -61,7 +61,7 @@ pub fn rotavirus_custom_forecast_hook(
     }
 
     // Initiation check: If patient is >= 105 days and has 0 valid doses
-    let tp_105d = crate::date_utils::TimePeriod::parse("105d").unwrap();
+    let tp_105d = crate::time_period!("105d");
     let date_105d = tp_105d.add_to(birth);
     if eval_date >= date_105d && valid_doses.is_empty() {
         forecast.status = SeriesStatus::NotRecommended;
