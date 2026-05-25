@@ -2,8 +2,9 @@ use std::fs;
 use std::hint::black_box;
 use std::path::Path;
 use std::time::Instant;
+use rayon::prelude::*;
 
-#[cfg(not(target_os = "windows"))]
+#[cfg(all(feature = "jemalloc", not(target_os = "windows")))]
 #[global_allocator]
 static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
@@ -78,11 +79,13 @@ fn main() {
     }
     println!("Warmup complete.");
 
-    // Benchmark 1: Full Test Suite Throughput
+    // === Benchmark 1: Full Suite Throughput ===
     println!("\n=== Benchmark 1: Full Suite Throughput ===");
     let iterations = 1000;
     println!("Running {} iterations of all {} test cases ({} total evaluations)...", iterations, num_cases, iterations * num_cases);
     
+    // 1A: Single-Threaded
+    println!("\n--- 1A: Single-Threaded ---");
     let start = Instant::now();
     for _ in 0..iterations {
         for tc in &cases {
@@ -90,52 +93,91 @@ fn main() {
             black_box(res);
         }
     }
-    let elapsed = start.elapsed();
+    let elapsed_st = start.elapsed();
     let total_evals = iterations * num_cases;
-    let evals_per_sec = total_evals as f64 / elapsed.as_secs_f64();
-    let avg_latency_us = (elapsed.as_nanos() as f64 / total_evals as f64) / 1000.0;
+    let evals_per_sec_st = total_evals as f64 / elapsed_st.as_secs_f64();
+    let avg_latency_us_st = (elapsed_st.as_nanos() as f64 / total_evals as f64) / 1000.0;
+    println!("Throughput:         {:.2} evaluations/sec", evals_per_sec_st);
+    println!("Average latency:    {:.3} microseconds per patient", avg_latency_us_st);
 
-    println!("Total elapsed time: {:?}", elapsed);
-    println!("Throughput:         {:.2} evaluations/sec", evals_per_sec);
-    println!("Average latency:    {:.3} microseconds per patient", avg_latency_us);
+    // 1B: Multi-Threaded
+    println!("\n--- 1B: Multi-Threaded ---");
+    let start = Instant::now();
+    (0..iterations).into_par_iter().for_each(|_| {
+        for tc in &cases {
+            let res = evaluate_patient_all_groups(&tc.patient, &tc.history, tc.execution_date);
+            black_box(res);
+        }
+    });
+    let elapsed_mt = start.elapsed();
+    let evals_per_sec_mt = total_evals as f64 / elapsed_mt.as_secs_f64();
+    let avg_latency_us_mt = (elapsed_mt.as_nanos() as f64 / total_evals as f64) / 1000.0;
+    println!("Throughput:         {:.2} evaluations/sec (Speedup: {:.2}x)", evals_per_sec_mt, evals_per_sec_mt / evals_per_sec_st);
+    println!("Average latency:    {:.3} microseconds per patient (effective)", avg_latency_us_mt);
 
-    // Benchmark 2: Single Complex Case Latency
-    println!("\n=== Benchmark 2: Complex Case Latency ===");
+    // === Benchmark 2: Complex Case Performance ===
+    println!("\n=== Benchmark 2: Complex Case Performance ===");
     println!("Case: {} ({} doses)", max_dose_case.name, max_dose_case.history.len());
     let complex_iterations = 100_000;
     println!("Running {} iterations...", complex_iterations);
     
+    // 2A: Single-Threaded
+    println!("\n--- 2A: Single-Threaded ---");
     let start = Instant::now();
     for _ in 0..complex_iterations {
         let res = evaluate_patient_all_groups(&max_dose_case.patient, &max_dose_case.history, max_dose_case.execution_date);
         black_box(res);
     }
-    let elapsed = start.elapsed();
-    let complex_evals_per_sec = complex_iterations as f64 / elapsed.as_secs_f64();
-    let complex_avg_latency_us = (elapsed.as_nanos() as f64 / complex_iterations as f64) / 1000.0;
+    let elapsed_st = start.elapsed();
+    let evals_per_sec_st = complex_iterations as f64 / elapsed_st.as_secs_f64();
+    let avg_latency_us_st = (elapsed_st.as_nanos() as f64 / complex_iterations as f64) / 1000.0;
+    println!("Throughput:         {:.2} evaluations/sec", evals_per_sec_st);
+    println!("Average latency:    {:.3} microseconds", avg_latency_us_st);
 
-    println!("Total elapsed time: {:?}", elapsed);
-    println!("Throughput:         {:.2} evaluations/sec", complex_evals_per_sec);
-    println!("Average latency:    {:.3} microseconds", complex_avg_latency_us);
+    // 2B: Multi-Threaded
+    println!("\n--- 2B: Multi-Threaded ---");
+    let start = Instant::now();
+    (0..complex_iterations).into_par_iter().for_each(|_| {
+        let res = evaluate_patient_all_groups(&max_dose_case.patient, &max_dose_case.history, max_dose_case.execution_date);
+        black_box(res);
+    });
+    let elapsed_mt = start.elapsed();
+    let evals_per_sec_mt = complex_iterations as f64 / elapsed_mt.as_secs_f64();
+    let avg_latency_us_mt = (elapsed_mt.as_nanos() as f64 / complex_iterations as f64) / 1000.0;
+    println!("Throughput:         {:.2} evaluations/sec (Speedup: {:.2}x)", evals_per_sec_mt, evals_per_sec_mt / evals_per_sec_st);
+    println!("Average latency:    {:.3} microseconds (effective)", avg_latency_us_mt);
 
-    // Benchmark 3: Single Minimal Case Latency
-    println!("\n=== Benchmark 3: Minimal Case Latency ===");
+    // === Benchmark 3: Minimal Case Performance ===
+    println!("\n=== Benchmark 3: Minimal Case Performance ===");
     println!("Case: {} ({} doses)", min_dose_case.name, min_dose_case.history.len());
     let minimal_iterations = 100_000;
     println!("Running {} iterations...", minimal_iterations);
     
+    // 3A: Single-Threaded
+    println!("\n--- 3A: Single-Threaded ---");
     let start = Instant::now();
     for _ in 0..minimal_iterations {
         let res = evaluate_patient_all_groups(&min_dose_case.patient, &min_dose_case.history, min_dose_case.execution_date);
         black_box(res);
     }
-    let elapsed = start.elapsed();
-    let minimal_evals_per_sec = minimal_iterations as f64 / elapsed.as_secs_f64();
-    let minimal_avg_latency_us = (elapsed.as_nanos() as f64 / minimal_iterations as f64) / 1000.0;
+    let elapsed_st = start.elapsed();
+    let evals_per_sec_st = minimal_iterations as f64 / elapsed_st.as_secs_f64();
+    let avg_latency_us_st = (elapsed_st.as_nanos() as f64 / minimal_iterations as f64) / 1000.0;
+    println!("Throughput:         {:.2} evaluations/sec", evals_per_sec_st);
+    println!("Average latency:    {:.3} microseconds", avg_latency_us_st);
 
-    println!("Total elapsed time: {:?}", elapsed);
-    println!("Throughput:         {:.2} evaluations/sec", minimal_evals_per_sec);
-    println!("Average latency:    {:.3} microseconds", minimal_avg_latency_us);
+    // 3B: Multi-Threaded
+    println!("\n--- 3B: Multi-Threaded ---");
+    let start = Instant::now();
+    (0..minimal_iterations).into_par_iter().for_each(|_| {
+        let res = evaluate_patient_all_groups(&min_dose_case.patient, &min_dose_case.history, min_dose_case.execution_date);
+        black_box(res);
+    });
+    let elapsed_mt = start.elapsed();
+    let evals_per_sec_mt = minimal_iterations as f64 / elapsed_mt.as_secs_f64();
+    let avg_latency_us_mt = (elapsed_mt.as_nanos() as f64 / minimal_iterations as f64) / 1000.0;
+    println!("Throughput:         {:.2} evaluations/sec (Speedup: {:.2}x)", evals_per_sec_mt, evals_per_sec_mt / evals_per_sec_st);
+    println!("Average latency:    {:.3} microseconds (effective)", avg_latency_us_mt);
     
     println!("\nBenchmark run completed successfully.");
 }

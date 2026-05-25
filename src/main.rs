@@ -2,7 +2,7 @@ use chrono::NaiveDate;
 use std::time::Instant;
 use rayon::prelude::*;
 
-#[cfg(not(target_os = "windows"))]
+#[cfg(all(feature = "jemalloc", not(target_os = "windows")))]
 #[global_allocator]
 static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
 

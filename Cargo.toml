@@ -25,4 +25,8 @@ flatbuffers = "25.2.10"
 smallvec = { version = "1.13", features = ["serde", "union"] }
 
 [target.'cfg(not(target_os = "windows"))'.dependencies]
-jemallocator = "0.5"
+jemallocator = { version = "0.5", optional = true }
+
+[features]
+default = ["jemalloc"]
+jemalloc = ["dep:jemallocator"]
