@@ -1,0 +1,57 @@
+namespace org.cdsframework.ice.flatbuf;
+
+table Dose {
+  date: string;
+  cvx: string;
+}
+
+table Patient {
+  birth_date: string;
+  gender: string;
+}
+
+table PatientRequest {
+  patient: Patient;
+  history: [Dose];
+  execution_date: string;
+}
+
+table BulkForecastRequest {
+  requests: [PatientRequest];
+}
+
+table SeriesForecast {
+  series_name: string;
+  earliest_date: string;
+  recommended_date: string;
+  overdue_date: string;
+  latest_date: string;
+  status: string;
+  reasons: [string];
+}
+
+table DoseEvaluation {
+  dose_date: string;
+  cvx: string;
+  status: string;
+  reasons: [string];
+  dose_number: int;
+}
+
+table VaccineGroupForecast {
+  vaccine_group: string;
+  evaluations: [DoseEvaluation];
+  forecasts: [SeriesForecast];
+  selected_series: string;
+}
+
+table ForecastResponse {
+  vaccine_groups: [VaccineGroupForecast];
+}
+
+table BulkForecastResponse {
+  responses: [ForecastResponse];
+}
+
+root_type BulkForecastRequest;
+root_type BulkForecastResponse;

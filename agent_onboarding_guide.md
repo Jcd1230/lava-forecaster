@@ -55,10 +55,11 @@ Create `src/rules/<vaccine_group>/schedules.rs` (or modify the scaffolded stub) 
 
 #### Example: Varicella 2-Dose Series
 ```rust
+use ice_cvx_macro::cvx;
 use crate::schedule::CompiledSeries;
 
 pub fn varicella_2_dose_series() -> CompiledSeries {
-    let allowed_cvx = &["21", "94"]; // Varicella, MMRV
+    let allowed_cvx = &[cvx!("21"), cvx!("94")]; // Varicella, MMRV
 
     CompiledSeries::builder("VARICELLA_2_DOSE_SERIES")
         .code("VARICELLA_2_DOSE_SERIES")
@@ -102,6 +103,7 @@ Create `src/rules/<vaccine_group>/overrides.rs`. If the vaccine group contains l
 Fires during chronological dose validation. Allows modifying the status or adding custom evaluation reasons.
 
 ```rust
+use crate::date_utils::TinyVec;
 use crate::engine::EvaluationContext;
 use crate::models::{DoseStatus, EvaluationReason};
 
@@ -109,7 +111,7 @@ pub fn varicella_custom_evaluation_hook(
     _series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut Vec<EvaluationReason>,
+    reasons: &mut TinyVec<EvaluationReason, 4>,
     status: &mut DoseStatus,
 ) {
     if let Some(dose) = ctx.current_dose {
@@ -149,7 +151,7 @@ pub fn varicella_custom_forecast_hook(
     let pre_1980 = NaiveDate::from_ymd_opt(1980, 1, 1).unwrap();
     if patient.birth_date < pre_1980 && forecast.status != SeriesStatus::Complete {
         forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = vec!["CONDITIONAL".to_string()];
+        forecast.reasons = crate::reasons!["CONDITIONAL"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;

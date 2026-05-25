@@ -4,6 +4,7 @@ pub mod legacy_models;
 pub mod models;
 pub mod rules;
 pub mod schedule;
+pub mod forecaster_generated;
 
 use chrono::NaiveDate;
 use models::{Dose, Patient, VaccineGroupForecast, Cvx};

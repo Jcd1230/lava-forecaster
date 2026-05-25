@@ -119,6 +119,227 @@ async fn evaluate_bulk_handler(
     (StatusCode::OK, resp_headers, response_json).into_response()
 }
 
+async fn evaluate_bulk_flatbuffers_handler(
+    body: axum::body::Bytes,
+) -> impl axum::response::IntoResponse {
+    use axum::http::{StatusCode, HeaderMap, HeaderValue};
+    use axum::response::IntoResponse;
+    use ice_rust_forecaster_poc::forecaster_generated::org::cdsframework::ice::flatbuf as fb;
+    let req_start = Instant::now();
+
+    let bulk_req = match ::flatbuffers::root::<fb::BulkForecastRequest>(&body) {
+        Ok(r) => r,
+        Err(e) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                HeaderMap::new(),
+                format!("Failed to parse FlatBuffers bulk request: {}", e),
+            ).into_response();
+        }
+    };
+
+    let reqs = match bulk_req.requests() {
+        Some(r) => r,
+        None => {
+            let mut builder = ::flatbuffers::FlatBufferBuilder::new();
+            let empty_vec = builder.create_vector::<::flatbuffers::WIPOffset<fb::ForecastResponse>>(&[]);
+            let bulk_resp = fb::BulkForecastResponse::create(&mut builder, &fb::BulkForecastResponseArgs {
+                responses: Some(empty_vec),
+            });
+            fb::finish_bulk_forecast_response_buffer(&mut builder, bulk_resp);
+            let finished_data = builder.finished_data().to_vec();
+            let mut resp_headers = HeaderMap::new();
+            resp_headers.insert("Content-Type", HeaderValue::from_static("application/octet-stream"));
+            return (StatusCode::OK, resp_headers, finished_data).into_response();
+        }
+    };
+
+    let mut parsed_requests = Vec::with_capacity(reqs.len());
+    for i in 0..reqs.len() {
+        parsed_requests.push(reqs.get(i));
+    }
+
+    let internal_requests: Result<Vec<(models::Patient, Vec<models::Dose>, NaiveDate)>, String> = parsed_requests
+        .iter()
+        .map(|req| {
+            let exec_date_str = req.execution_date().ok_or("execution_date is required")?;
+            let exec_date = NaiveDate::parse_from_str(exec_date_str, "%Y-%m-%d")
+                .map_err(|e| format!("invalid execution_date '{}': {}", exec_date_str, e))?;
+
+            let patient_fb = req.patient().ok_or("patient is required")?;
+            let birth_date_str = patient_fb.birth_date().ok_or("birth_date is required")?;
+            let birth_date = NaiveDate::parse_from_str(birth_date_str, "%Y-%m-%d")
+                .map_err(|e| format!("invalid birth_date '{}': {}", birth_date_str, e))?;
+
+            let gender_str = patient_fb.gender().unwrap_or("Unknown");
+            let gender = match gender_str {
+                "Female" | "FEMALE" | "F" => models::Gender::Female,
+                "Male" | "MALE" | "M" => models::Gender::Male,
+                _ => models::Gender::Unknown,
+            };
+
+            let mut history = Vec::new();
+            if let Some(history_fb) = req.history() {
+                for j in 0..history_fb.len() {
+                    let dose_fb = history_fb.get(j);
+                    let date_str = dose_fb.date().ok_or("dose date is required")?;
+                    let date = NaiveDate::parse_from_str(date_str, "%Y-%m-%d")
+                        .map_err(|e| format!("invalid dose date '{}': {}", date_str, e))?;
+                    let cvx_str = dose_fb.cvx().unwrap_or("");
+                    let cvx = models::Cvx(cvx_str.parse::<u16>().unwrap_or(0));
+                    history.push(models::Dose { date, cvx });
+                }
+            }
+
+            Ok((models::Patient { birth_date, gender }, history, exec_date))
+        })
+        .collect();
+
+    let internal_requests = match internal_requests {
+        Ok(r) => r,
+        Err(err) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                HeaderMap::new(),
+                format!("Invalid request data: {}", err),
+            ).into_response();
+        }
+    };
+
+    let evaluated_responses: Vec<models::ForecastResponse> = internal_requests
+        .into_par_iter()
+        .map(|req_item| {
+            let patient = &req_item.0;
+            let history = &req_item.1;
+            let exec_date = req_item.2;
+            let results = evaluate_patient_all_groups(patient, history, exec_date);
+            models::ForecastResponse {
+                vaccine_groups: results,
+            }
+        })
+        .collect();
+
+    let num_responses = evaluated_responses.len();
+    let mut builder = ::flatbuffers::FlatBufferBuilder::new();
+    let mut response_offsets = Vec::with_capacity(num_responses);
+
+    for resp in evaluated_responses {
+        let mut vg_offsets = Vec::with_capacity(resp.vaccine_groups.len());
+
+        for vg in resp.vaccine_groups.iter() {
+            // Build evaluations vector
+            let mut eval_offsets = Vec::with_capacity(vg.evaluations.len());
+            for eval in vg.evaluations.iter() {
+                let dose_date = builder.create_string(&eval.dose_date.format("%Y-%m-%d").to_string());
+                let cvx = builder.create_string(&eval.cvx.to_string());
+                let status_str = match eval.status {
+                    models::DoseStatus::Valid => "Valid",
+                    models::DoseStatus::Invalid => "Invalid",
+                    models::DoseStatus::Accepted => "Accepted",
+                    models::DoseStatus::Ignored => "Ignored",
+                };
+                let status = builder.create_string(status_str);
+
+                let mut reason_offsets = Vec::with_capacity(eval.reasons.len());
+                for r in eval.reasons.iter() {
+                    let r_str = format!("{:?}", r);
+                    reason_offsets.push(builder.create_string(&r_str));
+                }
+                let reasons_vec = builder.create_vector(&reason_offsets);
+
+                let dose_number = eval.dose_number.unwrap_or(0) as i32;
+
+                let dose_eval_offset = fb::DoseEvaluation::create(&mut builder, &fb::DoseEvaluationArgs {
+                    dose_date: Some(dose_date),
+                    cvx: Some(cvx),
+                    status: Some(status),
+                    reasons: Some(reasons_vec),
+                    dose_number,
+                });
+                eval_offsets.push(dose_eval_offset);
+            }
+            let evals_vec = builder.create_vector(&eval_offsets);
+
+            // Build forecasts vector
+            let mut forecast_offsets = Vec::with_capacity(vg.forecasts.len());
+            for fc in vg.forecasts.iter() {
+                let series_name = builder.create_string(&fc.series_name);
+                let earliest_date = fc.earliest_date.map(|d| builder.create_string(&d.format("%Y-%m-%d").to_string()));
+                let recommended_date = fc.recommended_date.map(|d| builder.create_string(&d.format("%Y-%m-%d").to_string()));
+                let overdue_date = fc.overdue_date.map(|d| builder.create_string(&d.format("%Y-%m-%d").to_string()));
+                let latest_date = fc.latest_date.map(|d| builder.create_string(&d.format("%Y-%m-%d").to_string()));
+
+                let status_str = match fc.status {
+                    models::SeriesStatus::NotComplete => "NotComplete",
+                    models::SeriesStatus::Complete => "Complete",
+                    models::SeriesStatus::NotRecommended => "NotRecommended",
+                    models::SeriesStatus::ConditionallyRecommended => "ConditionallyRecommended",
+                };
+                let status = builder.create_string(status_str);
+
+                let mut reason_offsets = Vec::with_capacity(fc.reasons.len());
+                for r in fc.reasons.iter() {
+                    reason_offsets.push(builder.create_string(r));
+                }
+                let reasons_vec = builder.create_vector(&reason_offsets);
+
+                let fc_offset = fb::SeriesForecast::create(&mut builder, &fb::SeriesForecastArgs {
+                    series_name: Some(series_name),
+                    earliest_date,
+                    recommended_date,
+                    overdue_date,
+                    latest_date,
+                    status: Some(status),
+                    reasons: Some(reasons_vec),
+                });
+                forecast_offsets.push(fc_offset);
+            }
+            let forecasts_vec = builder.create_vector(&forecast_offsets);
+
+            let vaccine_group = builder.create_string(&vg.vaccine_group);
+            let selected_series = vg.selected_series.as_ref().map(|s| builder.create_string(s));
+
+            let vg_forecast_offset = fb::VaccineGroupForecast::create(&mut builder, &fb::VaccineGroupForecastArgs {
+                vaccine_group: Some(vaccine_group),
+                evaluations: Some(evals_vec),
+                forecasts: Some(forecasts_vec),
+                selected_series,
+            });
+            vg_offsets.push(vg_forecast_offset);
+        }
+        let vg_vec = builder.create_vector(&vg_offsets);
+
+        let forecast_resp = fb::ForecastResponse::create(&mut builder, &fb::ForecastResponseArgs {
+            vaccine_groups: Some(vg_vec),
+        });
+        response_offsets.push(forecast_resp);
+    }
+
+    let responses_vec = builder.create_vector(&response_offsets);
+    let bulk_resp = fb::BulkForecastResponse::create(&mut builder, &fb::BulkForecastResponseArgs {
+        responses: Some(responses_vec),
+    });
+
+    fb::finish_bulk_forecast_response_buffer(&mut builder, bulk_resp);
+    let finished_data = builder.finished_data().to_vec();
+
+    let elapsed = req_start.elapsed();
+    println!(
+        "INFO: processed Bulk FlatBuffers request (size {}) in {:?}",
+        num_responses,
+        elapsed
+    );
+
+    let elapsed_us = elapsed.as_micros().to_string();
+    let mut resp_headers = HeaderMap::new();
+    resp_headers.insert("Content-Type", HeaderValue::from_static("application/octet-stream"));
+    if let Ok(val) = HeaderValue::from_str(&elapsed_us) {
+        resp_headers.insert("X-Process-Time-Us", val);
+    }
+
+    (StatusCode::OK, resp_headers, finished_data).into_response()
+}
+
 fn run_server() -> Result<(), Box<dyn std::error::Error>> {
     let rt = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
@@ -134,7 +355,8 @@ fn run_server() -> Result<(), Box<dyn std::error::Error>> {
         let app = Router::new()
             .route("/evaluate", post(evaluate_handler))
             .route("/opencds-decision-support-service/api/resources/evaluate", post(evaluate_handler))
-            .route("/evaluate_bulk", post(evaluate_bulk_handler));
+            .route("/evaluate_bulk", post(evaluate_bulk_handler))
+            .route("/evaluate_bulk_flatbuffers", post(evaluate_bulk_flatbuffers_handler));
 
         let addr = SocketAddr::from(([0, 0, 0, 0], 8081));
         println!("Rust PoC REST server listening on http://{}", addr);
