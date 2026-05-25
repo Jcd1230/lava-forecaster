@@ -32,7 +32,9 @@
         "latest_date": null,
         "status": "NotComplete",
         "reasons": [
-          "DUE_IN_FUTURE"
+          "DUE_IN_FUTURE",
+          "ADMINISTER_TDAP_OR_TD",
+          "SUPPLEMENTAL_TEXT"
         ]
       }
     ]

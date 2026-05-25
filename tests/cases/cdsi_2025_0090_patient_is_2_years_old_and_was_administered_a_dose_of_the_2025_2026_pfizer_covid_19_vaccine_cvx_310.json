@@ -18,7 +18,7 @@
       {
         "dose_date": "2025-11-10",
         "cvx": "310",
-        "status": "Invalid",
+        "status": "Valid",
         "reasons": [],
         "dose_number": 1
       }
@@ -26,13 +26,13 @@
     "forecasts": [
       {
         "series_name": "COVID19",
-        "earliest_date": "2025-12-08",
-        "recommended_date": "2025-12-08",
+        "earliest_date": null,
+        "recommended_date": null,
         "overdue_date": null,
         "latest_date": null,
-        "status": "NotComplete",
+        "status": "Complete",
         "reasons": [
-          "DUE_IN_FUTURE"
+          "COMPLETE_HIGH_RISK"
         ]
       }
     ]

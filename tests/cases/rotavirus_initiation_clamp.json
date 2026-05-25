@@ -13,13 +13,13 @@
     "forecasts": [
       {
         "series_name": "ROTAVIRUS",
-        "earliest_date": "2026-02-12",
-        "recommended_date": "2026-03-01",
+        "earliest_date": null,
+        "recommended_date": null,
         "overdue_date": null,
         "latest_date": null,
-        "status": "NotComplete",
+        "status": "NotRecommended",
         "reasons": [
-          "DUE_NOW"
+          "TOO_OLD_TO_INITIATE"
         ]
       }
     ]

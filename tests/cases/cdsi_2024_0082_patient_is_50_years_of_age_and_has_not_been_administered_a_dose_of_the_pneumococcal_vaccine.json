@@ -19,9 +19,8 @@
         "latest_date": null,
         "status": "NotComplete",
         "reasons": [
-          "DUE_IN_FUTURE",
-          "ADMINISTER_PCV15_PCV20_OR_PCV21",
-          "SUPPLEMENTAL_TEXT"
+          "DUE_NOW",
+          "ADMINISTER_PCV15_PCV20_OR_PCV21"
         ]
       }
     ]

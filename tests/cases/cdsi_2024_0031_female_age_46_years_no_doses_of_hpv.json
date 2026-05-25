@@ -17,9 +17,9 @@
         "recommended_date": null,
         "overdue_date": null,
         "latest_date": null,
-        "status": "ConditionallyRecommended",
+        "status": "NotRecommended",
         "reasons": [
-          "CLINICAL_PATIENT_DISCRETION"
+          "TOO_OLD"
         ]
       }
     ]

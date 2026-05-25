@@ -13,13 +13,13 @@
     "forecasts": [
       {
         "series_name": "HPV",
-        "earliest_date": "2007-11-10",
-        "recommended_date": "2009-11-10",
-        "overdue_date": "2013-11-09",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
         "latest_date": null,
-        "status": "NotComplete",
+        "status": "ConditionallyRecommended",
         "reasons": [
-          "DUE_NOW"
+          "CLINICAL_PATIENT_DISCRETION"
         ]
       }
     ]

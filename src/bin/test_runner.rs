@@ -138,7 +138,7 @@ fn generate_xml_payload(dob: NaiveDate, gender: Gender, doses: &[(NaiveDate, Cvx
                         </substance>
                         <administrationTimeInterval high="{}" low="{}"/>
                     </substanceAdministrationEvent>"#,
-            1000 + idx, cvx.0, dt_str, dt_str
+            1000 + idx, cvx, dt_str, dt_str
         ));
     }
 
@@ -190,7 +190,7 @@ fn build_evaluate_payload(
     let xml_content = generate_xml_payload(dob, gender, doses);
     let b64_xml = base64::Engine::encode(&base64::prelude::BASE64_STANDARD, xml_content.as_bytes());
 
-    let eval_datetime = eval_date.and_hms_opt(0, 0, 0).unwrap();
+    let eval_datetime = eval_date.and_hms_opt(23, 59, 59).unwrap();
     let ts_ms = eval_datetime.and_utc().timestamp_millis();
 
     serde_json::json!({

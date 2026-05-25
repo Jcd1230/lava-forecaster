@@ -7,7 +7,7 @@ import argparse
 import subprocess
 import requests
 import re
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, time
 import calendar
 import tempfile
 import xml.etree.ElementTree as ET
@@ -89,13 +89,14 @@ def generate_xml_payload(dob, gender, doses):
     sae_templates = []
     for idx, (dt, cvx) in enumerate(doses):
         dt_str = dt.strftime("%Y%m%d") # Format without hyphens to prevent Java date shift bugs
+        cvx_padded = str(cvx).zfill(2)
         sae_templates.append(f"""                    <substanceAdministrationEvent>
                         <templateId root="2.16.840.1.113883.3.795.11.9.1.1"/>
                         <id root="2.16.840.1.113883.3.795.12.100.10" extension="{1000 + idx}"/>
                         <substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
                         <substance>
                             <id root="ab0c489e-782a-4c34-9e4e-9094cc2952d7"/>
-                            <substanceCode code="{cvx}" displayName="Vaccine" codeSystem="2.16.840.1.113883.12.292"/>
+                            <substanceCode code="{cvx_padded}" displayName="Vaccine" codeSystem="2.16.840.1.113883.12.292"/>
                         </substance>
                         <administrationTimeInterval high="{dt_str}" low="{dt_str}"/>
                     </substanceAdministrationEvent>""")
@@ -136,7 +137,7 @@ def build_evaluate_payload(dob, gender, doses, eval_date):
     b64_xml = base64.b64encode(xml_content.encode("utf-8")).decode("utf-8")
     
     # Specified Time in epoch milliseconds
-    eval_datetime = datetime.combine(eval_date, datetime.min.time())
+    eval_datetime = datetime.combine(eval_date, time(23, 59, 59))
     ts_ms = int(eval_datetime.timestamp() * 1000)
     
     payload = {

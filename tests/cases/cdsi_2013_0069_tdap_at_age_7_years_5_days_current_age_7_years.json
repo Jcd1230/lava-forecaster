@@ -26,9 +26,9 @@
     "forecasts": [
       {
         "series_name": "DTP",
-        "earliest_date": "2025-11-05",
-        "recommended_date": "2025-11-05",
-        "overdue_date": "2025-11-05",
+        "earliest_date": "2025-11-10",
+        "recommended_date": "2025-11-10",
+        "overdue_date": "2025-11-10",
         "latest_date": null,
         "status": "NotComplete",
         "reasons": [

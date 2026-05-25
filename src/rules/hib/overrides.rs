@@ -259,25 +259,51 @@ pub fn hib_custom_forecast_hook(
         }
     }
 
-    // Space by 28-day repeat interval from the last invalid dose in history
+    // Space by 28-day repeat interval from the last invalid dose in history,
+    // unless that last dose was invalid due to BelowMinimumAge.
     let last_dose = history.iter().max_by_key(|d| d.date);
     if let Some(ld) = last_dose {
         let is_valid = valid_doses.iter().any(|(date, _)| *date == ld.date);
         if !is_valid {
-            let repeat_date = ld.date + chrono::Duration::days(28);
-            if let Some(ref mut earliest) = forecast.earliest_date {
-                if *earliest < repeat_date {
-                    *earliest = repeat_date;
+            let target_dose_num = valid_doses.len() + 1;
+            let abs_min_age_str = match forecast.series_name.as_ref() {
+                "HIB_OMP_SERIES" => match target_dose_num {
+                    1 => Some("38d"),
+                    2 => Some("66d"),
+                    3 => Some("1y-4d"),
+                    _ => None,
+                },
+                _ => match target_dose_num {
+                    1 => Some("38d"),
+                    2 => Some("66d"),
+                    3 => Some("94d"),
+                    4 => Some("1y-4d"),
+                    _ => None,
+                },
+            };
+            let is_below_min_age = if let Some(age_str) = abs_min_age_str {
+                let tp = TimePeriod::parse(age_str).unwrap();
+                compare_elapsed(birth, ld.date, &tp) == std::cmp::Ordering::Less
+            } else {
+                false
+            };
+
+            if !is_below_min_age {
+                let repeat_date = ld.date + chrono::Duration::days(28);
+                if let Some(ref mut earliest) = forecast.earliest_date {
+                    if *earliest < repeat_date {
+                        *earliest = repeat_date;
+                    }
                 }
-            }
-            if let Some(ref mut recommended) = forecast.recommended_date {
-                if *recommended < repeat_date {
-                    *recommended = repeat_date;
+                if let Some(ref mut recommended) = forecast.recommended_date {
+                    if *recommended < repeat_date {
+                        *recommended = repeat_date;
+                    }
                 }
-            }
-            if let Some(ref mut overdue) = forecast.overdue_date {
-                if *overdue < repeat_date {
-                    *overdue = repeat_date;
+                if let Some(ref mut overdue) = forecast.overdue_date {
+                    if *overdue < repeat_date {
+                        *overdue = repeat_date;
+                    }
                 }
             }
         }

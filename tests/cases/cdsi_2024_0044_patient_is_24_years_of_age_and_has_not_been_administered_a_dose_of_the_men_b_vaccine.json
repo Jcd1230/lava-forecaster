@@ -19,7 +19,7 @@
         "latest_date": null,
         "status": "ConditionallyRecommended",
         "reasons": [
-          "CLINICAL_PATIENT_DISCRETION"
+          "HIGH_RISK"
         ]
       }
     ]

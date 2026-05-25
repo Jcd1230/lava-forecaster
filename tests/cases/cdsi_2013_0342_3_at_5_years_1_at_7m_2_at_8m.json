@@ -48,13 +48,13 @@
     "forecasts": [
       {
         "series_name": "HIB",
-        "earliest_date": "2026-01-05",
-        "recommended_date": "2026-01-05",
-        "overdue_date": "2026-01-05",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
         "latest_date": null,
-        "status": "NotComplete",
+        "status": "ConditionallyRecommended",
         "reasons": [
-          "DUE_IN_FUTURE"
+          "HIGH_RISK"
         ]
       }
     ]

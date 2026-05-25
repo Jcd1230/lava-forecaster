@@ -19,7 +19,6 @@
         "latest_date": null,
         "status": "ConditionallyRecommended",
         "reasons": [
-          "BELOW_REC_AGE_SERIES",
           "HIGH_RISK",
           "SUPPLEMENTAL_TEXT"
         ]

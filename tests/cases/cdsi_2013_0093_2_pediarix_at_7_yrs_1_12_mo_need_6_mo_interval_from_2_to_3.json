@@ -37,13 +37,16 @@
     "forecasts": [
       {
         "series_name": "DTP",
-        "earliest_date": "2025-12-08",
-        "recommended_date": "2025-12-08",
-        "overdue_date": "2025-12-08",
+        "earliest_date": "2026-05-10",
+        "recommended_date": "2026-05-10",
+        "overdue_date": "2026-05-10",
         "latest_date": null,
         "status": "NotComplete",
         "reasons": [
-          "DUE_IN_FUTURE"
+          "DUE_IN_FUTURE",
+          "ADMINISTER_TDAP_OR_TD",
+          "SUPPLEMENTAL_TEXT",
+          "SUPPLEMENTAL_TEXT"
         ]
       }
     ]

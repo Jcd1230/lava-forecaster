@@ -54,7 +54,7 @@
         "latest_date": null,
         "status": "NotComplete",
         "reasons": [
-          "DUE_IN_FUTURE"
+          "DUE_NOW"
         ]
       }
     ]

@@ -13,14 +13,13 @@
     "forecasts": [
       {
         "series_name": "RSV",
-        "earliest_date": "2025-10-01",
-        "recommended_date": "2025-10-01",
+        "earliest_date": null,
+        "recommended_date": null,
         "overdue_date": null,
         "latest_date": null,
-        "status": "NotComplete",
+        "status": "ConditionallyRecommended",
         "reasons": [
-          "DUE_NOW",
-          "SUPPLEMENTAL_TEXT"
+          "HIGH_RISK"
         ]
       }
     ]
