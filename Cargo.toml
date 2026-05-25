@@ -22,3 +22,4 @@ rayon = "1.10"
 reqwest = { version = "0.12", features = ["blocking", "json"] }
 ice-cvx-macro = { path = "./ice-cvx-macro" }
 flatbuffers = "25.2.10"
+smallvec = { version = "1.13", features = ["serde", "union"] }
