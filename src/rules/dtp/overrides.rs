@@ -152,7 +152,7 @@ pub fn dtp_custom_forecast_hook(
     
     if forecast.status == crate::models::SeriesStatus::Complete {
         forecast.status = crate::models::SeriesStatus::NotComplete;
-        forecast.reasons = vec!["NOT_COMPLETE".to_string()];
+        forecast.reasons = vec!["NOT_COMPLETE".into()];
         
         if has_valid_tdap_ge_10 {
             // Decennial booster needed
@@ -401,8 +401,8 @@ pub fn dtp_group_selection(
     let is_at_least_7 = eval_date >= age_7;
     
     if is_at_least_7 && !has_dose_before_7 {
-        "DTP_3_DOSE_SERIES".to_string()
+        "DTP_3_DOSE_SERIES".into()
     } else {
-        "DTP_5_DOSE_SERIES".to_string()
+        "DTP_5_DOSE_SERIES".into()
     }
 }

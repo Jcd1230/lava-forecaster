@@ -21,7 +21,7 @@ pub fn cholera_custom_forecast_hook(
     forecast: &mut SeriesForecast,
 ) {
     if forecast.status == SeriesStatus::Complete {
-        forecast.reasons = vec!["COMPLETE".to_string()];
+        forecast.reasons = vec!["COMPLETE".into()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -41,7 +41,7 @@ pub fn cholera_custom_forecast_hook(
 
     if is_under_2y {
         forecast.status = SeriesStatus::NotRecommended;
-        forecast.reasons = vec!["CHOLERA_NOT_ROUTINE_SEE_ACIP".to_string()];
+        forecast.reasons = vec!["CHOLERA_NOT_ROUTINE_SEE_ACIP".into()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -50,16 +50,16 @@ pub fn cholera_custom_forecast_hook(
         if valid_doses.is_empty() {
             forecast.status = SeriesStatus::ConditionallyRecommended;
             forecast.reasons = vec![
-                "HIGH_RISK".to_string(),
-                "CHOLERA_NOT_ROUTINE_SEE_ACIP".to_string(),
+                "HIGH_RISK".into(),
+                "CHOLERA_NOT_ROUTINE_SEE_ACIP".into(),
             ];
             forecast.earliest_date = None;
             forecast.recommended_date = None;
             forecast.overdue_date = None;
             forecast.latest_date = None;
         } else {
-            if !forecast.reasons.contains(&"CHOLERA_NOT_ROUTINE_SEE_ACIP".to_string()) {
-                forecast.reasons.push("CHOLERA_NOT_ROUTINE_SEE_ACIP".to_string());
+            if !forecast.reasons.contains(&"CHOLERA_NOT_ROUTINE_SEE_ACIP".into()) {
+                forecast.reasons.push("CHOLERA_NOT_ROUTINE_SEE_ACIP".into());
             }
         }
     } else {
@@ -67,16 +67,16 @@ pub fn cholera_custom_forecast_hook(
         if valid_doses.is_empty() {
             forecast.status = SeriesStatus::NotRecommended;
             forecast.reasons = vec![
-                "TOO_OLD".to_string(),
-                "CHOLERA_NOT_ROUTINE_SEE_ACIP".to_string(),
+                "TOO_OLD".into(),
+                "CHOLERA_NOT_ROUTINE_SEE_ACIP".into(),
             ];
             forecast.earliest_date = None;
             forecast.recommended_date = None;
             forecast.overdue_date = None;
             forecast.latest_date = None;
         } else {
-            if !forecast.reasons.contains(&"CHOLERA_NOT_ROUTINE_SEE_ACIP".to_string()) {
-                forecast.reasons.push("CHOLERA_NOT_ROUTINE_SEE_ACIP".to_string());
+            if !forecast.reasons.contains(&"CHOLERA_NOT_ROUTINE_SEE_ACIP".into()) {
+                forecast.reasons.push("CHOLERA_NOT_ROUTINE_SEE_ACIP".into());
             }
         }
     }

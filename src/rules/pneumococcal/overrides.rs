@@ -290,7 +290,7 @@ pub fn pneumococcal_custom_forecast_hook(
         .any(|d| ADULT_COMPLETE_PCV_CVX.contains(&d.cvx.0) && age_ge(birth, d.date, "19y"))
     {
         forecast.status = SeriesStatus::Complete;
-        forecast.reasons = vec!["COMPLETE".to_string()];
+        forecast.reasons = vec!["COMPLETE".into()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -302,7 +302,7 @@ pub fn pneumococcal_custom_forecast_hook(
         .any(|d| d.cvx.0 == cvx!("215") && age_ge(birth, d.date, "19y"));
     if has_adult_pcv15 && has_adult_ppsv23 {
         forecast.status = SeriesStatus::Complete;
-        forecast.reasons = vec!["COMPLETE".to_string()];
+        forecast.reasons = vec!["COMPLETE".into()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -315,7 +315,7 @@ pub fn pneumococcal_custom_forecast_hook(
 
     if age_ge(birth, eval_date, "65y") && has_adult_pcv13 && has_ppsv65 && !has_adult_modern_pcv {
         forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = vec!["COMPLETE".to_string()];
+        forecast.reasons = vec!["COMPLETE".into()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -350,7 +350,7 @@ pub fn pneumococcal_custom_forecast_hook(
         } else {
             "HIGH_RISK"
         }
-        .to_string()];
+        .into()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -359,7 +359,7 @@ pub fn pneumococcal_custom_forecast_hook(
 
     if age_ge(birth, eval_date, "19y") && age_lt(birth, eval_date, "50y") {
         forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = vec!["HIGH_RISK".to_string()];
+        forecast.reasons = vec!["HIGH_RISK".into()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -371,7 +371,7 @@ pub fn pneumococcal_custom_forecast_hook(
         && has_valid_child_modern_pcv
     {
         forecast.status = SeriesStatus::Complete;
-        forecast.reasons = vec!["COMPLETE_HIGH_RISK".to_string()];
+        forecast.reasons = vec!["COMPLETE_HIGH_RISK".into()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;

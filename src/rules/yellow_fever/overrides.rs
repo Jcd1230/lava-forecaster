@@ -23,8 +23,8 @@ pub fn yellow_fever_custom_forecast_hook(
     if forecast.status == SeriesStatus::Complete {
         forecast.status = SeriesStatus::Complete;
         forecast.reasons = vec![
-            "COMPLETE_HIGH_RISK".to_string(),
-            "YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP".to_string(),
+            "COMPLETE_HIGH_RISK".into(),
+            "YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP".into(),
         ];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
@@ -45,7 +45,7 @@ pub fn yellow_fever_custom_forecast_hook(
 
     if is_under_6m {
         forecast.status = SeriesStatus::NotRecommended;
-        forecast.reasons = vec!["YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP".to_string()];
+        forecast.reasons = vec!["YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP".into()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -53,9 +53,9 @@ pub fn yellow_fever_custom_forecast_hook(
     } else if is_under_9m {
         forecast.status = SeriesStatus::ConditionallyRecommended;
         forecast.reasons = vec![
-            "BELOW_REC_AGE_SERIES".to_string(),
-            "HIGH_RISK".to_string(),
-            "YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP".to_string(),
+            "BELOW_REC_AGE_SERIES".into(),
+            "HIGH_RISK".into(),
+            "YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP".into(),
         ];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
@@ -65,8 +65,8 @@ pub fn yellow_fever_custom_forecast_hook(
         // >= 9 months old and incomplete
         forecast.status = SeriesStatus::ConditionallyRecommended;
         forecast.reasons = vec![
-            "HIGH_RISK".to_string(),
-            "YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP".to_string(),
+            "HIGH_RISK".into(),
+            "YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP".into(),
         ];
         forecast.earliest_date = None;
         forecast.recommended_date = None;

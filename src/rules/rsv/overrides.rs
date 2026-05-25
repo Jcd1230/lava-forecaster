@@ -89,7 +89,7 @@ pub fn rsv_custom_forecast_hook(
     forecast: &mut SeriesForecast,
 ) {
     if forecast.status == SeriesStatus::Complete {
-        forecast.reasons = vec!["COMPLETE".to_string()];
+        forecast.reasons = vec!["COMPLETE".into()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -100,7 +100,7 @@ pub fn rsv_custom_forecast_hook(
     let support_start = date(RSV_SUPPORT_START.0, RSV_SUPPORT_START.1, RSV_SUPPORT_START.2);
     if eval_date < support_start {
         forecast.status = SeriesStatus::NotRecommended;
-        forecast.reasons = vec!["NOT_SUPPORTED".to_string()];
+        forecast.reasons = vec!["NOT_SUPPORTED".into()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -111,7 +111,7 @@ pub fn rsv_custom_forecast_hook(
     if forecast.series_name == "RSV_INFANT_SERIES" {
         if age_ge(patient.birth_date, eval_date, "8m") && age_lt(patient.birth_date, eval_date, "20m") {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons = vec!["HIGH_RISK".to_string()];
+            forecast.reasons = vec!["HIGH_RISK".into()];
             forecast.earliest_date = None;
             forecast.recommended_date = None;
             forecast.overdue_date = None;
@@ -130,7 +130,7 @@ pub fn rsv_custom_forecast_hook(
             && age_lt(patient.birth_date, recommendation_date, "20m")
         {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons = vec!["HIGH_RISK".to_string()];
+            forecast.reasons = vec!["HIGH_RISK".into()];
             forecast.earliest_date = None;
             forecast.recommended_date = None;
             forecast.overdue_date = None;
@@ -139,7 +139,7 @@ pub fn rsv_custom_forecast_hook(
         }
 
         forecast.status = SeriesStatus::NotComplete;
-        forecast.reasons = vec!["NOT_COMPLETE".to_string()];
+        forecast.reasons = vec!["NOT_COMPLETE".into()];
         forecast.earliest_date = Some(recommendation_date);
         forecast.recommended_date = Some(recommendation_date);
         forecast.overdue_date = None;
@@ -149,7 +149,7 @@ pub fn rsv_custom_forecast_hook(
 
     if age_ge(patient.birth_date, eval_date, "50y") && age_lt(patient.birth_date, eval_date, "75y") {
         forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = vec!["HIGH_RISK".to_string()];
+        forecast.reasons = vec!["HIGH_RISK".into()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -160,7 +160,7 @@ pub fn rsv_custom_forecast_hook(
     let age_75 = add_years(patient.birth_date, 75);
     let adult_recommendation_date = age_75.max(date(2024, 6, 26));
     forecast.status = SeriesStatus::NotComplete;
-    forecast.reasons = vec!["NOT_COMPLETE".to_string()];
+    forecast.reasons = vec!["NOT_COMPLETE".into()];
     forecast.earliest_date = Some(adult_recommendation_date);
     forecast.recommended_date = Some(adult_recommendation_date);
     forecast.overdue_date = None;
@@ -175,8 +175,8 @@ pub fn rsv_group_selection(
 ) -> String {
     let adult_start = add_months(patient.birth_date, 20);
     if eval_date >= adult_start {
-        "RSV_ADULT_SERIES".to_string()
+        "RSV_ADULT_SERIES".into()
     } else {
-        "RSV_INFANT_SERIES".to_string()
+        "RSV_INFANT_SERIES".into()
     }
 }

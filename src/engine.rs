@@ -483,10 +483,10 @@ impl<'a> EvaluationEngine<'a> {
         );
 
         VaccineGroupForecast {
-            vaccine_group: active_series.vaccine_group.clone(),
+            vaccine_group: active_series.vaccine_group.into(),
             evaluations,
             forecasts: vec![forecast],
-            selected_series: Some(active_series.name.clone()),
+            selected_series: Some(active_series.name.into()),
         }
     }
 
@@ -502,13 +502,13 @@ impl<'a> EvaluationEngine<'a> {
     ) -> SeriesForecast {
         if is_completed {
             let mut forecast = SeriesForecast {
-                series_name: active_series.name.clone(),
+                series_name: active_series.name.into(),
                 earliest_date: None,
                 recommended_date: None,
                 overdue_date: None,
                 latest_date: None,
                 status: SeriesStatus::Complete,
-                reasons: vec!["COMPLETE".to_string()],
+                reasons: vec!["COMPLETE".into()],
             };
             if let Some(hook) = self.custom_forecast_hook {
                 (hook)(patient, valid_doses, history, eval_date, &mut forecast);
@@ -532,13 +532,13 @@ impl<'a> EvaluationEngine<'a> {
 
         if next_dose_idx > active_series.num_doses {
             let mut forecast = SeriesForecast {
-                series_name: active_series.name.clone(),
+                series_name: active_series.name.into(),
                 earliest_date: None,
                 recommended_date: None,
                 overdue_date: None,
                 latest_date: None,
                 status: SeriesStatus::Complete,
-                reasons: vec!["COMPLETE".to_string()],
+                reasons: vec!["COMPLETE".into()],
             };
             if let Some(hook) = self.custom_forecast_hook {
                 (hook)(patient, valid_doses, history, eval_date, &mut forecast);
@@ -650,13 +650,13 @@ impl<'a> EvaluationEngine<'a> {
         let overdue_date = overdue_date.and_then(|d| d.pred_opt());
 
         let mut forecast = SeriesForecast {
-            series_name: active_series.name.clone(),
+            series_name: active_series.name.into(),
             earliest_date,
             recommended_date,
             overdue_date,
             latest_date: None,
             status: SeriesStatus::NotComplete,
-            reasons: vec!["NOT_COMPLETE".to_string()],
+            reasons: vec!["NOT_COMPLETE".into()],
         };
 
         // Apply max age clamp if configured
@@ -668,7 +668,7 @@ impl<'a> EvaluationEngine<'a> {
                     forecast.recommended_date = None;
                     forecast.overdue_date = None;
                     forecast.latest_date = None;
-                    forecast.reasons = vec!["MAX_AGE_EXCEEDED".to_string()];
+                    forecast.reasons = vec!["MAX_AGE_EXCEEDED".into()];
                 }
             }
         }

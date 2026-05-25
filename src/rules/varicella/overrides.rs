@@ -81,7 +81,7 @@ pub fn varicella_custom_forecast_hook(
     // 1. Patient born prior to 1980 rule
     if forecast.status != SeriesStatus::Complete && patient.birth_date < pre_1980 {
         forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = vec!["CONDITIONAL".to_string()];
+        forecast.reasons = vec!["CONDITIONAL".into()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;

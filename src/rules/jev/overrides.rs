@@ -53,8 +53,8 @@ pub fn jev_custom_forecast_hook(
     if forecast.status == SeriesStatus::Complete {
         forecast.status = SeriesStatus::Complete;
         forecast.reasons = vec![
-            "COMPLETE_HIGH_RISK".to_string(),
-            "JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP".to_string(),
+            "COMPLETE_HIGH_RISK".into(),
+            "JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP".into(),
         ];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
@@ -67,12 +67,12 @@ pub fn jev_custom_forecast_hook(
         let age_2m = crate::time_period!("2m").add_to(patient.birth_date);
         if eval_date < age_2m {
             forecast.status = SeriesStatus::NotRecommended;
-            forecast.reasons = vec!["JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP".to_string()];
+            forecast.reasons = vec!["JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP".into()];
         } else {
             forecast.status = SeriesStatus::ConditionallyRecommended;
             forecast.reasons = vec![
-                "HIGH_RISK".to_string(),
-                "JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP".to_string(),
+                "HIGH_RISK".into(),
+                "JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP".into(),
             ];
         }
         forecast.earliest_date = None;
@@ -83,8 +83,8 @@ pub fn jev_custom_forecast_hook(
     }
 
     if valid_doses.len() == 1 {
-        if !forecast.reasons.contains(&"JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP".to_string()) {
-            forecast.reasons.push("JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP".to_string());
+        if !forecast.reasons.contains(&"JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP".into()) {
+            forecast.reasons.push("JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP".into());
         }
 
         if forecast.series_name == "JEVC_RISK_2_DOSE_ACCELERATED_SERIES" {
@@ -128,8 +128,8 @@ pub fn jev_group_selection(
     let select_accelerated = age_at_reference >= age_18_minus_4d && age_at_reference < age_66;
 
     if select_accelerated {
-        "JEVC_RISK_2_DOSE_ACCELERATED_SERIES".to_string()
+        "JEVC_RISK_2_DOSE_ACCELERATED_SERIES".into()
     } else {
-        "JEVC_RISK_2_DOSE_SERIES".to_string()
+        "JEVC_RISK_2_DOSE_SERIES".into()
     }
 }

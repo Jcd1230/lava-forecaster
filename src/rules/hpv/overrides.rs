@@ -155,9 +155,9 @@ pub fn hpv_group_selection(
             // No doses administered yet: select based on age on evaluation date
             let age_15 = add_years(patient.birth_date, 15);
             if eval_date < age_15 {
-                "HPV_2_DOSE_SERIES".to_string()
+                "HPV_2_DOSE_SERIES".into()
             } else {
-                "HPV_3_DOSE_SERIES".to_string()
+                "HPV_3_DOSE_SERIES".into()
             }
         }
         Some(d1_date) => {
@@ -180,20 +180,20 @@ pub fn hpv_group_selection(
                         .any(|e| e.status == DoseStatus::Valid && e.dose_number == Some(2) && e.dose_date < d2_2dose_date);
 
                     if earlier_d2_3dose {
-                        "HPV_3_DOSE_SERIES".to_string()
+                        "HPV_3_DOSE_SERIES".into()
                     } else {
-                        "HPV_2_DOSE_SERIES".to_string()
+                        "HPV_2_DOSE_SERIES".into()
                     }
                 } else if has_valid_d2_in_3_dose {
                     // 2-dose is not satisfied, but 3-dose is
-                    "HPV_3_DOSE_SERIES".to_string()
+                    "HPV_3_DOSE_SERIES".into()
                 } else {
                     // Only 1 dose, or no valid doses at all
-                    "HPV_2_DOSE_SERIES".to_string()
+                    "HPV_2_DOSE_SERIES".into()
                 }
             } else {
                 // Initiated at or after age 15 -> must use 3-dose series
-                "HPV_3_DOSE_SERIES".to_string()
+                "HPV_3_DOSE_SERIES".into()
             }
         }
     }

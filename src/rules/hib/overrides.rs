@@ -362,8 +362,8 @@ pub fn hib_group_selection(
     _eval_date: NaiveDate,
     candidate_forecasts: &mut std::collections::HashMap<String, VaccineGroupForecast>,
 ) -> String {
-    let omp_name = "HIB_OMP_SERIES".to_string();
-    let four_dose_name = "HIB_4_DOSE_SERIES".to_string();
+    let omp_name = "HIB_OMP_SERIES".into();
+    let four_dose_name = "HIB_4_DOSE_SERIES".into();
 
     let omp_exists = candidate_forecasts.contains_key(&omp_name);
     let four_dose_exists = candidate_forecasts.contains_key(&four_dose_name);

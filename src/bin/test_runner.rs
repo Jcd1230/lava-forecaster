@@ -577,13 +577,13 @@ fn parse_legacy_xml(xml_content: &str, focus_code: &str) -> ExpectedResults {
                     if prop_focus_matched {
                         let st = prop_status.as_deref().unwrap_or("RECOMMENDED");
                         forecasts.push(SeriesForecast {
-                            series_name: "".to_string(),
+                            series_name: "".into(),
                             earliest_date: prop_earliest,
                             recommended_date: prop_recommended,
                             overdue_date: prop_overdue,
                             latest_date: None,
                             status: map_legacy_status(st, &prop_reasons),
-                            reasons: prop_reasons.clone(),
+                            reasons: prop_reasons.iter().map(|r| r.clone().into()).collect(),
                         });
                     }
                 }
@@ -749,7 +749,7 @@ fn main() {
                     
                     // Fill in series names for expected forecasts to match Rust
                     for f in &mut java_res.forecasts {
-                        f.series_name = tc.group.clone(); // Fallback focus series
+                        f.series_name = tc.group.clone().into(); // Fallback focus series
                     }
 
                     tc.expected = Some(java_res);

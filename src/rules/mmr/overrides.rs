@@ -153,7 +153,7 @@ pub fn mmr_custom_forecast_hook(
 
     if is_completed || is_adult_complete {
         forecast.status = SeriesStatus::Complete;
-        forecast.reasons = vec!["COMPLETE_HIGH_RISK".to_string()];
+        forecast.reasons = vec!["COMPLETE_HIGH_RISK".into()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -162,7 +162,7 @@ pub fn mmr_custom_forecast_hook(
         // Case 2: Not complete. Check if born prior to 1957
         if patient.birth_date < pre_1957 {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons = vec!["CONDITIONAL".to_string()];
+            forecast.reasons = vec!["CONDITIONAL".into()];
             forecast.earliest_date = None;
             forecast.recommended_date = None;
             forecast.overdue_date = None;

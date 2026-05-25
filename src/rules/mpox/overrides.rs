@@ -79,7 +79,7 @@ pub fn mpox_custom_forecast_hook(
     forecast: &mut SeriesForecast,
 ) {
     if forecast.status == SeriesStatus::Complete {
-        forecast.reasons = vec!["COMPLETE_HIGH_RISK".to_string()];
+        forecast.reasons = vec!["COMPLETE_HIGH_RISK".into()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -89,7 +89,7 @@ pub fn mpox_custom_forecast_hook(
 
     if valid_doses.is_empty() {
         forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = vec!["HIGH_RISK".to_string()];
+        forecast.reasons = vec!["HIGH_RISK".into()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;

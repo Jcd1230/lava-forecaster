@@ -35,7 +35,7 @@ pub fn rotavirus_custom_forecast_hook(
     let birth = patient.birth_date;
 
     if forecast.status == SeriesStatus::Complete {
-        forecast.reasons = vec!["COMPLETE".to_string()];
+        forecast.reasons = vec!["COMPLETE".into()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -52,7 +52,7 @@ pub fn rotavirus_custom_forecast_hook(
 
     if is_currently_gt_8m || is_rec_gt_8m {
         forecast.status = SeriesStatus::NotRecommended;
-        forecast.reasons = vec!["TOO_OLD".to_string()];
+        forecast.reasons = vec!["TOO_OLD".into()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -65,7 +65,7 @@ pub fn rotavirus_custom_forecast_hook(
     let date_105d = tp_105d.add_to(birth);
     if eval_date >= date_105d && valid_doses.is_empty() {
         forecast.status = SeriesStatus::NotRecommended;
-        forecast.reasons = vec!["TOO_OLD_TO_INITIATE".to_string()];
+        forecast.reasons = vec!["TOO_OLD_TO_INITIATE".into()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -117,8 +117,8 @@ pub fn rotavirus_group_selection(
     _eval_date: NaiveDate,
     candidate_forecasts: &mut std::collections::HashMap<String, VaccineGroupForecast>,
 ) -> String {
-    let series_2_dose = "ROTAVIRUS_2_DOSE_SERIES".to_string();
-    let series_3_dose = "ROTAVIRUS_3_DOSE_SERIES".to_string();
+    let series_2_dose = "ROTAVIRUS_2_DOSE_SERIES".into();
+    let series_3_dose = "ROTAVIRUS_3_DOSE_SERIES".into();
 
     let has_2_dose = candidate_forecasts.contains_key(&series_2_dose);
     let has_3_dose = candidate_forecasts.contains_key(&series_3_dose);

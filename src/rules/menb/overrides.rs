@@ -187,7 +187,7 @@ pub fn menb_custom_forecast_hook(
     forecast: &mut SeriesForecast,
 ) {
     if forecast.status == SeriesStatus::Complete {
-        forecast.reasons = vec!["COMPLETE".to_string()];
+        forecast.reasons = vec!["COMPLETE".into()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -199,16 +199,16 @@ pub fn menb_custom_forecast_hook(
         let age_10 = add_years(patient.birth_date, 10);
         if eval_date < age_10 {
             forecast.status = SeriesStatus::NotRecommended;
-            forecast.reasons = vec!["BELOW_MINIMUM_AGE_HIGH_RISK_SERIES".to_string()];
+            forecast.reasons = vec!["BELOW_MINIMUM_AGE_HIGH_RISK_SERIES".into()];
         } else if eval_date < add_years(patient.birth_date, 16) {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons = vec!["HIGH_RISK".to_string()];
+            forecast.reasons = vec!["HIGH_RISK".into()];
         } else if eval_date < add_years(patient.birth_date, 24) {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons = vec!["CLINICAL_PATIENT_DISCRETION".to_string()];
+            forecast.reasons = vec!["CLINICAL_PATIENT_DISCRETION".into()];
         } else {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons = vec!["HIGH_RISK".to_string()];
+            forecast.reasons = vec!["HIGH_RISK".into()];
         }
         forecast.earliest_date = None;
         forecast.recommended_date = None;
@@ -237,7 +237,7 @@ pub fn menb_custom_forecast_hook(
         }
     }
 
-    if matches!(forecast.series_name.as_str(), "MEN_B_4_C_3_DOSE_SERIES" | "MEN_BF_HBP_3_DOSE_SERIES") {
+    if matches!(forecast.series_name.as_ref(), "MEN_B_4_C_3_DOSE_SERIES" | "MEN_BF_HBP_3_DOSE_SERIES") {
         if let Some((dose1_date, _)) = valid_doses.first() {
             let anchor = crate::time_period!("6m").add_to(*dose1_date);
             forecast.earliest_date = Some(forecast.earliest_date.map_or(anchor, |date| date.max(anchor)));
@@ -274,7 +274,7 @@ pub fn menb_group_selection(
         .iter()
         .any(|dose| dose.date < policy_change && has_mixed_brand_same_day(dose, history))
     {
-        return "MEN_B_4_C_2_DOSE_SERIES".to_string();
+        return "MEN_B_4_C_2_DOSE_SERIES".into();
     }
 
     match latest_family(history) {
@@ -288,6 +288,6 @@ pub fn menb_group_selection(
             "MEN_B_4_C_3_DOSE_SERIES",
             candidate_forecasts,
         ),
-        _ => "MEN_B_4_C_2_DOSE_SERIES".to_string(),
+        _ => "MEN_B_4_C_2_DOSE_SERIES".into(),
     }
 }

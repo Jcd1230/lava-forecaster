@@ -380,7 +380,7 @@ pub fn hep_b_custom_forecast_hook(
         }
     }
 
-    match forecast.series_name.as_str() {
+    match forecast.series_name.as_ref() {
         "HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES" if forecast.status == SeriesStatus::NotComplete && max_dose_number == 1 => {
             if eval_date >= add_months(patient.birth_date, 4) {
                 forecast.overdue_date = forecast.earliest_date.or(forecast.recommended_date);
@@ -577,13 +577,13 @@ pub fn hep_b_group_selection(
             }
             for f in &mut forecast.forecasts {
                 f.status = SeriesStatus::Complete;
-                f.reasons = vec!["COMPLETE".to_string()];
+                f.reasons = vec!["COMPLETE".into()];
                 f.earliest_date = None;
                 f.recommended_date = None;
                 f.overdue_date = None;
                 f.latest_date = None;
             }
-            return "HEP_B_ADULT_2_DOSE_SERIES".to_string();
+            return "HEP_B_ADULT_2_DOSE_SERIES".into();
         }
     }
 
@@ -626,7 +626,7 @@ pub fn hep_b_group_selection(
 
     if !is_adult && child_requires_four_dose_series(patient, history, &[]) {
         if candidate_forecasts.contains_key("HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES") {
-            return "HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES".to_string();
+            return "HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES".into();
         }
     }
 
@@ -648,11 +648,11 @@ pub fn hep_b_group_selection(
                 if twinrix_doses.len() >= 2 {
                     let interval = (twinrix_doses[1].date - twinrix_doses[0].date).num_days();
                     if (7..24).contains(&interval) && candidate_forecasts.contains_key("HEP_B_4_DOSE_ACCELERATED_TWINRIX_SERIES") {
-                        return "HEP_B_4_DOSE_ACCELERATED_TWINRIX_SERIES".to_string();
+                        return "HEP_B_4_DOSE_ACCELERATED_TWINRIX_SERIES".into();
                     }
                 }
                 if candidate_forecasts.contains_key("HEP_B_3_DOSE_TWINRIX_SERIES") {
-                    return "HEP_B_3_DOSE_TWINRIX_SERIES".to_string();
+                    return "HEP_B_3_DOSE_TWINRIX_SERIES".into();
                 }
             }
         }
@@ -661,13 +661,13 @@ pub fn hep_b_group_selection(
     let has_cvx189 = history.iter().any(|d| d.cvx.0 == cvx!("189"));
     if has_cvx189 {
         if candidate_forecasts.contains_key("HEP_B_ADULT_2_DOSE_SERIES") {
-            return "HEP_B_ADULT_2_DOSE_SERIES".to_string();
+            return "HEP_B_ADULT_2_DOSE_SERIES".into();
         }
     }
 
     // Default choice based on is_adult
     if is_adult {
-        "HEP_B_ADULT_3_DOSE_SERIES".to_string()
+        "HEP_B_ADULT_3_DOSE_SERIES".into()
     } else {
         if let Some(f3) = candidate_forecasts.get_mut("HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES") {
             let all_pediarix_evaluations = !f3.evaluations.is_empty() && f3.evaluations.iter().all(|evaluation| evaluation.cvx.0 == cvx!("110"));
@@ -693,9 +693,9 @@ pub fn hep_b_group_selection(
             let f4 = candidate_forecasts.get("HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES").unwrap();
             // If any dose was evaluated as Dose 4, it means we switched!
             if f4.evaluations.iter().any(|e| e.dose_number == Some(4)) {
-                return "HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES".to_string();
+                return "HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES".into();
             }
         }
-        "HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES".to_string()
+        "HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES".into()
     }
 }

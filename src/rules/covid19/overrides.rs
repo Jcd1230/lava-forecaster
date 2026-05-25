@@ -240,21 +240,21 @@ pub fn evaluate_doses_seasonally(
                     let season_key = if season == "COVID_19_AUG_2025_SEASON" {
                         let age_65_date = add_years(patient.birth_date, 65);
                         if dose.date >= age_65_date {
-                            "COVID_19_AUG_2025_SEASON_GTE65".to_string()
+                            "COVID_19_AUG_2025_SEASON_GTE65".into()
                         } else {
-                            "COVID_19_AUG_2025_SEASON".to_string()
+                            "COVID_19_AUG_2025_SEASON".into()
                         }
                     } else {
                         let is_pediatric = matches!(dose.cvx.0, cvx!("219") | cvx!("228") | cvx!("272") | cvx!("302") | cvx!("308") | cvx!("311"));
                         if is_pediatric {
-                            "PRIOR_SEASONS_LT5".to_string()
+                            "PRIOR_SEASONS_LT5".into()
                         } else {
                             let season_start_dt = get_season_start_date(season);
                             let age_at_season_start = compare_elapsed(patient.birth_date, season_start_dt, &crate::time_period!("5y"));
                             if age_at_season_start != std::cmp::Ordering::Less {
                                 season.to_string()
                             } else {
-                                "PRIOR_SEASONS_LT5".to_string()
+                                "PRIOR_SEASONS_LT5".into()
                             }
                         }
                     };
@@ -295,21 +295,21 @@ pub fn evaluate_doses_seasonally(
         let season_key = if season == "COVID_19_AUG_2025_SEASON" {
             let age_65_date = add_years(patient.birth_date, 65);
             if dose.date >= age_65_date {
-                "COVID_19_AUG_2025_SEASON_GTE65".to_string()
+                "COVID_19_AUG_2025_SEASON_GTE65".into()
             } else {
-                "COVID_19_AUG_2025_SEASON".to_string()
+                "COVID_19_AUG_2025_SEASON".into()
             }
         } else {
             let is_pediatric = matches!(dose.cvx.0, cvx!("219") | cvx!("228") | cvx!("272") | cvx!("302") | cvx!("308") | cvx!("311"));
             if is_pediatric {
-                "PRIOR_SEASONS_LT5".to_string()
+                "PRIOR_SEASONS_LT5".into()
             } else {
                 let season_start_dt = get_season_start_date(season);
                 let age_at_season_start = compare_elapsed(patient.birth_date, season_start_dt, &crate::time_period!("5y"));
                 if age_at_season_start != std::cmp::Ordering::Less {
                     season.to_string()
                 } else {
-                    "PRIOR_SEASONS_LT5".to_string()
+                    "PRIOR_SEASONS_LT5".into()
                 }
             }
         };
@@ -454,10 +454,10 @@ pub fn covid19_custom_forecast_hook(
                 forecast.recommended_date = None;
                 forecast.overdue_date = None;
                 forecast.latest_date = None;
-                forecast.reasons = vec!["COMPLETE_HIGH_RISK".to_string()];
+                forecast.reasons = vec!["COMPLETE_HIGH_RISK".into()];
             } else {
                 forecast.status = SeriesStatus::NotComplete;
-                forecast.reasons = vec!["NOT_COMPLETE".to_string()];
+                forecast.reasons = vec!["NOT_COMPLETE".into()];
                 
                 let mut earliest = season_start().max(age_6m);
                 let mut recommended = season_start().max(age_6m);
@@ -483,10 +483,10 @@ pub fn covid19_custom_forecast_hook(
                 forecast.recommended_date = None;
                 forecast.overdue_date = None;
                 forecast.latest_date = None;
-                forecast.reasons = vec!["COMPLETE_HIGH_RISK".to_string()];
+                forecast.reasons = vec!["COMPLETE_HIGH_RISK".into()];
             } else if current_season_valid_doses.len() == 1 {
                 forecast.status = SeriesStatus::NotComplete;
-                forecast.reasons = vec!["NOT_COMPLETE".to_string()];
+                forecast.reasons = vec!["NOT_COMPLETE".into()];
 
                 let anchor_dose = last_current_season_dose.unwrap();
                 let earliest = anchor_dose.date + chrono::Duration::days(28);
@@ -500,7 +500,7 @@ pub fn covid19_custom_forecast_hook(
             } else {
                 // 0 current season doses
                 forecast.status = SeriesStatus::NotComplete;
-                forecast.reasons = vec!["NOT_COMPLETE".to_string()];
+                forecast.reasons = vec!["NOT_COMPLETE".into()];
 
                 if let Some(last_dose) = last_current_season_dose {
                     let earliest = last_dose.date + chrono::Duration::days(28);
@@ -540,20 +540,20 @@ pub fn covid19_custom_forecast_hook(
             forecast.recommended_date = None;
             forecast.overdue_date = None;
             forecast.latest_date = None;
-            forecast.reasons = vec!["COMPLETE_HIGH_RISK".to_string()];
+            forecast.reasons = vec!["COMPLETE_HIGH_RISK".into()];
         } else {
             let is_under_19 = eval_date < add_years(patient.birth_date, 19);
             if is_under_19 {
                 if prior_season_valid_doses.is_empty() {
                     forecast.status = SeriesStatus::NotComplete;
-                    forecast.reasons = vec!["NOT_COMPLETE".to_string()];
+                    forecast.reasons = vec!["NOT_COMPLETE".into()];
                 } else {
                     forecast.status = SeriesStatus::ConditionallyRecommended;
-                    forecast.reasons = vec!["HIGH_RISK".to_string()];
+                    forecast.reasons = vec!["HIGH_RISK".into()];
                 }
             } else {
                 forecast.status = SeriesStatus::NotComplete;
-                forecast.reasons = vec!["NOT_COMPLETE".to_string()];
+                forecast.reasons = vec!["NOT_COMPLETE".into()];
             }
 
             if let Some(last_dose) = last_current_season_dose {
@@ -594,10 +594,10 @@ pub fn covid19_custom_forecast_hook(
             forecast.recommended_date = None;
             forecast.overdue_date = None;
             forecast.latest_date = None;
-            forecast.reasons = vec!["COMPLETE_HIGH_RISK".to_string()];
+            forecast.reasons = vec!["COMPLETE_HIGH_RISK".into()];
         } else if current_season_valid_doses.len() == 1 {
             forecast.status = SeriesStatus::NotComplete;
-            forecast.reasons = vec!["NOT_COMPLETE".to_string()];
+            forecast.reasons = vec!["NOT_COMPLETE".into()];
             
             let anchor_dose = last_current_season_dose.unwrap();
             let earliest = anchor_dose.date + chrono::Duration::days(56);
@@ -610,7 +610,7 @@ pub fn covid19_custom_forecast_hook(
         } else {
             // 0 current season doses
             forecast.status = SeriesStatus::NotComplete;
-            forecast.reasons = vec!["NOT_COMPLETE".to_string()];
+            forecast.reasons = vec!["NOT_COMPLETE".into()];
 
             if let Some(last_dose) = last_current_season_dose {
                 let earliest = last_dose.date + chrono::Duration::days(56);

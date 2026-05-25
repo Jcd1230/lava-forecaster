@@ -22,9 +22,9 @@ pub struct CompiledDoseInterval {
 
 #[derive(Debug, Clone)]
 pub struct CompiledSeries {
-    pub name: String,
-    pub code: String,
-    pub vaccine_group: String,
+    pub name: &'static str,
+    pub code: &'static str,
+    pub vaccine_group: &'static str,
     pub num_doses: usize,
     pub doses: Vec<CompiledDoseRule>,
     pub intervals: Vec<CompiledDoseInterval>,
@@ -33,15 +33,15 @@ pub struct CompiledSeries {
 
 // Fluent builders to make writing schedules in Rust extremely clean
 impl CompiledSeries {
-    pub fn builder(name: &str) -> CompiledSeriesBuilder {
+    pub fn builder(name: &'static str) -> CompiledSeriesBuilder {
         CompiledSeriesBuilder::new(name)
     }
 }
 
 pub struct CompiledSeriesBuilder {
-    name: String,
-    code: Option<String>,
-    vaccine_group: Option<String>,
+    name: &'static str,
+    code: Option<&'static str>,
+    vaccine_group: Option<&'static str>,
     num_doses: usize,
     doses: Vec<CompiledDoseRule>,
     intervals: Vec<CompiledDoseInterval>,
@@ -49,9 +49,9 @@ pub struct CompiledSeriesBuilder {
 }
 
 impl CompiledSeriesBuilder {
-    pub fn new(name: &str) -> Self {
+    pub fn new(name: &'static str) -> Self {
         Self {
-            name: name.to_string(),
+            name,
             code: None,
             vaccine_group: None,
             num_doses: 0,
@@ -61,13 +61,13 @@ impl CompiledSeriesBuilder {
         }
     }
 
-    pub fn code(mut self, code: &str) -> Self {
-        self.code = Some(code.to_string());
+    pub fn code(mut self, code: &'static str) -> Self {
+        self.code = Some(code);
         self
     }
 
-    pub fn vaccine_group(mut self, group: &str) -> Self {
-        self.vaccine_group = Some(group.to_string());
+    pub fn vaccine_group(mut self, group: &'static str) -> Self {
+        self.vaccine_group = Some(group);
         self
     }
 
@@ -102,7 +102,7 @@ impl CompiledSeriesBuilder {
     }
 
     pub fn build(self) -> CompiledSeries {
-        let code = self.code.unwrap_or_else(|| self.name.clone());
+        let code = self.code.unwrap_or(self.name);
         let vaccine_group = self.vaccine_group.expect("vaccine_group is required");
         
         // Sort doses and intervals to ensure they are in correct order

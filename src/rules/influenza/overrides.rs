@@ -155,7 +155,7 @@ pub fn influenza_custom_forecast_hook(
         forecast.recommended_date = Some(active_season.end + chrono::Duration::days(1));
         forecast.overdue_date = None;
         forecast.latest_date = None;
-        forecast.reasons = vec!["NOT_COMPLETE".to_string()];
+        forecast.reasons = vec!["NOT_COMPLETE".into()];
         return;
     }
 
@@ -452,18 +452,18 @@ pub fn influenza_group_selection(
     let selected_series_name = if is_default_season {
         if use_1_dose {
             if candidate_forecasts.contains_key("INFLUENZA_1_DOSE_SERIES") {
-                "INFLUENZA_1_DOSE_SERIES".to_string()
+                "INFLUENZA_1_DOSE_SERIES".into()
             } else {
-                "INFLUENZA_2_DOSE_DEFAULT_SERIES".to_string()
+                "INFLUENZA_2_DOSE_DEFAULT_SERIES".into()
             }
         } else {
-            "INFLUENZA_2_DOSE_DEFAULT_SERIES".to_string()
+            "INFLUENZA_2_DOSE_DEFAULT_SERIES".into()
         }
     } else {
         if use_1_dose {
-            "INFLUENZA_1_DOSE_SERIES".to_string()
+            "INFLUENZA_1_DOSE_SERIES".into()
         } else {
-            "INFLUENZA_2_DOSE_SERIES".to_string()
+            "INFLUENZA_2_DOSE_SERIES".into()
         }
     };
 

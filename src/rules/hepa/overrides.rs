@@ -126,7 +126,7 @@ pub fn hepa_group_selection(
     _eval_date: NaiveDate,
     candidate_forecasts: &mut HashMap<String, VaccineGroupForecast>,
 ) -> String {
-    let mut selected = "HEP_A_2_DOSE_CHILD_ADULT_SERIES".to_string();
+    let mut selected = "HEP_A_2_DOSE_CHILD_ADULT_SERIES".into();
 
     let forecast_2 = candidate_forecasts.get("HEP_A_2_DOSE_CHILD_ADULT_SERIES").unwrap();
     let first_valid_dose_2 = forecast_2.evaluations.iter()
@@ -155,7 +155,7 @@ pub fn hepa_group_selection(
                     && interval_ge(d1.dose_date, d2.dose_date, "7d") 
                     && interval_lt(d1.dose_date, d2.dose_date, "24d") 
                 {
-                    selected = "HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES".to_string();
+                    selected = "HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES".into();
                     twinrix_selected = true;
                 }
             }
@@ -171,7 +171,7 @@ pub fn hepa_group_selection(
                     let d1 = valid_doses_3[0];
                     if d1.cvx.0 == cvx!("104") {
                         if valid_doses_3.len() == 1 {
-                            selected = "HEP_A_ADULT_3_DOSE_SERIES".to_string();
+                            selected = "HEP_A_ADULT_3_DOSE_SERIES".into();
                         } else {
                             let d2 = valid_doses_3[1];
                             
@@ -179,7 +179,7 @@ pub fn hepa_group_selection(
                                 && interval_ge(d1.dose_date, d2.dose_date, "24d") 
                                 && interval_lt(d1.dose_date, d2.dose_date, "6m-4d") 
                             {
-                                selected = "HEP_A_ADULT_3_DOSE_SERIES".to_string();
+                                selected = "HEP_A_ADULT_3_DOSE_SERIES".into();
                             }
                         }
                     }
@@ -194,13 +194,13 @@ pub fn hepa_group_selection(
                 let v4 = num_valid_doses(forecast_4);
                 
                 if v3 == 3 && v4 < 4 {
-                    selected = "HEP_A_ADULT_3_DOSE_SERIES".to_string();
+                    selected = "HEP_A_ADULT_3_DOSE_SERIES".into();
                 } else if v4 < 4 {
                     if let Some(latest_twinrix_date) = last_valid_dose_date(forecast_4) {
                         let has_later_3dose_valid = forecast_3.evaluations.iter()
                             .any(|e| e.status == DoseStatus::Valid && e.dose_date > latest_twinrix_date);
                         if has_later_3dose_valid && (3 - v3) < (4 - v4) {
-                            selected = "HEP_A_ADULT_3_DOSE_SERIES".to_string();
+                            selected = "HEP_A_ADULT_3_DOSE_SERIES".into();
                         }
                     }
                 }
@@ -212,12 +212,12 @@ pub fn hepa_group_selection(
                 if is_complete(forecast_2) {
                     let forecast_sel = candidate_forecasts.get(&selected).unwrap();
                     if !is_complete(forecast_sel) {
-                        selected = "HEP_A_2_DOSE_CHILD_ADULT_SERIES".to_string();
+                        selected = "HEP_A_2_DOSE_CHILD_ADULT_SERIES".into();
                     } else {
                         let date_2 = last_valid_dose_date(forecast_2).unwrap();
                         let date_sel = last_valid_dose_date(forecast_sel).unwrap();
                         if date_2 < date_sel {
-                            selected = "HEP_A_2_DOSE_CHILD_ADULT_SERIES".to_string();
+                            selected = "HEP_A_2_DOSE_CHILD_ADULT_SERIES".into();
                         }
                     }
                 }

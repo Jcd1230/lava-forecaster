@@ -143,21 +143,21 @@ pub enum SeriesStatus {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SeriesForecast {
-    pub series_name: String,
+    pub series_name: std::borrow::Cow<'static, str>,
     pub earliest_date: Option<NaiveDate>,
     pub recommended_date: Option<NaiveDate>,
     pub overdue_date: Option<NaiveDate>,
     pub latest_date: Option<NaiveDate>,
     pub status: SeriesStatus,
-    pub reasons: Vec<String>,
+    pub reasons: Vec<std::borrow::Cow<'static, str>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VaccineGroupForecast {
-    pub vaccine_group: String,
+    pub vaccine_group: std::borrow::Cow<'static, str>,
     pub evaluations: Vec<DoseEvaluation>,
     pub forecasts: Vec<SeriesForecast>,
-    pub selected_series: Option<String>,
+    pub selected_series: Option<std::borrow::Cow<'static, str>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

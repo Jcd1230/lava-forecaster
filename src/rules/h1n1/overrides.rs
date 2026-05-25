@@ -35,7 +35,7 @@ pub fn h1n1_custom_forecast_hook(
 
     if forecast.status == SeriesStatus::Complete {
         forecast.status = SeriesStatus::NotRecommended;
-        forecast.reasons = vec!["COMPLETE".to_string()];
+        forecast.reasons = vec!["COMPLETE".into()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -45,7 +45,7 @@ pub fn h1n1_custom_forecast_hook(
 
     if eval_date > season_end {
         forecast.status = SeriesStatus::NotRecommended;
-        forecast.reasons = vec!["VAC_GROUP_NO_LONGER_REC".to_string()];
+        forecast.reasons = vec!["VAC_GROUP_NO_LONGER_REC".into()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -56,7 +56,7 @@ pub fn h1n1_custom_forecast_hook(
     if let Some(rec_date) = forecast.recommended_date {
         if rec_date > season_end {
             forecast.status = SeriesStatus::NotRecommended;
-            forecast.reasons = vec!["VAC_GROUP_NO_LONGER_REC".to_string()];
+            forecast.reasons = vec!["VAC_GROUP_NO_LONGER_REC".into()];
             forecast.earliest_date = None;
             forecast.recommended_date = None;
             forecast.overdue_date = None;
@@ -95,9 +95,9 @@ pub fn h1n1_group_selection(
     };
 
     let selected = if select_2_dose {
-        "H1N1_2_DOSE_SERIES".to_string()
+        "H1N1_2_DOSE_SERIES".into()
     } else {
-        "H1N1_1_DOSE_SERIES".to_string()
+        "H1N1_1_DOSE_SERIES".into()
     };
 
     let season_end = NaiveDate::from_ymd_opt(2010, 6, 30).unwrap();

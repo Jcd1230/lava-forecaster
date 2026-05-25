@@ -57,7 +57,7 @@ pub fn evaluate_patient_all_groups(
 
                 let forecast =
                     engine.evaluate_patient(patient, history, eval_date, &ruleset.series);
-                candidate_forecasts.insert(series.name.clone(), forecast);
+                candidate_forecasts.insert(series.name.to_string(), forecast);
             }
             let selected_name =
                 (group_selection)(patient, history, eval_date, &mut candidate_forecasts);

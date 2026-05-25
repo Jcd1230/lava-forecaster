@@ -357,10 +357,10 @@ pub fn polio_group_selection(
                     }
                 }
                 if !has_other_valid_before {
-                    return "POLIO_FRACTIONAL_IPV_SERIES".to_string();
+                    return "POLIO_FRACTIONAL_IPV_SERIES".into();
                 }
             }
         }
     }
-    "POLIO_4_DOSE_SERIES".to_string()
+    "POLIO_4_DOSE_SERIES".into()
 }

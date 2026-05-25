@@ -34,8 +34,8 @@ pub fn typhoid_custom_forecast_hook(
     if forecast.status == SeriesStatus::Complete {
         forecast.status = SeriesStatus::Complete;
         forecast.reasons = vec![
-            "COMPLETE_HIGH_RISK".to_string(),
-            "TYPHOID_NOT_ROUTINE_SEE_ACIP".to_string(),
+            "COMPLETE_HIGH_RISK".into(),
+            "TYPHOID_NOT_ROUTINE_SEE_ACIP".into(),
         ];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
@@ -51,7 +51,7 @@ pub fn typhoid_custom_forecast_hook(
 
     if is_under_2y {
         forecast.status = SeriesStatus::NotRecommended;
-        forecast.reasons = vec!["TYPHOID_NOT_ROUTINE_SEE_ACIP".to_string()];
+        forecast.reasons = vec!["TYPHOID_NOT_ROUTINE_SEE_ACIP".into()];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -60,8 +60,8 @@ pub fn typhoid_custom_forecast_hook(
         // >= 2 years old and not complete
         forecast.status = SeriesStatus::ConditionallyRecommended;
         forecast.reasons = vec![
-            "HIGH_RISK".to_string(),
-            "TYPHOID_NOT_ROUTINE_SEE_ACIP".to_string(),
+            "HIGH_RISK".into(),
+            "TYPHOID_NOT_ROUTINE_SEE_ACIP".into(),
         ];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
