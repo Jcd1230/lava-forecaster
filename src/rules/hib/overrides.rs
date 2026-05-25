@@ -1,15 +1,16 @@
+use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
 use crate::date_utils::{TimePeriod, compare_elapsed};
 
 pub fn is_hib_cvx(cvx: Cvx) -> bool {
-    const HIB_CVX: &[u16] = &[17, 22, 46, 47, 48, 49, 50, 51, 102, 120, 132, 146, 148, 170, 198];
+    const HIB_CVX: &[u16] = &[cvx!("17"), cvx!("22"), cvx!("46"), cvx!("47"), cvx!("48"), cvx!("49"), cvx!("50"), cvx!("51"), cvx!("102"), cvx!("120"), cvx!("132"), cvx!("146"), cvx!("148"), cvx!("170"), cvx!("198")];
     HIB_CVX.contains(&cvx.0)
 }
 
 pub fn is_omp_cvx(cvx: Cvx) -> bool {
-    const OMP_CVX: &[u16] = &[49, 51];
+    const OMP_CVX: &[u16] = &[cvx!("49"), cvx!("51")];
     OMP_CVX.contains(&cvx.0)
 }
 
@@ -116,7 +117,7 @@ pub fn hib_custom_evaluation_hook(
     let admin_date = dose.date;
 
     // 1. Booster Check (CVX 50)
-    if dose.cvx.0 == 50 {
+    if dose.cvx.0 == cvx!("50") {
         let tp_1y_4d = TimePeriod::parse("1y-4d").unwrap();
         let tp_5y = TimePeriod::parse("5y").unwrap();
         let age_ge_1y_4d = compare_elapsed(birth, admin_date, &tp_1y_4d) != std::cmp::Ordering::Less;
@@ -156,7 +157,7 @@ pub fn hib_custom_evaluation_hook(
         let tp_1y_4d = TimePeriod::parse("1y-4d").unwrap();
         let age_lt_1y_4d = compare_elapsed(birth, admin_date, &tp_1y_4d) == std::cmp::Ordering::Less;
         if age_lt_1y_4d {
-            let hib_cvx = &[17, 22, 46, 47, 48, 49, 50, 51, 102, 120, 132, 146, 148, 170, 198];
+            let hib_cvx = &[cvx!("17"), cvx!("22"), cvx!("46"), cvx!("47"), cvx!("48"), cvx!("49"), cvx!("50"), cvx!("51"), cvx!("102"), cvx!("120"), cvx!("132"), cvx!("146"), cvx!("148"), cvx!("170"), cvx!("198")];
             let count_before_7m = ctx.count_cvx_before(hib_cvx, "7m");
             if count_before_7m == 0 {
                 *status = DoseStatus::Invalid;

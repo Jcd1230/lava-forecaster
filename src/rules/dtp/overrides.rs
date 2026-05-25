@@ -1,3 +1,4 @@
+use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, VaccineGroupForecast};
@@ -6,13 +7,13 @@ use std::collections::HashMap;
 
 pub fn is_pertussis_vaccine(cvx: Cvx) -> bool {
     // DT/Td (tetanus/diphtheria only, no pertussis) CVX codes
-    const DT_TD_CVX: &[u16] = &[9, 28, 113, 138, 139, 195, 196];
+    const DT_TD_CVX: &[u16] = &[cvx!("09"), cvx!("28"), cvx!("113"), cvx!("138"), cvx!("139"), cvx!("195"), cvx!("196")];
     !DT_TD_CVX.contains(&cvx.0)
 }
 
 fn is_adolescent_tdap_completed(ctx: &EvaluationContext) -> bool {
     ctx.valid_doses.iter().any(|(v_date, _)| {
-        let is_tdap = ctx.history.iter().any(|d| d.date == *v_date && (d.cvx.0 == 115 || d.cvx.0 == 198));
+        let is_tdap = ctx.history.iter().any(|d| d.date == *v_date && (d.cvx.0 == cvx!("115") || d.cvx.0 == cvx!("198")));
         let age_ge_10 = *v_date >= add_years(ctx.patient.birth_date, 10);
         is_tdap && age_ge_10
     })
@@ -38,8 +39,8 @@ pub fn dtp_custom_evaluation_hook(
     if let Some(dose) = ctx.current_dose {
         let birth_date = ctx.patient.birth_date;
         let age_7_minus_4d = add_years(birth_date, 7) - chrono::Duration::days(4);
-        let is_tdap = dose.cvx.0 == 115 || dose.cvx.0 == 198;
-        let is_td = dose.cvx.0 == 9 || dose.cvx.0 == 113 || dose.cvx.0 == 138 || dose.cvx.0 == 139 || dose.cvx.0 == 196;
+        let is_tdap = dose.cvx.0 == cvx!("115") || dose.cvx.0 == cvx!("198");
+        let is_td = dose.cvx.0 == cvx!("09") || dose.cvx.0 == cvx!("113") || dose.cvx.0 == cvx!("138") || dose.cvx.0 == cvx!("139") || dose.cvx.0 == cvx!("196");
         
         if dose.date < age_7_minus_4d {
             if is_tdap && series_name == "DTP_5_DOSE_SERIES" && target_dose_idx <= 3 {
@@ -99,7 +100,7 @@ pub fn dtp_custom_extra_dose_hook(
         return Some((DoseStatus::Valid, Vec::new()));
     }
     
-    let is_tdap = dose.cvx.0 == 115 || dose.cvx.0 == 198;
+    let is_tdap = dose.cvx.0 == cvx!("115") || dose.cvx.0 == cvx!("198");
     let age_ge_7 = dose.date >= add_years(birth_date, 7);
     let age_ge_10 = dose.date >= add_years(birth_date, 10);
     
@@ -113,7 +114,7 @@ pub fn dtp_custom_extra_dose_hook(
             return Some((DoseStatus::Valid, Vec::new()));
         } else {
             let has_prior_tdap_ge_7 = ctx.valid_doses.iter().any(|(v_date, _)| {
-                let is_prior_tdap = ctx.history.iter().any(|d| d.date == *v_date && (d.cvx.0 == 115 || d.cvx.0 == 198));
+                let is_prior_tdap = ctx.history.iter().any(|d| d.date == *v_date && (d.cvx.0 == cvx!("115") || d.cvx.0 == cvx!("198")));
                 let prior_ge_7 = *v_date >= add_years(birth_date, 7);
                 is_prior_tdap && prior_ge_7
             });
@@ -144,7 +145,7 @@ pub fn dtp_custom_forecast_hook(
     
     // Check if the adolescent Tdap booster has been completed in valid doses.
     let has_valid_tdap_ge_10 = valid_doses.iter().any(|(v_date, _)| {
-        let is_tdap = history.iter().any(|d| d.date == *v_date && (d.cvx.0 == 115 || d.cvx.0 == 198));
+        let is_tdap = history.iter().any(|d| d.date == *v_date && (d.cvx.0 == cvx!("115") || d.cvx.0 == cvx!("198")));
         let age_ge_10 = *v_date >= add_years(patient.birth_date, 10);
         is_tdap && age_ge_10
     });
@@ -208,7 +209,7 @@ pub fn dtp_custom_forecast_hook(
     } else {
         // Series is not complete
         let age_7 = add_years(patient.birth_date, 7);
-        const ALLOWED_CVX: &[u16] = &[1, 20, 106, 107, 22, 50, 102, 110, 120, 130, 132, 146, 115, 28, 9, 138, 139, 113, 170, 195, 196, 198];
+        const ALLOWED_CVX: &[u16] = &[cvx!("01"), cvx!("20"), cvx!("106"), cvx!("107"), cvx!("22"), cvx!("50"), cvx!("102"), cvx!("110"), cvx!("120"), cvx!("130"), cvx!("132"), cvx!("146"), cvx!("115"), cvx!("28"), cvx!("09"), cvx!("138"), cvx!("139"), cvx!("113"), cvx!("170"), cvx!("195"), cvx!("196"), cvx!("198")];
         let history_count = history.iter()
             .filter(|d| ALLOWED_CVX.contains(&d.cvx.0))
             .count();
@@ -230,8 +231,8 @@ pub fn dtp_custom_forecast_hook(
         // If the last shot in history was ignored, adjust forecast dates accordingly
         let is_last_shot_ignored = history.last().map(|d| {
             let age_7_minus_4d = age_7 - chrono::Duration::days(4);
-            let is_tdap = d.cvx.0 == 115 || d.cvx.0 == 198;
-            let is_td = d.cvx.0 == 9 || d.cvx.0 == 113 || d.cvx.0 == 138 || d.cvx.0 == 139 || d.cvx.0 == 196;
+            let is_tdap = d.cvx.0 == cvx!("115") || d.cvx.0 == cvx!("198");
+            let is_td = d.cvx.0 == cvx!("09") || d.cvx.0 == cvx!("113") || d.cvx.0 == cvx!("138") || d.cvx.0 == cvx!("139") || d.cvx.0 == cvx!("196");
             if d.date < age_7_minus_4d {
                 if is_tdap {
                     valid_doses.len() <= 2

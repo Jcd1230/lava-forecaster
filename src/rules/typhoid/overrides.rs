@@ -1,3 +1,4 @@
+use ice_cvx_macro::cvx;
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus};
 use chrono::NaiveDate;
@@ -10,7 +11,7 @@ pub fn typhoid_custom_evaluation_hook(
     status: &mut DoseStatus,
 ) {
     if let Some(dose) = ctx.current_dose {
-        if dose.cvx.0 == 25 {
+        if dose.cvx.0 == cvx!("25") {
             let tp_6y_minus_4d = crate::date_utils::TimePeriod::parse("6y-4d").unwrap();
             let abs_min_date = tp_6y_minus_4d.add_to(ctx.patient.birth_date);
             if dose.date < abs_min_date {

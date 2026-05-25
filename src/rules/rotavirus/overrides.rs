@@ -1,3 +1,4 @@
+use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
@@ -102,7 +103,7 @@ pub fn rotavirus_custom_dose_number_hook(
         }
         seen_dates.insert(d.date);
 
-        if d.cvx.0 == 122 {
+        if d.cvx.0 == cvx!("122") {
             prior_122_count += 1;
         }
     }
@@ -126,7 +127,7 @@ pub fn rotavirus_group_selection(
         // 1. Check if any valid dose of CVX 116, 74, or 122 was administered in either candidate's evaluations.
         let fc_3 = candidate_forecasts.get(&series_3_dose).unwrap();
         let has_valid_3dose_cvx = fc_3.evaluations.iter().any(|e| {
-            e.status == DoseStatus::Valid && (e.cvx.0 == 116 || e.cvx.0 == 74 || e.cvx.0 == 122)
+            e.status == DoseStatus::Valid && (e.cvx.0 == cvx!("116") || e.cvx.0 == cvx!("74") || e.cvx.0 == cvx!("122"))
         });
         if has_valid_3dose_cvx {
             return series_3_dose;
@@ -135,7 +136,7 @@ pub fn rotavirus_group_selection(
         // 2. Check if dose 1 is CVX 119 and is valid in 2-dose series candidate evaluations.
         let fc_2 = candidate_forecasts.get(&series_2_dose).unwrap();
         let dose_1_is_valid_rv1 = fc_2.evaluations.iter().any(|e| {
-            e.status == DoseStatus::Valid && e.dose_number == Some(1) && e.cvx.0 == 119
+            e.status == DoseStatus::Valid && e.dose_number == Some(1) && e.cvx.0 == cvx!("119")
         });
         if dose_1_is_valid_rv1 {
             return series_2_dose;

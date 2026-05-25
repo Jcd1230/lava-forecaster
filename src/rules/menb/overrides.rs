@@ -1,3 +1,4 @@
+use ice_cvx_macro::cvx;
 use crate::date_utils::{add_years, TimePeriod};
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, 
@@ -18,11 +19,11 @@ fn policy_change_date() -> NaiveDate {
 }
 
 fn is_4c(cvx: Cvx) -> bool {
-    matches!(cvx.0, 163 | 328)
+    matches!(cvx.0, cvx!("163") | cvx!("328"))
 }
 
 fn is_fhbp(cvx: Cvx) -> bool {
-    matches!(cvx.0, 162 | 316)
+    matches!(cvx.0, cvx!("162") | cvx!("316"))
 }
 
 fn is_4c_series(series_name: &str) -> bool {
@@ -113,7 +114,7 @@ pub fn menb_custom_evaluation_hook(
     };
 
     let age_10 = add_years(ctx.patient.birth_date, 10);
-    if matches!(dose.cvx.0, 162 | 163)
+    if matches!(dose.cvx.0, cvx!("162") | cvx!("163"))
         && dose.date >= age_10
         && reasons.contains(&EvaluationReason::BelowMinimumAge)
     {

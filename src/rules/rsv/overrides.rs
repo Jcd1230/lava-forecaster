@@ -1,3 +1,4 @@
+use ice_cvx_macro::cvx;
 use chrono::{Datelike, NaiveDate};
 use crate::date_utils::{add_months, add_years, compare_elapsed, TimePeriod};
 use crate::engine::EvaluationContext;
@@ -42,12 +43,12 @@ fn infant_recommendation_date(birth_date: NaiveDate, eval_date: NaiveDate) -> Na
 fn availability_cutoff(series_name: &str, cvx: Cvx) -> Option<NaiveDate> {
     match series_name {
         "RSV_ADULT_SERIES" => match cvx.0 {
-            303 | 304 | 305 | 314 | 326 => Some(date(2023, 6, 21)),
+            cvx!("303") | cvx!("304") | cvx!("305") | cvx!("314") | cvx!("326") => Some(date(2023, 6, 21)),
             _ => None,
         },
         "RSV_INFANT_SERIES" => match cvx.0 {
-            332 => Some(date(2025, 6, 9)),
-            304 | 306 | 307 | 315 => Some(date(2023, 8, 3)),
+            cvx!("332") => Some(date(2025, 6, 9)),
+            cvx!("304") | cvx!("306") | cvx!("307") | cvx!("315") => Some(date(2023, 8, 3)),
             _ => None,
         },
         _ => None,

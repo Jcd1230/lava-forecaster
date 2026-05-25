@@ -1,7 +1,8 @@
+use ice_cvx_macro::cvx;
 use crate::schedule::CompiledSeries;
 
 pub fn varicella_2_dose_series() -> CompiledSeries {
-    let allowed_cvx = &[21, 94];
+    let allowed_cvx = &[cvx!("21"), cvx!("94")];
 
     CompiledSeries::builder("VARICELLA_2_DOSE_SERIES")
         .code("VARICELLA_2_DOSE_SERIES")

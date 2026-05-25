@@ -551,12 +551,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "ice-cvx-macro"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "ice-rust-forecaster-poc"
 version = "0.1.0"
 dependencies = [
  "axum",
  "base64",
  "chrono",
+ "ice-cvx-macro",
  "quick-xml",
  "rayon",
  "reqwest",

@@ -1,7 +1,8 @@
+use ice_cvx_macro::cvx;
 use crate::schedule::CompiledSeries;
 
 pub fn hib_4_dose_series() -> CompiledSeries {
-    let allowed_cvx = &[17, 22, 46, 47, 48, 49, 50, 51, 102, 120, 132, 146, 148, 170, 198];
+    let allowed_cvx = &[cvx!("17"), cvx!("22"), cvx!("46"), cvx!("47"), cvx!("48"), cvx!("49"), cvx!("50"), cvx!("51"), cvx!("102"), cvx!("120"), cvx!("132"), cvx!("146"), cvx!("148"), cvx!("170"), cvx!("198")];
 
     CompiledSeries::builder("HIB_4_DOSE_SERIES")
         .code("HIB_4_DOSE_SERIES")
@@ -58,8 +59,8 @@ pub fn hib_4_dose_series() -> CompiledSeries {
 }
 
 pub fn hib_omp_series() -> CompiledSeries {
-    let omp_cvx = &[49, 51];
-    let allowed_cvx = &[17, 22, 46, 47, 48, 49, 50, 51, 102, 120, 132, 146, 148, 170, 198];
+    let omp_cvx = &[cvx!("49"), cvx!("51")];
+    let allowed_cvx = &[cvx!("17"), cvx!("22"), cvx!("46"), cvx!("47"), cvx!("48"), cvx!("49"), cvx!("50"), cvx!("51"), cvx!("102"), cvx!("120"), cvx!("132"), cvx!("146"), cvx!("148"), cvx!("170"), cvx!("198")];
 
     CompiledSeries::builder("HIB_OMP_SERIES")
         .code("HIB_OMP_SERIES")

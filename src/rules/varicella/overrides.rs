@@ -1,19 +1,20 @@
+use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus};
 use crate::rules::helpers::{clamp_date_at_least, interval_days_between, age_ge};
 
 fn is_live_virus(cvx: Cvx) -> bool {
-    const LIVE_VIRUS: &[u16] = &[3, 4, 5, 6, 7, 21, 37, 38, 75, 94, 105, 111, 121, 125, 149, 151, 183, 184, 325, 333];
+    const LIVE_VIRUS: &[u16] = &[cvx!("03"), cvx!("04"), cvx!("05"), cvx!("06"), cvx!("07"), cvx!("21"), cvx!("37"), cvx!("38"), cvx!("75"), cvx!("94"), cvx!("105"), cvx!("111"), cvx!("121"), cvx!("125"), cvx!("149"), cvx!("151"), cvx!("183"), cvx!("184"), cvx!("325"), cvx!("333")];
     LIVE_VIRUS.contains(&cvx.0)
 }
 
 fn is_varicella_group(cvx: Cvx) -> bool {
-    cvx.0 == 21 || cvx.0 == 94
+    cvx.0 == cvx!("21") || cvx.0 == cvx!("94")
 }
 
 fn is_old_zoster(cvx: Cvx) -> bool {
-    cvx.0 == 121 || cvx.0 == 188
+    cvx.0 == cvx!("121") || cvx.0 == cvx!("188")
 }
 
 pub fn varicella_custom_evaluation_hook(
@@ -47,7 +48,7 @@ pub fn varicella_custom_evaluation_hook(
                 if prev.date < dose.date && is_live_virus(prev.cvx) {
                     let is_both_varicella = is_varicella_group(dose.cvx) && is_varicella_group(prev.cvx);
                     let required_days = if is_both_varicella {
-                        if dose.cvx.0 == 94 || prev.cvx.0 == 94 {
+                        if dose.cvx.0 == cvx!("94") || prev.cvx.0 == cvx!("94") {
                             28
                         } else {
                             24

@@ -1,7 +1,8 @@
+use ice_cvx_macro::cvx;
 use crate::schedule::CompiledSeries;
 
 pub fn cholera_1_dose_risk_series() -> CompiledSeries {
-    let allowed_cvx = &[174];
+    let allowed_cvx = &[cvx!("174")];
 
     CompiledSeries::builder("CHOLERA_1_DOSE_RISK_SERIES")
         .code("CHOLERA_1_DOSE_RISK_SERIES")

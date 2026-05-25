@@ -1,7 +1,8 @@
+use ice_cvx_macro::cvx;
 use crate::schedule::CompiledSeries;
 
 pub fn men_b_4c_2_dose_series() -> CompiledSeries {
-    let allowed_cvx = &[163, 328];
+    let allowed_cvx = &[cvx!("163"), cvx!("328")];
 
     CompiledSeries::builder("MEN_B_4_C_2_DOSE_SERIES")
         .code("MEN_B_4_C_2_DOSE_SERIES")
@@ -23,7 +24,7 @@ pub fn men_b_4c_2_dose_series() -> CompiledSeries {
 }
 
 pub fn men_b_4c_3_dose_series() -> CompiledSeries {
-    let allowed_cvx = &[163, 328];
+    let allowed_cvx = &[cvx!("163"), cvx!("328")];
 
     CompiledSeries::builder("MEN_B_4_C_3_DOSE_SERIES")
         .code("MEN_B_4_C_3_DOSE_SERIES")
@@ -62,7 +63,7 @@ pub fn men_b_4c_3_dose_series() -> CompiledSeries {
 }
 
 pub fn men_b_fhbp_2_dose_series() -> CompiledSeries {
-    let allowed_cvx = &[162, 316];
+    let allowed_cvx = &[cvx!("162"), cvx!("316")];
 
     CompiledSeries::builder("MEN_BF_HBP_2_DOSE_SERIES")
         .code("MEN_BF_HBP_2_DOSE_SERIES")
@@ -84,7 +85,7 @@ pub fn men_b_fhbp_2_dose_series() -> CompiledSeries {
 }
 
 pub fn men_b_fhbp_3_dose_series() -> CompiledSeries {
-    let allowed_cvx = &[162, 316];
+    let allowed_cvx = &[cvx!("162"), cvx!("316")];
 
     CompiledSeries::builder("MEN_BF_HBP_3_DOSE_SERIES")
         .code("MEN_BF_HBP_3_DOSE_SERIES")

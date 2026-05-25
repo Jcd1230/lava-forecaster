@@ -1,7 +1,8 @@
+use ice_cvx_macro::cvx;
 use crate::schedule::CompiledSeries;
 
 pub fn polio_4_dose_series() -> CompiledSeries {
-    let allowed_cvx = &[10, 89, 2, 110, 120, 130, 132, 146, 170, 182, 195, 178, 179];
+    let allowed_cvx = &[cvx!("10"), cvx!("89"), cvx!("02"), cvx!("110"), cvx!("120"), cvx!("130"), cvx!("132"), cvx!("146"), cvx!("170"), cvx!("182"), cvx!("195"), cvx!("178"), cvx!("179")];
 
     CompiledSeries::builder("POLIO_4_DOSE_SERIES")
         .code("POLIO_4_DOSE_SERIES")
@@ -57,7 +58,7 @@ pub fn polio_4_dose_series() -> CompiledSeries {
 }
 
 pub fn polio_fipv_series() -> CompiledSeries {
-    let allowed_cvx = &[10, 89, 2, 110, 120, 130, 132, 146, 170, 182, 195, 178, 179];
+    let allowed_cvx = &[cvx!("10"), cvx!("89"), cvx!("02"), cvx!("110"), cvx!("120"), cvx!("130"), cvx!("132"), cvx!("146"), cvx!("170"), cvx!("182"), cvx!("195"), cvx!("178"), cvx!("179")];
 
     CompiledSeries::builder("POLIO_FRACTIONAL_IPV_SERIES")
         .code("POLIO_FRACTIONAL_IPV_SERIES")
@@ -68,14 +69,14 @@ pub fn polio_fipv_series() -> CompiledSeries {
             .min_age("42d")
             .earliest_recommended_age("2m")
             .latest_recommended_age("3m+4w")
-            .cvx(&[324])
+            .cvx(&[cvx!("324")])
         )
         .dose(2, |d| d
             .abs_min_age("38d")
             .min_age("42d")
             .earliest_recommended_age("2m")
             .latest_recommended_age("3m+4w")
-            .cvx(&[324])
+            .cvx(&[cvx!("324")])
         )
         .dose(3, |d| d
             .abs_min_age("66d")

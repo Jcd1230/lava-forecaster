@@ -1,3 +1,4 @@
+use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus};
@@ -5,9 +6,9 @@ use crate::date_utils::{TimePeriod, add_years};
 
 fn get_vaccine_min_age(cvx: Cvx) -> Option<TimePeriod> {
     let s = match cvx.0 {
-        114 | 147 => "9m-4d",
-        136 => "2m-4d",
-        203 | 108 | 32 => "2y-4d",
+        cvx!("114") | cvx!("147") => "9m-4d",
+        cvx!("136") => "2m-4d",
+        cvx!("203") | cvx!("108") | cvx!("32") => "2y-4d",
         _ => return None,
     };
     TimePeriod::parse(s).ok()

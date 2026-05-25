@@ -1,3 +1,4 @@
+use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast};
@@ -6,17 +7,17 @@ use crate::rules::helpers::{clamp_date_at_least, interval_days_between};
 /// CVX codes for old live zoster vaccines (Zostavax and variants).
 /// These are not valid doses for the recombinant series but are tracked as Accepted.
 fn is_old_zoster(cvx: Cvx) -> bool {
-    cvx.0 == 121 || cvx.0 == 188
+    cvx.0 == cvx!("121") || cvx.0 == cvx!("188")
 }
 
 /// CVX code for recombinant zoster vaccine (Shingrix).
 fn is_shingrix(cvx: Cvx) -> bool {
-    cvx.0 == 187
+    cvx.0 == cvx!("187")
 }
 
 /// CVX code for adult varicella (for live-virus forecast spacing).
 fn is_adult_varicella(cvx: Cvx) -> bool {
-    cvx.0 == 21
+    cvx.0 == cvx!("21")
 }
 
 pub fn zoster_custom_evaluation_hook(

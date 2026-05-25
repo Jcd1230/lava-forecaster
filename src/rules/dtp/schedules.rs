@@ -1,6 +1,7 @@
+use ice_cvx_macro::cvx;
 use crate::schedule::CompiledSeries;
 
-const ALLOWED_CVX: &[u16] = &[1, 20, 106, 107, 22, 50, 102, 110, 120, 130, 132, 146, 115, 28, 9, 138, 139, 113, 170, 195, 196, 198];
+const ALLOWED_CVX: &[u16] = &[cvx!("01"), cvx!("20"), cvx!("106"), cvx!("107"), cvx!("22"), cvx!("50"), cvx!("102"), cvx!("110"), cvx!("120"), cvx!("130"), cvx!("132"), cvx!("146"), cvx!("115"), cvx!("28"), cvx!("09"), cvx!("138"), cvx!("139"), cvx!("113"), cvx!("170"), cvx!("195"), cvx!("196"), cvx!("198")];
 
 pub fn dtp_3_dose_series() -> CompiledSeries {
     CompiledSeries::builder("DTP_3_DOSE_SERIES")

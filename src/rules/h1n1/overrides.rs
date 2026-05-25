@@ -1,3 +1,4 @@
+use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
@@ -73,7 +74,7 @@ pub fn h1n1_group_selection(
     let age_10y = crate::date_utils::add_years(patient.birth_date, 10);
     
     let last_h1n1_dose = history.iter()
-        .filter(|d| matches!(d.cvx.0, 125 | 126 | 127 | 128))
+        .filter(|d| matches!(d.cvx.0, cvx!("125") | cvx!("126") | cvx!("127") | cvx!("128")))
         .max_by_key(|d| d.date);
 
     let select_2_dose = match last_h1n1_dose {
@@ -101,7 +102,7 @@ pub fn h1n1_group_selection(
 
     let season_end = NaiveDate::from_ymd_opt(2010, 6, 30).unwrap();
     let has_zero_h1n1_doses = history.iter()
-        .filter(|d| matches!(d.cvx.0, 125 | 126 | 127 | 128))
+        .filter(|d| matches!(d.cvx.0, cvx!("125") | cvx!("126") | cvx!("127") | cvx!("128")))
         .count() == 0;
 
     if eval_date > season_end && has_zero_h1n1_doses {

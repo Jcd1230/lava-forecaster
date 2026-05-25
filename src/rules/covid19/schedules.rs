@@ -1,6 +1,7 @@
+use ice_cvx_macro::cvx;
 use crate::schedule::CompiledSeries;
 
-const ALL_COVID_CVX: &[u16] = &[207, 208, 211, 212, 213, 217, 218, 219, 221, 228, 229, 272, 300, 301, 302, 308, 309, 310, 311, 312, 313, 334, 502, 519];
+const ALL_COVID_CVX: &[u16] = &[cvx!("207"), cvx!("208"), cvx!("211"), cvx!("212"), cvx!("213"), cvx!("217"), cvx!("218"), cvx!("219"), cvx!("221"), cvx!("228"), cvx!("229"), cvx!("272"), cvx!("300"), cvx!("301"), cvx!("302"), cvx!("308"), cvx!("309"), cvx!("310"), cvx!("311"), cvx!("312"), cvx!("313"), cvx!("334"), cvx!("502"), cvx!("519")];
 
 pub fn covid19_aug2025_lt2_series() -> CompiledSeries {
 	CompiledSeries::builder("COVID_19_AUG_2025_LT_2_SERIES")

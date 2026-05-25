@@ -1,7 +1,8 @@
+use ice_cvx_macro::cvx;
 use crate::schedule::CompiledSeries;
 
 pub fn mcv_42_dose_series() -> CompiledSeries {
-    let allowed_cvx = &[147, 32, 114, 136, 108, 203, 316, 328];
+    let allowed_cvx = &[cvx!("147"), cvx!("32"), cvx!("114"), cvx!("136"), cvx!("108"), cvx!("203"), cvx!("316"), cvx!("328")];
 
     CompiledSeries::builder("MCV_42_DOSE_SERIES")
         .code("MCV_42_DOSE_SERIES")

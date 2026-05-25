@@ -1,3 +1,4 @@
+use ice_cvx_macro::cvx;
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus};
 use chrono::NaiveDate;

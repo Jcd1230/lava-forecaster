@@ -1,6 +1,7 @@
+use ice_cvx_macro::cvx;
 use crate::schedule::CompiledSeries;
 
-const ALLOWED_CVX: &[u16] = &[151, 144, 149, 88, 111, 155, 15, 141, 153, 16, 135, 150, 140, 158, 161, 166, 168, 171, 185, 186, 194, 197, 200, 201, 202, 205, 231, 320, 331, 333];
+const ALLOWED_CVX: &[u16] = &[cvx!("151"), cvx!("144"), cvx!("149"), cvx!("88"), cvx!("111"), cvx!("155"), cvx!("15"), cvx!("141"), cvx!("153"), cvx!("16"), cvx!("135"), cvx!("150"), cvx!("140"), cvx!("158"), cvx!("161"), cvx!("166"), cvx!("168"), cvx!("171"), cvx!("185"), cvx!("186"), cvx!("194"), cvx!("197"), cvx!("200"), cvx!("201"), cvx!("202"), cvx!("205"), cvx!("231"), cvx!("320"), cvx!("331"), cvx!("333")];
 
 pub fn influenza_1_dose_series() -> CompiledSeries {
     CompiledSeries::builder("INFLUENZA_1_DOSE_SERIES")

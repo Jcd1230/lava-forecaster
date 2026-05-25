@@ -1,8 +1,9 @@
+use ice_cvx_macro::cvx;
 use crate::schedule::CompiledSeries;
 use crate::models::SeriesStatus;
 
 pub fn rotavirus_2_dose_series() -> CompiledSeries {
-    let allowed_cvx = &[119];
+    let allowed_cvx = &[cvx!("119")];
 
     CompiledSeries::builder("ROTAVIRUS_2_DOSE_SERIES")
         .code("ROTAVIRUS_2_DOSE_SERIES")
@@ -32,7 +33,7 @@ pub fn rotavirus_2_dose_series() -> CompiledSeries {
 }
 
 pub fn rotavirus_3_dose_series() -> CompiledSeries {
-    let allowed_cvx = &[119, 122, 116, 74];
+    let allowed_cvx = &[cvx!("119"), cvx!("122"), cvx!("116"), cvx!("74")];
 
     CompiledSeries::builder("ROTAVIRUS_3_DOSE_SERIES")
         .code("ROTAVIRUS_3_DOSE_SERIES")

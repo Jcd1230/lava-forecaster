@@ -1,7 +1,8 @@
+use ice_cvx_macro::cvx;
 use crate::schedule::CompiledSeries;
 
 pub fn hpv_2_dose_series() -> CompiledSeries {
-    let allowed_cvx = &[62, 118, 137, 165];
+    let allowed_cvx = &[cvx!("62"), cvx!("118"), cvx!("137"), cvx!("165")];
 
     CompiledSeries::builder("HPV_2_DOSE_SERIES")
         .code("HPV_2_DOSE_SERIES")
@@ -27,7 +28,7 @@ pub fn hpv_2_dose_series() -> CompiledSeries {
 }
 
 pub fn hpv_3_dose_series() -> CompiledSeries {
-    let allowed_cvx = &[62, 118, 137, 165];
+    let allowed_cvx = &[cvx!("62"), cvx!("118"), cvx!("137"), cvx!("165")];
 
     CompiledSeries::builder("HPV_3_DOSE_SERIES")
         .code("HPV_3_DOSE_SERIES")

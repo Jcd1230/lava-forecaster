@@ -1,7 +1,8 @@
+use ice_cvx_macro::cvx;
 use crate::schedule::CompiledSeries;
 
 pub fn yellow_fever_risk_series() -> CompiledSeries {
-    let allowed_cvx = &[37, 183, 184];
+    let allowed_cvx = &[cvx!("37"), cvx!("183"), cvx!("184")];
 
     CompiledSeries::builder("YELLOW_FEVER_RISK_SERIES")
         .code("YELLOW_FEVER_RISK_SERIES")

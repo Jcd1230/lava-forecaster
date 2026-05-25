@@ -28,14 +28,15 @@ impl std::fmt::Display for Cvx {
     }
 }
 
+use ice_cvx_macro::generate_cvx_registry;
+
+// Generates `cvx_to_id` and `id_to_cvx` helpers
+generate_cvx_registry!();
+
 impl Serialize for Cvx {
     fn serialize<S: serde::Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
-        // Always emit zero-padded 2-digit minimum: "03", "21", "310"
-        if self.0 < 10 {
-            s.serialize_str(&format!("0{}", self.0))
-        } else {
-            s.serialize_str(&self.0.to_string())
-        }
+        let raw = id_to_cvx(self.0).unwrap_or_else(|| self.0.to_string());
+        s.serialize_str(&raw)
     }
 }
 
@@ -53,7 +54,9 @@ impl<'de> Deserialize<'de> for Cvx {
             where
                 E: serde::de::Error,
             {
-                value.parse::<u16>().map(Cvx).map_err(|_| serde::de::Error::custom("invalid CVX string"))
+                cvx_to_id(value)
+                    .map(Cvx)
+                    .ok_or_else(|| serde::de::Error::custom("invalid CVX string"))
             }
 
             fn visit_u64<E>(self, value: u64) -> Result<Self::Value, E>

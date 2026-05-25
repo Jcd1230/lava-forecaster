@@ -1,3 +1,4 @@
+use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
@@ -5,7 +6,7 @@ use crate::date_utils::{TimePeriod, add_years};
 use std::collections::HashMap;
 
 fn is_hpv_cvx(cvx: Cvx) -> bool {
-    matches!(cvx.0, 62 | 118 | 137 | 165)
+    matches!(cvx.0, cvx!("62") | cvx!("118") | cvx!("137") | cvx!("165"))
 }
 
 fn add_interval(date: NaiveDate, interval: &str) -> NaiveDate {
@@ -25,7 +26,7 @@ pub fn hpv_custom_evaluation_hook(
 ) {
     if let Some(dose) = ctx.current_dose {
         // 1. Gender-specific restriction: CVX 118 (bivalent) is not licensed for males
-        if dose.cvx.0 == 118 && ctx.patient.gender == crate::models::Gender::Male {
+        if dose.cvx.0 == cvx!("118") && ctx.patient.gender == crate::models::Gender::Male {
             *status = DoseStatus::Accepted;
             reasons.clear();
             reasons.push(EvaluationReason::VaccineNotLicensedForMales);
