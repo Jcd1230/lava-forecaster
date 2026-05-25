@@ -2,6 +2,11 @@ use std::fs;
 use std::hint::black_box;
 use std::path::Path;
 use std::time::Instant;
+
+#[cfg(not(target_os = "windows"))]
+#[global_allocator]
+static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
+
 use ice_rust_forecaster_poc::{
     evaluate_patient_all_groups,
     models::UnifiedTestCase,
