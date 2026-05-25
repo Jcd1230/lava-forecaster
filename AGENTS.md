@@ -18,17 +18,28 @@ Welcome! This guide provides a quick-start reference for AI agents and developer
 
 ## Essential Developer Commands
 
-All major tasks are configured as `mise` commands:
+## Essential Developer Commands
+
+All major tasks are configured as `mise` commands or native Cargo binaries. 
+
+> [!TIP]
+> **Preferred Testing Method**: The Rust-native `test_runner` is significantly faster than the Python wrapper and evaluates the exact `UnifiedTestCase` formats. Always prefer running tests with Cargo when working offline.
+> 
+> *Note: All `cargo` commands below must be executed from within the `ice-rust-forecaster-poc/` subdirectory.*
 
 | Command | Description |
 |---|---|
 | `mise run build` | Builds the Java ICE Maven project (`mvn clean install`). |
 | `mise run run` | Runs the Java ICE server (exploded WAR) on `http://localhost:8080`. |
 | `mise run scaffold <group_lower> [GROUP_UPPER]` | Scaffolds a new vaccine group module (directory structure, files, mod.rs registration, test JSON). |
-| `mise run test` | Runs the Python test suite to verify the Rust PoC output against recorded snapshot JSONs (default quiet, only fails/summary). Does *not* require the Java server to be running. |
-| `mise run test-group -- <group_lower>` | Runs Rust PoC verification for one vaccine group against recorded snapshots. |
+| `cargo run --release --bin test_runner -- --run tests/cases` | **(Preferred)** Runs the Rust-native test runner to verify PoC logic against expected snapshots (offline). |
+| `cargo run --release --bin test_runner -- --run tests/cases --group <GROUP>` | Runs the Rust-native test runner for a specific vaccine group (e.g., `POLIO`, `DTP`, `MMR`). |
+| `cargo run --release --bin test_runner -- --run tests/cases --case <CASE>` | Runs the Rust-native test runner for a single test case. |
+| `cargo run --release --bin test_runner -- --record tests/cases` | Connects to the live Java ICE server and records expected output snapshots directly into case JSONs. |
+| `mise run test` | Runs the Python-based test runner against recorded snapshot JSONs (offline). |
 | `mise run test-compare` | Compares Rust PoC outputs directly against the live Java ICE server. **Auto-records missing expected snapshots.** Requires the Java server to be running. |
-| `mise run test-record` | Queries the Java ICE server and records its responses as the expected JSON snapshot. Requires the Java server to be running. |
+
+
 
 ## Crucial Gotchas & Project Context
 
