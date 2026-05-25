@@ -1,6 +1,7 @@
+use crate::engine::CandidateForecastsExt;
 use ice_cvx_macro::cvx;
 use chrono::{Datelike, NaiveDate};
-use crate::date_utils::{add_months, add_years, compare_elapsed, TimePeriod};
+use crate::date_utils::{TinyVec, add_months, add_years, compare_elapsed, TimePeriod};
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, 
     Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus,
@@ -59,7 +60,7 @@ pub fn rsv_custom_evaluation_hook(
     series_name: &str,
     _target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut Vec<EvaluationReason>,
+    reasons: &mut TinyVec<EvaluationReason, 4>,
     status: &mut DoseStatus,
 ) {
     let Some(dose) = ctx.current_dose else {
@@ -89,7 +90,7 @@ pub fn rsv_custom_forecast_hook(
     forecast: &mut SeriesForecast,
 ) {
     if forecast.status == SeriesStatus::Complete {
-        forecast.reasons = vec!["COMPLETE".into()];
+        forecast.reasons = crate::reasons!["COMPLETE"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -100,7 +101,7 @@ pub fn rsv_custom_forecast_hook(
     let support_start = date(RSV_SUPPORT_START.0, RSV_SUPPORT_START.1, RSV_SUPPORT_START.2);
     if eval_date < support_start {
         forecast.status = SeriesStatus::NotRecommended;
-        forecast.reasons = vec!["NOT_SUPPORTED".into()];
+        forecast.reasons = crate::reasons!["NOT_SUPPORTED"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -111,7 +112,7 @@ pub fn rsv_custom_forecast_hook(
     if forecast.series_name == "RSV_INFANT_SERIES" {
         if age_ge(patient.birth_date, eval_date, "8m") && age_lt(patient.birth_date, eval_date, "20m") {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons = vec!["HIGH_RISK".into()];
+            forecast.reasons = crate::reasons!["HIGH_RISK"];
             forecast.earliest_date = None;
             forecast.recommended_date = None;
             forecast.overdue_date = None;
@@ -130,7 +131,7 @@ pub fn rsv_custom_forecast_hook(
             && age_lt(patient.birth_date, recommendation_date, "20m")
         {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons = vec!["HIGH_RISK".into()];
+            forecast.reasons = crate::reasons!["HIGH_RISK"];
             forecast.earliest_date = None;
             forecast.recommended_date = None;
             forecast.overdue_date = None;
@@ -139,7 +140,7 @@ pub fn rsv_custom_forecast_hook(
         }
 
         forecast.status = SeriesStatus::NotComplete;
-        forecast.reasons = vec!["NOT_COMPLETE".into()];
+        forecast.reasons = crate::reasons!["NOT_COMPLETE"];
         forecast.earliest_date = Some(recommendation_date);
         forecast.recommended_date = Some(recommendation_date);
         forecast.overdue_date = None;
@@ -149,7 +150,7 @@ pub fn rsv_custom_forecast_hook(
 
     if age_ge(patient.birth_date, eval_date, "50y") && age_lt(patient.birth_date, eval_date, "75y") {
         forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = vec!["HIGH_RISK".into()];
+        forecast.reasons = crate::reasons!["HIGH_RISK"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -160,7 +161,7 @@ pub fn rsv_custom_forecast_hook(
     let age_75 = add_years(patient.birth_date, 75);
     let adult_recommendation_date = age_75.max(date(2024, 6, 26));
     forecast.status = SeriesStatus::NotComplete;
-    forecast.reasons = vec!["NOT_COMPLETE".into()];
+    forecast.reasons = crate::reasons!["NOT_COMPLETE"];
     forecast.earliest_date = Some(adult_recommendation_date);
     forecast.recommended_date = Some(adult_recommendation_date);
     forecast.overdue_date = None;
@@ -171,12 +172,12 @@ pub fn rsv_group_selection(
     patient: &Patient,
     _history: &[Dose],
     eval_date: NaiveDate,
-    _candidate_forecasts: &mut std::collections::HashMap<String, VaccineGroupForecast>,
-) -> String {
+    _candidate_forecasts: &mut [(&'static str, VaccineGroupForecast)],
+) -> &'static str {
     let adult_start = add_months(patient.birth_date, 20);
     if eval_date >= adult_start {
-        "RSV_ADULT_SERIES".into()
+        "RSV_ADULT_SERIES"
     } else {
-        "RSV_INFANT_SERIES".into()
+        "RSV_INFANT_SERIES"
     }
 }

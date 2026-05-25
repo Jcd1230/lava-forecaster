@@ -1,3 +1,4 @@
+use crate::date_utils::TinyVec;
 use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
@@ -7,7 +8,7 @@ pub fn cholera_custom_evaluation_hook(
     _series_name: &str,
     _target_dose_idx: usize,
     _ctx: &EvaluationContext,
-    _reasons: &mut Vec<EvaluationReason>,
+    _reasons: &mut TinyVec<EvaluationReason, 4>,
     _status: &mut DoseStatus,
 ) {
     // Standard CDSi parameters in schedules.rs are sufficient; no custom dose evaluation logic needed.
@@ -21,7 +22,7 @@ pub fn cholera_custom_forecast_hook(
     forecast: &mut SeriesForecast,
 ) {
     if forecast.status == SeriesStatus::Complete {
-        forecast.reasons = vec!["COMPLETE".into()];
+        forecast.reasons = crate::reasons!["COMPLETE"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -41,7 +42,7 @@ pub fn cholera_custom_forecast_hook(
 
     if is_under_2y {
         forecast.status = SeriesStatus::NotRecommended;
-        forecast.reasons = vec!["CHOLERA_NOT_ROUTINE_SEE_ACIP".into()];
+        forecast.reasons = crate::reasons!["CHOLERA_NOT_ROUTINE_SEE_ACIP"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -49,16 +50,16 @@ pub fn cholera_custom_forecast_hook(
     } else if is_under_65y {
         if valid_doses.is_empty() {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons = vec![
-                "HIGH_RISK".into(),
-                "CHOLERA_NOT_ROUTINE_SEE_ACIP".into(),
+            forecast.reasons = crate::reasons![
+                "HIGH_RISK",
+                "CHOLERA_NOT_ROUTINE_SEE_ACIP",
             ];
             forecast.earliest_date = None;
             forecast.recommended_date = None;
             forecast.overdue_date = None;
             forecast.latest_date = None;
         } else {
-            if !forecast.reasons.contains(&"CHOLERA_NOT_ROUTINE_SEE_ACIP".into()) {
+            if !forecast.reasons.iter().any(|r| r == "CHOLERA_NOT_ROUTINE_SEE_ACIP") {
                 forecast.reasons.push("CHOLERA_NOT_ROUTINE_SEE_ACIP".into());
             }
         }
@@ -66,16 +67,16 @@ pub fn cholera_custom_forecast_hook(
         // >= 65 years old
         if valid_doses.is_empty() {
             forecast.status = SeriesStatus::NotRecommended;
-            forecast.reasons = vec![
-                "TOO_OLD".into(),
-                "CHOLERA_NOT_ROUTINE_SEE_ACIP".into(),
+            forecast.reasons = crate::reasons![
+                "TOO_OLD",
+                "CHOLERA_NOT_ROUTINE_SEE_ACIP",
             ];
             forecast.earliest_date = None;
             forecast.recommended_date = None;
             forecast.overdue_date = None;
             forecast.latest_date = None;
         } else {
-            if !forecast.reasons.contains(&"CHOLERA_NOT_ROUTINE_SEE_ACIP".into()) {
+            if !forecast.reasons.iter().any(|r| r == "CHOLERA_NOT_ROUTINE_SEE_ACIP") {
                 forecast.reasons.push("CHOLERA_NOT_ROUTINE_SEE_ACIP".into());
             }
         }

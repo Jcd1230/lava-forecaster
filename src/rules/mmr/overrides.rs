@@ -1,3 +1,4 @@
+use crate::date_utils::TinyVec;
 use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
@@ -44,7 +45,7 @@ pub fn mmr_custom_evaluation_hook(
     _series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut Vec<EvaluationReason>,
+    reasons: &mut TinyVec<EvaluationReason, 4>,
     status: &mut DoseStatus,
 ) {
     if let Some(dose) = ctx.current_dose {
@@ -153,7 +154,7 @@ pub fn mmr_custom_forecast_hook(
 
     if is_completed || is_adult_complete {
         forecast.status = SeriesStatus::Complete;
-        forecast.reasons = vec!["COMPLETE_HIGH_RISK".into()];
+        forecast.reasons = crate::reasons!["COMPLETE_HIGH_RISK"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -162,7 +163,7 @@ pub fn mmr_custom_forecast_hook(
         // Case 2: Not complete. Check if born prior to 1957
         if patient.birth_date < pre_1957 {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons = vec!["CONDITIONAL".into()];
+            forecast.reasons = crate::reasons!["CONDITIONAL"];
             forecast.earliest_date = None;
             forecast.recommended_date = None;
             forecast.overdue_date = None;

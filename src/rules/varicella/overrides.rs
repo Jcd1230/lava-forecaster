@@ -1,3 +1,4 @@
+use crate::date_utils::TinyVec;
 use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
@@ -21,7 +22,7 @@ pub fn varicella_custom_evaluation_hook(
     _series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut Vec<EvaluationReason>,
+    reasons: &mut TinyVec<EvaluationReason, 4>,
     status: &mut DoseStatus,
 ) {
     if let Some(dose) = ctx.current_dose {
@@ -81,7 +82,7 @@ pub fn varicella_custom_forecast_hook(
     // 1. Patient born prior to 1980 rule
     if forecast.status != SeriesStatus::Complete && patient.birth_date < pre_1980 {
         forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = vec!["CONDITIONAL".into()];
+        forecast.reasons = crate::reasons!["CONDITIONAL"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;

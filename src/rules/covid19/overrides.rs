@@ -1,6 +1,7 @@
+use crate::engine::CandidateForecastsExt;
 use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
-use crate::date_utils::{add_years, add_months, compare_elapsed, TimePeriod};
+use crate::date_utils::{TinyVec, add_years, add_months, compare_elapsed, TimePeriod};
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, 
     Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus,
@@ -129,7 +130,7 @@ pub fn evaluate_doses_seasonally(
     for (i, dose) in sorted_history.iter().enumerate() {
         let season = get_covid_season(dose.date);
         let mut status = DoseStatus::Valid;
-        let mut reasons = Vec::new();
+        let mut reasons = TinyVec::<EvaluationReason, 4>::new();
 
         // 1. DOB check
         if dose.date < patient.birth_date {
@@ -240,26 +241,26 @@ pub fn evaluate_doses_seasonally(
                     let season_key = if season == "COVID_19_AUG_2025_SEASON" {
                         let age_65_date = add_years(patient.birth_date, 65);
                         if dose.date >= age_65_date {
-                            "COVID_19_AUG_2025_SEASON_GTE65".into()
+                            "COVID_19_AUG_2025_SEASON_GTE65"
                         } else {
-                            "COVID_19_AUG_2025_SEASON".into()
+                            "COVID_19_AUG_2025_SEASON"
                         }
                     } else {
                         let is_pediatric = matches!(dose.cvx.0, cvx!("219") | cvx!("228") | cvx!("272") | cvx!("302") | cvx!("308") | cvx!("311"));
                         if is_pediatric {
-                            "PRIOR_SEASONS_LT5".into()
+                            "PRIOR_SEASONS_LT5"
                         } else {
                             let season_start_dt = get_season_start_date(season);
                             let age_at_season_start = compare_elapsed(patient.birth_date, season_start_dt, &crate::time_period!("5y"));
                             if age_at_season_start != std::cmp::Ordering::Less {
-                                season.to_string()
+                                season
                             } else {
-                                "PRIOR_SEASONS_LT5".into()
+                                "PRIOR_SEASONS_LT5"
                             }
                         }
                     };
 
-                    let season_valid_doses_len = valid_doses_by_season.get(&season_key).map(|v| v.len()).unwrap_or(0);
+                    let season_valid_doses_len = valid_doses_by_season.get(season_key).map(|v| v.len()).unwrap_or(0);
 
                     let mut min_interval_days = get_min_interval_days(
                         patient,
@@ -295,27 +296,27 @@ pub fn evaluate_doses_seasonally(
         let season_key = if season == "COVID_19_AUG_2025_SEASON" {
             let age_65_date = add_years(patient.birth_date, 65);
             if dose.date >= age_65_date {
-                "COVID_19_AUG_2025_SEASON_GTE65".into()
+                "COVID_19_AUG_2025_SEASON_GTE65"
             } else {
-                "COVID_19_AUG_2025_SEASON".into()
+                "COVID_19_AUG_2025_SEASON"
             }
         } else {
             let is_pediatric = matches!(dose.cvx.0, cvx!("219") | cvx!("228") | cvx!("272") | cvx!("302") | cvx!("308") | cvx!("311"));
             if is_pediatric {
-                "PRIOR_SEASONS_LT5".into()
+                "PRIOR_SEASONS_LT5"
             } else {
                 let season_start_dt = get_season_start_date(season);
                 let age_at_season_start = compare_elapsed(patient.birth_date, season_start_dt, &crate::time_period!("5y"));
                 if age_at_season_start != std::cmp::Ordering::Less {
-                    season.to_string()
+                    season
                 } else {
-                    "PRIOR_SEASONS_LT5".into()
+                    "PRIOR_SEASONS_LT5"
                 }
             }
         };
 
         let mut dose_number = if status == DoseStatus::Valid {
-            let season_valid_doses = valid_doses_by_season.entry(season_key.clone()).or_insert_with(Vec::new);
+            let season_valid_doses = valid_doses_by_season.entry(season_key.to_string()).or_insert_with(Vec::new);
             season_valid_doses.push(dose.date);
             
             let mut num = season_valid_doses.len();
@@ -336,7 +337,7 @@ pub fn evaluate_doses_seasonally(
             }
             num
         } else {
-            let season_valid_doses = valid_doses_by_season.entry(season_key.clone()).or_insert_with(Vec::new);
+            let season_valid_doses = valid_doses_by_season.entry(season_key.to_string()).or_insert_with(Vec::new);
             let mut num = season_valid_doses.len() + 1;
             if active_series_name == "COVID_19_AUG_2025_LT_2_SERIES" && season == "COVID_19_AUG_2025_SEASON" {
                 let prior_moderna_count = sorted_history.iter()
@@ -386,7 +387,7 @@ pub fn covid19_custom_evaluation_hook(
     series_name: &str,
     _target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut Vec<EvaluationReason>,
+    reasons: &mut TinyVec<EvaluationReason, 4>,
     status: &mut DoseStatus,
 ) {
     if let Some(dose) = ctx.current_dose {
@@ -394,7 +395,7 @@ pub fn covid19_custom_evaluation_hook(
         if let Some(matching_eval) = evals.iter().find(|e| e.dose_date == dose.date && e.cvx == dose.cvx) {
             *status = matching_eval.status;
             reasons.clear();
-            reasons.extend(matching_eval.reasons.clone());
+            reasons.extend(matching_eval.reasons.iter().copied());
         }
     }
 }
@@ -454,10 +455,10 @@ pub fn covid19_custom_forecast_hook(
                 forecast.recommended_date = None;
                 forecast.overdue_date = None;
                 forecast.latest_date = None;
-                forecast.reasons = vec!["COMPLETE_HIGH_RISK".into()];
+                forecast.reasons = crate::reasons!["COMPLETE_HIGH_RISK"];
             } else {
                 forecast.status = SeriesStatus::NotComplete;
-                forecast.reasons = vec!["NOT_COMPLETE".into()];
+                forecast.reasons = crate::reasons!["NOT_COMPLETE"];
                 
                 let mut earliest = season_start().max(age_6m);
                 let mut recommended = season_start().max(age_6m);
@@ -483,10 +484,10 @@ pub fn covid19_custom_forecast_hook(
                 forecast.recommended_date = None;
                 forecast.overdue_date = None;
                 forecast.latest_date = None;
-                forecast.reasons = vec!["COMPLETE_HIGH_RISK".into()];
+                forecast.reasons = crate::reasons!["COMPLETE_HIGH_RISK"];
             } else if current_season_valid_doses.len() == 1 {
                 forecast.status = SeriesStatus::NotComplete;
-                forecast.reasons = vec!["NOT_COMPLETE".into()];
+                forecast.reasons = crate::reasons!["NOT_COMPLETE"];
 
                 let anchor_dose = last_current_season_dose.unwrap();
                 let earliest = anchor_dose.date + chrono::Duration::days(28);
@@ -500,7 +501,7 @@ pub fn covid19_custom_forecast_hook(
             } else {
                 // 0 current season doses
                 forecast.status = SeriesStatus::NotComplete;
-                forecast.reasons = vec!["NOT_COMPLETE".into()];
+                forecast.reasons = crate::reasons!["NOT_COMPLETE"];
 
                 if let Some(last_dose) = last_current_season_dose {
                     let earliest = last_dose.date + chrono::Duration::days(28);
@@ -540,20 +541,20 @@ pub fn covid19_custom_forecast_hook(
             forecast.recommended_date = None;
             forecast.overdue_date = None;
             forecast.latest_date = None;
-            forecast.reasons = vec!["COMPLETE_HIGH_RISK".into()];
+            forecast.reasons = crate::reasons!["COMPLETE_HIGH_RISK"];
         } else {
             let is_under_19 = eval_date < add_years(patient.birth_date, 19);
             if is_under_19 {
                 if prior_season_valid_doses.is_empty() {
                     forecast.status = SeriesStatus::NotComplete;
-                    forecast.reasons = vec!["NOT_COMPLETE".into()];
+                    forecast.reasons = crate::reasons!["NOT_COMPLETE"];
                 } else {
                     forecast.status = SeriesStatus::ConditionallyRecommended;
-                    forecast.reasons = vec!["HIGH_RISK".into()];
+                    forecast.reasons = crate::reasons!["HIGH_RISK"];
                 }
             } else {
                 forecast.status = SeriesStatus::NotComplete;
-                forecast.reasons = vec!["NOT_COMPLETE".into()];
+                forecast.reasons = crate::reasons!["NOT_COMPLETE"];
             }
 
             if let Some(last_dose) = last_current_season_dose {
@@ -594,10 +595,10 @@ pub fn covid19_custom_forecast_hook(
             forecast.recommended_date = None;
             forecast.overdue_date = None;
             forecast.latest_date = None;
-            forecast.reasons = vec!["COMPLETE_HIGH_RISK".into()];
+            forecast.reasons = crate::reasons!["COMPLETE_HIGH_RISK"];
         } else if current_season_valid_doses.len() == 1 {
             forecast.status = SeriesStatus::NotComplete;
-            forecast.reasons = vec!["NOT_COMPLETE".into()];
+            forecast.reasons = crate::reasons!["NOT_COMPLETE"];
             
             let anchor_dose = last_current_season_dose.unwrap();
             let earliest = anchor_dose.date + chrono::Duration::days(56);
@@ -610,7 +611,7 @@ pub fn covid19_custom_forecast_hook(
         } else {
             // 0 current season doses
             forecast.status = SeriesStatus::NotComplete;
-            forecast.reasons = vec!["NOT_COMPLETE".into()];
+            forecast.reasons = crate::reasons!["NOT_COMPLETE"];
 
             if let Some(last_dose) = last_current_season_dose {
                 let earliest = last_dose.date + chrono::Duration::days(56);
@@ -649,12 +650,12 @@ pub fn covid19_group_selection(
     patient: &Patient,
     history: &[Dose],
     eval_date: NaiveDate,
-    candidate_forecasts: &mut std::collections::HashMap<String, VaccineGroupForecast>,
-) -> String {
+    candidate_forecasts: &mut [(&'static str, VaccineGroupForecast)],
+) -> &'static str {
     let selected_series_name = if age_lt(patient.birth_date, eval_date, "2y") 
         || has_in_season_dose_before_age(patient, history, "2y") 
     {
-        "COVID_19_AUG_2025_LT_2_SERIES".to_string()
+        "COVID_19_AUG_2025_LT_2_SERIES"
     } else {
         let age_65 = add_years(patient.birth_date, 65);
         let within_12m_of_65 = season_start() < age_65
@@ -665,14 +666,14 @@ pub fn covid19_group_selection(
             || history.iter().any(|dose| dose.date >= season_start() && dose.date >= age_65) 
             || within_12m_of_65 
         {
-            "COVID_19_AUG_2025_GTE_65_SERIES".to_string()
+            "COVID_19_AUG_2025_GTE_65_SERIES"
         } else {
-            "COVID_19_AUG_2025_2_Y_TO_64_Y_SERIES".to_string()
+            "COVID_19_AUG_2025_2_Y_TO_64_Y_SERIES"
         }
     };
 
-    if let Some(forecast) = candidate_forecasts.get_mut(&selected_series_name) {
-        forecast.evaluations = evaluate_doses_seasonally(patient, history, &selected_series_name);
+    if let Some(forecast) = candidate_forecasts.get_forecast_mut(selected_series_name) {
+        forecast.evaluations = evaluate_doses_seasonally(patient, history, selected_series_name).into();
     }
 
     selected_series_name

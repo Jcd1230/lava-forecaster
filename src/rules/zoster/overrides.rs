@@ -1,3 +1,4 @@
+use crate::date_utils::TinyVec;
 use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
@@ -24,7 +25,7 @@ pub fn zoster_custom_evaluation_hook(
     _series_name: &str,
     _target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut Vec<EvaluationReason>,
+    reasons: &mut TinyVec<EvaluationReason, 4>,
     status: &mut DoseStatus,
 ) {
     if let Some(dose) = ctx.current_dose {

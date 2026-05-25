@@ -1,3 +1,5 @@
+use crate::date_utils::TinyVec;
+use crate::engine::CandidateForecastsExt;
 use ice_cvx_macro::cvx;
 use chrono::{Datelike, NaiveDate};
 use crate::engine::EvaluationContext;
@@ -75,7 +77,7 @@ pub fn influenza_custom_evaluation_hook(
     _series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut Vec<EvaluationReason>,
+    reasons: &mut TinyVec<EvaluationReason, 4>,
     status: &mut DoseStatus,
 ) {
     let Some(dose) = ctx.current_dose else {
@@ -155,7 +157,7 @@ pub fn influenza_custom_forecast_hook(
         forecast.recommended_date = Some(active_season.end + chrono::Duration::days(1));
         forecast.overdue_date = None;
         forecast.latest_date = None;
-        forecast.reasons = vec!["NOT_COMPLETE".into()];
+        forecast.reasons = crate::reasons!["NOT_COMPLETE"];
         return;
     }
 
@@ -306,7 +308,7 @@ fn evaluate_history_seasonally(patient: &Patient, history: &[Dose]) -> Vec<DoseE
         let season_key = active_season.start.to_string();
 
         let mut status = DoseStatus::Valid;
-        let mut reasons = Vec::new();
+        let mut reasons = TinyVec::<EvaluationReason, 4>::new();
 
         // 1. Prior to DOB check
         if dose.date < patient.birth_date {
@@ -398,8 +400,8 @@ pub fn influenza_group_selection(
     patient: &Patient,
     history: &[Dose],
     eval_date: NaiveDate,
-    candidate_forecasts: &mut std::collections::HashMap<String, VaccineGroupForecast>,
-) -> String {
+    candidate_forecasts: &mut [(&'static str, VaccineGroupForecast)],
+) -> &'static str {
     let active_season = get_active_season(eval_date);
     let active_season_name = get_active_season_name(eval_date);
     let is_default_season = active_season_name == "DEFAULT_INFLUENZA_SEASON";
@@ -451,24 +453,24 @@ pub fn influenza_group_selection(
     
     let selected_series_name = if is_default_season {
         if use_1_dose {
-            if candidate_forecasts.contains_key("INFLUENZA_1_DOSE_SERIES") {
-                "INFLUENZA_1_DOSE_SERIES".into()
+            if candidate_forecasts.contains_forecast("INFLUENZA_1_DOSE_SERIES") {
+                "INFLUENZA_1_DOSE_SERIES"
             } else {
-                "INFLUENZA_2_DOSE_DEFAULT_SERIES".into()
+                "INFLUENZA_2_DOSE_DEFAULT_SERIES"
             }
         } else {
-            "INFLUENZA_2_DOSE_DEFAULT_SERIES".into()
+            "INFLUENZA_2_DOSE_DEFAULT_SERIES"
         }
     } else {
         if use_1_dose {
-            "INFLUENZA_1_DOSE_SERIES".into()
+            "INFLUENZA_1_DOSE_SERIES"
         } else {
-            "INFLUENZA_2_DOSE_SERIES".into()
+            "INFLUENZA_2_DOSE_SERIES"
         }
     };
 
-    if let Some(forecast) = candidate_forecasts.get_mut(&selected_series_name) {
-        forecast.evaluations = evaluate_history_seasonally(patient, history);
+    if let Some(forecast) = candidate_forecasts.get_forecast_mut(selected_series_name) {
+        forecast.evaluations = evaluate_history_seasonally(patient, history).into();
     }
 
     selected_series_name

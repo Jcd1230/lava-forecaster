@@ -1,3 +1,4 @@
+use crate::date_utils::TinyVec;
 use ice_cvx_macro::cvx;
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus};
@@ -7,7 +8,7 @@ pub fn typhoid_custom_evaluation_hook(
     _series_name: &str,
     _target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut Vec<EvaluationReason>,
+    reasons: &mut TinyVec<EvaluationReason, 4>,
     status: &mut DoseStatus,
 ) {
     if let Some(dose) = ctx.current_dose {
@@ -33,9 +34,9 @@ pub fn typhoid_custom_forecast_hook(
 ) {
     if forecast.status == SeriesStatus::Complete {
         forecast.status = SeriesStatus::Complete;
-        forecast.reasons = vec![
-            "COMPLETE_HIGH_RISK".into(),
-            "TYPHOID_NOT_ROUTINE_SEE_ACIP".into(),
+        forecast.reasons = crate::reasons![
+            "COMPLETE_HIGH_RISK",
+            "TYPHOID_NOT_ROUTINE_SEE_ACIP",
         ];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
@@ -51,7 +52,7 @@ pub fn typhoid_custom_forecast_hook(
 
     if is_under_2y {
         forecast.status = SeriesStatus::NotRecommended;
-        forecast.reasons = vec!["TYPHOID_NOT_ROUTINE_SEE_ACIP".into()];
+        forecast.reasons = crate::reasons!["TYPHOID_NOT_ROUTINE_SEE_ACIP"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -59,9 +60,9 @@ pub fn typhoid_custom_forecast_hook(
     } else {
         // >= 2 years old and not complete
         forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = vec![
-            "HIGH_RISK".into(),
-            "TYPHOID_NOT_ROUTINE_SEE_ACIP".into(),
+        forecast.reasons = crate::reasons![
+            "HIGH_RISK",
+            "TYPHOID_NOT_ROUTINE_SEE_ACIP",
         ];
         forecast.earliest_date = None;
         forecast.recommended_date = None;

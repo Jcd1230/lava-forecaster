@@ -1,3 +1,5 @@
+use crate::date_utils::TinyVec;
+use crate::engine::CandidateForecastsExt;
 use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
@@ -47,7 +49,7 @@ pub fn hepa_custom_evaluation_hook(
     series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut Vec<EvaluationReason>,
+    reasons: &mut TinyVec<EvaluationReason, 4>,
     status: &mut DoseStatus,
 ) {
     if let Some(dose) = ctx.current_dose {
@@ -124,11 +126,11 @@ pub fn hepa_group_selection(
     patient: &Patient,
     _history: &[Dose],
     _eval_date: NaiveDate,
-    candidate_forecasts: &mut HashMap<String, VaccineGroupForecast>,
-) -> String {
-    let mut selected = "HEP_A_2_DOSE_CHILD_ADULT_SERIES".into();
+    candidate_forecasts: &mut [(&'static str, VaccineGroupForecast)],
+) -> &'static str {
+    let mut selected = "HEP_A_2_DOSE_CHILD_ADULT_SERIES";
 
-    let forecast_2 = candidate_forecasts.get("HEP_A_2_DOSE_CHILD_ADULT_SERIES").unwrap();
+    let forecast_2 = candidate_forecasts.get_forecast("HEP_A_2_DOSE_CHILD_ADULT_SERIES").unwrap();
     let first_valid_dose_2 = forecast_2.evaluations.iter()
         .filter(|e| e.status == DoseStatus::Valid)
         .min_by_key(|e| e.dose_date);
@@ -140,7 +142,7 @@ pub fn hepa_group_selection(
             // Patient >= 18y-4d at Dose 1. Default initially is 2-dose.
             
             // Check Override 1: Select 4-dose Accelerated Twinrix series
-            let forecast_4 = candidate_forecasts.get("HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES").unwrap();
+            let forecast_4 = candidate_forecasts.get_forecast("HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES").unwrap();
             let valid_doses_4: Vec<&crate::models::DoseEvaluation> = forecast_4.evaluations.iter()
                 .filter(|e| e.status == DoseStatus::Valid)
                 .collect();
@@ -155,14 +157,14 @@ pub fn hepa_group_selection(
                     && interval_ge(d1.dose_date, d2.dose_date, "7d") 
                     && interval_lt(d1.dose_date, d2.dose_date, "24d") 
                 {
-                    selected = "HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES".into();
+                    selected = "HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES";
                     twinrix_selected = true;
                 }
             }
 
             // Check Override 2: Select 3-dose series (if Twinrix accelerated not selected)
             if !twinrix_selected {
-                let forecast_3 = candidate_forecasts.get("HEP_A_ADULT_3_DOSE_SERIES").unwrap();
+                let forecast_3 = candidate_forecasts.get_forecast("HEP_A_ADULT_3_DOSE_SERIES").unwrap();
                 let valid_doses_3: Vec<&crate::models::DoseEvaluation> = forecast_3.evaluations.iter()
                     .filter(|e| e.status == DoseStatus::Valid)
                     .collect();
@@ -171,7 +173,7 @@ pub fn hepa_group_selection(
                     let d1 = valid_doses_3[0];
                     if d1.cvx.0 == cvx!("104") {
                         if valid_doses_3.len() == 1 {
-                            selected = "HEP_A_ADULT_3_DOSE_SERIES".into();
+                            selected = "HEP_A_ADULT_3_DOSE_SERIES";
                         } else {
                             let d2 = valid_doses_3[1];
                             
@@ -179,7 +181,7 @@ pub fn hepa_group_selection(
                                 && interval_ge(d1.dose_date, d2.dose_date, "24d") 
                                 && interval_lt(d1.dose_date, d2.dose_date, "6m-4d") 
                             {
-                                selected = "HEP_A_ADULT_3_DOSE_SERIES".into();
+                                selected = "HEP_A_ADULT_3_DOSE_SERIES";
                             }
                         }
                     }
@@ -188,19 +190,19 @@ pub fn hepa_group_selection(
 
             // Check Override 3: If 4-dose is selected, check if we revert to 3-dose
             if selected == "HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES" {
-                let forecast_3 = candidate_forecasts.get("HEP_A_ADULT_3_DOSE_SERIES").unwrap();
-                let forecast_4 = candidate_forecasts.get("HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES").unwrap();
+                let forecast_3 = candidate_forecasts.get_forecast("HEP_A_ADULT_3_DOSE_SERIES").unwrap();
+                let forecast_4 = candidate_forecasts.get_forecast("HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES").unwrap();
                 let v3 = num_valid_doses(forecast_3);
                 let v4 = num_valid_doses(forecast_4);
                 
                 if v3 == 3 && v4 < 4 {
-                    selected = "HEP_A_ADULT_3_DOSE_SERIES".into();
+                    selected = "HEP_A_ADULT_3_DOSE_SERIES";
                 } else if v4 < 4 {
                     if let Some(latest_twinrix_date) = last_valid_dose_date(forecast_4) {
                         let has_later_3dose_valid = forecast_3.evaluations.iter()
                             .any(|e| e.status == DoseStatus::Valid && e.dose_date > latest_twinrix_date);
                         if has_later_3dose_valid && (3 - v3) < (4 - v4) {
-                            selected = "HEP_A_ADULT_3_DOSE_SERIES".into();
+                            selected = "HEP_A_ADULT_3_DOSE_SERIES";
                         }
                     }
                 }
@@ -208,16 +210,16 @@ pub fn hepa_group_selection(
 
             // Check Override 4: Revert to 2-dose complete series if complete and either the selected is not, or 2-dose completed before it
             if selected == "HEP_A_ADULT_3_DOSE_SERIES" || selected == "HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES" {
-                let forecast_2 = candidate_forecasts.get("HEP_A_2_DOSE_CHILD_ADULT_SERIES").unwrap();
+                let forecast_2 = candidate_forecasts.get_forecast("HEP_A_2_DOSE_CHILD_ADULT_SERIES").unwrap();
                 if is_complete(forecast_2) {
-                    let forecast_sel = candidate_forecasts.get(&selected).unwrap();
+                    let forecast_sel = candidate_forecasts.get_forecast(&selected).unwrap();
                     if !is_complete(forecast_sel) {
-                        selected = "HEP_A_2_DOSE_CHILD_ADULT_SERIES".into();
+                        selected = "HEP_A_2_DOSE_CHILD_ADULT_SERIES";
                     } else {
                         let date_2 = last_valid_dose_date(forecast_2).unwrap();
                         let date_sel = last_valid_dose_date(forecast_sel).unwrap();
                         if date_2 < date_sel {
-                            selected = "HEP_A_2_DOSE_CHILD_ADULT_SERIES".into();
+                            selected = "HEP_A_2_DOSE_CHILD_ADULT_SERIES";
                         }
                     }
                 }
@@ -228,43 +230,43 @@ pub fn hepa_group_selection(
     // Post-Process status modifications
     if selected == "HEP_A_ADULT_3_DOSE_SERIES" {
         // Find doses Valid in 4-dose, and if they are Invalid in 3-dose, mark Accepted
-        let valid_dates_4: Vec<NaiveDate> = candidate_forecasts.get("HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES").unwrap()
+        let valid_dates_4: Vec<NaiveDate> = candidate_forecasts.get_forecast("HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES").unwrap()
             .evaluations.iter()
             .filter(|e| e.status == DoseStatus::Valid)
             .map(|e| e.dose_date)
             .collect();
         
-        if let Some(forecast_3) = candidate_forecasts.get_mut("HEP_A_ADULT_3_DOSE_SERIES") {
-            for eval in &mut forecast_3.evaluations {
+        if let Some(forecast_3) = candidate_forecasts.get_forecast_mut("HEP_A_ADULT_3_DOSE_SERIES") {
+            for eval in forecast_3.evaluations.iter_mut() {
                 if eval.status == DoseStatus::Invalid && valid_dates_4.contains(&eval.dose_date) {
                     eval.status = DoseStatus::Accepted;
-                    eval.reasons = vec![EvaluationReason::VaccineNotCountedBasedOnMostRecentVaccineGiven];
+                    eval.reasons = crate::reasons![EvaluationReason::VaccineNotCountedBasedOnMostRecentVaccineGiven];
                 }
             }
         }
     } else if selected == "HEP_A_2_DOSE_CHILD_ADULT_SERIES" {
         // Only Twinrix-valid alternate-series doses are accepted when the 2-dose series stays selected.
         let mut valid_dates_other = Vec::new();
-        if let Some(f3) = candidate_forecasts.get("HEP_A_ADULT_3_DOSE_SERIES") {
-            for e in &f3.evaluations {
+        if let Some(f3) = candidate_forecasts.get_forecast("HEP_A_ADULT_3_DOSE_SERIES") {
+            for e in f3.evaluations.iter() {
                 if e.status == DoseStatus::Valid && e.cvx.0 == cvx!("104") {
                     valid_dates_other.push(e.dose_date);
                 }
             }
         }
-        if let Some(f4) = candidate_forecasts.get("HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES") {
-            for e in &f4.evaluations {
+        if let Some(f4) = candidate_forecasts.get_forecast("HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES") {
+            for e in f4.evaluations.iter() {
                 if e.status == DoseStatus::Valid && e.cvx.0 == cvx!("104") {
                     valid_dates_other.push(e.dose_date);
                 }
             }
         }
         
-        if let Some(forecast_2) = candidate_forecasts.get_mut("HEP_A_2_DOSE_CHILD_ADULT_SERIES") {
-            for eval in &mut forecast_2.evaluations {
+        if let Some(forecast_2) = candidate_forecasts.get_forecast_mut("HEP_A_2_DOSE_CHILD_ADULT_SERIES") {
+            for eval in forecast_2.evaluations.iter_mut() {
                 if eval.status == DoseStatus::Invalid && valid_dates_other.contains(&eval.dose_date) {
                     eval.status = DoseStatus::Accepted;
-                    eval.reasons = vec![EvaluationReason::VaccineNotCountedBasedOnMostRecentVaccineGiven];
+                    eval.reasons = crate::reasons![EvaluationReason::VaccineNotCountedBasedOnMostRecentVaccineGiven];
                 }
             }
         }

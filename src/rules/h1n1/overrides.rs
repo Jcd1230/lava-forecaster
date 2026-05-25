@@ -1,3 +1,5 @@
+use crate::date_utils::TinyVec;
+use crate::engine::CandidateForecastsExt;
 use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
@@ -7,7 +9,7 @@ pub fn h1n1_custom_evaluation_hook(
     _series_name: &str,
     _target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut Vec<EvaluationReason>,
+    reasons: &mut TinyVec<EvaluationReason, 4>,
     status: &mut DoseStatus,
 ) {
     if let Some(dose) = ctx.current_dose {
@@ -35,7 +37,7 @@ pub fn h1n1_custom_forecast_hook(
 
     if forecast.status == SeriesStatus::Complete {
         forecast.status = SeriesStatus::NotRecommended;
-        forecast.reasons = vec!["COMPLETE".into()];
+        forecast.reasons = crate::reasons!["COMPLETE"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -45,7 +47,7 @@ pub fn h1n1_custom_forecast_hook(
 
     if eval_date > season_end {
         forecast.status = SeriesStatus::NotRecommended;
-        forecast.reasons = vec!["VAC_GROUP_NO_LONGER_REC".into()];
+        forecast.reasons = crate::reasons!["VAC_GROUP_NO_LONGER_REC"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -56,7 +58,7 @@ pub fn h1n1_custom_forecast_hook(
     if let Some(rec_date) = forecast.recommended_date {
         if rec_date > season_end {
             forecast.status = SeriesStatus::NotRecommended;
-            forecast.reasons = vec!["VAC_GROUP_NO_LONGER_REC".into()];
+            forecast.reasons = crate::reasons!["VAC_GROUP_NO_LONGER_REC"];
             forecast.earliest_date = None;
             forecast.recommended_date = None;
             forecast.overdue_date = None;
@@ -69,8 +71,8 @@ pub fn h1n1_group_selection(
     patient: &Patient,
     history: &[Dose],
     eval_date: NaiveDate,
-    candidate_forecasts: &mut std::collections::HashMap<String, VaccineGroupForecast>,
-) -> String {
+    candidate_forecasts: &mut [(&'static str, VaccineGroupForecast)],
+) -> &'static str {
     let age_10y = crate::date_utils::add_years(patient.birth_date, 10);
     
     let last_h1n1_dose = history.iter()
@@ -82,7 +84,7 @@ pub fn h1n1_group_selection(
             eval_date < age_10y
         }
         Some(last_dose) => {
-            let has_ge_2_valid = candidate_forecasts.get("H1N1_2_DOSE_SERIES")
+            let has_ge_2_valid = candidate_forecasts.get_forecast("H1N1_2_DOSE_SERIES")
                 .map(|f| f.evaluations.iter().filter(|e| e.status == DoseStatus::Valid).count() >= 2)
                 .unwrap_or(false);
             
@@ -95,9 +97,9 @@ pub fn h1n1_group_selection(
     };
 
     let selected = if select_2_dose {
-        "H1N1_2_DOSE_SERIES".into()
+        "H1N1_2_DOSE_SERIES"
     } else {
-        "H1N1_1_DOSE_SERIES".into()
+        "H1N1_1_DOSE_SERIES"
     };
 
     let season_end = NaiveDate::from_ymd_opt(2010, 6, 30).unwrap();
@@ -106,7 +108,7 @@ pub fn h1n1_group_selection(
         .count() == 0;
 
     if eval_date > season_end && has_zero_h1n1_doses {
-        if let Some(f) = candidate_forecasts.get_mut(&selected) {
+        if let Some(f) = candidate_forecasts.get_forecast_mut(&selected) {
             f.forecasts.clear();
         }
     }

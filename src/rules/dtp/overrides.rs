@@ -1,8 +1,9 @@
+use crate::engine::CandidateForecastsExt;
 use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, VaccineGroupForecast};
-use crate::date_utils::{add_years, add_months};
+use crate::date_utils::{TinyVec, add_years, add_months};
 use std::collections::HashMap;
 
 pub fn is_pertussis_vaccine(cvx: Cvx) -> bool {
@@ -30,7 +31,7 @@ pub fn dtp_custom_evaluation_hook(
     series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut Vec<EvaluationReason>,
+    reasons: &mut TinyVec<EvaluationReason, 4>,
     status: &mut DoseStatus,
 ) {
     if series_name != "DTP_5_DOSE_SERIES" && series_name != "DTP_3_DOSE_SERIES" {
@@ -87,7 +88,7 @@ pub fn dtp_custom_dose_number_hook(
 pub fn dtp_custom_extra_dose_hook(
     series_name: &str,
     ctx: &EvaluationContext,
-) -> Option<(DoseStatus, Vec<EvaluationReason>)> {
+) -> Option<(DoseStatus, TinyVec<EvaluationReason, 4>)> {
     if series_name != "DTP_5_DOSE_SERIES" && series_name != "DTP_3_DOSE_SERIES" {
         return None;
     }
@@ -97,7 +98,7 @@ pub fn dtp_custom_extra_dose_hook(
     let t_completed = is_adolescent_tdap_completed(ctx);
     if t_completed {
         // Any subsequent dose is valid as a recurring decennial booster
-        return Some((DoseStatus::Valid, Vec::new()));
+        return Some((DoseStatus::Valid, TinyVec::new()));
     }
     
     let is_tdap = dose.cvx.0 == cvx!("115") || dose.cvx.0 == cvx!("198");
@@ -108,10 +109,10 @@ pub fn dtp_custom_extra_dose_hook(
         if age_ge_10 {
             if let Some(prev_p_date) = get_last_pertussis_date_before(ctx, dose.date) {
                 if dose.date < prev_p_date + chrono::Duration::days(28) {
-                    return Some((DoseStatus::Accepted, vec![EvaluationReason::BoosterDose]));
+                    return Some((DoseStatus::Accepted, crate::reasons![EvaluationReason::BoosterDose]));
                 }
             }
-            return Some((DoseStatus::Valid, Vec::new()));
+            return Some((DoseStatus::Valid, TinyVec::new()));
         } else {
             let has_prior_tdap_ge_7 = ctx.valid_doses.iter().any(|(v_date, _)| {
                 let is_prior_tdap = ctx.history.iter().any(|d| d.date == *v_date && (d.cvx.0 == cvx!("115") || d.cvx.0 == cvx!("198")));
@@ -121,15 +122,15 @@ pub fn dtp_custom_extra_dose_hook(
             if !has_prior_tdap_ge_7 {
                 if let Some(prev_p_date) = get_last_pertussis_date_before(ctx, dose.date) {
                     if dose.date < prev_p_date + chrono::Duration::days(28) {
-                        return Some((DoseStatus::Accepted, vec![EvaluationReason::BoosterDose]));
+                        return Some((DoseStatus::Accepted, crate::reasons![EvaluationReason::BoosterDose]));
                     }
                 }
-                return Some((DoseStatus::Valid, Vec::new()));
+                return Some((DoseStatus::Valid, TinyVec::new()));
             }
         }
     }
     
-    Some((DoseStatus::Accepted, vec![EvaluationReason::BoosterDose]))
+    Some((DoseStatus::Accepted, crate::reasons![EvaluationReason::BoosterDose]))
 }
 
 pub fn dtp_custom_forecast_hook(
@@ -152,7 +153,7 @@ pub fn dtp_custom_forecast_hook(
     
     if forecast.status == crate::models::SeriesStatus::Complete {
         forecast.status = crate::models::SeriesStatus::NotComplete;
-        forecast.reasons = vec!["NOT_COMPLETE".into()];
+        forecast.reasons = crate::reasons!["NOT_COMPLETE"];
         
         if has_valid_tdap_ge_10 {
             // Decennial booster needed
@@ -390,8 +391,8 @@ pub fn dtp_group_selection(
     patient: &Patient,
     history: &[Dose],
     eval_date: NaiveDate,
-    _candidate_forecasts: &mut HashMap<String, VaccineGroupForecast>,
-) -> String {
+    _candidate_forecasts: &mut [(&'static str, VaccineGroupForecast)],
+) -> &'static str {
     let age_7 = add_years(patient.birth_date, 7);
     
     // Check if any dose on record is before age 7
@@ -401,8 +402,8 @@ pub fn dtp_group_selection(
     let is_at_least_7 = eval_date >= age_7;
     
     if is_at_least_7 && !has_dose_before_7 {
-        "DTP_3_DOSE_SERIES".into()
+        "DTP_3_DOSE_SERIES"
     } else {
-        "DTP_5_DOSE_SERIES".into()
+        "DTP_5_DOSE_SERIES"
     }
 }

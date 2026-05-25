@@ -1,3 +1,5 @@
+use crate::date_utils::TinyVec;
+use crate::engine::CandidateForecastsExt;
 use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
@@ -7,7 +9,7 @@ pub fn rotavirus_custom_evaluation_hook(
     _series_name: &str,
     _target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut Vec<EvaluationReason>,
+    reasons: &mut TinyVec<EvaluationReason, 4>,
     status: &mut DoseStatus,
 ) {
     let Some(dose) = ctx.current_dose else {
@@ -35,7 +37,7 @@ pub fn rotavirus_custom_forecast_hook(
     let birth = patient.birth_date;
 
     if forecast.status == SeriesStatus::Complete {
-        forecast.reasons = vec!["COMPLETE".into()];
+        forecast.reasons = crate::reasons!["COMPLETE"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -52,7 +54,7 @@ pub fn rotavirus_custom_forecast_hook(
 
     if is_currently_gt_8m || is_rec_gt_8m {
         forecast.status = SeriesStatus::NotRecommended;
-        forecast.reasons = vec!["TOO_OLD".into()];
+        forecast.reasons = crate::reasons!["TOO_OLD"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -65,7 +67,7 @@ pub fn rotavirus_custom_forecast_hook(
     let date_105d = tp_105d.add_to(birth);
     if eval_date >= date_105d && valid_doses.is_empty() {
         forecast.status = SeriesStatus::NotRecommended;
-        forecast.reasons = vec!["TOO_OLD_TO_INITIATE".into()];
+        forecast.reasons = crate::reasons!["TOO_OLD_TO_INITIATE"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -115,17 +117,17 @@ pub fn rotavirus_group_selection(
     _patient: &Patient,
     _history: &[Dose],
     _eval_date: NaiveDate,
-    candidate_forecasts: &mut std::collections::HashMap<String, VaccineGroupForecast>,
-) -> String {
-    let series_2_dose = "ROTAVIRUS_2_DOSE_SERIES".into();
-    let series_3_dose = "ROTAVIRUS_3_DOSE_SERIES".into();
+    candidate_forecasts: &mut [(&'static str, VaccineGroupForecast)],
+) -> &'static str {
+    let series_2_dose = "ROTAVIRUS_2_DOSE_SERIES";
+    let series_3_dose = "ROTAVIRUS_3_DOSE_SERIES";
 
-    let has_2_dose = candidate_forecasts.contains_key(&series_2_dose);
-    let has_3_dose = candidate_forecasts.contains_key(&series_3_dose);
+    let has_2_dose = candidate_forecasts.contains_forecast(&series_2_dose);
+    let has_3_dose = candidate_forecasts.contains_forecast(&series_3_dose);
 
     if has_2_dose && has_3_dose {
         // 1. Check if any valid dose of CVX 116, 74, or 122 was administered in either candidate's evaluations.
-        let fc_3 = candidate_forecasts.get(&series_3_dose).unwrap();
+        let fc_3 = candidate_forecasts.get_forecast(&series_3_dose).unwrap();
         let has_valid_3dose_cvx = fc_3.evaluations.iter().any(|e| {
             e.status == DoseStatus::Valid && (e.cvx.0 == cvx!("116") || e.cvx.0 == cvx!("74") || e.cvx.0 == cvx!("122"))
         });
@@ -134,7 +136,7 @@ pub fn rotavirus_group_selection(
         }
 
         // 2. Check if dose 1 is CVX 119 and is valid in 2-dose series candidate evaluations.
-        let fc_2 = candidate_forecasts.get(&series_2_dose).unwrap();
+        let fc_2 = candidate_forecasts.get_forecast(&series_2_dose).unwrap();
         let dose_1_is_valid_rv1 = fc_2.evaluations.iter().any(|e| {
             e.status == DoseStatus::Valid && e.dose_number == Some(1) && e.cvx.0 == cvx!("119")
         });

@@ -1,8 +1,9 @@
+use crate::engine::CandidateForecastsExt;
 use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
-use crate::date_utils::{TimePeriod, add_years};
+use crate::date_utils::{TinyVec, TimePeriod, add_years};
 use std::collections::HashMap;
 
 fn is_hpv_cvx(cvx: Cvx) -> bool {
@@ -21,7 +22,7 @@ pub fn hpv_custom_evaluation_hook(
     series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut Vec<EvaluationReason>,
+    reasons: &mut TinyVec<EvaluationReason, 4>,
     status: &mut DoseStatus,
 ) {
     if let Some(dose) = ctx.current_dose {
@@ -139,10 +140,10 @@ pub fn hpv_group_selection(
     patient: &Patient,
     _history: &[Dose],
     eval_date: NaiveDate,
-    candidate_forecasts: &mut HashMap<String, VaccineGroupForecast>,
-) -> String {
-    let forecast_2 = candidate_forecasts.get("HPV_2_DOSE_SERIES").unwrap();
-    let forecast_3 = candidate_forecasts.get("HPV_3_DOSE_SERIES").unwrap();
+    candidate_forecasts: &mut [(&'static str, VaccineGroupForecast)],
+) -> &'static str {
+    let forecast_2 = candidate_forecasts.get_forecast("HPV_2_DOSE_SERIES").unwrap();
+    let forecast_3 = candidate_forecasts.get_forecast("HPV_3_DOSE_SERIES").unwrap();
 
     // Find the first valid dose date in either series (will be identical since dose 1 requirements are same)
     let first_valid_dose_date = forecast_2.evaluations.iter()
@@ -155,9 +156,9 @@ pub fn hpv_group_selection(
             // No doses administered yet: select based on age on evaluation date
             let age_15 = add_years(patient.birth_date, 15);
             if eval_date < age_15 {
-                "HPV_2_DOSE_SERIES".into()
+                "HPV_2_DOSE_SERIES"
             } else {
-                "HPV_3_DOSE_SERIES".into()
+                "HPV_3_DOSE_SERIES"
             }
         }
         Some(d1_date) => {
@@ -180,20 +181,20 @@ pub fn hpv_group_selection(
                         .any(|e| e.status == DoseStatus::Valid && e.dose_number == Some(2) && e.dose_date < d2_2dose_date);
 
                     if earlier_d2_3dose {
-                        "HPV_3_DOSE_SERIES".into()
+                        "HPV_3_DOSE_SERIES"
                     } else {
-                        "HPV_2_DOSE_SERIES".into()
+                        "HPV_2_DOSE_SERIES"
                     }
                 } else if has_valid_d2_in_3_dose {
                     // 2-dose is not satisfied, but 3-dose is
-                    "HPV_3_DOSE_SERIES".into()
+                    "HPV_3_DOSE_SERIES"
                 } else {
                     // Only 1 dose, or no valid doses at all
-                    "HPV_2_DOSE_SERIES".into()
+                    "HPV_2_DOSE_SERIES"
                 }
             } else {
                 // Initiated at or after age 15 -> must use 3-dose series
-                "HPV_3_DOSE_SERIES".into()
+                "HPV_3_DOSE_SERIES"
             }
         }
     }

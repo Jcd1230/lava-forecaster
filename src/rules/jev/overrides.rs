@@ -1,14 +1,15 @@
+use crate::engine::CandidateForecastsExt;
 use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
-use crate::date_utils::{add_years, TimePeriod};
+use crate::date_utils::{TinyVec, add_years, TimePeriod};
 
 pub fn jev_custom_evaluation_hook(
     series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut Vec<EvaluationReason>,
+    reasons: &mut TinyVec<EvaluationReason, 4>,
     status: &mut DoseStatus,
 ) {
     if let Some(dose) = ctx.current_dose {
@@ -52,9 +53,9 @@ pub fn jev_custom_forecast_hook(
 ) {
     if forecast.status == SeriesStatus::Complete {
         forecast.status = SeriesStatus::Complete;
-        forecast.reasons = vec![
-            "COMPLETE_HIGH_RISK".into(),
-            "JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP".into(),
+        forecast.reasons = crate::reasons![
+            "COMPLETE_HIGH_RISK",
+            "JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP",
         ];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
@@ -67,12 +68,12 @@ pub fn jev_custom_forecast_hook(
         let age_2m = crate::time_period!("2m").add_to(patient.birth_date);
         if eval_date < age_2m {
             forecast.status = SeriesStatus::NotRecommended;
-            forecast.reasons = vec!["JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP".into()];
+            forecast.reasons = crate::reasons!["JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP"];
         } else {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons = vec![
-                "HIGH_RISK".into(),
-                "JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP".into(),
+            forecast.reasons = crate::reasons![
+                "HIGH_RISK",
+                "JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP",
             ];
         }
         forecast.earliest_date = None;
@@ -83,7 +84,7 @@ pub fn jev_custom_forecast_hook(
     }
 
     if valid_doses.len() == 1 {
-        if !forecast.reasons.contains(&"JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP".into()) {
+        if !forecast.reasons.iter().any(|r| r.as_ref() == "JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP") {
             forecast.reasons.push("JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP".into());
         }
 
@@ -110,9 +111,9 @@ pub fn jev_group_selection(
     patient: &Patient,
     _history: &[Dose],
     eval_date: NaiveDate,
-    candidate_forecasts: &mut std::collections::HashMap<String, VaccineGroupForecast>,
-) -> String {
-    let first_valid_dose_date = candidate_forecasts.get("JEVC_RISK_2_DOSE_SERIES")
+    candidate_forecasts: &mut [(&'static str, VaccineGroupForecast)],
+) -> &'static str {
+    let first_valid_dose_date = candidate_forecasts.get_forecast("JEVC_RISK_2_DOSE_SERIES")
         .and_then(|f| {
             f.evaluations.iter()
                 .find(|e| e.status == DoseStatus::Valid && e.dose_number == Some(1))
@@ -128,8 +129,8 @@ pub fn jev_group_selection(
     let select_accelerated = age_at_reference >= age_18_minus_4d && age_at_reference < age_66;
 
     if select_accelerated {
-        "JEVC_RISK_2_DOSE_ACCELERATED_SERIES".into()
+        "JEVC_RISK_2_DOSE_ACCELERATED_SERIES"
     } else {
-        "JEVC_RISK_2_DOSE_SERIES".into()
+        "JEVC_RISK_2_DOSE_SERIES"
     }
 }

@@ -568,7 +568,7 @@ fn parse_legacy_xml(xml_content: &str, focus_code: &str) -> ExpectedResults {
                                     cvx: *cvx,
                                     status: map_legacy_dose_status(st),
                                     dose_number: inner_dose_number,
-                                    reasons: mapped_reasons,
+                                    reasons: mapped_reasons.into(),
                                 });
                             }
                         }
@@ -846,7 +846,7 @@ fn main() {
                                     }
                                 }
                             }
-                            for re in &rg.evaluations {
+                            for re in rg.evaluations.iter() {
                                 let ee = expected.evaluations.iter().find(|e| e.dose_date == re.dose_date && e.cvx == re.cvx);
                                 if ee.is_none() {
                                     is_ok = false;

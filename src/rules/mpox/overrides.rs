@@ -1,3 +1,5 @@
+use crate::date_utils::TinyVec;
+use crate::engine::CandidateForecastsExt;
 use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
@@ -40,7 +42,7 @@ pub fn mpox_custom_evaluation_hook(
     series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut Vec<EvaluationReason>,
+    reasons: &mut TinyVec<EvaluationReason, 4>,
     status: &mut DoseStatus,
 ) {
     let Some(primary_dose_count) = series_primary_dose_count(series_name) else {
@@ -60,12 +62,12 @@ pub fn mpox_custom_evaluation_hook(
 pub fn mpox_custom_extra_dose_hook(
     series_name: &str,
     ctx: &EvaluationContext,
-) -> Option<(DoseStatus, Vec<EvaluationReason>)> {
+) -> Option<(DoseStatus, TinyVec<EvaluationReason, 4>)> {
     let primary_dose_count = series_primary_dose_count(series_name)?;
     if ctx.valid_doses.len() == primary_dose_count
         && ctx.target_dose_number == primary_dose_count + 1
     {
-        return Some((DoseStatus::Valid, vec![EvaluationReason::BoosterDose]));
+        return Some((DoseStatus::Valid, crate::reasons![EvaluationReason::BoosterDose]));
     }
 
     None
@@ -79,7 +81,7 @@ pub fn mpox_custom_forecast_hook(
     forecast: &mut SeriesForecast,
 ) {
     if forecast.status == SeriesStatus::Complete {
-        forecast.reasons = vec!["COMPLETE_HIGH_RISK".into()];
+        forecast.reasons = crate::reasons!["COMPLETE_HIGH_RISK"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -89,7 +91,7 @@ pub fn mpox_custom_forecast_hook(
 
     if valid_doses.is_empty() {
         forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = vec!["HIGH_RISK".into()];
+        forecast.reasons = crate::reasons!["HIGH_RISK"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -101,29 +103,29 @@ pub fn mpox_group_selection(
     _patient: &Patient,
     _history: &[Dose],
     _eval_date: NaiveDate,
-    candidate_forecasts: &mut std::collections::HashMap<String, VaccineGroupForecast>,
-) -> String {
-    let two_dose = candidate_forecasts.get(MPOX_2_DOSE_SERIES);
-    let one_dose = candidate_forecasts.get(MPOX_1_DOSE_SERIES);
+    candidate_forecasts: &mut [(&'static str, VaccineGroupForecast)],
+) -> &'static str {
+    let two_dose = candidate_forecasts.get_forecast(MPOX_2_DOSE_SERIES);
+    let one_dose = candidate_forecasts.get_forecast(MPOX_1_DOSE_SERIES);
 
     let two_dose_first = two_dose.and_then(|forecast| first_valid_dose_date(forecast, 1));
     let one_dose_first = one_dose.and_then(|forecast| first_valid_dose_date(forecast, 1));
 
     let mut selected = if let Some(two_date) = two_dose_first {
         if one_dose_first.is_none_or(|one_date| one_date >= two_date) {
-            MPOX_2_DOSE_SERIES.to_string()
+            MPOX_2_DOSE_SERIES
         } else {
-            MPOX_1_DOSE_SERIES.to_string()
+            MPOX_1_DOSE_SERIES
         }
     } else if one_dose_first.is_some() {
-        MPOX_1_DOSE_SERIES.to_string()
+        MPOX_1_DOSE_SERIES
     } else {
-        MPOX_2_DOSE_SERIES.to_string()
+        MPOX_2_DOSE_SERIES
     };
 
     let selected_complete_date = candidate_forecasts
-        .get(&selected)
-        .and_then(|forecast| completion_date(&selected, forecast));
+        .get_forecast(selected)
+        .and_then(|forecast| completion_date(selected, forecast));
 
     let other_name = if selected == MPOX_2_DOSE_SERIES {
         MPOX_1_DOSE_SERIES
@@ -131,12 +133,12 @@ pub fn mpox_group_selection(
         MPOX_2_DOSE_SERIES
     };
     let other_complete_date = candidate_forecasts
-        .get(other_name)
+        .get_forecast(other_name)
         .and_then(|forecast| completion_date(other_name, forecast));
 
     if let Some(other_date) = other_complete_date {
         if selected_complete_date.is_none_or(|selected_date| other_date < selected_date) {
-            selected = other_name.to_string();
+            selected = other_name;
         }
     }
 

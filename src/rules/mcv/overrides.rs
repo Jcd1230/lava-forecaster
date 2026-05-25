@@ -2,7 +2,7 @@ use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus};
-use crate::date_utils::{TimePeriod, add_years};
+use crate::date_utils::{TinyVec, TimePeriod, add_years};
 
 fn get_vaccine_min_age(cvx: Cvx) -> Option<TimePeriod> {
     let s = match cvx.0 {
@@ -36,7 +36,7 @@ pub fn mcv_custom_evaluation_hook(
     _series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut Vec<EvaluationReason>,
+    reasons: &mut TinyVec<EvaluationReason, 4>,
     status: &mut DoseStatus,
 ) {
     if let Some(dose) = ctx.current_dose {
@@ -86,7 +86,7 @@ pub fn mcv_custom_forecast_hook(
     // 1. If patient has completed the series, forecast is Complete / COMPLETE_HIGH_RISK
     if forecast.status == SeriesStatus::Complete {
         forecast.status = SeriesStatus::Complete;
-        forecast.reasons = vec!["COMPLETE_HIGH_RISK".into()];
+        forecast.reasons = crate::reasons!["COMPLETE_HIGH_RISK"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -98,7 +98,7 @@ pub fn mcv_custom_forecast_hook(
     let age_19 = add_years(patient.birth_date, 19);
     if eval_date >= age_19 {
         forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = vec!["HIGH_RISK".into()];
+        forecast.reasons = crate::reasons!["HIGH_RISK"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;

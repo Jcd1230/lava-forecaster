@@ -1,8 +1,9 @@
+use crate::engine::CandidateForecastsExt;
 use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, VaccineGroupForecast, SeriesStatus};
-use crate::date_utils::{add_years, add_months};
+use crate::date_utils::{TinyVec, add_years, add_months};
 use std::collections::HashMap;
 
 fn is_combo_child_hepb_cvx(cvx: Cvx) -> bool {
@@ -87,7 +88,7 @@ pub fn hep_b_custom_evaluation_hook(
     series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut Vec<EvaluationReason>,
+    reasons: &mut TinyVec<EvaluationReason, 4>,
     status: &mut DoseStatus,
 ) {
     if let Some(dose) = ctx.current_dose {
@@ -494,15 +495,15 @@ pub fn hep_b_group_selection(
     patient: &Patient,
     history: &[Dose],
     eval_date: NaiveDate,
-    candidate_forecasts: &mut HashMap<String, VaccineGroupForecast>,
-) -> String {
+    candidate_forecasts: &mut [(&'static str, VaccineGroupForecast)],
+) -> &'static str {
     if history.iter().any(|dose| dose.cvx.0 == cvx!("110")) && eval_date >= patient.birth_date + chrono::Duration::days(168) {
-        for forecast_group in candidate_forecasts.values_mut() {
+        for forecast_group in candidate_forecasts.iter_mut().map(|(_, f)| f) {
             if forecast_group.evaluations.len() == 1
                 && forecast_group.evaluations[0].cvx.0 == cvx!("110")
                 && forecast_group.forecasts.iter().any(|forecast| forecast.status == SeriesStatus::NotComplete)
             {
-                for forecast in &mut forecast_group.forecasts {
+                for forecast in forecast_group.forecasts.iter_mut() {
                     if forecast.status == SeriesStatus::NotComplete {
                         forecast.overdue_date = forecast.earliest_date.or(forecast.recommended_date);
                     }
@@ -538,7 +539,7 @@ pub fn hep_b_group_selection(
     if heplisav_complete {
         let (d1_date, d2_date) = pair_indices.unwrap();
         // Post-process the candidate forecast for HEP_B_ADULT_2_DOSE_SERIES to be Complete and override other doses to Accepted
-        if let Some(forecast) = candidate_forecasts.get_mut("HEP_B_ADULT_2_DOSE_SERIES") {
+        if let Some(forecast) = candidate_forecasts.get_forecast_mut("HEP_B_ADULT_2_DOSE_SERIES") {
             forecast.evaluations.clear();
             let mut d1_done = false;
             let mut d2_done = false;
@@ -549,7 +550,7 @@ pub fn hep_b_group_selection(
                         dose_date: dose.date,
                         cvx: dose.cvx.clone(),
                         status: DoseStatus::Valid,
-                        reasons: Vec::new(),
+                        reasons: TinyVec::new(),
                         dose_number: Some(1),
                     });
                     d1_done = true;
@@ -558,7 +559,7 @@ pub fn hep_b_group_selection(
                         dose_date: dose.date,
                         cvx: dose.cvx.clone(),
                         status: DoseStatus::Valid,
-                        reasons: Vec::new(),
+                        reasons: TinyVec::new(),
                         dose_number: Some(2),
                     });
                     d2_done = true;
@@ -569,21 +570,21 @@ pub fn hep_b_group_selection(
                         dose_date: dose.date,
                         cvx: dose.cvx.clone(),
                         status: DoseStatus::Accepted,
-                        reasons: vec![EvaluationReason::VaccineNotCountedBasedOnMostRecentVaccineGiven],
+                        reasons: crate::reasons![EvaluationReason::VaccineNotCountedBasedOnMostRecentVaccineGiven],
                         dose_number: Some(accepted_number),
                     });
                     accepted_number += 1;
                 }
             }
-            for f in &mut forecast.forecasts {
+            for f in forecast.forecasts.iter_mut() {
                 f.status = SeriesStatus::Complete;
-                f.reasons = vec!["COMPLETE".into()];
+                f.reasons = crate::reasons!["COMPLETE"];
                 f.earliest_date = None;
                 f.recommended_date = None;
                 f.overdue_date = None;
                 f.latest_date = None;
             }
-            return "HEP_B_ADULT_2_DOSE_SERIES".into();
+            return "HEP_B_ADULT_2_DOSE_SERIES";
         }
     }
 
@@ -625,15 +626,15 @@ pub fn hep_b_group_selection(
     }
 
     if !is_adult && child_requires_four_dose_series(patient, history, &[]) {
-        if candidate_forecasts.contains_key("HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES") {
-            return "HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES".into();
+        if candidate_forecasts.contains_forecast("HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES") {
+            return "HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES";
         }
     }
 
     for name in &series_priority {
-        if let Some(f) = candidate_forecasts.get(*name) {
+        if let Some(f) = candidate_forecasts.get_forecast(*name) {
             if f.forecasts.iter().any(|fc| fc.status == SeriesStatus::Complete) {
-                return name.to_string();
+                return name;
             }
         }
     }
@@ -647,12 +648,12 @@ pub fn hep_b_group_selection(
             if first_twinrix_dose.date >= age_18y_minus_4d {
                 if twinrix_doses.len() >= 2 {
                     let interval = (twinrix_doses[1].date - twinrix_doses[0].date).num_days();
-                    if (7..24).contains(&interval) && candidate_forecasts.contains_key("HEP_B_4_DOSE_ACCELERATED_TWINRIX_SERIES") {
-                        return "HEP_B_4_DOSE_ACCELERATED_TWINRIX_SERIES".into();
+                    if (7..24).contains(&interval) && candidate_forecasts.contains_forecast("HEP_B_4_DOSE_ACCELERATED_TWINRIX_SERIES") {
+                        return "HEP_B_4_DOSE_ACCELERATED_TWINRIX_SERIES";
                     }
                 }
-                if candidate_forecasts.contains_key("HEP_B_3_DOSE_TWINRIX_SERIES") {
-                    return "HEP_B_3_DOSE_TWINRIX_SERIES".into();
+                if candidate_forecasts.contains_forecast("HEP_B_3_DOSE_TWINRIX_SERIES") {
+                    return "HEP_B_3_DOSE_TWINRIX_SERIES";
                 }
             }
         }
@@ -660,42 +661,42 @@ pub fn hep_b_group_selection(
 
     let has_cvx189 = history.iter().any(|d| d.cvx.0 == cvx!("189"));
     if has_cvx189 {
-        if candidate_forecasts.contains_key("HEP_B_ADULT_2_DOSE_SERIES") {
-            return "HEP_B_ADULT_2_DOSE_SERIES".into();
+        if candidate_forecasts.contains_forecast("HEP_B_ADULT_2_DOSE_SERIES") {
+            return "HEP_B_ADULT_2_DOSE_SERIES";
         }
     }
 
     // Default choice based on is_adult
     if is_adult {
-        "HEP_B_ADULT_3_DOSE_SERIES".into()
+        "HEP_B_ADULT_3_DOSE_SERIES"
     } else {
-        if let Some(f3) = candidate_forecasts.get_mut("HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES") {
+        if let Some(f3) = candidate_forecasts.get_forecast_mut("HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES") {
             let all_pediarix_evaluations = !f3.evaluations.is_empty() && f3.evaluations.iter().all(|evaluation| evaluation.cvx.0 == cvx!("110"));
             if all_pediarix_evaluations && f3.forecasts.iter().any(|forecast| forecast.status == SeriesStatus::Complete) {
                 let mut valid_seen = 0;
-                for evaluation in &mut f3.evaluations {
+                for evaluation in f3.evaluations.iter_mut() {
                     if evaluation.status == DoseStatus::Valid {
                         valid_seen += 1;
                         if valid_seen > 3 {
                             evaluation.status = DoseStatus::Accepted;
                             evaluation.dose_number = Some(4);
-                            evaluation.reasons = vec![EvaluationReason::VaccineNotCountedBasedOnMostRecentVaccineGiven];
+                            evaluation.reasons = crate::reasons![EvaluationReason::VaccineNotCountedBasedOnMostRecentVaccineGiven];
                         }
                     } else if evaluation.status == DoseStatus::Accepted {
                         evaluation.dose_number = Some(4);
-                        evaluation.reasons = vec![EvaluationReason::VaccineNotCountedBasedOnMostRecentVaccineGiven];
+                        evaluation.reasons = crate::reasons![EvaluationReason::VaccineNotCountedBasedOnMostRecentVaccineGiven];
                     }
                 }
             }
         }
         // For children/adolescents, check if switched or default to 3-Dose
-        if candidate_forecasts.contains_key("HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES") {
-            let f4 = candidate_forecasts.get("HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES").unwrap();
+        if candidate_forecasts.contains_forecast("HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES") {
+            let f4 = candidate_forecasts.get_forecast("HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES").unwrap();
             // If any dose was evaluated as Dose 4, it means we switched!
             if f4.evaluations.iter().any(|e| e.dose_number == Some(4)) {
-                return "HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES".into();
+                return "HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES";
             }
         }
-        "HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES".into()
+        "HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES"
     }
 }

@@ -259,7 +259,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 4. Run evaluations
     println!("\n--- Test Case A: Standard 4-Dose Series (3 doses given) ---");
     let result_a = evaluate_patient_all_groups(&patient_a, &history_a, eval_date);
-    for group_forecast in &result_a {
+    for group_forecast in result_a.iter() {
         println!("Vaccine Group: {}", group_forecast.vaccine_group);
         for (i, eval) in group_forecast.evaluations.iter().enumerate() {
             println!(
@@ -284,7 +284,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("\n--- Test Case B: 3-Dose Completion Rule (Dose 3 given at >= 4 years) ---");
     let result_b = evaluate_patient_all_groups(&patient_b, &history_b, eval_date);
-    for group_forecast in &result_b {
+    for group_forecast in result_b.iter() {
         println!("Vaccine Group: {}", group_forecast.vaccine_group);
         for (i, eval) in group_forecast.evaluations.iter().enumerate() {
             println!(
@@ -303,7 +303,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("\n--- Test Case C: Pre-2009 Vaccine Interval Check ---");
     let result_c = evaluate_patient_all_groups(&patient_c, &history_c, eval_date);
-    for group_forecast in &result_c {
+    for group_forecast in result_c.iter() {
         println!("Vaccine Group: {}", group_forecast.vaccine_group);
         for (i, eval) in group_forecast.evaluations.iter().enumerate() {
             println!(

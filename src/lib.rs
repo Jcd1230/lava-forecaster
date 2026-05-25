@@ -7,6 +7,7 @@ pub mod schedule;
 
 use chrono::NaiveDate;
 use models::{Dose, Patient, VaccineGroupForecast, Cvx};
+use crate::date_utils::TinyVec;
 
 fn is_single_antigen_mmr(cvx: Cvx) -> bool {
     matches!(cvx.0, 3 | 4 | 5 | 6 | 7 | 38)
@@ -38,11 +39,11 @@ pub fn evaluate_patient_all_groups(
     patient: &Patient,
     history: &[Dose],
     eval_date: NaiveDate,
-) -> Vec<VaccineGroupForecast> {
-    let mut results = Vec::new();
+) -> TinyVec<VaccineGroupForecast, 24> {
+    let mut results = TinyVec::<VaccineGroupForecast, 24>::new();
     for ruleset in rules::get_all_groups() {
         if let Some(group_selection) = ruleset.group_selection {
-            let mut candidate_forecasts = std::collections::HashMap::new();
+            let mut candidate_forecasts = TinyVec::<(&'static str, VaccineGroupForecast), 4>::new();
             for series in &ruleset.series {
                 let mut engine = engine::EvaluationEngine::new(series);
                 engine.param_overrides = &ruleset.param_overrides;
@@ -57,11 +58,18 @@ pub fn evaluate_patient_all_groups(
 
                 let forecast =
                     engine.evaluate_patient(patient, history, eval_date, &ruleset.series);
-                candidate_forecasts.insert(series.name.to_string(), forecast);
+                candidate_forecasts.push((series.name, forecast));
             }
             let selected_name =
                 (group_selection)(patient, history, eval_date, &mut candidate_forecasts);
-            if let Some(selected_forecast) = candidate_forecasts.remove(&selected_name) {
+            let mut selected_forecast = None;
+            for i in 0..candidate_forecasts.len() {
+                if candidate_forecasts[i].0 == selected_name {
+                    selected_forecast = Some(candidate_forecasts.swap_remove(i).1);
+                    break;
+                }
+            }
+            if let Some(selected_forecast) = selected_forecast {
                 results.push(selected_forecast);
             }
         } else {
@@ -101,7 +109,7 @@ pub fn evaluate_patient_all_groups(
 
         if let Some(yf_date) = last_yf_dose {
             let limit_date = yf_date + chrono::Duration::days(30);
-            for g in &mut results {
+            for g in results.iter_mut() {
                 if g.vaccine_group == "YELLOW_FEVER" {
                     continue;
                 }
@@ -112,7 +120,7 @@ pub fn evaluate_patient_all_groups(
                     || g.vaccine_group == "CHOLERA";
 
                 if is_live_group {
-                    for f in &mut g.forecasts {
+                    for f in g.forecasts.iter_mut() {
                         if let Some(ref mut earliest) = f.earliest_date {
                             let gap = *earliest - yf_date;
                             let is_conflict = if yf_date != eval_date {
@@ -136,12 +144,12 @@ pub fn evaluate_patient_all_groups(
     }
 
     if has_same_day_separate_mmr_and_varicella(history, eval_date) {
-        for g in &mut results {
+        for g in results.iter_mut() {
             if g.vaccine_group != "MMR" {
                 continue;
             }
 
-            for f in &mut g.forecasts {
+            for f in g.forecasts.iter_mut() {
                 if f.status == models::SeriesStatus::NotComplete {
                     f.earliest_date = Some(eval_date);
                     f.recommended_date = Some(eval_date);

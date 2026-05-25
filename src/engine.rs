@@ -84,7 +84,7 @@ pub type CustomEvaluationHook = fn(
     series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut Vec<EvaluationReason>,
+    reasons: &mut TinyVec<EvaluationReason, 4>,
     status: &mut DoseStatus,
 );
 
@@ -96,7 +96,7 @@ pub type CustomDoseNumberHook = fn(
 pub type CustomExtraDoseHook = fn(
     series_name: &str,
     ctx: &EvaluationContext,
-) -> Option<(DoseStatus, Vec<EvaluationReason>)>;
+) -> Option<(DoseStatus, TinyVec<EvaluationReason, 4>)>;
 
 pub type CustomCompletionHook = fn(
     ctx: &EvaluationContext,
@@ -106,8 +106,26 @@ pub type GroupSelectionAndPostProcess = fn(
     patient: &Patient,
     history: &[Dose],
     eval_date: NaiveDate,
-    candidate_forecasts: &mut std::collections::HashMap<String, VaccineGroupForecast>,
-) -> String;
+    candidate_forecasts: &mut [(&'static str, VaccineGroupForecast)],
+) -> &'static str;
+
+pub trait CandidateForecastsExt {
+    fn get_forecast(&self, name: &str) -> Option<&VaccineGroupForecast>;
+    fn get_forecast_mut(&mut self, name: &str) -> Option<&mut VaccineGroupForecast>;
+    fn contains_forecast(&self, name: &str) -> bool;
+}
+
+impl CandidateForecastsExt for [(&'static str, VaccineGroupForecast)] {
+    fn get_forecast(&self, name: &str) -> Option<&VaccineGroupForecast> {
+        self.iter().find(|(n, _)| *n == name).map(|(_, f)| f)
+    }
+    fn get_forecast_mut(&mut self, name: &str) -> Option<&mut VaccineGroupForecast> {
+        self.iter_mut().find(|(n, _)| *n == name).map(|(_, f)| f)
+    }
+    fn contains_forecast(&self, name: &str) -> bool {
+        self.iter().any(|(n, _)| *n == name)
+    }
+}
 
 // Primitives for generic override rules
 #[allow(dead_code)]
@@ -174,7 +192,7 @@ impl<'a> EvaluationEngine<'a> {
         group_series: &'a [CompiledSeries],
     ) -> VaccineGroupForecast {
         // 1. Filter and sort history chronologically (only keep doses relevant to this series or group)
-        let mut sorted_history = TinyVec::<Dose, 32>::new(Dose::default());
+        let mut sorted_history = TinyVec::<Dose, 32>::new();
         for dose in history {
             let keep = if group_series.is_empty() {
                 self.series.doses.iter().any(|d_rule| d_rule.allowed_cvx.contains(&dose.cvx.0))
@@ -198,8 +216,8 @@ impl<'a> EvaluationEngine<'a> {
             }
         });
 
-        let mut evaluations: Vec<DoseEvaluation> = Vec::new();
-        let mut valid_doses = TinyVec::<(NaiveDate, usize), 32>::new((NaiveDate::from_ymd_opt(1970, 1, 1).unwrap(), 0));
+        let mut evaluations = TinyVec::<DoseEvaluation, 8>::new();
+        let mut valid_doses = TinyVec::<(NaiveDate, usize), 32>::new();
         let mut is_completed = false;
         let mut active_series: &'a CompiledSeries = self.series;
 
@@ -240,7 +258,7 @@ impl<'a> EvaluationEngine<'a> {
                     dose_date: dose.date,
                     cvx: dose.cvx,
                     status: DoseStatus::Invalid,
-                    reasons: vec![EvaluationReason::DuplicateShotSameDay],
+                    reasons: crate::reasons![EvaluationReason::DuplicateShotSameDay],
                     dose_number: Some(prev_dose_num),
                 });
                 i += 1;
@@ -254,7 +272,7 @@ impl<'a> EvaluationEngine<'a> {
                     dose_date: dose.date,
                     cvx: dose.cvx,
                     status: DoseStatus::Invalid,
-                    reasons: vec![EvaluationReason::PriorToDOB],
+                    reasons: crate::reasons![EvaluationReason::PriorToDOB],
                     dose_number: Some(output_dose_number),
                 });
                 i += 1;
@@ -313,7 +331,7 @@ impl<'a> EvaluationEngine<'a> {
                     dose_date: dose.date,
                     cvx: dose.cvx,
                     status: DoseStatus::Accepted, // Mark accepted as extra dose
-                    reasons: vec![EvaluationReason::BoosterDose],
+                    reasons: crate::reasons![EvaluationReason::BoosterDose],
                     dose_number: Some(output_dose_number),
                 });
                 i += 1;
@@ -356,7 +374,7 @@ impl<'a> EvaluationEngine<'a> {
                 }
             }
 
-            let mut reasons = Vec::new();
+            let mut reasons = TinyVec::<EvaluationReason, 4>::new();
             let mut is_valid = true;
 
             // Check vaccine code eligibility
@@ -482,10 +500,13 @@ impl<'a> EvaluationEngine<'a> {
             active_series,
         );
 
+        let mut forecasts = TinyVec::new();
+        forecasts.push(forecast);
+
         VaccineGroupForecast {
             vaccine_group: active_series.vaccine_group.into(),
             evaluations,
-            forecasts: vec![forecast],
+            forecasts,
             selected_series: Some(active_series.name.into()),
         }
     }
@@ -508,7 +529,7 @@ impl<'a> EvaluationEngine<'a> {
                 overdue_date: None,
                 latest_date: None,
                 status: SeriesStatus::Complete,
-                reasons: vec!["COMPLETE".into()],
+                reasons: crate::reasons!["COMPLETE"],
             };
             if let Some(hook) = self.custom_forecast_hook {
                 (hook)(patient, valid_doses, history, eval_date, &mut forecast);
@@ -538,7 +559,7 @@ impl<'a> EvaluationEngine<'a> {
                 overdue_date: None,
                 latest_date: None,
                 status: SeriesStatus::Complete,
-                reasons: vec!["COMPLETE".into()],
+                reasons: crate::reasons!["COMPLETE"],
             };
             if let Some(hook) = self.custom_forecast_hook {
                 (hook)(patient, valid_doses, history, eval_date, &mut forecast);
@@ -656,7 +677,7 @@ impl<'a> EvaluationEngine<'a> {
             overdue_date,
             latest_date: None,
             status: SeriesStatus::NotComplete,
-            reasons: vec!["NOT_COMPLETE".into()],
+            reasons: crate::reasons!["NOT_COMPLETE"],
         };
 
         // Apply max age clamp if configured
@@ -668,7 +689,7 @@ impl<'a> EvaluationEngine<'a> {
                     forecast.recommended_date = None;
                     forecast.overdue_date = None;
                     forecast.latest_date = None;
-                    forecast.reasons = vec!["MAX_AGE_EXCEEDED".into()];
+                    forecast.reasons = crate::reasons!["MAX_AGE_EXCEEDED"];
                 }
             }
         }

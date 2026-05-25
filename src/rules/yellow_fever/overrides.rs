@@ -1,3 +1,4 @@
+use crate::date_utils::TinyVec;
 use ice_cvx_macro::cvx;
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus};
@@ -7,7 +8,7 @@ pub fn yellow_fever_custom_evaluation_hook(
     _series_name: &str,
     _target_dose_idx: usize,
     _ctx: &EvaluationContext,
-    _reasons: &mut Vec<EvaluationReason>,
+    _reasons: &mut TinyVec<EvaluationReason, 4>,
     _status: &mut DoseStatus,
 ) {
     // Standard CDSi evaluation is sufficient.
@@ -22,9 +23,9 @@ pub fn yellow_fever_custom_forecast_hook(
 ) {
     if forecast.status == SeriesStatus::Complete {
         forecast.status = SeriesStatus::Complete;
-        forecast.reasons = vec![
-            "COMPLETE_HIGH_RISK".into(),
-            "YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP".into(),
+        forecast.reasons = crate::reasons![
+            "COMPLETE_HIGH_RISK",
+            "YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP",
         ];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
@@ -45,17 +46,17 @@ pub fn yellow_fever_custom_forecast_hook(
 
     if is_under_6m {
         forecast.status = SeriesStatus::NotRecommended;
-        forecast.reasons = vec!["YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP".into()];
+        forecast.reasons = crate::reasons!["YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
         forecast.latest_date = None;
     } else if is_under_9m {
         forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = vec![
-            "BELOW_REC_AGE_SERIES".into(),
-            "HIGH_RISK".into(),
-            "YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP".into(),
+        forecast.reasons = crate::reasons![
+            "BELOW_REC_AGE_SERIES",
+            "HIGH_RISK",
+            "YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP",
         ];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
@@ -64,9 +65,9 @@ pub fn yellow_fever_custom_forecast_hook(
     } else {
         // >= 9 months old and incomplete
         forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = vec![
-            "HIGH_RISK".into(),
-            "YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP".into(),
+        forecast.reasons = crate::reasons![
+            "HIGH_RISK",
+            "YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP",
         ];
         forecast.earliest_date = None;
         forecast.recommended_date = None;

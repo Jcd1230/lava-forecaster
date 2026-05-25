@@ -1,5 +1,6 @@
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
+use crate::date_utils::TinyVec;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Gender {
@@ -95,23 +96,25 @@ impl Default for Dose {
     }
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub enum DoseStatus {
+    #[default]
     Valid,
     Invalid,
     Accepted,
     Ignored,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub enum EvaluationReason {
+    #[default]
+    VaccineNotPartOfSeries,
     PriorToDOB,
     BelowMinimumAge,
     BelowMinimumAgeFinalDose,
     BelowMinimumInterval,
     TooEarlyLiveVirus,
     DuplicateShotSameDay,
-    VaccineNotPartOfSeries,
     MissingAntigen,
     BoosterDose,
     VaccineNotCountedBasedOnMostRecentVaccineGiven,
@@ -128,13 +131,26 @@ pub struct DoseEvaluation {
     pub dose_date: NaiveDate,
     pub cvx: Cvx,
     pub status: DoseStatus,
-    pub reasons: Vec<EvaluationReason>,
+    pub reasons: TinyVec<EvaluationReason, 4>,
     // The designated target dose number in the series
     pub dose_number: Option<usize>,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+impl Default for DoseEvaluation {
+    fn default() -> Self {
+        Self {
+            dose_date: NaiveDate::from_ymd_opt(1970, 1, 1).unwrap(),
+            cvx: Cvx::default(),
+            status: DoseStatus::Valid,
+            reasons: TinyVec::new(),
+            dose_number: None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub enum SeriesStatus {
+    #[default]
     NotComplete,
     Complete,
     NotRecommended,
@@ -149,15 +165,40 @@ pub struct SeriesForecast {
     pub overdue_date: Option<NaiveDate>,
     pub latest_date: Option<NaiveDate>,
     pub status: SeriesStatus,
-    pub reasons: Vec<std::borrow::Cow<'static, str>>,
+    pub reasons: TinyVec<std::borrow::Cow<'static, str>, 2>,
+}
+
+impl Default for SeriesForecast {
+    fn default() -> Self {
+        Self {
+            series_name: std::borrow::Cow::Borrowed(""),
+            earliest_date: None,
+            recommended_date: None,
+            overdue_date: None,
+            latest_date: None,
+            status: SeriesStatus::NotComplete,
+            reasons: TinyVec::new(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VaccineGroupForecast {
     pub vaccine_group: std::borrow::Cow<'static, str>,
-    pub evaluations: Vec<DoseEvaluation>,
-    pub forecasts: Vec<SeriesForecast>,
+    pub evaluations: TinyVec<DoseEvaluation, 8>,
+    pub forecasts: TinyVec<SeriesForecast, 2>,
     pub selected_series: Option<std::borrow::Cow<'static, str>>,
+}
+
+impl Default for VaccineGroupForecast {
+    fn default() -> Self {
+        Self {
+            vaccine_group: std::borrow::Cow::Borrowed(""),
+            evaluations: TinyVec::new(),
+            forecasts: TinyVec::new(),
+            selected_series: None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -169,7 +210,7 @@ pub struct ForecastRequest {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ForecastResponse {
-    pub vaccine_groups: Vec<VaccineGroupForecast>,
+    pub vaccine_groups: TinyVec<VaccineGroupForecast, 24>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -1,5 +1,6 @@
+use crate::engine::CandidateForecastsExt;
 use ice_cvx_macro::cvx;
-use crate::date_utils::{add_years, TimePeriod};
+use crate::date_utils::{TinyVec, add_years, TimePeriod};
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, 
     Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus, VaccineGroupForecast,
@@ -53,16 +54,16 @@ fn is_complete(forecast: &VaccineGroupForecast) -> bool {
         .is_some_and(|series| series.status == SeriesStatus::Complete)
 }
 
-fn choose_series<'a>(
-    two_dose_name: &'a str,
-    three_dose_name: &'a str,
-    candidate_forecasts: &HashMap<String, VaccineGroupForecast>,
-) -> String {
-    let Some(two_dose) = candidate_forecasts.get(two_dose_name) else {
-        return three_dose_name.to_string();
+fn choose_series(
+    two_dose_name: &'static str,
+    three_dose_name: &'static str,
+    candidate_forecasts: &[(&'static str, VaccineGroupForecast)],
+) -> &'static str {
+    let Some(two_dose) = candidate_forecasts.get_forecast(two_dose_name) else {
+        return three_dose_name;
     };
-    let Some(three_dose) = candidate_forecasts.get(three_dose_name) else {
-        return two_dose_name.to_string();
+    let Some(three_dose) = candidate_forecasts.get_forecast(three_dose_name) else {
+        return two_dose_name;
     };
 
     let two_complete = is_complete(two_dose);
@@ -70,9 +71,9 @@ fn choose_series<'a>(
 
     if two_complete != three_complete {
         return if three_complete {
-            three_dose_name.to_string()
+            three_dose_name
         } else {
-            two_dose_name.to_string()
+            two_dose_name
         };
     }
 
@@ -80,9 +81,9 @@ fn choose_series<'a>(
     let three_valid = valid_count(three_dose);
 
     if three_valid > two_valid {
-        three_dose_name.to_string()
+        three_dose_name
     } else {
-        two_dose_name.to_string()
+        two_dose_name
     }
 }
 
@@ -106,7 +107,7 @@ pub fn menb_custom_evaluation_hook(
     series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut Vec<EvaluationReason>,
+    reasons: &mut TinyVec<EvaluationReason, 4>,
     status: &mut DoseStatus,
 ) {
     let Some(dose) = ctx.current_dose else {
@@ -187,7 +188,7 @@ pub fn menb_custom_forecast_hook(
     forecast: &mut SeriesForecast,
 ) {
     if forecast.status == SeriesStatus::Complete {
-        forecast.reasons = vec!["COMPLETE".into()];
+        forecast.reasons = crate::reasons!["COMPLETE"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -199,16 +200,16 @@ pub fn menb_custom_forecast_hook(
         let age_10 = add_years(patient.birth_date, 10);
         if eval_date < age_10 {
             forecast.status = SeriesStatus::NotRecommended;
-            forecast.reasons = vec!["BELOW_MINIMUM_AGE_HIGH_RISK_SERIES".into()];
+            forecast.reasons = crate::reasons!["BELOW_MINIMUM_AGE_HIGH_RISK_SERIES"];
         } else if eval_date < add_years(patient.birth_date, 16) {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons = vec!["HIGH_RISK".into()];
+            forecast.reasons = crate::reasons!["HIGH_RISK"];
         } else if eval_date < add_years(patient.birth_date, 24) {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons = vec!["CLINICAL_PATIENT_DISCRETION".into()];
+            forecast.reasons = crate::reasons!["CLINICAL_PATIENT_DISCRETION"];
         } else {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons = vec!["HIGH_RISK".into()];
+            forecast.reasons = crate::reasons!["HIGH_RISK"];
         }
         forecast.earliest_date = None;
         forecast.recommended_date = None;
@@ -267,14 +268,14 @@ pub fn menb_group_selection(
     _patient: &Patient,
     history: &[Dose],
     _eval_date: NaiveDate,
-    candidate_forecasts: &mut HashMap<String, VaccineGroupForecast>,
-) -> String {
+    candidate_forecasts: &mut [(&'static str, VaccineGroupForecast)],
+) -> &'static str {
     let policy_change = policy_change_date();
     if history
         .iter()
         .any(|dose| dose.date < policy_change && has_mixed_brand_same_day(dose, history))
     {
-        return "MEN_B_4_C_2_DOSE_SERIES".into();
+        return "MEN_B_4_C_2_DOSE_SERIES";
     }
 
     match latest_family(history) {
@@ -288,6 +289,6 @@ pub fn menb_group_selection(
             "MEN_B_4_C_3_DOSE_SERIES",
             candidate_forecasts,
         ),
-        _ => "MEN_B_4_C_2_DOSE_SERIES".into(),
+        _ => "MEN_B_4_C_2_DOSE_SERIES",
     }
 }

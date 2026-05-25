@@ -1,7 +1,7 @@
 use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 
-use crate::date_utils::{compare_elapsed, TimePeriod};
+use crate::date_utils::{TinyVec, compare_elapsed, TimePeriod};
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus};
 
@@ -95,7 +95,7 @@ pub fn pneumococcal_custom_evaluation_hook(
     _series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut Vec<EvaluationReason>,
+    reasons: &mut TinyVec<EvaluationReason, 4>,
     status: &mut DoseStatus,
 ) {
     let dose = match ctx.current_dose {
@@ -290,7 +290,7 @@ pub fn pneumococcal_custom_forecast_hook(
         .any(|d| ADULT_COMPLETE_PCV_CVX.contains(&d.cvx.0) && age_ge(birth, d.date, "19y"))
     {
         forecast.status = SeriesStatus::Complete;
-        forecast.reasons = vec!["COMPLETE".into()];
+        forecast.reasons = crate::reasons!["COMPLETE"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -302,7 +302,7 @@ pub fn pneumococcal_custom_forecast_hook(
         .any(|d| d.cvx.0 == cvx!("215") && age_ge(birth, d.date, "19y"));
     if has_adult_pcv15 && has_adult_ppsv23 {
         forecast.status = SeriesStatus::Complete;
-        forecast.reasons = vec!["COMPLETE".into()];
+        forecast.reasons = crate::reasons!["COMPLETE"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -315,7 +315,7 @@ pub fn pneumococcal_custom_forecast_hook(
 
     if age_ge(birth, eval_date, "65y") && has_adult_pcv13 && has_ppsv65 && !has_adult_modern_pcv {
         forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = vec!["COMPLETE".into()];
+        forecast.reasons = crate::reasons!["COMPLETE"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -345,12 +345,11 @@ pub fn pneumococcal_custom_forecast_hook(
 
     if age_ge(birth, eval_date, "5y") && age_lt(birth, eval_date, "19y") {
         forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = vec![if child_complete {
+        forecast.reasons = crate::reasons![if child_complete {
             "COMPLETE_HIGH_RISK"
         } else {
             "HIGH_RISK"
-        }
-        .into()];
+        }];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -359,7 +358,7 @@ pub fn pneumococcal_custom_forecast_hook(
 
     if age_ge(birth, eval_date, "19y") && age_lt(birth, eval_date, "50y") {
         forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = vec!["HIGH_RISK".into()];
+        forecast.reasons = crate::reasons!["HIGH_RISK"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;
@@ -371,7 +370,7 @@ pub fn pneumococcal_custom_forecast_hook(
         && has_valid_child_modern_pcv
     {
         forecast.status = SeriesStatus::Complete;
-        forecast.reasons = vec!["COMPLETE_HIGH_RISK".into()];
+        forecast.reasons = crate::reasons!["COMPLETE_HIGH_RISK"];
         forecast.earliest_date = None;
         forecast.recommended_date = None;
         forecast.overdue_date = None;

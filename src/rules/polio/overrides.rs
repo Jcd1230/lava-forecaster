@@ -1,7 +1,8 @@
+use crate::engine::CandidateForecastsExt;
 use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::{EvaluationContext, ParameterOverrideRule, ConditionalCompletionRule, RecommendationOverrideRule};
-use crate::date_utils::{TimePeriod, compare_elapsed, add_years, add_months};
+use crate::date_utils::{TinyVec, TimePeriod, compare_elapsed, add_years, add_months};
 use crate::models::{Cvx, Patient, SeriesForecast, Dose, DoseStatus, EvaluationReason, VaccineGroupForecast, DoseEvaluation};
 use std::collections::HashMap;
 
@@ -260,7 +261,7 @@ pub fn polio_custom_evaluation_hook(
     series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut Vec<EvaluationReason>,
+    reasons: &mut TinyVec<EvaluationReason, 4>,
     status: &mut DoseStatus,
 ) {
     if series_name != "POLIO_4_DOSE_SERIES" && series_name != "POLIO_FRACTIONAL_IPV_SERIES" {
@@ -307,7 +308,7 @@ pub fn polio_custom_evaluation_hook(
 pub fn polio_custom_extra_dose_hook(
     series_name: &str,
     ctx: &EvaluationContext,
-) -> Option<(DoseStatus, Vec<EvaluationReason>)> {
+) -> Option<(DoseStatus, TinyVec<EvaluationReason, 4>)> {
     if series_name != "POLIO_4_DOSE_SERIES" && series_name != "POLIO_FRACTIONAL_IPV_SERIES" {
         return None;
     }
@@ -318,27 +319,27 @@ pub fn polio_custom_extra_dose_hook(
     let is_cvx_02_182_after_2016 = (dose.cvx.0 == cvx!("02") || dose.cvx.0 == cvx!("182")) && dose.date >= NaiveDate::from_ymd_opt(2016, 4, 1).unwrap();
     
     if is_cvx_178_179 || is_cvx_02_182_after_2016 {
-        return Some((DoseStatus::Invalid, vec![EvaluationReason::MissingAntigen]));
+        return Some((DoseStatus::Invalid, crate::reasons![EvaluationReason::MissingAntigen]));
     }
 
     let birth_date = ctx.patient.birth_date;
     let age_18 = add_years(birth_date, 18);
     if dose.date >= age_18 {
         if ctx.target_dose_number == ctx.valid_doses.len() + 1 {
-            return Some((DoseStatus::Valid, vec![EvaluationReason::BoosterDose]));
+            return Some((DoseStatus::Valid, crate::reasons![EvaluationReason::BoosterDose]));
         }
     }
 
-    Some((DoseStatus::Accepted, vec![EvaluationReason::BoosterDose]))
+    Some((DoseStatus::Accepted, crate::reasons![EvaluationReason::BoosterDose]))
 }
 
 pub fn polio_group_selection(
     _patient: &Patient,
     _history: &[Dose],
     _eval_date: NaiveDate,
-    candidate_forecasts: &mut HashMap<String, VaccineGroupForecast>,
-) -> String {
-    if let Some(fipv_forecast) = candidate_forecasts.get("POLIO_FRACTIONAL_IPV_SERIES") {
+    candidate_forecasts: &mut [(&'static str, VaccineGroupForecast)],
+) -> &'static str {
+    if let Some(fipv_forecast) = candidate_forecasts.get_forecast("POLIO_FRACTIONAL_IPV_SERIES") {
         let mut valid_doses: Vec<&DoseEvaluation> = fipv_forecast.evaluations.iter()
             .filter(|e| e.status == DoseStatus::Valid)
             .collect();
@@ -348,8 +349,8 @@ pub fn polio_group_selection(
             if valid_doses[0].cvx.0 == cvx!("324") && valid_doses[1].cvx.0 == cvx!("324") {
                 let second_fipv_date = valid_doses[1].dose_date;
                 let mut has_other_valid_before = false;
-                if let Some(four_dose_forecast) = candidate_forecasts.get("POLIO_4_DOSE_SERIES") {
-                    for e in &four_dose_forecast.evaluations {
+                if let Some(four_dose_forecast) = candidate_forecasts.get_forecast("POLIO_4_DOSE_SERIES") {
+                    for e in four_dose_forecast.evaluations.iter() {
                         if e.status == DoseStatus::Valid && e.dose_date < second_fipv_date && e.cvx.0 != cvx!("324") {
                             has_other_valid_before = true;
                             break;
@@ -357,10 +358,10 @@ pub fn polio_group_selection(
                     }
                 }
                 if !has_other_valid_before {
-                    return "POLIO_FRACTIONAL_IPV_SERIES".into();
+                    return "POLIO_FRACTIONAL_IPV_SERIES";
                 }
             }
         }
     }
-    "POLIO_4_DOSE_SERIES".into()
+    "POLIO_4_DOSE_SERIES"
 }
