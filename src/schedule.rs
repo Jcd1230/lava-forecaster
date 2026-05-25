@@ -1,6 +1,6 @@
 use crate::date_utils::TimePeriod;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct CompiledDoseRule {
     pub dose_number: usize,
     pub absolute_minimum_age: Option<TimePeriod>,
@@ -10,7 +10,7 @@ pub struct CompiledDoseRule {
     pub allowed_cvx: &'static [u16],
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct CompiledDoseInterval {
     pub from_dose: usize,
     pub to_dose: usize,

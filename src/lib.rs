@@ -44,10 +44,10 @@ pub fn evaluate_patient_all_groups(
         if let Some(group_selection) = ruleset.group_selection {
             let mut candidate_forecasts = std::collections::HashMap::new();
             for series in &ruleset.series {
-                let mut engine = engine::EvaluationEngine::new(series.clone());
-                engine.param_overrides = ruleset.param_overrides.clone();
-                engine.completion_rules = ruleset.completion_rules.clone();
-                engine.rec_overrides = ruleset.rec_overrides.clone();
+                let mut engine = engine::EvaluationEngine::new(series);
+                engine.param_overrides = &ruleset.param_overrides;
+                engine.completion_rules = &ruleset.completion_rules;
+                engine.rec_overrides = &ruleset.rec_overrides;
                 engine.custom_forecast_hook = ruleset.custom_forecast_hook;
                 engine.custom_switch_hook = ruleset.custom_switch_hook;
                 engine.custom_evaluation_hook = ruleset.custom_evaluation_hook;
@@ -66,10 +66,10 @@ pub fn evaluate_patient_all_groups(
             }
         } else {
             if let Some(series) = ruleset.series.first() {
-                let mut engine = engine::EvaluationEngine::new(series.clone());
-                engine.param_overrides = ruleset.param_overrides.clone();
-                engine.completion_rules = ruleset.completion_rules.clone();
-                engine.rec_overrides = ruleset.rec_overrides.clone();
+                let mut engine = engine::EvaluationEngine::new(series);
+                engine.param_overrides = &ruleset.param_overrides;
+                engine.completion_rules = &ruleset.completion_rules;
+                engine.rec_overrides = &ruleset.rec_overrides;
                 engine.custom_forecast_hook = ruleset.custom_forecast_hook;
                 engine.custom_switch_hook = ruleset.custom_switch_hook;
                 engine.custom_evaluation_hook = ruleset.custom_evaluation_hook;

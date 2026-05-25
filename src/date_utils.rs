@@ -249,3 +249,83 @@ mod tests {
         assert_eq!(tp_1m.add_to(aug30), NaiveDate::from_ymd_opt(2020, 9, 30).unwrap());
     }
 }
+
+#[derive(Debug, Clone)]
+pub enum TinyVec<T: Copy, const N: usize> {
+    Inline {
+        data: [T; N],
+        len: usize,
+        default: T,
+    },
+    Heap(Vec<T>),
+}
+
+impl<T: Copy, const N: usize> TinyVec<T, N> {
+    pub fn new(default: T) -> Self {
+        TinyVec::Inline {
+            data: [default; N],
+            len: 0,
+            default,
+        }
+    }
+
+    pub fn push(&mut self, val: T) {
+        match self {
+            TinyVec::Inline { data, len, .. } => {
+                if *len < N {
+                    data[*len] = val;
+                    *len += 1;
+                } else {
+                    let mut vec = Vec::with_capacity(N + 1);
+                    for i in 0..N {
+                        vec.push(data[i]);
+                    }
+                    vec.push(val);
+                    *self = TinyVec::Heap(vec);
+                }
+            }
+            TinyVec::Heap(vec) => {
+                vec.push(val);
+            }
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        match self {
+            TinyVec::Inline { len, .. } => *len,
+            TinyVec::Heap(vec) => vec.len(),
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    pub fn as_slice(&self) -> &[T] {
+        match self {
+            TinyVec::Inline { data, len, .. } => &data[..*len],
+            TinyVec::Heap(vec) => vec.as_slice(),
+        }
+    }
+
+    pub fn as_mut_slice(&mut self) -> &mut [T] {
+        match self {
+            TinyVec::Inline { data, len, .. } => &mut data[..*len],
+            TinyVec::Heap(vec) => vec.as_mut_slice(),
+        }
+    }
+}
+
+impl<T: Copy, const N: usize> std::ops::Deref for TinyVec<T, N> {
+    type Target = [T];
+    fn deref(&self) -> &Self::Target {
+        self.as_slice()
+    }
+}
+
+impl<T: Copy, const N: usize> std::ops::DerefMut for TinyVec<T, N> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.as_mut_slice()
+    }
+}
+

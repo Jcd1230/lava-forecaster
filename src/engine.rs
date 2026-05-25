@@ -4,7 +4,7 @@ use crate::models::{
     Patient, VaccineGroupForecast, Cvx
 };
 use crate::schedule::CompiledSeries;
-use crate::date_utils::{TimePeriod, compare_elapsed};
+use crate::date_utils::{TimePeriod, compare_elapsed, TinyVec};
 use std::cmp::max;
 
 #[allow(dead_code)]
@@ -137,11 +137,11 @@ pub struct RecommendationOverrideRule {
     pub override_min_interval: Option<TimePeriod>,
 }
 
-pub struct EvaluationEngine {
-    pub series: CompiledSeries,
-    pub param_overrides: Vec<ParameterOverrideRule>,
-    pub completion_rules: Vec<ConditionalCompletionRule>,
-    pub rec_overrides: Vec<RecommendationOverrideRule>,
+pub struct EvaluationEngine<'a> {
+    pub series: &'a CompiledSeries,
+    pub param_overrides: &'a [ParameterOverrideRule],
+    pub completion_rules: &'a [ConditionalCompletionRule],
+    pub rec_overrides: &'a [RecommendationOverrideRule],
     pub custom_forecast_hook: Option<CustomForecastHook>,
     pub custom_switch_hook: Option<CustomSwitchHook>,
     pub custom_evaluation_hook: Option<CustomEvaluationHook>,
@@ -150,13 +150,13 @@ pub struct EvaluationEngine {
     pub custom_completion_hook: Option<CustomCompletionHook>,
 }
 
-impl EvaluationEngine {
-    pub fn new(series: CompiledSeries) -> Self {
+impl<'a> EvaluationEngine<'a> {
+    pub fn new(series: &'a CompiledSeries) -> Self {
         EvaluationEngine {
             series,
-            param_overrides: Vec::new(),
-            completion_rules: Vec::new(),
-            rec_overrides: Vec::new(),
+            param_overrides: &[],
+            completion_rules: &[],
+            rec_overrides: &[],
             custom_forecast_hook: None,
             custom_switch_hook: None,
             custom_evaluation_hook: None,
@@ -171,21 +171,22 @@ impl EvaluationEngine {
         patient: &Patient,
         history: &[Dose],
         eval_date: NaiveDate,
-        group_series: &[CompiledSeries],
+        group_series: &'a [CompiledSeries],
     ) -> VaccineGroupForecast {
         // 1. Filter and sort history chronologically (only keep doses relevant to this series or group)
-        let mut sorted_history: Vec<Dose> = history.iter()
-            .filter(|dose| {
-                if group_series.is_empty() {
-                    self.series.doses.iter().any(|d_rule| d_rule.allowed_cvx.contains(&dose.cvx.0))
-                } else {
-                    group_series.iter().any(|s| {
-                        s.doses.iter().any(|d_rule| d_rule.allowed_cvx.contains(&dose.cvx.0))
-                    })
-                }
-            })
-            .cloned()
-            .collect();
+        let mut sorted_history = TinyVec::<Dose, 32>::new(Dose::default());
+        for dose in history {
+            let keep = if group_series.is_empty() {
+                self.series.doses.iter().any(|d_rule| d_rule.allowed_cvx.contains(&dose.cvx.0))
+            } else {
+                group_series.iter().any(|s| {
+                    s.doses.iter().any(|d_rule| d_rule.allowed_cvx.contains(&dose.cvx.0))
+                })
+            };
+            if keep {
+                sorted_history.push(*dose);
+            }
+        }
         sorted_history.sort_by(|a, b| {
             if a.date != b.date {
                 a.date.cmp(&b.date)
@@ -198,9 +199,9 @@ impl EvaluationEngine {
         });
 
         let mut evaluations: Vec<DoseEvaluation> = Vec::new();
-        let mut valid_doses: Vec<(NaiveDate, usize)> = Vec::new(); // (date, dose_number_in_series)
+        let mut valid_doses = TinyVec::<(NaiveDate, usize), 32>::new((NaiveDate::from_ymd_opt(1970, 1, 1).unwrap(), 0));
         let mut is_completed = false;
-        let mut active_series = self.series.clone();
+        let mut active_series: &'a CompiledSeries = self.series;
 
         // 2. Chronological dose evaluation loop
         let mut i = 0;
@@ -273,7 +274,7 @@ impl EvaluationEngine {
                 );
                 if let Some(new_series_name) = (switch_hook)(&active_series.name, target_dose_idx, &ctx) {
                     if let Some(new_series) = group_series.iter().find(|s| s.name == new_series_name) {
-                        active_series = new_series.clone();
+                        active_series = new_series;
                     }
                 }
             }
@@ -340,7 +341,7 @@ impl EvaluationEngine {
                 &active_series.name,
             );
 
-            for rule in &self.param_overrides {
+            for rule in self.param_overrides {
                 if rule.target_dose_number == target_dose_idx && (rule.condition)(&ctx) {
                     if let Some(ref over_age) = rule.override_abs_min_age {
                         dose_rule.absolute_minimum_age = Some(over_age.clone());
@@ -419,7 +420,7 @@ impl EvaluationEngine {
                 &active_series.name,
             );
 
-            for rule in &self.completion_rules {
+            for rule in self.completion_rules {
                 if (rule.condition)(&ctx_complete) {
                     is_completed = true;
                 }
@@ -478,7 +479,7 @@ impl EvaluationEngine {
             satisfied_count,
             is_completed,
             eval_date,
-            &active_series,
+            active_series,
         );
 
         VaccineGroupForecast {
@@ -565,7 +566,7 @@ impl EvaluationEngine {
         );
 
         // Apply recommendation overrides
-        for rule in &self.rec_overrides {
+        for rule in self.rec_overrides {
             if rule.target_dose_number == next_dose_idx && (rule.condition)(&ctx) {
                 if let Some(ref over_age) = rule.override_min_age {
                     dose_rule.minimum_age = Some(over_age.clone());

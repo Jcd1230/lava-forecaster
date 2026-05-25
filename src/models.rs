@@ -10,7 +10,7 @@ pub enum Gender {
 
 /// A CDC CVX code stored as a compact integer.
 /// Serializes/deserializes as a zero-padded string ("03") for API compatibility.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub struct Cvx(pub u16);
 
 impl Cvx {
@@ -84,6 +84,15 @@ pub struct Patient {
 pub struct Dose {
     pub date: NaiveDate,
     pub cvx: Cvx,
+}
+
+impl Default for Dose {
+    fn default() -> Self {
+        Self {
+            date: NaiveDate::from_ymd_opt(1970, 1, 1).unwrap(),
+            cvx: Cvx::default(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
