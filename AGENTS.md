@@ -34,12 +34,10 @@ All major tasks are configured as `mise` commands or native Cargo binaries.
 | `mise run scaffold <group_lower> [GROUP_UPPER]` | Scaffolds a new vaccine group module (directory structure, files, mod.rs registration, test JSON). |
 | `cargo run --release --bin test_runner -- --run tests/cases` | **(Preferred)** Runs the Rust-native test runner to verify PoC logic against expected snapshots (offline). |
 | `cargo run --release --bin test_runner -- --run tests/cases --group <GROUP>` | Runs the Rust-native test runner for a specific vaccine group (e.g., `POLIO`, `DTP`, `MMR`). |
-| `cargo run --release --bin test_runner -- --run tests/cases --case <CASE>` | Runs the Rust-native test runner for a single test case. |
+| `cargo run --release --bin test_runner -- --run tests/cases --group <GROUP> --compare` | Runs the Rust test runner and compares dynamically against the live Java ICE server. |
+| `cargo run --release --bin test_runner -- --run tests/cases --case <CASE> -v` | Runs a single case with side-by-side verbose details. |
 | `cargo run --release --bin test_runner -- --record tests/cases` | Connects to the live Java ICE server and records expected output snapshots directly into case JSONs. |
-| `mise run test` | Runs the Python-based test runner against recorded snapshot JSONs (offline). |
-| `mise run test-compare` | Compares Rust PoC outputs directly against the live Java ICE server. **Auto-records missing expected snapshots.** Requires the Java server to be running. |
-
-
+| `python3 curl-rest-tests/run_tests.py --group <GROUP> --compare` | (Alternative Wrapper) Runs the test suite via Python wrapper, delegating to the Cargo binary. |
 
 ## Crucial Gotchas & Project Context
 
@@ -47,7 +45,7 @@ All major tasks are configured as `mise` commands or native Cargo binaries.
 - **Scaffolding New Modules**: When implementing a new vaccine group, always run `mise run scaffold <group_lower>` first to generate boilerplate and register the module in `rules/mod.rs`.
 - **Drools Output Mapping**: Do not trust the Drools rules literally. `Mark the shot as Ignored` in Drools maps to `DoseStatus::Accepted` in the output XML. `COMPLETE_HIGH_RISK` combined recommendation status maps to `SeriesStatus::Complete` in the final output. Always verify against recorded Java output.
 - **Legacy Rule Definitions**: Legacy rules and support data YAML files are located under the [Series Directory](file:///home/jason/projects/ice/opencds-decision-support-service/src/main/resources/data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/Series/).
-- **Comparing Against Live Java**: When implementing or debugging a vaccine group, you can compare Rust behavior against Java in real time. First start the Java server using `mise run run`, then run `mise run test-compare -- --group <name>` in another shell.
+- **Comparing Against Live Java**: When implementing or debugging a vaccine group, you can compare Rust behavior against Java in real time. First start the Java server using `mise run run`, then run `cargo run --release --bin test_runner -- --run tests/cases --group <name> --compare` in another shell.
 - **Test Runner Verbosity**: The test runner is quiet by default. Pass `--verbose` or `-v` to see full details of passing tests.
 - **Formatting Scope**: Avoid broad `cargo fmt` / `rustfmt` unless you intend to format the whole Rust module tree. Prefer formatting only files you intentionally changed; `rustfmt` can follow `mod.rs` declarations and touch sibling vaccine modules.
 
@@ -55,13 +53,13 @@ All major tasks are configured as `mise` commands or native Cargo binaries.
 
 When reducing Java-vs-Rust discrepancies for an existing group, use this loop:
 
-1. Run a full CDSi compare and save the output under `curl-rest-tests/tmp/`:
-	 - `python3 curl-rest-tests/run_tests.py --compare --cdsi > curl-rest-tests/tmp/ice_cdsi_compare_<label>.txt 2>&1`
+1. Run a full CDSi compare dynamically:
+	 - `cargo run --release --bin test_runner -- --run tests/cases --compare > curl-rest-tests/tmp/ice_cdsi_compare_<label>.txt 2>&1`
 2. Pick the next smallest remaining bucket from that log.
-3. Run the target group alone before editing:
-	 - `python3 curl-rest-tests/run_tests.py --group cdsi_<group> --compare`
-4. Use `--case <name> -v` for representative edge cases while debugging.
-5. After the group passes, re-run the full CDSi compare into a new log under `curl-rest-tests/tmp/`.
+3. Run the target group alone with Java comparison:
+	 - `cargo run --release --bin test_runner -- --run tests/cases --group <GROUP> --compare`
+4. Use `--case <name> -v` for representative edge cases to see side-by-side comparisons.
+5. After the group passes, re-run the full compare into a new log under `curl-rest-tests/tmp/`.
 6. Diff per-group failure counts between the previous and new full-compare logs to check for regressions outside the target group.
 
 For detailed mismatch-routing guidance, use [parity_workflow_notes.md](file:///home/jason/projects/ice/parity_workflow_notes.md). For the fuller source-of-truth map and implementation touchpoints, use [agent_onboarding_guide.md](file:///home/jason/projects/ice/agent_onboarding_guide.md).
@@ -85,7 +83,7 @@ For detailed mismatch-routing guidance, use [parity_workflow_notes.md](file:///h
 - Adult recommendation statuses may only apply when **no relevant dose history exists**. Once a series has started, Java often keeps the forecast `NotComplete` instead of switching to `ConditionallyRecommended`.
 - If Java marks a shot as effectively ignored for completion, Rust often needs `Accepted` plus `OutsideRoutineSeries` to avoid falsely completing the series.
 - When a failing case is ambiguous, run the Rust forecaster directly on a hand-built request JSON and inspect `selected_series`, evaluations, and forecasts before patching.
-- For existing parity buckets, prefer raw `python3 curl-rest-tests/run_tests.py --compare ...` commands so compare logging stays explicit. Use `mise run test-record` / `mise run test-compare` when you intentionally want snapshot recording behavior.
+- For existing parity buckets, prefer Cargo test runner commands so compare logging stays explicit.
 
 ## Version Control (Jujutsu / jj-vcs)
 

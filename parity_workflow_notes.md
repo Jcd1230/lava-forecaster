@@ -9,19 +9,19 @@ Use saved full-CDSi compare logs under `curl-rest-tests/tmp/` so you can compare
 Create a baseline log:
 
 ```bash
-python3 curl-rest-tests/run_tests.py --compare --cdsi > curl-rest-tests/tmp/ice_cdsi_compare_<label>.txt 2>&1
+cargo run --release --bin test_runner -- --run tests/cases --compare > curl-rest-tests/tmp/ice_cdsi_compare_<label>.txt 2>&1
 ```
 
 Run a target group only:
 
 ```bash
-python3 curl-rest-tests/run_tests.py --group cdsi_<group> --compare
+cargo run --release --bin test_runner -- --run tests/cases --group <group> --compare
 ```
 
 Run a single case with full detail:
 
 ```bash
-python3 curl-rest-tests/run_tests.py --group cdsi_<group> --case <test_case_name> --compare -v
+cargo run --release --bin test_runner -- --run tests/cases --group <group> --case <test_case_name> --compare -v
 ```
 
 ## At-a-Glance Triage
@@ -99,8 +99,8 @@ When a label and the actual dates disagree, trust the dates in the raw case file
 
 ## Tooling Notes
 
-- For existing buckets, prefer raw `python3 curl-rest-tests/run_tests.py --compare ...` commands so saved logs and runner behavior stay explicit.
-- Use `mise run test-record` or `mise run test-compare` when you intentionally want snapshot recording behavior.
+- For existing buckets, prefer Cargo test runner commands (`cargo run --release --bin test_runner -- --run tests/cases --group <GROUP> --compare`) so compare logging stays explicit.
+- Use `cargo run --release --bin test_runner -- --record tests/cases` when you want to record Java ICE snapshots into test JSONs.
 - Keep compare-log postprocessing shell-simple. `rg`, `awk`, saved logs, and small one-liners are usually enough.
 
 ## Direct Rust Inspection
