@@ -7,7 +7,8 @@ use crate::models::{
 };
 use chrono::NaiveDate;
 use ice_cvx_macro::cvx;
-use std::collections::HashMap;
+
+const CHILD_SERIES_ABSOLUTE_MIN_INTERVAL_DAYS: i64 = 108;
 
 fn is_combo_child_hepb_cvx(cvx: Cvx) -> bool {
     matches!(
@@ -66,7 +67,8 @@ fn child_requires_four_dose_series(
             let first = combo_dates[0];
             let second = combo_dates[1];
             let third = combo_dates[2];
-            let third_is_complete = (third - first).num_days() >= 112
+            let third_is_complete =
+                (third - first).num_days() >= CHILD_SERIES_ABSOLUTE_MIN_INTERVAL_DAYS
                 && (third - second).num_days() >= 52
                 && (third - patient.birth_date).num_days() >= 164;
             if third_is_complete {
@@ -158,11 +160,11 @@ pub fn hep_b_custom_evaluation_hook(
             }
         }
 
-        // 4. Child/Adolescent 3-dose and 4-dose absolute minimum interval 1->3 and 1->4 is 112 days
+        // 4. Child/Adolescent 3-dose and 4-dose absolute minimum interval 1->3 and 1->4 is 108 days
         if series_name == "HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES" && target_dose_idx == 3 {
             if ctx.valid_doses.len() >= 1 {
                 let dose1_date = ctx.valid_doses[0].0;
-                if (dose.date - dose1_date).num_days() < 112 {
+                if (dose.date - dose1_date).num_days() < CHILD_SERIES_ABSOLUTE_MIN_INTERVAL_DAYS {
                     *status = DoseStatus::Invalid;
                     if !reasons.contains(&EvaluationReason::BelowMinimumInterval) {
                         reasons.push(EvaluationReason::BelowMinimumInterval);
@@ -173,7 +175,7 @@ pub fn hep_b_custom_evaluation_hook(
         if series_name == "HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES" && target_dose_idx == 4 {
             if ctx.valid_doses.len() >= 1 {
                 let dose1_date = ctx.valid_doses[0].0;
-                if (dose.date - dose1_date).num_days() < 112 {
+                if (dose.date - dose1_date).num_days() < CHILD_SERIES_ABSOLUTE_MIN_INTERVAL_DAYS {
                     *status = DoseStatus::Invalid;
                     if !reasons.contains(&EvaluationReason::BelowMinimumInterval) {
                         reasons.push(EvaluationReason::BelowMinimumInterval);
@@ -202,7 +204,7 @@ pub fn hep_b_custom_evaluation_hook(
             if ctx.valid_doses.len() >= 3 {
                 let dose1_date = ctx.valid_doses[0].0;
                 let dose2_date = ctx.valid_doses[1].0;
-                if (dose.date - dose1_date).num_days() >= 112
+                if (dose.date - dose1_date).num_days() >= CHILD_SERIES_ABSOLUTE_MIN_INTERVAL_DAYS
                     && (dose.date - dose2_date).num_days() >= 52
                     && (dose.date - ctx.patient.birth_date).num_days() >= 164
                 {
@@ -605,7 +607,8 @@ pub fn hep_b_custom_switch_hook(
                 let is_too_short_2_to_3 = ctx.valid_doses.len() >= 2
                     && (dose.date - ctx.valid_doses[1].0).num_days() < 52;
                 let is_too_short_1_to_3 = ctx.valid_doses.len() >= 1
-                    && (dose.date - ctx.valid_doses[0].0).num_days() < 112;
+                    && (dose.date - ctx.valid_doses[0].0).num_days()
+                        < CHILD_SERIES_ABSOLUTE_MIN_INTERVAL_DAYS;
 
                 if is_too_young || is_too_short_2_to_3 || is_too_short_1_to_3 {
                     return Some("HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES");
