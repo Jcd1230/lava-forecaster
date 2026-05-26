@@ -190,13 +190,12 @@ fn map_rust_reason_to_cdc(eval: &DoseEvaluation) -> Option<&'static str> {
         Some("Series Already Complete")
     } else if has_reason(EvaluationReason::VaccineNotPartOfSeries)
         || has_reason(EvaluationReason::OutsideRoutineSeries)
-    {
-        Some("Inadvertent Vaccine")
-    } else if has_reason(EvaluationReason::VaccineNotAllowedInUs)
         || has_reason(EvaluationReason::VaccineNotLicensedForMales)
         || has_reason(EvaluationReason::MissingAntigen)
         || has_reason(EvaluationReason::InsufficientAntigen)
     {
+        Some("Inadvertent Vaccine")
+    } else if has_reason(EvaluationReason::VaccineNotAllowedInUs) {
         Some("Not a preferable or allowable vaccine")
     } else {
         None
@@ -208,7 +207,7 @@ fn map_rust_dose_status_to_cdc(eval: &DoseEvaluation) -> &'static str {
         DoseStatus::Valid => "Valid",
         DoseStatus::Invalid => "Not Valid",
         DoseStatus::Accepted | DoseStatus::Ignored => {
-            if matches!(map_rust_reason_to_cdc(eval), Some("Series Already Complete")) {
+            if matches!(map_rust_reason_to_cdc(eval), Some("Series Already Complete" | "Age: Too Old")) {
                 "Extraneous"
             } else {
                 "Not Valid"
@@ -217,12 +216,18 @@ fn map_rust_dose_status_to_cdc(eval: &DoseEvaluation) -> &'static str {
     }
 }
 
-fn map_rust_series_status_to_cdc(status: SeriesStatus) -> &'static str {
-    match status {
+fn map_rust_series_status_to_cdc(forecast: &SeriesForecast) -> &'static str {
+    match forecast.status {
         SeriesStatus::NotComplete => "Not complete",
         SeriesStatus::Complete => "Complete",
         SeriesStatus::NotRecommended => "Aged out",
-        SeriesStatus::ConditionallyRecommended => "Not complete",
+        SeriesStatus::ConditionallyRecommended => {
+            if forecast.reasons.iter().any(|reason| reason.as_ref() == "MAX_AGE_EXCEEDED") {
+                "Aged out"
+            } else {
+                "Not complete"
+            }
+        }
     }
 }
 
@@ -256,7 +261,7 @@ fn normalize_rust_results_to_cdc(
         };
 
         CdcActualForecast {
-            series_status: Some(map_rust_series_status_to_cdc(fc.status).to_string()),
+            series_status: Some(map_rust_series_status_to_cdc(fc).to_string()),
             forecast_number,
             earliest_date: fc.earliest_date,
             recommended_date: fc.recommended_date,
