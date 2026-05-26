@@ -10,20 +10,6 @@ use chrono::NaiveDate;
 use models::{Dose, Patient, VaccineGroupForecast, Cvx};
 use crate::date_utils::TinyVec;
 
-fn is_single_antigen_mmr(cvx: Cvx) -> bool {
-    matches!(cvx.0, 3 | 4 | 5 | 6 | 7 | 38)
-}
-
-fn has_same_day_separate_mmr_and_varicella(history: &[Dose], eval_date: NaiveDate) -> bool {
-    let has_mmr = history
-        .iter()
-        .any(|dose| dose.date == eval_date && is_single_antigen_mmr(dose.cvx));
-    let has_varicella = history
-        .iter()
-        .any(|dose| dose.date == eval_date && dose.cvx.0 == 21);
-
-    has_mmr && has_varicella
-}
 
 pub fn parse_request(content: &str) -> Result<models::ForecastRequest, Box<dyn std::error::Error>> {
     // Try to parse as simplified format first
@@ -144,20 +130,6 @@ pub fn evaluate_patient_all_groups(
         }
     }
 
-    if has_same_day_separate_mmr_and_varicella(history, eval_date) {
-        for g in results.iter_mut() {
-            if g.vaccine_group != "MMR" {
-                continue;
-            }
-
-            for f in g.forecasts.iter_mut() {
-                if f.status == models::SeriesStatus::NotComplete {
-                    f.earliest_date = Some(eval_date);
-                    f.recommended_date = Some(eval_date);
-                }
-            }
-        }
-    }
 
     results
 }

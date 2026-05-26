@@ -11,6 +11,11 @@ fn is_old_zoster(cvx: Cvx) -> bool {
     cvx.0 == cvx!("121") || cvx.0 == cvx!("188")
 }
 
+fn is_live_virus(cvx: Cvx) -> bool {
+    const LIVE_VIRUS: &[u16] = &[cvx!("03"), cvx!("04"), cvx!("05"), cvx!("06"), cvx!("07"), cvx!("21"), cvx!("37"), cvx!("38"), cvx!("75"), cvx!("94"), cvx!("105"), cvx!("111"), cvx!("121"), cvx!("125"), cvx!("149"), cvx!("151"), cvx!("183"), cvx!("184"), cvx!("325"), cvx!("333")];
+    LIVE_VIRUS.contains(&cvx.0)
+}
+
 /// CVX code for recombinant zoster vaccine (Shingrix).
 fn is_shingrix(cvx: Cvx) -> bool {
     cvx.0 == cvx!("187")
@@ -29,6 +34,20 @@ pub fn zoster_custom_evaluation_hook(
     status: &mut DoseStatus,
 ) {
     if let Some(dose) = ctx.current_dose {
+        // Live virus conflict check first
+        if is_live_virus(dose.cvx) {
+            for prior in ctx.history {
+                if prior.date < dose.date && is_live_virus(prior.cvx) {
+                    if (dose.date - prior.date).num_days() < 28 {
+                        *status = DoseStatus::Invalid;
+                        reasons.clear();
+                        reasons.push(EvaluationReason::TooEarlyLiveVirus);
+                        return;
+                    }
+                }
+            }
+        }
+
         // Rule 1: CVX 121/188 (old live zoster) → always Accepted/VaccineNotPartOfSeries
         if is_old_zoster(dose.cvx) {
             *status = DoseStatus::Accepted;

@@ -115,7 +115,7 @@ pub fn varicella_custom_forecast_hook(
     // 3. Live Virus Forecast Spacing
     if forecast.status != SeriesStatus::Complete {
         let last_live_virus = history.iter()
-            .filter(|d| is_varicella_group(d.cvx))
+            .filter(|d| is_live_virus(d.cvx))
             .map(|d| d.date)
             .max();
 

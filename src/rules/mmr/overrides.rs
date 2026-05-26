@@ -169,7 +169,6 @@ pub fn mmr_custom_forecast_hook(
             forecast.overdue_date = None;
             forecast.latest_date = None;
         } else {
-            // Case 3: Adjust earliest and recommended dates based on live virus conflict in history
             let last_live_virus = history.iter()
                 .filter(|d| is_live_virus(d.cvx))
                 .map(|d| d.date)
@@ -186,11 +185,6 @@ pub fn mmr_custom_forecast_hook(
                         clamp_date_at_least(&mut forecast.recommended_date, earliest);
                     }
                 }
-            }
-
-            if has_same_day_mixed_live_virus(history, eval_date) {
-                forecast.earliest_date = Some(eval_date);
-                forecast.recommended_date = Some(eval_date);
             }
         }
     }

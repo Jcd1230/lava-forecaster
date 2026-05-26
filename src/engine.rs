@@ -1,10 +1,10 @@
-use chrono::NaiveDate;
+use crate::date_utils::{compare_elapsed, TimePeriod, TinyVec};
 use crate::models::{
-    Dose, DoseEvaluation, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus,
-    Patient, VaccineGroupForecast, Cvx
+    Cvx, Dose, DoseEvaluation, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus,
+    VaccineGroupForecast,
 };
-use crate::schedule::CompiledSeries;
-use crate::date_utils::{TimePeriod, compare_elapsed, TinyVec};
+use crate::schedule::{CompiledDoseInterval, CompiledSeries};
+use chrono::NaiveDate;
 use std::cmp::max;
 
 #[allow(dead_code)]
@@ -43,15 +43,19 @@ impl<'a> EvaluationContext<'a> {
     pub fn count_valid_doses_before(&self, age_str: &str) -> usize {
         let tp = TimePeriod::parse(age_str).unwrap();
         let cutoff = tp.add_to(self.patient.birth_date);
-        self.valid_doses.iter().filter(|(date, _)| *date < cutoff).count()
+        self.valid_doses
+            .iter()
+            .filter(|(date, _)| *date < cutoff)
+            .count()
     }
 
     /// Checks if a specific CVX code was administered but is not in the valid doses
     pub fn has_invalid_cvx(&self, cvx: Cvx) -> bool {
         let has_cvx = self.history.iter().any(|d| d.cvx == cvx);
-        let valid_has_cvx = self.valid_doses.iter().any(|(date, _)| {
-            self.history.iter().any(|d| d.cvx == cvx && d.date == *date)
-        });
+        let valid_has_cvx = self
+            .valid_doses
+            .iter()
+            .any(|(date, _)| self.history.iter().any(|d| d.cvx == cvx && d.date == *date));
         has_cvx && !valid_has_cvx
     }
 
@@ -59,7 +63,8 @@ impl<'a> EvaluationContext<'a> {
     pub fn count_cvx_before(&self, cvx_list: &[u16], age_str: &str) -> usize {
         let tp = TimePeriod::parse(age_str).unwrap();
         let cutoff = tp.add_to(self.patient.birth_date);
-        self.history.iter()
+        self.history
+            .iter()
             .filter(|d| cvx_list.contains(&d.cvx.0) && d.date < cutoff)
             .count()
     }
@@ -88,19 +93,14 @@ pub type CustomEvaluationHook = fn(
     status: &mut DoseStatus,
 );
 
-pub type CustomDoseNumberHook = fn(
-    series_name: &str,
-    ctx: &EvaluationContext,
-) -> usize;
+pub type CustomDoseNumberHook = fn(series_name: &str, ctx: &EvaluationContext) -> usize;
 
 pub type CustomExtraDoseHook = fn(
     series_name: &str,
     ctx: &EvaluationContext,
 ) -> Option<(DoseStatus, TinyVec<EvaluationReason, 4>)>;
 
-pub type CustomCompletionHook = fn(
-    ctx: &EvaluationContext,
-) -> bool;
+pub type CustomCompletionHook = fn(ctx: &EvaluationContext) -> bool;
 
 pub type GroupSelectionAndPostProcess = fn(
     patient: &Patient,
@@ -195,10 +195,15 @@ impl<'a> EvaluationEngine<'a> {
         let mut sorted_history = TinyVec::<Dose, 32>::new();
         for dose in history {
             let keep = if group_series.is_empty() {
-                self.series.doses.iter().any(|d_rule| d_rule.allowed_cvx.contains(&dose.cvx.0))
+                self.series
+                    .doses
+                    .iter()
+                    .any(|d_rule| d_rule.allowed_cvx.contains(&dose.cvx.0))
             } else {
                 group_series.iter().any(|s| {
-                    s.doses.iter().any(|d_rule| d_rule.allowed_cvx.contains(&dose.cvx.0))
+                    s.doses
+                        .iter()
+                        .any(|d_rule| d_rule.allowed_cvx.contains(&dose.cvx.0))
                 })
             };
             if keep {
@@ -225,7 +230,8 @@ impl<'a> EvaluationEngine<'a> {
         let mut i = 0;
         while i < sorted_history.len() {
             let dose = &sorted_history[i];
-            let mut target_dose_idx = valid_doses.iter().map(|(_, num)| *num).max().unwrap_or(0) + 1;
+            let mut target_dose_idx =
+                valid_doses.iter().map(|(_, num)| *num).max().unwrap_or(0) + 1;
             if let Some(hook) = self.custom_dose_number_hook {
                 let ctx = EvaluationContext::new(
                     patient,
@@ -239,21 +245,53 @@ impl<'a> EvaluationEngine<'a> {
                 target_dose_idx = (hook)(&active_series.name, &ctx);
             }
 
-            // Same-day duplicate check
-            let is_duplicate = i > 0 && sorted_history[i - 1].date == dose.date && {
-                let prev_cvx = sorted_history[i - 1].cvx;
+            // MMR same-day single-antigen target dose adjustment
+            if active_series.vaccine_group == "MMR"
+                && i > 0
+                && sorted_history[i - 1].date == dose.date
+            {
+                let has_m = |c: Cvx| matches!(c.0, 3 | 4 | 5 | 94);
+                let has_mu = |c: Cvx| matches!(c.0, 3 | 7 | 38 | 94);
+                let has_r = |c: Cvx| matches!(c.0, 3 | 4 | 6 | 38 | 94);
+
                 let cur_cvx = dose.cvx;
-                if active_series.vaccine_group == "MMR" {
-                    let has_m = |c: Cvx| matches!(c.0, 3 | 4 | 5 | 94);
-                    let has_mu = |c: Cvx| matches!(c.0, 3 | 7 | 38 | 94);
-                    let has_r = |c: Cvx| matches!(c.0, 3 | 4 | 6 | 38 | 94);
-                    (has_m(prev_cvx) && has_m(cur_cvx)) || (has_mu(prev_cvx) && has_mu(cur_cvx)) || (has_r(prev_cvx) && has_r(cur_cvx))
-                } else {
-                    true
+                let same_day_match = evaluations.iter().enumerate().find(|(_, e)| {
+                    e.dose_date == dose.date
+                        && !((has_m(e.cvx) && has_m(cur_cvx))
+                            || (has_mu(e.cvx) && has_mu(cur_cvx))
+                            || (has_r(e.cvx) && has_r(cur_cvx)))
+                });
+                if let Some((_, prev_eval)) = same_day_match {
+                    if let Some(num) = prev_eval.dose_number {
+                        target_dose_idx = num;
+                    }
                 }
+            }
+
+            // Same-day duplicate check
+            let is_duplicate = i > 0 && {
+                let cur_cvx = dose.cvx;
+                sorted_history[0..i].iter().any(|prev_dose| {
+                    prev_dose.date == dose.date && {
+                        let prev_cvx = prev_dose.cvx;
+                        if active_series.vaccine_group == "MMR" {
+                            let has_m = |c: Cvx| matches!(c.0, 3 | 4 | 5 | 94);
+                            let has_mu = |c: Cvx| matches!(c.0, 3 | 7 | 38 | 94);
+                            let has_r = |c: Cvx| matches!(c.0, 3 | 4 | 6 | 38 | 94);
+                            (has_m(prev_cvx) && has_m(cur_cvx))
+                                || (has_mu(prev_cvx) && has_mu(cur_cvx))
+                                || (has_r(prev_cvx) && has_r(cur_cvx))
+                        } else {
+                            true
+                        }
+                    }
+                })
             };
             if is_duplicate {
-                let prev_dose_num = evaluations.last().and_then(|e| e.dose_number).unwrap_or(target_dose_idx);
+                let prev_dose_num = evaluations
+                    .last()
+                    .and_then(|e| e.dose_number)
+                    .unwrap_or(target_dose_idx);
                 evaluations.push(DoseEvaluation {
                     dose_date: dose.date,
                     cvx: dose.cvx,
@@ -290,9 +328,16 @@ impl<'a> EvaluationEngine<'a> {
                     eval_date,
                     &active_series.name,
                 );
-                if let Some(new_series_name) = (switch_hook)(&active_series.name, target_dose_idx, &ctx) {
-                    if let Some(new_series) = group_series.iter().find(|s| s.name == new_series_name) {
-                        active_series = new_series;
+                if let Some(new_series_name) =
+                    (switch_hook)(&active_series.name, target_dose_idx, &ctx)
+                {
+                    if let Some(new_series) =
+                        group_series.iter().find(|s| s.name == new_series_name)
+                    {
+                        if new_series.name != active_series.name {
+                            active_series = new_series;
+                            is_completed = false;
+                        }
                     }
                 }
             }
@@ -310,7 +355,8 @@ impl<'a> EvaluationEngine<'a> {
                 );
                 if let Some(extra_dose_hook) = self.custom_extra_dose_hook {
                     if let Some((status, reasons)) = (extra_dose_hook)(&active_series.name, &ctx) {
-                        let output_dose_number = std::cmp::min(target_dose_idx, valid_doses.len() + 1);
+                        let output_dose_number =
+                            std::cmp::min(target_dose_idx, valid_doses.len() + 1);
                         if status == DoseStatus::Valid {
                             valid_doses.push((dose.date, target_dose_idx));
                         }
@@ -340,12 +386,15 @@ impl<'a> EvaluationEngine<'a> {
 
             // Look up dose parameters
             let mut dose_rule = active_series.doses[target_dose_idx - 1].clone();
-            let mut interval_rule = if target_dose_idx > 1 {
-                active_series.intervals.iter()
-                    .find(|int| int.to_dose == target_dose_idx)
+            let mut applicable_intervals: Vec<CompiledDoseInterval> = if target_dose_idx > 1 {
+                active_series
+                    .intervals
+                    .iter()
+                    .filter(|int| int.to_dose == target_dose_idx)
                     .cloned()
+                    .collect()
             } else {
-                None
+                Vec::new()
             };
 
             // Apply parameter overrides (pre-2009 overrides, etc.)
@@ -364,8 +413,10 @@ impl<'a> EvaluationEngine<'a> {
                     if let Some(ref over_age) = rule.override_abs_min_age {
                         dose_rule.absolute_minimum_age = Some(over_age.clone());
                     }
-                    if let Some((from_dose, ref over_int)) = rule.override_abs_min_interval_from_dose {
-                        if let Some(ref mut int_rule) = interval_rule {
+                    if let Some((from_dose, ref over_int)) =
+                        rule.override_abs_min_interval_from_dose
+                    {
+                        for int_rule in &mut applicable_intervals {
                             if int_rule.from_dose == from_dose {
                                 int_rule.absolute_minimum_interval = Some(over_int.clone());
                             }
@@ -385,19 +436,29 @@ impl<'a> EvaluationEngine<'a> {
 
             // Check minimum age
             if let Some(ref abs_min_age) = dose_rule.absolute_minimum_age {
-                if compare_elapsed(patient.birth_date, dose.date, abs_min_age) == std::cmp::Ordering::Less {
+                if compare_elapsed(patient.birth_date, dose.date, abs_min_age)
+                    == std::cmp::Ordering::Less
+                {
                     is_valid = false;
                     reasons.push(EvaluationReason::BelowMinimumAge);
                 }
             }
 
             // Check minimum interval
-            if let Some(ref int_rule) = interval_rule {
+            for int_rule in &applicable_intervals {
                 if let Some(ref abs_min_int) = int_rule.absolute_minimum_interval {
-                    if let Some((prev_date, _)) = valid_doses.last() {
-                        if compare_elapsed(*prev_date, dose.date, abs_min_int) == std::cmp::Ordering::Less {
+                    let prev_date = valid_doses
+                        .iter()
+                        .find(|(_, num)| *num == int_rule.from_dose)
+                        .map(|(d, _)| *d);
+                    if let Some(prev_date) = prev_date {
+                        if compare_elapsed(prev_date, dose.date, abs_min_int)
+                            == std::cmp::Ordering::Less
+                        {
                             is_valid = false;
-                            reasons.push(EvaluationReason::BelowMinimumInterval);
+                            if !reasons.contains(&EvaluationReason::BelowMinimumInterval) {
+                                reasons.push(EvaluationReason::BelowMinimumInterval);
+                            }
                         }
                     }
                 }
@@ -411,7 +472,13 @@ impl<'a> EvaluationEngine<'a> {
 
             // Invoke custom_evaluation_hook after checking standard requirements
             if let Some(eval_hook) = self.custom_evaluation_hook {
-                (eval_hook)(&active_series.name, target_dose_idx, &ctx, &mut reasons, &mut status);
+                (eval_hook)(
+                    &active_series.name,
+                    target_dose_idx,
+                    &ctx,
+                    &mut reasons,
+                    &mut status,
+                );
             }
 
             let output_dose_number = std::cmp::min(target_dose_idx, valid_doses.len() + 1);
@@ -447,7 +514,9 @@ impl<'a> EvaluationEngine<'a> {
             let series_completed = if let Some(hook) = self.custom_completion_hook {
                 (hook)(&ctx_complete)
             } else {
-                valid_doses.iter().any(|(_, num)| *num == active_series.num_doses)
+                valid_doses
+                    .iter()
+                    .any(|(_, num)| *num == active_series.num_doses)
             };
             if series_completed {
                 is_completed = true;
@@ -469,31 +538,36 @@ impl<'a> EvaluationEngine<'a> {
             (hook)(&ctx_end)
         } else {
             evaluations.iter().any(|e| {
-                (e.status == DoseStatus::Valid || 
-                 (e.status == DoseStatus::Accepted && 
-                  !e.reasons.contains(&EvaluationReason::OutsideRoutineSeries) &&
-                  !e.reasons.contains(&EvaluationReason::VaccineNotLicensedForMales))) &&
-                e.dose_number == Some(active_series.num_doses)
+                (e.status == DoseStatus::Valid
+                    || (e.status == DoseStatus::Accepted
+                        && !e.reasons.contains(&EvaluationReason::OutsideRoutineSeries)
+                        && !e
+                            .reasons
+                            .contains(&EvaluationReason::VaccineNotLicensedForMales)))
+                    && e.dose_number == Some(active_series.num_doses)
             })
         };
 
         let is_completed = is_completed || series_completed;
 
-        let satisfied_count = evaluations.iter()
+        let satisfied_count = evaluations
+            .iter()
             .filter(|e| {
-                e.status == DoseStatus::Valid || 
-                (e.status == DoseStatus::Accepted && 
-                 !e.reasons.contains(&EvaluationReason::OutsideRoutineSeries) &&
-                 !e.reasons.contains(&EvaluationReason::VaccineNotLicensedForMales))
+                e.status == DoseStatus::Valid
+                    || (e.status == DoseStatus::Accepted
+                        && !e.reasons.contains(&EvaluationReason::OutsideRoutineSeries)
+                        && !e
+                            .reasons
+                            .contains(&EvaluationReason::VaccineNotLicensedForMales))
             })
             .count();
-
 
         // 4. Recommendation / Forecasting
         let forecast = self.generate_forecast(
             patient,
             history,
             &valid_doses,
+            &evaluations,
             satisfied_count,
             is_completed,
             eval_date,
@@ -516,13 +590,14 @@ impl<'a> EvaluationEngine<'a> {
         patient: &Patient,
         history: &[Dose],
         valid_doses: &[(NaiveDate, usize)],
+        evaluations: &[DoseEvaluation],
         satisfied_count: usize,
         is_completed: bool,
         eval_date: NaiveDate,
         active_series: &CompiledSeries,
     ) -> SeriesForecast {
-        if is_completed {
-            let mut forecast = SeriesForecast {
+        let mut forecast = if is_completed {
+            let mut f = SeriesForecast {
                 series_name: active_series.name.into(),
                 earliest_date: None,
                 recommended_date: None,
@@ -532,172 +607,221 @@ impl<'a> EvaluationEngine<'a> {
                 reasons: crate::reasons!["COMPLETE"],
             };
             if let Some(hook) = self.custom_forecast_hook {
-                (hook)(patient, valid_doses, history, eval_date, &mut forecast);
+                (hook)(patient, valid_doses, history, eval_date, &mut f);
             }
-            return forecast;
-        }
-
-        let mut next_dose_idx = valid_doses.iter().map(|(_, num)| *num).max().unwrap_or(0) + 1;
-        if let Some(hook) = self.custom_dose_number_hook {
-            let ctx = EvaluationContext::new(
-                patient,
-                history,
-                valid_doses,
-                None,
-                next_dose_idx,
-                eval_date,
-                &active_series.name,
-            );
-            next_dose_idx = (hook)(&active_series.name, &ctx);
-        }
-
-        if next_dose_idx > active_series.num_doses {
-            let mut forecast = SeriesForecast {
-                series_name: active_series.name.into(),
-                earliest_date: None,
-                recommended_date: None,
-                overdue_date: None,
-                latest_date: None,
-                status: SeriesStatus::Complete,
-                reasons: crate::reasons!["COMPLETE"],
-            };
-            if let Some(hook) = self.custom_forecast_hook {
-                (hook)(patient, valid_doses, history, eval_date, &mut forecast);
-            }
-            return forecast;
-        }
-
-        let mut dose_rule = active_series.doses[next_dose_idx - 1].clone();
-        let mut interval_rule = if next_dose_idx > 1 {
-            active_series.intervals.iter()
-                .find(|int| int.to_dose == next_dose_idx)
-                .cloned()
+            f
         } else {
-            None
-        };
+            let mut next_dose_idx = valid_doses.iter().map(|(_, num)| *num).max().unwrap_or(0) + 1;
+            if let Some(hook) = self.custom_dose_number_hook {
+                let ctx = EvaluationContext::new(
+                    patient,
+                    history,
+                    valid_doses,
+                    None,
+                    next_dose_idx,
+                    eval_date,
+                    &active_series.name,
+                );
+                next_dose_idx = (hook)(&active_series.name, &ctx);
+            }
 
-        let ctx = EvaluationContext::new(
-            patient,
-            history,
-            valid_doses,
-            None,
-            next_dose_idx,
-            eval_date,
-            &active_series.name,
-        );
-
-        // Apply recommendation overrides
-        for rule in self.rec_overrides {
-            if rule.target_dose_number == next_dose_idx && (rule.condition)(&ctx) {
-                if let Some(ref over_age) = rule.override_min_age {
-                    dose_rule.minimum_age = Some(over_age.clone());
+            if next_dose_idx > active_series.num_doses {
+                let mut f = SeriesForecast {
+                    series_name: active_series.name.into(),
+                    earliest_date: None,
+                    recommended_date: None,
+                    overdue_date: None,
+                    latest_date: None,
+                    status: SeriesStatus::Complete,
+                    reasons: crate::reasons!["COMPLETE"],
+                };
+                if let Some(hook) = self.custom_forecast_hook {
+                    (hook)(patient, valid_doses, history, eval_date, &mut f);
                 }
-                if let Some(ref over_int) = rule.override_min_interval {
-                    if let Some(ref mut int_rule) = interval_rule {
-                        int_rule.minimum_interval = Some(over_int.clone());
+                f
+            } else {
+                let mut dose_rule = active_series.doses[next_dose_idx - 1].clone();
+                let mut applicable_intervals: Vec<CompiledDoseInterval> = if next_dose_idx > 1 {
+                    active_series
+                        .intervals
+                        .iter()
+                        .filter(|int| int.to_dose == next_dose_idx)
+                        .cloned()
+                        .collect()
+                } else {
+                    Vec::new()
+                };
+
+                let ctx = EvaluationContext::new(
+                    patient,
+                    history,
+                    valid_doses,
+                    None,
+                    next_dose_idx,
+                    eval_date,
+                    &active_series.name,
+                );
+
+                // Apply recommendation overrides
+                for rule in self.rec_overrides {
+                    if rule.target_dose_number == next_dose_idx && (rule.condition)(&ctx) {
+                        if let Some(ref over_age) = rule.override_min_age {
+                            dose_rule.minimum_age = Some(over_age.clone());
+                        }
+                        if let Some(ref over_int) = rule.override_min_interval {
+                            for int_rule in &mut applicable_intervals {
+                                int_rule.minimum_interval = Some(over_int.clone());
+                            }
+                        }
                     }
                 }
-            }
-        }
 
-        // Get the most recent shot date for any dose belonging to this series
-        let last_shot_date = history.iter()
-            .filter(|d| active_series.doses.iter().any(|d_rule| d_rule.allowed_cvx.contains(&d.cvx.0)))
-            .filter(|d| {
-                !(active_series.vaccine_group == "PNEUMOCOCCAL"
-                    && d.cvx.0 == 33
-                    && compare_elapsed(
-                        patient.birth_date,
-                        d.date,
-                        &crate::time_period!("2y"),
-                    ) == std::cmp::Ordering::Less)
-            })
-            .map(|d| d.date)
-            .max();
+                // Get the most recent shot date for any dose belonging to this series that is valid or invalid solely due to age/interval
+                let last_shot_date = evaluations
+                    .iter()
+                    .filter(|e| {
+                        e.status == DoseStatus::Valid
+                            || (e.status == DoseStatus::Invalid
+                                && !e.reasons.is_empty()
+                                && e.reasons.iter().all(|r| {
+                                    *r == EvaluationReason::BelowMinimumAge
+                                        || *r == EvaluationReason::BelowMinimumInterval
+                                        || *r == EvaluationReason::TooEarlyLiveVirus
+                                }))
+                    })
+                    .filter(|e| {
+                        !(active_series.vaccine_group == "PNEUMOCOCCAL"
+                            && e.cvx.0 == 33
+                            && compare_elapsed(
+                                patient.birth_date,
+                                e.dose_date,
+                                &crate::time_period!("2y"),
+                            ) == std::cmp::Ordering::Less)
+                    })
+                    .map(|e| e.dose_date)
+                    .max();
 
-        // Calculate Earliest Date: max(minimum_age, minimum_interval)
-        let min_age_tp = dose_rule.minimum_age.as_ref();
-        let min_age_date = min_age_tp.map(|tp| tp.add_to(patient.birth_date));
-        
-        let min_int_date = if let Some(ref int_rule) = interval_rule {
-            int_rule.minimum_interval.as_ref().and_then(|tp| {
-                last_shot_date.map(|prev_date| tp.add_to(prev_date))
-            })
-        } else {
-            None
-        };
+                // Calculate Earliest Date: max(minimum_age, minimum_interval)
+                let min_age_tp = dose_rule.minimum_age.as_ref();
+                let min_age_date = min_age_tp.map(|tp| tp.add_to(patient.birth_date));
 
-        let earliest_date = match (min_age_date, min_int_date) {
-            (Some(a), Some(i)) => Some(max(a, i)),
-            (Some(a), None) => Some(a),
-            (None, Some(i)) => Some(i),
-            (None, None) => None,
-        };
+                let get_dose_date = |dose_num: usize| -> Option<NaiveDate> {
+                    valid_doses
+                        .iter()
+                        .find(|(_, num)| *num == dose_num)
+                        .map(|(date, _)| *date)
+                };
 
-        // Calculate Recommended Date
-        let rec_age_date = dose_rule.earliest_recommended_age.as_ref()
-            .map(|tp| tp.add_to(patient.birth_date));
-        let rec_int_date = if let Some(ref int_rule) = interval_rule {
-            int_rule.earliest_recommended_interval.as_ref().and_then(|tp| {
-                last_shot_date.map(|prev_date| tp.add_to(prev_date))
-            })
-        } else {
-            None
-        };
+                let min_int_date = applicable_intervals
+                    .iter()
+                    .filter_map(|int_rule| {
+                        int_rule.minimum_interval.as_ref().and_then(|tp| {
+                            if int_rule.from_dose == next_dose_idx - 1 {
+                                // Sequential interval: measured from the most recent dose (valid or invalid)
+                                last_shot_date.map(|d| tp.add_to(d))
+                            } else {
+                                // Non-sequential interval: measured ONLY from the valid from_dose
+                                get_dose_date(int_rule.from_dose).map(|d| tp.add_to(d))
+                            }
+                        })
+                    })
+                    .max();
 
-        let recommended_date = match (rec_age_date, rec_int_date) {
-            (Some(a), Some(i)) => Some(max(a, i)),
-            (Some(a), None) => Some(a),
-            (None, Some(i)) => Some(i),
-            (None, None) => None,
-        };
+                let earliest_date = match (min_age_date, min_int_date) {
+                    (Some(a), Some(i)) => Some(max(a, i)),
+                    (Some(a), None) => Some(a),
+                    (None, Some(i)) => Some(i),
+                    (None, None) => None,
+                };
 
-        // Calculate Overdue Date
-        let overdue_age_date = dose_rule.latest_recommended_age.as_ref()
-            .map(|tp| tp.add_to(patient.birth_date));
-        let overdue_int_date = if let Some(ref int_rule) = interval_rule {
-            int_rule.latest_recommended_interval.as_ref().and_then(|tp| {
-                last_shot_date.map(|prev_date| tp.add_to(prev_date))
-            })
-        } else {
-            None
-        };
+                // Calculate Recommended Date
+                let rec_age_date = dose_rule
+                    .earliest_recommended_age
+                    .as_ref()
+                    .map(|tp| tp.add_to(patient.birth_date));
+                let rec_int_date = applicable_intervals
+                    .iter()
+                    .filter_map(|int_rule| {
+                        int_rule
+                            .earliest_recommended_interval
+                            .as_ref()
+                            .and_then(|tp| {
+                                if int_rule.from_dose == next_dose_idx - 1 {
+                                    last_shot_date.map(|d| tp.add_to(d))
+                                } else {
+                                    get_dose_date(int_rule.from_dose).map(|d| tp.add_to(d))
+                                }
+                            })
+                    })
+                    .max();
 
-        let overdue_date = if overdue_age_date.is_some() {
-            overdue_age_date
-        } else {
-            overdue_int_date
-        };
-        let overdue_date = overdue_date.and_then(|d| d.pred_opt());
+                let recommended_date = match (rec_age_date, rec_int_date) {
+                    (Some(a), Some(i)) => Some(max(a, i)),
+                    (Some(a), None) => Some(a),
+                    (None, Some(i)) => Some(i),
+                    (None, None) => None,
+                };
 
-        let mut forecast = SeriesForecast {
-            series_name: active_series.name.into(),
-            earliest_date,
-            recommended_date,
-            overdue_date,
-            latest_date: None,
-            status: SeriesStatus::NotComplete,
-            reasons: crate::reasons!["NOT_COMPLETE"],
-        };
+                // Calculate Overdue Date
+                let overdue_age_date = dose_rule
+                    .latest_recommended_age
+                    .as_ref()
+                    .map(|tp| tp.add_to(patient.birth_date));
+                let overdue_int_date = applicable_intervals
+                    .iter()
+                    .filter_map(|int_rule| {
+                        int_rule
+                            .latest_recommended_interval
+                            .as_ref()
+                            .and_then(|tp| {
+                                if int_rule.from_dose == next_dose_idx - 1 {
+                                    last_shot_date.map(|d| tp.add_to(d))
+                                } else {
+                                    get_dose_date(int_rule.from_dose).map(|d| tp.add_to(d))
+                                }
+                            })
+                    })
+                    .max();
 
-        // Apply max age clamp if configured
-        if let Some((max_age, status)) = &active_series.max_age_clamp {
-            if eval_date >= max_age.add_to(patient.birth_date) {
-                if forecast.status != SeriesStatus::Complete {
-                    forecast.status = status.clone();
-                    forecast.earliest_date = None;
-                    forecast.recommended_date = None;
-                    forecast.overdue_date = None;
-                    forecast.latest_date = None;
-                    forecast.reasons = crate::reasons!["MAX_AGE_EXCEEDED"];
+                let overdue_date = if overdue_age_date.is_some() {
+                    overdue_age_date
+                } else {
+                    overdue_int_date
+                };
+                let overdue_date = overdue_date.and_then(|d| d.pred_opt());
+
+                let mut f = SeriesForecast {
+                    series_name: active_series.name.into(),
+                    earliest_date,
+                    recommended_date,
+                    overdue_date,
+                    latest_date: None,
+                    status: SeriesStatus::NotComplete,
+                    reasons: crate::reasons!["NOT_COMPLETE"],
+                };
+
+                // Apply max age clamp if configured
+                if let Some((max_age, status)) = &active_series.max_age_clamp {
+                    if eval_date >= max_age.add_to(patient.birth_date) {
+                        if f.status != SeriesStatus::Complete {
+                            f.status = status.clone();
+                            f.earliest_date = None;
+                            f.recommended_date = None;
+                            f.overdue_date = None;
+                            f.latest_date = None;
+                            f.reasons = crate::reasons!["MAX_AGE_EXCEEDED"];
+                        }
+                    }
                 }
-            }
-        }
 
-        // Apply custom rules hook (like Polio 2009 reset) if present
-        if let Some(hook) = self.custom_forecast_hook {
-            (hook)(patient, valid_doses, history, eval_date, &mut forecast);
-        }
+                // Apply custom rules hook (like Polio 2009 reset) if present
+                if let Some(hook) = self.custom_forecast_hook {
+                    (hook)(patient, valid_doses, history, eval_date, &mut f);
+                }
+
+                f
+            }
+        };
 
         let last_group_date = history.iter().map(|d| d.date).max();
         if let Some(last_date) = last_group_date {
@@ -719,17 +843,23 @@ impl<'a> EvaluationEngine<'a> {
         }
 
         // Align earliest <= recommended <= overdue
-        if let (Some(earliest), Some(recommended)) = (forecast.earliest_date, forecast.recommended_date.as_mut()) {
+        if let (Some(earliest), Some(recommended)) =
+            (forecast.earliest_date, forecast.recommended_date.as_mut())
+        {
             if *recommended < earliest {
                 *recommended = earliest;
             }
         }
-        if let (Some(recommended), Some(overdue)) = (forecast.recommended_date, forecast.overdue_date.as_mut()) {
+        if let (Some(recommended), Some(overdue)) =
+            (forecast.recommended_date, forecast.overdue_date.as_mut())
+        {
             if *overdue < recommended {
                 *overdue = recommended;
             }
         }
-        if let (Some(earliest), Some(overdue)) = (forecast.earliest_date, forecast.overdue_date.as_mut()) {
+        if let (Some(earliest), Some(overdue)) =
+            (forecast.earliest_date, forecast.overdue_date.as_mut())
+        {
             if *overdue < earliest {
                 *overdue = earliest;
             }
@@ -739,7 +869,12 @@ impl<'a> EvaluationEngine<'a> {
     }
 }
 
-fn get_same_day_priority(group: &str, cvx: Cvx, birth_date: NaiveDate, dose_date: NaiveDate) -> i32 {
+fn get_same_day_priority(
+    group: &str,
+    cvx: Cvx,
+    birth_date: NaiveDate,
+    dose_date: NaiveDate,
+) -> i32 {
     let cvx_code = cvx.0;
     match group {
         "MMR" => match cvx_code {
@@ -755,9 +890,17 @@ fn get_same_day_priority(group: &str, cvx: Cvx, birth_date: NaiveDate, dose_date
         "HEP_A" => {
             let age_19 = crate::date_utils::add_years(birth_date, 19);
             if dose_date >= age_19 {
-                if cvx_code == 52 { 0 } else { 1 }
+                if cvx_code == 52 {
+                    0
+                } else {
+                    1
+                }
             } else {
-                if cvx_code == 52 { 1 } else { 0 }
+                if cvx_code == 52 {
+                    1
+                } else {
+                    0
+                }
             }
         }
         "VARICELLA" => match cvx_code {
@@ -766,9 +909,9 @@ fn get_same_day_priority(group: &str, cvx: Cvx, birth_date: NaiveDate, dose_date
             _ => 2,
         },
         "DTP" => match cvx_code {
-            115 | 198 => 1, // Tdap
+            115 | 198 => 1,                            // Tdap
             9 | 28 | 113 | 138 | 139 | 195 | 196 => 2, // DT/Td
-            _ => 0, // DTaP/DTP combo/single
+            _ => 0,                                    // DTaP/DTP combo/single
         },
         "HEP_B" => match cvx_code {
             104 | 110 | 146 => 0,

@@ -1,17 +1,24 @@
+use crate::date_utils::{add_months, add_years, TinyVec};
 use crate::engine::CandidateForecastsExt;
-use ice_cvx_macro::cvx;
-use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
-use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, VaccineGroupForecast, SeriesStatus};
-use crate::date_utils::{TinyVec, add_years, add_months};
+use crate::models::{
+    Cvx, Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus,
+    VaccineGroupForecast,
+};
+use chrono::NaiveDate;
+use ice_cvx_macro::cvx;
 use std::collections::HashMap;
 
 fn is_combo_child_hepb_cvx(cvx: Cvx) -> bool {
-    matches!(cvx.0, cvx!("51") | cvx!("102") | cvx!("110") | cvx!("132") | cvx!("146") | cvx!("198"))
+    matches!(
+        cvx.0,
+        cvx!("51") | cvx!("102") | cvx!("110") | cvx!("132") | cvx!("146") | cvx!("198")
+    )
 }
 
 fn is_birth_monovalent_hepb(dose: &Dose, birth_date: NaiveDate) -> bool {
-    matches!(dose.cvx.0, cvx!("08") | cvx!("8") | cvx!("42") | cvx!("45")) && dose.date <= birth_date + chrono::Duration::days(1)
+    matches!(dose.cvx.0, cvx!("08") | cvx!("8") | cvx!("42") | cvx!("45"))
+        && dose.date <= birth_date + chrono::Duration::days(1)
 }
 
 fn dose_date(valid_doses: &[(NaiveDate, usize)], dose_number: usize) -> Option<NaiveDate> {
@@ -24,11 +31,20 @@ fn dose_date(valid_doses: &[(NaiveDate, usize)], dose_number: usize) -> Option<N
 fn valid_dose_cvxs(history: &[Dose], valid_doses: &[(NaiveDate, usize)]) -> Vec<u16> {
     valid_doses
         .iter()
-        .filter_map(|(date, _)| history.iter().find(|dose| dose.date == *date).map(|dose| dose.cvx.0))
+        .filter_map(|(date, _)| {
+            history
+                .iter()
+                .find(|dose| dose.date == *date)
+                .map(|dose| dose.cvx.0)
+        })
         .collect()
 }
 
-fn child_requires_four_dose_series(patient: &Patient, history: &[Dose], valid_doses: &[(NaiveDate, usize)]) -> bool {
+fn child_requires_four_dose_series(
+    patient: &Patient,
+    history: &[Dose],
+    valid_doses: &[(NaiveDate, usize)],
+) -> bool {
     let has_birth_monovalent = history
         .iter()
         .any(|dose| is_birth_monovalent_hepb(dose, patient.birth_date));
@@ -93,7 +109,8 @@ pub fn hep_b_custom_evaluation_hook(
 ) {
     if let Some(dose) = ctx.current_dose {
         if dose.cvx.0 == cvx!("189") {
-            let age_18y_minus_4d = add_years(ctx.patient.birth_date, 18) - chrono::Duration::days(4);
+            let age_18y_minus_4d =
+                add_years(ctx.patient.birth_date, 18) - chrono::Duration::days(4);
             if dose.date < age_18y_minus_4d {
                 *status = DoseStatus::Invalid;
                 reasons.clear();
@@ -178,7 +195,10 @@ pub fn hep_b_custom_evaluation_hook(
             }
         }
 
-        if series_name == "HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES" && target_dose_idx == 4 && dose.cvx.0 == cvx!("110") {
+        if series_name == "HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES"
+            && target_dose_idx == 4
+            && dose.cvx.0 == cvx!("110")
+        {
             if ctx.valid_doses.len() >= 3 {
                 let dose1_date = ctx.valid_doses[0].0;
                 let dose2_date = ctx.valid_doses[1].0;
@@ -207,7 +227,9 @@ pub fn hep_b_custom_evaluation_hook(
 
         // 7. Adult "Enough is Enough" Rule
         if series_name == "HEP_B_ADULT_3_DOSE_SERIES" && target_dose_idx == 3 {
-            if *status == DoseStatus::Invalid && reasons.contains(&EvaluationReason::BelowMinimumInterval) {
+            if *status == DoseStatus::Invalid
+                && reasons.contains(&EvaluationReason::BelowMinimumInterval)
+            {
                 if ctx.valid_doses.len() >= 2 {
                     let dose2_date = ctx.valid_doses[1].0;
                     if (dose.date - dose2_date).num_days() >= 52 {
@@ -223,12 +245,16 @@ pub fn hep_b_custom_evaluation_hook(
         // 8. Heplisav-B (CVX 189) interval suppression
         if dose.cvx.0 == cvx!("189") {
             let prior_valid_189 = ctx.valid_doses.iter().find(|(v_date, _)| {
-                ctx.history.iter().any(|h| h.date == *v_date && h.cvx.0 == cvx!("189"))
+                ctx.history
+                    .iter()
+                    .any(|h| h.date == *v_date && h.cvx.0 == cvx!("189"))
             });
             if let Some((prior_date, _)) = prior_valid_189 {
                 let days = (dose.date - *prior_date).num_days();
                 if days >= 24 {
-                    if *status == DoseStatus::Invalid && reasons.contains(&EvaluationReason::BelowMinimumInterval) {
+                    if *status == DoseStatus::Invalid
+                        && reasons.contains(&EvaluationReason::BelowMinimumInterval)
+                    {
                         reasons.retain(|r| *r != EvaluationReason::BelowMinimumInterval);
                         if reasons.is_empty() {
                             *status = DoseStatus::Valid;
@@ -242,7 +268,8 @@ pub fn hep_b_custom_evaluation_hook(
         if series_name == "HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES" && target_dose_idx == 3 {
             if *status == DoseStatus::Invalid {
                 let only_allowable_invalid_reasons = reasons.iter().all(|r| {
-                    *r == EvaluationReason::BelowMinimumInterval || *r == EvaluationReason::BelowMinimumAge
+                    *r == EvaluationReason::BelowMinimumInterval
+                        || *r == EvaluationReason::BelowMinimumAge
                 });
                 if only_allowable_invalid_reasons && !reasons.is_empty() {
                     *status = DoseStatus::Valid;
@@ -260,7 +287,11 @@ pub fn hep_b_custom_forecast_hook(
     eval_date: NaiveDate,
     forecast: &mut SeriesForecast,
 ) {
-    let max_dose_number = valid_doses.iter().map(|(_, dose_number)| *dose_number).max().unwrap_or(0);
+    let max_dose_number = valid_doses
+        .iter()
+        .map(|(_, dose_number)| *dose_number)
+        .max()
+        .unwrap_or(0);
     let valid_cvxs = valid_dose_cvxs(history, valid_doses);
     let all_comvax = !valid_cvxs.is_empty() && valid_cvxs.iter().all(|cvx| *cvx == cvx!("51"));
     let all_pediarix = !valid_cvxs.is_empty() && valid_cvxs.iter().all(|cvx| *cvx == cvx!("110"));
@@ -275,8 +306,16 @@ pub fn hep_b_custom_forecast_hook(
     }
 
     if history.len() == 3
-        && history.iter().filter(|dose| dose.cvx.0 == cvx!("110")).count() == 1
-        && history.iter().filter(|dose| matches!(dose.cvx.0, cvx!("08") | cvx!("8") | cvx!("42") | cvx!("45"))).count() == 2
+        && history
+            .iter()
+            .filter(|dose| dose.cvx.0 == cvx!("110"))
+            .count()
+            == 1
+        && history
+            .iter()
+            .filter(|dose| matches!(dose.cvx.0, cvx!("08") | cvx!("8") | cvx!("42") | cvx!("45")))
+            .count()
+            == 2
         && forecast.status == SeriesStatus::NotComplete
         && eval_date >= patient.birth_date + chrono::Duration::days(168)
     {
@@ -290,8 +329,11 @@ pub fn hep_b_custom_forecast_hook(
     if all_comvax {
         match max_dose_number {
             2 => {
-                if let (Some(first_dose_date), Some(second_dose_date)) = (dose_date(valid_doses, 1), dose_date(valid_doses, 2)) {
-                    let next_date = (first_dose_date + chrono::Duration::days(112)).max(second_dose_date + chrono::Duration::days(56));
+                if let (Some(first_dose_date), Some(second_dose_date)) =
+                    (dose_date(valid_doses, 1), dose_date(valid_doses, 2))
+                {
+                    let next_date = (first_dose_date + chrono::Duration::days(112))
+                        .max(second_dose_date + chrono::Duration::days(56));
                     forecast.earliest_date = Some(next_date);
                     forecast.recommended_date = Some(next_date);
                 }
@@ -308,7 +350,8 @@ pub fn hep_b_custom_forecast_hook(
                         .max(third_dose_date);
                     forecast.earliest_date = Some(next_date);
                     forecast.recommended_date = Some(next_date);
-                    forecast.overdue_date = Some(add_months(second_dose_date, 18) + chrono::Duration::days(27));
+                    forecast.overdue_date =
+                        Some(add_months(second_dose_date, 18) + chrono::Duration::days(27));
                 }
                 return;
             }
@@ -324,10 +367,13 @@ pub fn hep_b_custom_forecast_hook(
         match max_dose_number {
             1 => {
                 if let Some(last_dose) = latest_history_dose {
-                    let prior_non_pediarix = history.iter().any(|dose| dose.date < last_dose.date && dose.cvx.0 != cvx!("110"));
+                    let prior_non_pediarix = history
+                        .iter()
+                        .any(|dose| dose.date < last_dose.date && dose.cvx.0 != cvx!("110"));
                     if history.len() > valid_doses.len() && !prior_non_pediarix {
                         forecast.earliest_date = Some(last_dose.date + chrono::Duration::days(28));
-                        forecast.recommended_date = Some(last_dose.date + chrono::Duration::days(28));
+                        forecast.recommended_date =
+                            Some(last_dose.date + chrono::Duration::days(28));
                         forecast.overdue_date = Some(last_dose.date + chrono::Duration::days(35));
                         return;
                     }
@@ -337,13 +383,20 @@ pub fn hep_b_custom_forecast_hook(
                 }
             }
             2 => {
-                if let (Some(first_dose_date), Some(second_dose_date)) = (dose_date(valid_doses, 1), dose_date(valid_doses, 2)) {
+                if let (Some(first_dose_date), Some(second_dose_date)) =
+                    (dose_date(valid_doses, 1), dose_date(valid_doses, 2))
+                {
                     let earliest = age_24_weeks
                         .max(first_dose_date + chrono::Duration::days(112))
                         .max(second_dose_date + chrono::Duration::days(56));
                     forecast.earliest_date = Some(earliest);
-                    forecast.recommended_date = Some(recommended_age.max(first_dose_date + chrono::Duration::days(112)));
-                    forecast.overdue_date = Some(if eval_date >= overdue_age { recommended_age.max(first_dose_date + chrono::Duration::days(112)) } else { overdue_age });
+                    forecast.recommended_date =
+                        Some(recommended_age.max(first_dose_date + chrono::Duration::days(112)));
+                    forecast.overdue_date = Some(if eval_date >= overdue_age {
+                        recommended_age.max(first_dose_date + chrono::Duration::days(112))
+                    } else {
+                        overdue_age
+                    });
                 }
                 return;
             }
@@ -359,7 +412,8 @@ pub fn hep_b_custom_forecast_hook(
                         .max(third_dose_date);
                     forecast.earliest_date = Some(earliest);
                     forecast.recommended_date = Some(recommended_age);
-                    forecast.overdue_date = Some(add_months(second_dose_date, 18) + chrono::Duration::days(27));
+                    forecast.overdue_date =
+                        Some(add_months(second_dose_date, 18) + chrono::Duration::days(27));
                 }
                 return;
             }
@@ -367,8 +421,14 @@ pub fn hep_b_custom_forecast_hook(
         }
     }
 
-    if forecast.series_name == "HEP_B_ADULT_2_DOSE_SERIES" && forecast.status == SeriesStatus::NotComplete {
-        if let Some(last_heplisav_dose) = history.iter().filter(|dose| dose.cvx.0 == cvx!("189")).max_by_key(|dose| dose.date) {
+    if forecast.series_name == "HEP_B_ADULT_2_DOSE_SERIES"
+        && forecast.status == SeriesStatus::NotComplete
+    {
+        if let Some(last_heplisav_dose) = history
+            .iter()
+            .filter(|dose| dose.cvx.0 == cvx!("189"))
+            .max_by_key(|dose| dose.date)
+        {
             let next_date = last_heplisav_dose.date + chrono::Duration::days(28);
             forecast.earliest_date = Some(next_date);
             forecast.recommended_date = Some(next_date);
@@ -382,18 +442,31 @@ pub fn hep_b_custom_forecast_hook(
     }
 
     match forecast.series_name.as_ref() {
-        "HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES" if forecast.status == SeriesStatus::NotComplete && max_dose_number == 1 => {
+        "HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES"
+            if forecast.status == SeriesStatus::NotComplete && max_dose_number == 1 =>
+        {
             if eval_date >= add_months(patient.birth_date, 4) {
                 forecast.overdue_date = forecast.earliest_date.or(forecast.recommended_date);
             }
         }
-        "HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES" if forecast.status == SeriesStatus::NotComplete && max_dose_number == 2 => {
-            if let (Some(first_dose_date), Some(second_dose_date)) = (dose_date(valid_doses, 1), dose_date(valid_doses, 2)) {
-                let next_date = (first_dose_date + chrono::Duration::days(112)).max(second_dose_date + chrono::Duration::days(56));
+        "HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES"
+            if forecast.status == SeriesStatus::NotComplete && max_dose_number == 2 =>
+        {
+            if let (Some(first_dose_date), Some(second_dose_date)) =
+                (dose_date(valid_doses, 1), dose_date(valid_doses, 2))
+            {
+                let next_date = (first_dose_date + chrono::Duration::days(112))
+                    .max(second_dose_date + chrono::Duration::days(56));
                 forecast.earliest_date = merge_with_existing(forecast.earliest_date, next_date);
-                forecast.recommended_date = merge_with_existing(forecast.recommended_date, first_dose_date + chrono::Duration::days(112));
+                forecast.recommended_date = merge_with_existing(
+                    forecast.recommended_date,
+                    first_dose_date + chrono::Duration::days(112),
+                );
                 if eval_date >= add_months(patient.birth_date, 20) {
-                    forecast.overdue_date = merge_with_existing(forecast.overdue_date, forecast.recommended_date.unwrap_or(next_date));
+                    forecast.overdue_date = merge_with_existing(
+                        forecast.overdue_date,
+                        forecast.recommended_date.unwrap_or(next_date),
+                    );
                 }
             }
         }
@@ -407,26 +480,51 @@ pub fn hep_b_custom_forecast_hook(
                     next_date = next_date.max(third_dose_date);
                 }
                 forecast.earliest_date = merge_with_existing(forecast.earliest_date, next_date);
-                forecast.recommended_date = merge_with_existing(forecast.recommended_date, next_date);
-                if eval_date >= add_months(patient.birth_date, 20) {
-                    forecast.overdue_date = merge_with_existing(forecast.overdue_date, forecast.recommended_date.unwrap_or(next_date));
+                forecast.recommended_date =
+                    merge_with_existing(forecast.recommended_date, next_date);
+                if max_dose_number == 3 {
+                    if let Some(second_dose_date) = dose_date(valid_doses, 2) {
+                        let custom_overdue =
+                            add_months(second_dose_date, 18) + chrono::Duration::days(27);
+                        forecast.overdue_date =
+                            merge_with_existing(forecast.overdue_date, custom_overdue);
+                    }
+                } else if eval_date >= add_months(patient.birth_date, 20) {
+                    forecast.overdue_date = merge_with_existing(
+                        forecast.overdue_date,
+                        forecast.recommended_date.unwrap_or(next_date),
+                    );
                 }
             }
         }
-        "HEP_B_ADULT_3_DOSE_SERIES" if forecast.status == SeriesStatus::NotComplete && max_dose_number == 2 => {
-            if let (Some(first_dose_date), Some(second_dose_date)) = (dose_date(valid_doses, 1), dose_date(valid_doses, 2)) {
-                forecast.earliest_date = Some((first_dose_date + chrono::Duration::days(112)).max(second_dose_date + chrono::Duration::days(56)));
-                forecast.recommended_date = Some(add_months(first_dose_date, 6).max(second_dose_date + chrono::Duration::days(56)));
+        "HEP_B_ADULT_3_DOSE_SERIES"
+            if forecast.status == SeriesStatus::NotComplete && max_dose_number == 2 =>
+        {
+            if let (Some(first_dose_date), Some(second_dose_date)) =
+                (dose_date(valid_doses, 1), dose_date(valid_doses, 2))
+            {
+                forecast.earliest_date = Some(
+                    (first_dose_date + chrono::Duration::days(112))
+                        .max(second_dose_date + chrono::Duration::days(56)),
+                );
+                forecast.recommended_date = Some(
+                    add_months(first_dose_date, 6)
+                        .max(second_dose_date + chrono::Duration::days(56)),
+                );
             }
         }
-        "HEP_B_3_DOSE_TWINRIX_SERIES" if forecast.status == SeriesStatus::NotComplete && max_dose_number == 2 => {
+        "HEP_B_3_DOSE_TWINRIX_SERIES"
+            if forecast.status == SeriesStatus::NotComplete && max_dose_number == 2 =>
+        {
             if let Some(first_dose_date) = dose_date(valid_doses, 1) {
                 let next_date = add_months(first_dose_date, 6);
                 forecast.earliest_date = Some(next_date);
                 forecast.recommended_date = Some(next_date);
             }
         }
-        "HEP_B_4_DOSE_ACCELERATED_TWINRIX_SERIES" if forecast.status == SeriesStatus::NotComplete => {
+        "HEP_B_4_DOSE_ACCELERATED_TWINRIX_SERIES"
+            if forecast.status == SeriesStatus::NotComplete =>
+        {
             if max_dose_number == 2 {
                 if let Some(second_dose_date) = dose_date(valid_doses, 2) {
                     forecast.earliest_date = Some(second_dose_date + chrono::Duration::days(14));
@@ -441,7 +539,9 @@ pub fn hep_b_custom_forecast_hook(
                 }
             }
         }
-        "HEP_B_ADULT_2_DOSE_SERIES" if forecast.status == SeriesStatus::NotComplete && max_dose_number == 1 => {
+        "HEP_B_ADULT_2_DOSE_SERIES"
+            if forecast.status == SeriesStatus::NotComplete && max_dose_number == 1 =>
+        {
             if let Some(first_dose_date) = dose_date(valid_doses, 1) {
                 forecast.earliest_date = Some(first_dose_date + chrono::Duration::days(28));
                 forecast.recommended_date = Some(first_dose_date + chrono::Duration::days(28));
@@ -461,14 +561,27 @@ pub fn hep_b_adolescent_completion_condition(ctx: &EvaluationContext) -> bool {
         let dose1_date = ctx.valid_doses[0].0;
         let dose2_date = ctx.valid_doses[1].0;
 
-        let dose1_cvx = ctx.history.iter().find(|d| d.date == dose1_date).map(|d| d.cvx.0).unwrap_or(0);
-        let dose2_cvx = ctx.history.iter().find(|d| d.date == dose2_date).map(|d| d.cvx.0).unwrap_or(0);
+        let dose1_cvx = ctx
+            .history
+            .iter()
+            .find(|d| d.date == dose1_date)
+            .map(|d| d.cvx.0)
+            .unwrap_or(0);
+        let dose2_cvx = ctx
+            .history
+            .iter()
+            .find(|d| d.date == dose2_date)
+            .map(|d| d.cvx.0)
+            .unwrap_or(0);
 
         if dose1_cvx == cvx!("43") && dose2_cvx == cvx!("43") {
             let age_11 = add_years(birth_date, 11);
             let age_16 = add_years(birth_date, 16);
-            if dose1_date >= age_11 && dose1_date < age_16 &&
-               dose2_date >= age_11 && dose2_date < age_16 {
+            if dose1_date >= age_11
+                && dose1_date < age_16
+                && dose2_date >= age_11
+                && dose2_date < age_16
+            {
                 let limit = add_months(dose1_date, 4) - chrono::Duration::days(4);
                 if dose2_date >= limit {
                     return true;
@@ -482,11 +595,23 @@ pub fn hep_b_adolescent_completion_condition(ctx: &EvaluationContext) -> bool {
 pub fn hep_b_custom_switch_hook(
     current_series_name: &str,
     target_dose_idx: usize,
-    _ctx: &EvaluationContext,
+    ctx: &EvaluationContext,
 ) -> Option<&'static str> {
-    // If evaluating Dose 4 but we are on Child 3-dose, switch to Child 4-dose!
-    if current_series_name == "HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES" && target_dose_idx == 4 {
-        return Some("HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES");
+    if current_series_name == "HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES" {
+        if target_dose_idx == 3 {
+            if let Some(dose) = ctx.current_dose {
+                let birth_date = ctx.patient.birth_date;
+                let is_too_young = (dose.date - birth_date).num_days() < 164;
+                let is_too_short_2_to_3 = ctx.valid_doses.len() >= 2
+                    && (dose.date - ctx.valid_doses[1].0).num_days() < 52;
+                let is_too_short_1_to_3 = ctx.valid_doses.len() >= 1
+                    && (dose.date - ctx.valid_doses[0].0).num_days() < 112;
+
+                if is_too_young || is_too_short_2_to_3 || is_too_short_1_to_3 {
+                    return Some("HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES");
+                }
+            }
+        }
     }
     None
 }
@@ -497,15 +622,21 @@ pub fn hep_b_group_selection(
     eval_date: NaiveDate,
     candidate_forecasts: &mut [(&'static str, VaccineGroupForecast)],
 ) -> &'static str {
-    if history.iter().any(|dose| dose.cvx.0 == cvx!("110")) && eval_date >= patient.birth_date + chrono::Duration::days(168) {
+    if history.iter().any(|dose| dose.cvx.0 == cvx!("110"))
+        && eval_date >= patient.birth_date + chrono::Duration::days(168)
+    {
         for forecast_group in candidate_forecasts.iter_mut().map(|(_, f)| f) {
             if forecast_group.evaluations.len() == 1
                 && forecast_group.evaluations[0].cvx.0 == cvx!("110")
-                && forecast_group.forecasts.iter().any(|forecast| forecast.status == SeriesStatus::NotComplete)
+                && forecast_group
+                    .forecasts
+                    .iter()
+                    .any(|forecast| forecast.status == SeriesStatus::NotComplete)
             {
                 for forecast in forecast_group.forecasts.iter_mut() {
                     if forecast.status == SeriesStatus::NotComplete {
-                        forecast.overdue_date = forecast.earliest_date.or(forecast.recommended_date);
+                        forecast.overdue_date =
+                            forecast.earliest_date.or(forecast.recommended_date);
                     }
                 }
             }
@@ -515,7 +646,8 @@ pub fn hep_b_group_selection(
     // 1. Post-process Heplisav-B (CVX 189) Adult 2-Dose exception
     // Check if there are 2 doses of CVX 189 given at age >= 18y-4d, separated by >= 24 days.
     let age_18y_minus_4d = add_years(patient.birth_date, 18) - chrono::Duration::days(4);
-    let cvx189_doses: Vec<&Dose> = history.iter()
+    let cvx189_doses: Vec<&Dose> = history
+        .iter()
         .filter(|d| d.cvx.0 == cvx!("189") && d.date >= age_18y_minus_4d)
         .collect();
 
@@ -541,17 +673,19 @@ pub fn hep_b_group_selection(
         // Post-process the candidate forecast for HEP_B_ADULT_2_DOSE_SERIES to be Complete and override other doses to Accepted
         if let Some(forecast) = candidate_forecasts.get_forecast_mut("HEP_B_ADULT_2_DOSE_SERIES") {
             forecast.evaluations.clear();
+            let mut sorted_history = history.to_vec();
+            sorted_history.sort_by_key(|d| d.date);
             let mut d1_done = false;
             let mut d2_done = false;
-            let mut accepted_number = 1;
-            for dose in history {
+            for (idx, dose) in sorted_history.iter().enumerate() {
+                let dose_num = idx + 1;
                 if dose.cvx.0 == cvx!("189") && dose.date == d1_date && !d1_done {
                     forecast.evaluations.push(crate::models::DoseEvaluation {
                         dose_date: dose.date,
                         cvx: dose.cvx.clone(),
                         status: DoseStatus::Valid,
                         reasons: TinyVec::new(),
-                        dose_number: Some(1),
+                        dose_number: Some(dose_num),
                     });
                     d1_done = true;
                 } else if dose.cvx.0 == cvx!("189") && dose.date == d2_date && !d2_done {
@@ -560,20 +694,19 @@ pub fn hep_b_group_selection(
                         cvx: dose.cvx.clone(),
                         status: DoseStatus::Valid,
                         reasons: TinyVec::new(),
-                        dose_number: Some(2),
+                        dose_number: Some(dose_num),
                     });
                     d2_done = true;
-                } else if dose.date < age_18y_minus_4d {
-                    continue;
                 } else {
                     forecast.evaluations.push(crate::models::DoseEvaluation {
                         dose_date: dose.date,
                         cvx: dose.cvx.clone(),
                         status: DoseStatus::Accepted,
-                        reasons: crate::reasons![EvaluationReason::VaccineNotCountedBasedOnMostRecentVaccineGiven],
-                        dose_number: Some(accepted_number),
+                        reasons: crate::reasons![
+                            EvaluationReason::VaccineNotCountedBasedOnMostRecentVaccineGiven
+                        ],
+                        dose_number: Some(dose_num),
                     });
-                    accepted_number += 1;
                 }
             }
             for f in forecast.forecasts.iter_mut() {
@@ -590,9 +723,26 @@ pub fn hep_b_group_selection(
 
     // 2. Determine if the patient is considered an adult for Hep B series selection.
     // Based on age when first Hep B dose was administered (or evaluation date if no doses).
-    let first_dose_date = history.iter()
+    let first_dose_date = history
+        .iter()
         .filter(|d| {
-            matches!(d.cvx.0, cvx!("08") | cvx!("42") | cvx!("43") | cvx!("44") | cvx!("45") | cvx!("51") | cvx!("102") | cvx!("104") | cvx!("110") | cvx!("132") | cvx!("146") | cvx!("189") | cvx!("198") | cvx!("220"))
+            matches!(
+                d.cvx.0,
+                cvx!("08")
+                    | cvx!("42")
+                    | cvx!("43")
+                    | cvx!("44")
+                    | cvx!("45")
+                    | cvx!("51")
+                    | cvx!("102")
+                    | cvx!("104")
+                    | cvx!("110")
+                    | cvx!("132")
+                    | cvx!("146")
+                    | cvx!("189")
+                    | cvx!("198")
+                    | cvx!("220")
+            )
         })
         .min_by_key(|d| d.date)
         .map(|d| d.date);
@@ -614,8 +764,10 @@ pub fn hep_b_group_selection(
         // Child/Adolescent can also use Twinrix if administered at >= 18y-4d
         series_priority.push("HEP_B_3_DOSE_TWINRIX_SERIES");
         series_priority.push("HEP_B_4_DOSE_ACCELERATED_TWINRIX_SERIES");
-        
-        let has_birth_dose = history.iter().any(|d| is_birth_monovalent_hepb(d, patient.birth_date));
+
+        let has_birth_dose = history
+            .iter()
+            .any(|d| is_birth_monovalent_hepb(d, patient.birth_date));
         if has_birth_dose {
             series_priority.push("HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES");
             series_priority.push("HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES");
@@ -633,7 +785,10 @@ pub fn hep_b_group_selection(
 
     for name in &series_priority {
         if let Some(f) = candidate_forecasts.get_forecast(*name) {
-            if f.forecasts.iter().any(|fc| fc.status == SeriesStatus::Complete) {
+            if f.forecasts
+                .iter()
+                .any(|fc| fc.status == SeriesStatus::Complete)
+            {
                 return name;
             }
         }
@@ -642,13 +797,19 @@ pub fn hep_b_group_selection(
     // 4. If none are complete, select based on history content or age
     let has_twinrix = history.iter().any(|d| d.cvx.0 == cvx!("104"));
     if has_twinrix {
-        let twinrix_doses: Vec<&Dose> = history.iter().filter(|dose| dose.cvx.0 == cvx!("104")).collect();
+        let twinrix_doses: Vec<&Dose> = history
+            .iter()
+            .filter(|dose| dose.cvx.0 == cvx!("104"))
+            .collect();
         if let Some(first_twinrix_dose) = twinrix_doses.first() {
             let age_18y_minus_4d = add_years(patient.birth_date, 18) - chrono::Duration::days(4);
             if first_twinrix_dose.date >= age_18y_minus_4d {
                 if twinrix_doses.len() >= 2 {
                     let interval = (twinrix_doses[1].date - twinrix_doses[0].date).num_days();
-                    if (7..24).contains(&interval) && candidate_forecasts.contains_forecast("HEP_B_4_DOSE_ACCELERATED_TWINRIX_SERIES") {
+                    if (7..24).contains(&interval)
+                        && candidate_forecasts
+                            .contains_forecast("HEP_B_4_DOSE_ACCELERATED_TWINRIX_SERIES")
+                    {
                         return "HEP_B_4_DOSE_ACCELERATED_TWINRIX_SERIES";
                     }
                 }
@@ -662,7 +823,35 @@ pub fn hep_b_group_selection(
     let has_cvx189 = history.iter().any(|d| d.cvx.0 == cvx!("189"));
     if has_cvx189 {
         if candidate_forecasts.contains_forecast("HEP_B_ADULT_2_DOSE_SERIES") {
-            return "HEP_B_ADULT_2_DOSE_SERIES";
+            let f2_valid_count = candidate_forecasts
+                .get_forecast("HEP_B_ADULT_2_DOSE_SERIES")
+                .map(|f| {
+                    f.evaluations
+                        .iter()
+                        .filter(|e| e.status == DoseStatus::Valid)
+                        .count()
+                })
+                .unwrap_or(0);
+            let mut max_3_dose_valid = 0;
+            for name in &[
+                "HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES",
+                "HEP_B_ADULT_3_DOSE_SERIES",
+                "HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES",
+            ] {
+                if let Some(f) = candidate_forecasts.get_forecast(name) {
+                    let count = f
+                        .evaluations
+                        .iter()
+                        .filter(|e| e.status == DoseStatus::Valid)
+                        .count();
+                    if count > max_3_dose_valid {
+                        max_3_dose_valid = count;
+                    }
+                }
+            }
+            if f2_valid_count >= max_3_dose_valid {
+                return "HEP_B_ADULT_2_DOSE_SERIES";
+            }
         }
     }
 
@@ -670,9 +859,20 @@ pub fn hep_b_group_selection(
     if is_adult {
         "HEP_B_ADULT_3_DOSE_SERIES"
     } else {
-        if let Some(f3) = candidate_forecasts.get_forecast_mut("HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES") {
-            let all_pediarix_evaluations = !f3.evaluations.is_empty() && f3.evaluations.iter().all(|evaluation| evaluation.cvx.0 == cvx!("110"));
-            if all_pediarix_evaluations && f3.forecasts.iter().any(|forecast| forecast.status == SeriesStatus::Complete) {
+        if let Some(f3) =
+            candidate_forecasts.get_forecast_mut("HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES")
+        {
+            let all_pediarix_evaluations = !f3.evaluations.is_empty()
+                && f3
+                    .evaluations
+                    .iter()
+                    .all(|evaluation| evaluation.cvx.0 == cvx!("110"));
+            if all_pediarix_evaluations
+                && f3
+                    .forecasts
+                    .iter()
+                    .any(|forecast| forecast.status == SeriesStatus::Complete)
+            {
                 let mut valid_seen = 0;
                 for evaluation in f3.evaluations.iter_mut() {
                     if evaluation.status == DoseStatus::Valid {
@@ -680,18 +880,24 @@ pub fn hep_b_group_selection(
                         if valid_seen > 3 {
                             evaluation.status = DoseStatus::Accepted;
                             evaluation.dose_number = Some(4);
-                            evaluation.reasons = crate::reasons![EvaluationReason::VaccineNotCountedBasedOnMostRecentVaccineGiven];
+                            evaluation.reasons = crate::reasons![
+                                EvaluationReason::VaccineNotCountedBasedOnMostRecentVaccineGiven
+                            ];
                         }
                     } else if evaluation.status == DoseStatus::Accepted {
                         evaluation.dose_number = Some(4);
-                        evaluation.reasons = crate::reasons![EvaluationReason::VaccineNotCountedBasedOnMostRecentVaccineGiven];
+                        evaluation.reasons = crate::reasons![
+                            EvaluationReason::VaccineNotCountedBasedOnMostRecentVaccineGiven
+                        ];
                     }
                 }
             }
         }
         // For children/adolescents, check if switched or default to 3-Dose
         if candidate_forecasts.contains_forecast("HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES") {
-            let f4 = candidate_forecasts.get_forecast("HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES").unwrap();
+            let f4 = candidate_forecasts
+                .get_forecast("HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES")
+                .unwrap();
             // If any dose was evaluated as Dose 4, it means we switched!
             if f4.evaluations.iter().any(|e| e.dose_number == Some(4)) {
                 return "HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES";

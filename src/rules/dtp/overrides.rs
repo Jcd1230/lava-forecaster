@@ -171,7 +171,7 @@ pub fn dtp_custom_forecast_hook(
             let mut recommended = add_years(patient.birth_date, 11);
             let mut overdue = add_years(patient.birth_date, 13) + chrono::Duration::days(28) - chrono::Duration::days(1);
             
-            let exception_occurred = if forecast.series_name == "DTP_5_DOSE_SERIES" {
+            let mut exception_occurred = if forecast.series_name == "DTP_5_DOSE_SERIES" {
                 let age_4y_minus_4d = add_years(patient.birth_date, 4) - chrono::Duration::days(4);
                 let has_pertussis_ge_4y_minus_4d = valid_doses.iter().any(|(v_date, _)| {
                     *v_date >= age_4y_minus_4d && history.iter().any(|d| d.date == *v_date && is_pertussis_vaccine(d.cvx))
@@ -184,6 +184,15 @@ pub fn dtp_custom_forecast_hook(
             } else {
                 false
             };
+
+            if exception_occurred {
+                let has_valid_dose_ge_7 = valid_doses.iter().any(|(v_date, _)| {
+                    *v_date >= add_years(patient.birth_date, 7)
+                });
+                if has_valid_dose_ge_7 {
+                    exception_occurred = false;
+                }
+            }
             
             if exception_occurred {
                 let age_7 = add_years(patient.birth_date, 7);
@@ -193,9 +202,9 @@ pub fn dtp_custom_forecast_hook(
             }
             
             // Check 6-month interval from last pertussis shot
-            let last_pertussis_date = valid_doses.iter()
-                .filter(|(v_date, _)| history.iter().any(|d| d.date == *v_date && is_pertussis_vaccine(d.cvx)))
-                .map(|(v_date, _)| *v_date)
+            let last_pertussis_date = history.iter()
+                .filter(|d| is_pertussis_vaccine(d.cvx))
+                .map(|d| d.date)
                 .max();
             if let Some(lp_date) = last_pertussis_date {
                 let min_interval_date = add_months(lp_date, 6);

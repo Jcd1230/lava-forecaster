@@ -703,6 +703,154 @@ fn import_python_cases(input_file: &Path, output_dir: &Path) {
     println!("Imported {} test cases from {:?}", imported, input_file);
 }
 
+fn print_comparison_table(
+    tc_name: &str,
+    rust_evals: &[DoseEvaluation],
+    rust_fc: Option<&SeriesForecast>,
+    exp_evals: &[DoseEvaluation],
+    exp_fc: Option<&SeriesForecast>,
+    errors: &[String],
+) {
+    if !errors.is_empty() {
+        println!("\nTest Case: \x1b[91m{}\x1b[0m (FAIL)", tc_name);
+        for err in errors {
+            println!("  - \x1b[91m{}\x1b[0m", err);
+        }
+    } else {
+        println!("\nTest Case: \x1b[92m{}\x1b[0m (PASS)", tc_name);
+    }
+
+    println!("{:<12} | {:<4} | {:<22} | {:<22} | Status", "Date", "CVX", "Rust Evaluation", "Expected Evaluation");
+    println!("{}", "-".repeat(78));
+
+    let mut all_keys: Vec<(NaiveDate, Cvx)> = Vec::new();
+    for e in rust_evals {
+        all_keys.push((e.dose_date, e.cvx));
+    }
+    for e in exp_evals {
+        if !all_keys.contains(&(e.dose_date, e.cvx)) {
+            all_keys.push((e.dose_date, e.cvx));
+        }
+    }
+    all_keys.sort_by_key(|k| k.0);
+
+    for (dt, cvx) in all_keys {
+        let r = rust_evals.iter().find(|e| e.dose_date == dt && e.cvx == cvx);
+        let e = exp_evals.iter().find(|e| e.dose_date == dt && e.cvx == cvx);
+
+        let r_str = match r {
+            Some(re) => format!("{:?} #{}", re.status, re.dose_number.map(|n| n.to_string()).unwrap_or_else(|| "-".to_string())),
+            None => "MISSING".to_string(),
+        };
+        let e_str = match e {
+            Some(ee) => format!("{:?} #{}", ee.status, ee.dose_number.map(|n| n.to_string()).unwrap_or_else(|| "-".to_string())),
+            None => "MISSING".to_string(),
+        };
+
+        let match_ok = match (r, e) {
+            (Some(re), Some(ee)) => re.status == ee.status && re.dose_number == ee.dose_number,
+            _ => false,
+        };
+
+        let status_indicator = if match_ok { "\x1b[92mOK\x1b[0m" } else { "\x1b[91mFAIL\x1b[0m" };
+        println!("{:<12} | {:<4} | {:<22} | {:<22} | {}", dt.format("%Y-%m-%d"), cvx, r_str, e_str, status_indicator);
+    }
+
+    println!("\nForecasts:");
+    println!("{:<15} | {:<22} | {:<22}", "Field", "Rust Forecast", "Expected Forecast");
+    println!("{}", "-".repeat(65));
+
+    let fields = ["status", "earliest_date", "recommended_date", "overdue_date"];
+    for field in &fields {
+        let r_val = match (field, rust_fc) {
+            (&"status", Some(fc)) => format!("{:?}", fc.status),
+            (&"earliest_date", Some(fc)) => fc.earliest_date.map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string()),
+            (&"recommended_date", Some(fc)) => fc.recommended_date.map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string()),
+            (&"overdue_date", Some(fc)) => fc.overdue_date.map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string()),
+            _ => "-".to_string(),
+        };
+        let e_val = match (field, exp_fc) {
+            (&"status", Some(fc)) => format!("{:?}", fc.status),
+            (&"earliest_date", Some(fc)) => fc.earliest_date.map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string()),
+            (&"recommended_date", Some(fc)) => fc.recommended_date.map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string()),
+            (&"overdue_date", Some(fc)) => fc.overdue_date.map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string()),
+            _ => "-".to_string(),
+        };
+
+        println!("{:<15} | {:<22} | {:<22}", field, r_val, e_val);
+    }
+    println!();
+}
+
+fn query_rust_rest_service(rust_url: &str, tc: &UnifiedTestCase) -> Result<ice_rust_forecaster_poc::models::ForecastResponse, String> {
+    let client = reqwest::blocking::Client::new();
+    let req_payload = ice_rust_forecaster_poc::models::ForecastRequest {
+        patient: tc.patient.clone(),
+        history: tc.history.clone(),
+        execution_date: tc.execution_date,
+    };
+    let endpoint = format!("{}/evaluate", rust_url);
+    let resp = client.post(&endpoint)
+        .json(&req_payload)
+        .send()
+        .map_err(|e| format!("Failed to connect to Rust REST server: {}", e))?;
+    
+    if !resp.status().is_success() {
+        return Err(format!("Rust REST server returned error: {}", resp.status()));
+    }
+    
+    let resp_data: ice_rust_forecaster_poc::models::ForecastResponse = resp.json()
+        .map_err(|e| format!("Failed to parse Rust REST response: {}", e))?;
+    
+    Ok(resp_data)
+}
+
+fn get_java_expected_results(java_url: &str, tc: &UnifiedTestCase) -> Result<ExpectedResults, String> {
+    let java_endpoint = format!("{}/opencds-decision-support-service/api/resources/evaluateAtSpecifiedTime", java_url);
+    let doses_tuples: Vec<(NaiveDate, Cvx)> = tc.history
+        .iter()
+        .map(|d| (d.date, d.cvx))
+        .collect();
+    let payload = build_evaluate_payload(
+        tc.patient.birth_date,
+        tc.patient.gender,
+        &doses_tuples,
+        tc.execution_date,
+    );
+    
+    let client = reqwest::blocking::Client::new();
+    let resp = client.post(&java_endpoint)
+        .json(&payload)
+        .send()
+        .map_err(|e| format!("Failed to connect to Java ICE service at {}: {}", java_url, e))?;
+        
+    if !resp.status().is_success() {
+        return Err(format!("Java service returned HTTP error: {}", resp.status()));
+    }
+    
+    let resp_json: serde_json::Value = resp.json()
+        .map_err(|e| format!("Failed to parse Java JSON response: {}", e))?;
+        
+    let b64_payload = resp_json["finalKMEvaluationResponse"][0]["kmEvaluationResultData"][0]["data"]["base64EncodedPayload"][0]
+        .as_str()
+        .ok_or_else(|| "Failed to extract base64 payload from Java response".to_string())?;
+
+    let clean_b64: String = b64_payload.chars().filter(|c| !c.is_whitespace()).collect();
+    let xml_bytes = base64::Engine::decode(&base64::prelude::BASE64_STANDARD, clean_b64.as_bytes())
+        .map_err(|e| format!("Failed to decode base64 XML payload: {}", e))?;
+
+    let xml_content = String::from_utf8(xml_bytes)
+        .map_err(|e| format!("Failed to decode UTF-8 XML string: {}", e))?;
+        
+    let mut java_res = parse_legacy_xml(&xml_content, &tc.focus_code);
+    
+    for f in &mut java_res.forecasts {
+        f.series_name = tc.group.clone().into();
+    }
+    
+    Ok(java_res)
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 2 {
@@ -710,7 +858,13 @@ fn main() {
         println!("Usage:");
         println!("  test-runner --import-cdsi <raw_json_suite> <output_dir>");
         println!("  test-runner --record <cases_dir> [java_url]");
-        println!("  test-runner --run <cases_dir> [--group <group_name>] [--case <case_name>]");
+        println!("  test-runner --run <cases_dir> [options]");
+        println!("Options under --run:");
+        println!("  --group <group_name>    Filter cases by group (e.g. POLIO)");
+        println!("  --case <case_name>      Filter cases by name");
+        println!("  --compare [java_url]    Compare outputs dynamically with a live Java ICE server (default: http://localhost:8080)");
+        println!("  --rest-url <rust_url>   Query Rust server at rust_url (e.g. http://localhost:8081) instead of in-process execution");
+        println!("  --verbose, -v           Show detailed side-by-side evaluation tables");
         return;
     }
 
@@ -766,6 +920,10 @@ fn main() {
         
         let mut filter_group = None;
         let mut filter_case = None;
+        let mut compare_java_url = None;
+        let mut rest_url = None;
+        let mut verbose = false;
+        
         let mut idx = 3;
         while idx < args.len() {
             if args[idx] == "--group" {
@@ -774,6 +932,20 @@ fn main() {
             } else if args[idx] == "--case" {
                 filter_case = Some(args[idx + 1].clone());
                 idx += 2;
+            } else if args[idx] == "--compare" {
+                if idx + 1 < args.len() && !args[idx + 1].starts_with('-') {
+                    compare_java_url = Some(args[idx + 1].clone());
+                    idx += 2;
+                } else {
+                    compare_java_url = Some("http://localhost:8080".to_string());
+                    idx += 1;
+                }
+            } else if args[idx] == "--rest-url" {
+                rest_url = Some(args[idx + 1].clone());
+                idx += 2;
+            } else if args[idx] == "--verbose" || args[idx] == "-v" {
+                verbose = true;
+                idx += 1;
             } else {
                 idx += 1;
             }
@@ -805,108 +977,143 @@ fn main() {
 
                     total += 1;
                     
-                    // Run the Rust forecaster core in-process!
-                    let rust_results = evaluate_patient_all_groups(&tc.patient, &tc.history, tc.execution_date);
-                    
-                    // Retrieve matching group forecast
-                    let rust_group = rust_results.iter().find(|rg| rg.vaccine_group == tc.group);
+                    let (rust_evals, rust_fc) = if let Some(ref r_url) = rest_url {
+                        match query_rust_rest_service(r_url, &tc) {
+                            Ok(resp) => {
+                                let rust_group = resp.vaccine_groups.iter().find(|rg| rg.vaccine_group == tc.group).cloned();
+                                match rust_group {
+                                    Some(rg) => (rg.evaluations.to_vec(), rg.forecasts.first().cloned()),
+                                    None => (Vec::new(), None),
+                                }
+                            }
+                            Err(e) => {
+                                failed += 1;
+                                failed_details.push((tc.name.clone(), vec![format!("Rust REST Error: {}", e)]));
+                                continue;
+                            }
+                        }
+                    } else {
+                        let rust_results = evaluate_patient_all_groups(&tc.patient, &tc.history, tc.execution_date);
+                        let rust_group = rust_results.iter().find(|rg| rg.vaccine_group == tc.group);
+                        match rust_group {
+                            Some(rg) => (rg.evaluations.to_vec(), rg.forecasts.first().cloned()),
+                            None => (Vec::new(), None),
+                        }
+                    };
 
-                    if filter_case.is_some() {
+                    let expected_results = if let Some(ref j_url) = compare_java_url {
+                        match get_java_expected_results(j_url, &tc) {
+                            Ok(res) => Some(res),
+                            Err(e) => {
+                                failed += 1;
+                                failed_details.push((tc.name.clone(), vec![format!("Java Query Error: {}", e)]));
+                                continue;
+                            }
+                        }
+                    } else {
+                        tc.expected.clone()
+                    };
+
+                    if filter_case.is_some() && verbose {
                         println!("DEBUG: patient: {:?}", tc.patient);
                         println!("DEBUG: history: {:?}", tc.history);
                         println!("DEBUG: execution_date: {:?}", tc.execution_date);
-                        println!("DEBUG: rust_group: {:#?}", rust_group);
-                        println!("DEBUG: expected: {:#?}", tc.expected);
+                        println!("DEBUG: rust_evals: {:#?}", rust_evals);
+                        println!("DEBUG: rust_fc: {:#?}", rust_fc);
+                        println!("DEBUG: expected: {:#?}", expected_results);
                     }
                     
                     let mut is_ok = true;
                     let mut errors = Vec::new();
 
-                    if let Some(expected) = &tc.expected {
-                        if let Some(rg) = rust_group {
-                            // 1. Verify evaluations
-                            for ee in &expected.evaluations {
-                                let re = rg.evaluations.iter().find(|r| r.dose_date == ee.dose_date && r.cvx == ee.cvx);
-                                match re {
-                                    Some(re) => {
-                                        if re.status != ee.status {
-                                            is_ok = false;
-                                            errors.push(format!(
-                                                "Evaluation status mismatch for dose ({:?}, {}): Rust={:?} (reasons={:?}), Expected={:?}",
-                                                re.dose_date, re.cvx, re.status, re.reasons, ee.status
-                                            ));
-                                        }
-                                    }
-                                    None => {
+                    if let Some(expected) = &expected_results {
+                        // 1. Verify evaluations
+                        for ee in &expected.evaluations {
+                            let re = rust_evals.iter().find(|r| r.dose_date == ee.dose_date && r.cvx == ee.cvx);
+                            match re {
+                                Some(re) => {
+                                    if re.status != ee.status {
                                         is_ok = false;
                                         errors.push(format!(
-                                            "Evaluation missing in Rust for dose ({:?}, {})",
-                                            ee.dose_date, ee.cvx
+                                            "Evaluation status mismatch for dose ({:?}, {}): Rust={:?} (reasons={:?}), Expected={:?}",
+                                            re.dose_date, re.cvx, re.status, re.reasons, ee.status
                                         ));
                                     }
                                 }
-                            }
-                            for re in rg.evaluations.iter() {
-                                let ee = expected.evaluations.iter().find(|e| e.dose_date == re.dose_date && e.cvx == re.cvx);
-                                if ee.is_none() {
+                                None => {
                                     is_ok = false;
                                     errors.push(format!(
-                                        "Evaluation missing in Expected for dose ({:?}, {})",
-                                        re.dose_date, re.cvx
+                                        "Evaluation missing in Rust for dose ({:?}, {})",
+                                        ee.dose_date, ee.cvx
                                     ));
                                 }
                             }
+                        }
+                        for re in &rust_evals {
+                            let ee = expected.evaluations.iter().find(|e| e.dose_date == re.dose_date && e.cvx == re.cvx);
+                            if ee.is_none() {
+                                is_ok = false;
+                                errors.push(format!(
+                                    "Evaluation missing in Expected for dose ({:?}, {})",
+                                    re.dose_date, re.cvx
+                                ));
+                            }
+                        }
 
-                            // 2. Verify forecasts
-                            // Extract primary series forecast from Rust
-                            let rust_fc = rg.forecasts.first();
-                            let exp_fc = expected.forecasts.first();
+                        // 2. Verify forecasts
+                        let exp_fc = expected.forecasts.first();
 
-                            match (rust_fc, exp_fc) {
-                                (Some(rf), Some(ef)) => {
-                                    if rf.status != ef.status {
-                                        is_ok = false;
-                                        errors.push(format!(
-                                            "Forecast status mismatch: Rust={:?}, Expected={:?}",
-                                            rf.status, ef.status
-                                        ));
-                                    }
-                                    if rf.earliest_date != ef.earliest_date {
-                                        is_ok = false;
-                                        errors.push(format!(
-                                            "Forecast earliest date mismatch: Rust={:?}, Expected={:?}",
-                                            rf.earliest_date, ef.earliest_date
-                                        ));
-                                    }
-                                    if rf.recommended_date != ef.recommended_date {
-                                        is_ok = false;
-                                        errors.push(format!(
-                                            "Forecast recommended date mismatch: Rust={:?}, Expected={:?}",
-                                            rf.recommended_date, ef.recommended_date
-                                        ));
-                                    }
-                                    if rf.overdue_date != ef.overdue_date {
-                                        is_ok = false;
-                                        errors.push(format!(
-                                            "Forecast overdue date mismatch: Rust={:?}, Expected={:?}",
-                                            rf.overdue_date, ef.overdue_date
-                                        ));
-                                    }
-                                }
-                                (None, None) => {}
-                                _ => {
+                        match (rust_fc.as_ref(), exp_fc) {
+                            (Some(rf), Some(ef)) => {
+                                if rf.status != ef.status {
                                     is_ok = false;
-                                    errors.push("Forecast availability mismatch (one is missing)".to_string());
+                                    errors.push(format!(
+                                        "Forecast status mismatch: Rust={:?}, Expected={:?}",
+                                        rf.status, ef.status
+                                    ));
+                                }
+                                if rf.earliest_date != ef.earliest_date {
+                                    is_ok = false;
+                                    errors.push(format!(
+                                        "Forecast earliest date mismatch: Rust={:?}, Expected={:?}",
+                                        rf.earliest_date, ef.earliest_date
+                                    ));
+                                }
+                                if rf.recommended_date != ef.recommended_date {
+                                    is_ok = false;
+                                    errors.push(format!(
+                                        "Forecast recommended date mismatch: Rust={:?}, Expected={:?}",
+                                        rf.recommended_date, ef.recommended_date
+                                    ));
+                                }
+                                if rf.overdue_date != ef.overdue_date {
+                                    is_ok = false;
+                                    errors.push(format!(
+                                        "Forecast overdue date mismatch: Rust={:?}, Expected={:?}",
+                                        rf.overdue_date, ef.overdue_date
+                                    ));
                                 }
                             }
-                        } else {
-                            is_ok = false;
-                            errors.push(format!("Vaccine group {} not found in Rust forecast results", tc.group));
+                            (None, None) => {}
+                            _ => {
+                                is_ok = false;
+                                errors.push("Forecast availability mismatch (one is missing)".to_string());
+                            }
                         }
                     } else {
-                        // No expected snapshot stored in case file
                         is_ok = false;
-                        errors.push("No expected snapshots recorded in test case file. Run with --record first.".to_string());
+                        errors.push("No expected snapshots recorded in test case file. Run with --record first or use --compare.".to_string());
+                    }
+
+                    if verbose || !is_ok {
+                        print_comparison_table(
+                            &tc.name,
+                            &rust_evals,
+                            rust_fc.as_ref(),
+                            expected_results.as_ref().map(|e| e.evaluations.as_slice()).unwrap_or(&[]),
+                            expected_results.as_ref().and_then(|e| e.forecasts.first()),
+                            &errors,
+                        );
                     }
 
                     if is_ok {
