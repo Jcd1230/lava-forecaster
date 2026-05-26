@@ -56,7 +56,7 @@ pub fn hpv_3_dose_series() -> CompiledSeries {
         .interval(2, 3, |i| i
             .abs_min_interval("80d")
             .min_interval("84d")
-            .earliest_recommended_interval("4m")
+            .earliest_recommended_interval("12w")
         )
         .interval(1, 3, |i| i
             .abs_min_interval("112d")
