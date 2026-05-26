@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::fs;
 use std::path::Path;
 use chrono::{Datelike, NaiveDate};
@@ -57,6 +57,54 @@ struct CdcActualForecast {
     earliest_date: Option<NaiveDate>,
     recommended_date: Option<NaiveDate>,
     overdue_date: Option<NaiveDate>,
+}
+
+#[derive(Debug, Default, Clone, Copy)]
+struct SummaryCounts {
+    executed: usize,
+    passed: usize,
+    failed: usize,
+}
+
+fn record_summary_result(summary: &mut BTreeMap<String, SummaryCounts>, group: &str, passed: bool) {
+    let entry = summary.entry(group.to_string()).or_default();
+    entry.executed += 1;
+    if passed {
+        entry.passed += 1;
+    } else {
+        entry.failed += 1;
+    }
+}
+
+fn print_summary(title: &str, total: usize, passed: usize, failed: usize, group_summary: &BTreeMap<String, SummaryCounts>) {
+    println!("\n--- {} ---", title);
+    println!("Executed: {}", total);
+    println!("Passed  : {}", passed);
+    println!("Failed  : {}", failed);
+    if total > 0 {
+        println!("Pass %  : {:.2}", passed as f64 / total as f64 * 100.0);
+    }
+
+    if !group_summary.is_empty() {
+        println!("\nPer-Group Summary:");
+        println!("{:<16} | {:>8} | {:>8} | {:>8} | {:>8}", "Group", "Executed", "Passed", "Failed", "Pass %");
+        println!("{}", "-".repeat(62));
+        for (group, counts) in group_summary {
+            let pass_pct = if counts.executed > 0 {
+                counts.passed as f64 / counts.executed as f64 * 100.0
+            } else {
+                0.0
+            };
+            println!(
+                "{:<16} | {:>8} | {:>8} | {:>8} | {:>7.2}",
+                group,
+                counts.executed,
+                counts.passed,
+                counts.failed,
+                pass_pct,
+            );
+        }
+    }
 }
 
 fn sanitize_name(test_id: &str, name: &str) -> String {
@@ -441,6 +489,7 @@ fn run_cdc_csv_mode(args: &[String]) {
     let mut passed = 0;
     let mut failed = 0;
     let mut failed_details = Vec::new();
+    let mut group_summary: BTreeMap<String, SummaryCounts> = BTreeMap::new();
 
     for cdc_case in cases {
         let tc = &cdc_case.unified_case;
@@ -468,6 +517,7 @@ fn run_cdc_csv_mode(args: &[String]) {
                 }
                 Err(e) => {
                     failed += 1;
+                    record_summary_result(&mut group_summary, &tc.group, false);
                     failed_details.push((tc.name.clone(), vec![format!("Rust REST Error: {}", e)]));
                     continue;
                 }
@@ -604,19 +654,15 @@ fn run_cdc_csv_mode(args: &[String]) {
 
         if is_ok {
             passed += 1;
+            record_summary_result(&mut group_summary, &tc.group, true);
         } else {
             failed += 1;
+            record_summary_result(&mut group_summary, &tc.group, false);
             failed_details.push((tc.name.clone(), errors));
         }
     }
 
-    println!("\n--- CDC Compliance Summary ---");
-    println!("Executed: {}", total);
-    println!("Passed  : {}", passed);
-    println!("Failed  : {}", failed);
-    if total > 0 {
-        println!("Pass %  : {:.2}", passed as f64 / total as f64 * 100.0);
-    }
+    print_summary("CDC Compliance Summary", total, passed, failed, &group_summary);
 
     if failed > 0 {
         println!("\nFailed Cases:");
@@ -1580,6 +1626,7 @@ fn main() {
         let mut total = 0;
         let mut passed = 0;
         let mut failed = 0;
+        let mut group_summary: BTreeMap<String, SummaryCounts> = BTreeMap::new();
         
         let mut failed_details = Vec::new();
 
@@ -1613,6 +1660,7 @@ fn main() {
                             }
                             Err(e) => {
                                 failed += 1;
+                                record_summary_result(&mut group_summary, &tc.group, false);
                                 failed_details.push((tc.name.clone(), vec![format!("Rust REST Error: {}", e)]));
                                 continue;
                             }
@@ -1631,6 +1679,7 @@ fn main() {
                             Ok(res) => Some(res),
                             Err(e) => {
                                 failed += 1;
+                                record_summary_result(&mut group_summary, &tc.group, false);
                                 failed_details.push((tc.name.clone(), vec![format!("Java Query Error: {}", e)]));
                                 continue;
                             }
@@ -1743,18 +1792,17 @@ fn main() {
 
                     if is_ok {
                         passed += 1;
+                        record_summary_result(&mut group_summary, &tc.group, true);
                     } else {
                         failed += 1;
+                        record_summary_result(&mut group_summary, &tc.group, false);
                         failed_details.push((tc.name.clone(), errors));
                     }
                 }
             }
         }
 
-        println!("\n--- Rust-Native Test Runner Summary ---");
-        println!("Executed: {}", total);
-        println!("Passed  : {}", passed);
-        println!("Failed  : {}", failed);
+        print_summary("Rust-Native Test Runner Summary", total, passed, failed, &group_summary);
 
         if failed > 0 {
             println!("\nFailed Cases:");
