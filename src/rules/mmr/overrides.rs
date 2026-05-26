@@ -54,7 +54,7 @@ pub fn mmr_custom_evaluation_hook(
         // 1. Outside Routine Series for Dose 1
         if target_dose_idx == 1 {
             if dose.cvx.0 == cvx!("03") || dose.cvx.0 == cvx!("04") || dose.cvx.0 == cvx!("05") {
-                if age_ge(birth_date, dose.date, "6m-4d") && age_lt(birth_date, dose.date, "1y-4d") {
+                if age_ge(birth_date, dose.date, crate::time_period!("6m-4d")) && age_lt(birth_date, dose.date, crate::time_period!("1y-4d")) {
                     *status = DoseStatus::Accepted;
                     reasons.clear();
                     reasons.push(EvaluationReason::OutsideRoutineSeries);
@@ -65,7 +65,7 @@ pub fn mmr_custom_evaluation_hook(
 
         // 2. Adult Dose 2 Booster/Completion
         if target_dose_idx == 2 {
-            if age_ge(birth_date, dose.date, "19y") {
+            if age_ge(birth_date, dose.date, crate::time_period!("19y")) {
                 *status = DoseStatus::Accepted;
                 reasons.clear();
                 reasons.push(EvaluationReason::BoosterDose);
@@ -148,8 +148,8 @@ pub fn mmr_custom_forecast_hook(
     // Case 1: Series is Complete (either already completed or adult completion)
     let is_completed = forecast.status == SeriesStatus::Complete;
     let is_adult_complete = !valid_doses.is_empty() && (
-        age_ge(patient.birth_date, eval_date, "19y")
-        || forecast.recommended_date.map(|d| age_ge(patient.birth_date, d, "19y")).unwrap_or(false)
+        age_ge(patient.birth_date, eval_date, crate::time_period!("19y"))
+        || forecast.recommended_date.map(|d| age_ge(patient.birth_date, d, crate::time_period!("19y"))).unwrap_or(false)
     );
 
     if is_completed || is_adult_complete {

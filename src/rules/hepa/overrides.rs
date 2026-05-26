@@ -19,21 +19,21 @@ pub fn hepa_custom_switch_hook(
         if dose.cvx.0 == cvx!("104") {
             let birth_date = ctx.patient.birth_date;
             if target_dose_idx == 1 {
-                if age_ge(birth_date, dose.date, "19y") {
+                if age_ge(birth_date, dose.date, crate::time_period!("19y")) {
                     return Some("HEP_A_ADULT_3_DOSE_SERIES");
                 }
             } else if target_dose_idx == 2 {
                 if let Some(&(prev_date, _)) = ctx.valid_doses.last() {
                     // Case A: age at dose 2 >= 19y and interval >= 24d
-                    if age_ge(birth_date, dose.date, "19y") && interval_ge(prev_date, dose.date, "24d") {
+                    if age_ge(birth_date, dose.date, crate::time_period!("19y")) && interval_ge(prev_date, dose.date, crate::time_period!("24d")) {
                         return Some("HEP_A_ADULT_3_DOSE_SERIES");
                     }
 
                     // Case B: Dose 1 is CVX 104 at >= 18y-4d, and interval is >= 24d and < 6m-4d
                     if let Some(dose_1) = ctx.history.iter().find(|d| d.date == prev_date && d.cvx.0 == cvx!("104")) {
-                        if age_ge(birth_date, dose_1.date, "18y-4d") 
-                            && interval_ge(prev_date, dose.date, "24d") 
-                            && interval_lt(prev_date, dose.date, "6m-4d") 
+                        if age_ge(birth_date, dose_1.date, crate::time_period!("18y-4d")) 
+                            && interval_ge(prev_date, dose.date, crate::time_period!("24d")) 
+                            && interval_lt(prev_date, dose.date, crate::time_period!("6m-4d")) 
                         {
                             return Some("HEP_A_ADULT_3_DOSE_SERIES");
                         }
@@ -56,7 +56,7 @@ pub fn hepa_custom_evaluation_hook(
         if series_name == "HEP_A_ADULT_3_DOSE_SERIES" && target_dose_idx == 3 {
             if ctx.valid_doses.len() >= 2 {
                 let dose_1_date = ctx.valid_doses[0].0;
-                if interval_lt(dose_1_date, dose.date, "6m-4d") {
+                if interval_lt(dose_1_date, dose.date, crate::time_period!("6m-4d")) {
                     *status = DoseStatus::Invalid;
                     if !reasons.contains(&EvaluationReason::BelowMinimumInterval) {
                         reasons.push(EvaluationReason::BelowMinimumInterval);
@@ -66,7 +66,7 @@ pub fn hepa_custom_evaluation_hook(
         } else if series_name == "HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES" && target_dose_idx == 4 {
             if ctx.valid_doses.len() >= 3 {
                 let dose_1_date = ctx.valid_doses[0].0;
-                if interval_lt(dose_1_date, dose.date, "12m-4d") {
+                if interval_lt(dose_1_date, dose.date, crate::time_period!("12m-4d")) {
                     *status = DoseStatus::Invalid;
                     if !reasons.contains(&EvaluationReason::BelowMinimumInterval) {
                         reasons.push(EvaluationReason::BelowMinimumInterval);
@@ -85,7 +85,7 @@ pub fn hepa_custom_forecast_hook(
     forecast: &mut SeriesForecast,
 ) {
     if valid_doses.is_empty() {
-        if age_ge(patient.birth_date, eval_date, "19y") {
+        if age_ge(patient.birth_date, eval_date, crate::time_period!("19y")) {
             forecast.status = SeriesStatus::ConditionallyRecommended;
             let age_2 = crate::date_utils::add_years(patient.birth_date, 2);
             forecast.recommended_date = Some(age_2);
@@ -138,7 +138,7 @@ pub fn hepa_group_selection(
     if let Some(fd2) = first_valid_dose_2 {
         let birth_date = patient.birth_date;
         
-        if age_ge(birth_date, fd2.dose_date, "18y-4d") {
+        if age_ge(birth_date, fd2.dose_date, crate::time_period!("18y-4d")) {
             // Patient >= 18y-4d at Dose 1. Default initially is 2-dose.
             
             // Check Override 1: Select 4-dose Accelerated Twinrix series
@@ -154,8 +154,8 @@ pub fn hepa_group_selection(
                 
                 // No prior valid doses before d1 (this is implicitly true because d1 is index 0)
                 if d1.cvx.0 == cvx!("104") && d2.cvx.0 == cvx!("104") 
-                    && interval_ge(d1.dose_date, d2.dose_date, "7d") 
-                    && interval_lt(d1.dose_date, d2.dose_date, "24d") 
+                    && interval_ge(d1.dose_date, d2.dose_date, crate::time_period!("7d")) 
+                    && interval_lt(d1.dose_date, d2.dose_date, crate::time_period!("24d")) 
                 {
                     selected = "HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES";
                     twinrix_selected = true;
@@ -178,8 +178,8 @@ pub fn hepa_group_selection(
                             let d2 = valid_doses_3[1];
                             
                             if (d1.cvx.0 == cvx!("104") || d2.cvx.0 == cvx!("104")) 
-                                && interval_ge(d1.dose_date, d2.dose_date, "24d") 
-                                && interval_lt(d1.dose_date, d2.dose_date, "6m-4d") 
+                                && interval_ge(d1.dose_date, d2.dose_date, crate::time_period!("24d")) 
+                                && interval_lt(d1.dose_date, d2.dose_date, crate::time_period!("6m-4d")) 
                             {
                                 selected = "HEP_A_ADULT_3_DOSE_SERIES";
                             }

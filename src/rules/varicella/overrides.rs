@@ -30,7 +30,7 @@ pub fn varicella_custom_evaluation_hook(
 
         // 1. Absolute Minimum Interval 1->2 Override if administered at >= 13 years of age
         if target_dose_idx == 2 {
-            if age_ge(birth_date, dose.date, "13y") {
+            if age_ge(birth_date, dose.date, crate::time_period!("13y")) {
                 if let Some((prev_date, _)) = ctx.valid_doses.last() {
                     let interval_days = interval_days_between(*prev_date, dose.date);
                     if interval_days >= 24 {
@@ -103,7 +103,7 @@ pub fn varicella_custom_forecast_hook(
 
     // 2. Patient age >= 13 years interval overrides
     if forecast.status != SeriesStatus::Complete && valid_doses.len() == 1 {
-        if age_ge(patient.birth_date, eval_date, "13y") {
+        if age_ge(patient.birth_date, eval_date, crate::time_period!("13y")) {
             let dose1_date = valid_doses[0].0;
             let override_date = dose1_date + chrono::Duration::days(28);
 
