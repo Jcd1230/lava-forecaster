@@ -55,7 +55,7 @@
       {
         "dose_date": "2023-08-21",
         "cvx": "120",
-        "status": "Invalid",
+        "status": "Valid",
         "reasons": [],
         "dose_number": 4
       },
@@ -64,7 +64,7 @@
         "cvx": "120",
         "status": "Valid",
         "reasons": [],
-        "dose_number": 4
+        "dose_number": 5
       }
     ],
     "forecasts": [

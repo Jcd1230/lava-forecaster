@@ -1,7 +1,7 @@
 use crate::engine::CandidateForecastsExt;
 use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
-use crate::engine::{EvaluationContext, ParameterOverrideRule, ConditionalCompletionRule, RecommendationOverrideRule};
+use crate::engine::{EvaluationContext, ParameterOverrideRule, RecommendationOverrideRule};
 use crate::date_utils::{TinyVec, TimePeriod, compare_elapsed, add_years, add_months};
 use crate::models::{Cvx, Patient, SeriesForecast, Dose, DoseStatus, EvaluationReason, VaccineGroupForecast, DoseEvaluation};
 use std::collections::HashMap;
@@ -43,65 +43,80 @@ pub fn polio_parameter_overrides() -> Vec<ParameterOverrideRule> {
     ]
 }
 
-pub fn polio_completion_rules() -> Vec<ConditionalCompletionRule> {
-    vec![
-        // Conditional 3-Dose Completion for POLIO_4_DOSE_SERIES:
-        // "Complete with 3 doses if 3 prior valid doses, child >= 4y-4d at dose 3, and interval 2 to 3 is >= 6m-4d"
-        ConditionalCompletionRule {
-            description: "Polio 3-Dose Completion Rule (Dose 3 at >= 4 years)",
-            condition: |ctx| {
-                if ctx.active_series_name == "POLIO_4_DOSE_SERIES" && ctx.valid_doses.len() >= 3 {
-                    let dose_3_date = ctx.valid_doses[2].0;
-                    let birth_date = ctx.patient.birth_date;
-                    
-                    let age_ok = compare_elapsed(
-                        birth_date,
-                        dose_3_date,
-                        &crate::time_period!("4y-4d"),
-                    ) != std::cmp::Ordering::Less;
-                    
-                    let dose_2_date = ctx.valid_doses[1].0;
-                    let interval_ok = compare_elapsed(
-                        dose_2_date,
-                        dose_3_date,
-                        &crate::time_period!("6m-4d"),
-                    ) != std::cmp::Ordering::Less;
-                    
-                    age_ok && interval_ok
-                } else {
-                    false
+pub fn polio_completion_rules() -> Vec<crate::engine::ConditionalCompletionRule> {
+    vec![]
+}
+
+/// Custom completion hook for Polio series.
+///
+/// Replicates the Drools completion rules:
+///
+/// **4-dose series** (POLIO_4_DOSE_SERIES):
+/// - Complete with 3 doses if dose 3 is at or after 4y-4d **and** interval 2→3 >= 6m-4d
+/// - Complete with 4 doses if dose 4 was given **before 2009-08-07** OR at/after 4y-4d
+///   (A dose 4 given after 2009 but before 4y-4d is Valid but does NOT complete the series)
+///
+/// **fIPV series** (POLIO_FRACTIONAL_IPV_SERIES):
+/// - Complete with 4 doses if dose 4 is at or after 4y-4d **and** interval 3→4 >= 6m-4d
+/// - Complete with 5 doses if dose 5 was given **before 2009-08-07** OR at/after 4y-4d
+pub fn polio_custom_completion_hook(ctx: &crate::engine::EvaluationContext) -> bool {
+    let aug_7_2009 = NaiveDate::from_ymd_opt(2009, 8, 7).unwrap();
+    let birth = ctx.patient.birth_date;
+    let age_4y_minus_4d = add_years(birth, 4) - chrono::Duration::days(4);
+
+    match ctx.active_series_name {
+        "POLIO_4_DOSE_SERIES" => {
+            let valid = ctx.valid_doses;
+
+            // 3-dose early completion: dose 3 at >= 4y-4d with interval 2->3 >= 6m-4d
+            if valid.len() >= 3 {
+                let d3 = valid[2].0;
+                let d2 = valid[1].0;
+                let age_ok = d3 >= age_4y_minus_4d;
+                let interval_ok = compare_elapsed(d2, d3, &crate::time_period!("6m-4d"))
+                    != std::cmp::Ordering::Less;
+                if age_ok && interval_ok {
+                    return true;
                 }
-            },
-        },
-        // Conditional 4-Dose Completion for POLIO_FRACTIONAL_IPV_SERIES:
-        // "Complete with 4 doses if 4 prior valid doses, child >= 4y-4d at dose 4, and interval 3 to 4 is >= 6m-4d"
-        ConditionalCompletionRule {
-            description: "Polio fIPV 4-Dose Completion Rule (Dose 4 at >= 4 years)",
-            condition: |ctx| {
-                if ctx.active_series_name == "POLIO_FRACTIONAL_IPV_SERIES" && ctx.valid_doses.len() >= 4 {
-                    let dose_4_date = ctx.valid_doses[3].0;
-                    let birth_date = ctx.patient.birth_date;
-                    
-                    let age_ok = compare_elapsed(
-                        birth_date,
-                        dose_4_date,
-                        &crate::time_period!("4y-4d"),
-                    ) != std::cmp::Ordering::Less;
-                    
-                    let dose_3_date = ctx.valid_doses[2].0;
-                    let interval_ok = compare_elapsed(
-                        dose_3_date,
-                        dose_4_date,
-                        &crate::time_period!("6m-4d"),
-                    ) != std::cmp::Ordering::Less;
-                    
-                    age_ok && interval_ok
-                } else {
-                    false
+            }
+
+            // 4-dose completion: dose 4 must be before 2009-08-07 OR at/after 4y-4d
+            if valid.len() >= 4 && valid[3].1 == 4 {
+                let d4 = valid[3].0;
+                if d4 < aug_7_2009 || d4 >= age_4y_minus_4d {
+                    return true;
                 }
-            },
+            }
+
+            false
         }
-    ]
+        "POLIO_FRACTIONAL_IPV_SERIES" => {
+            let valid = ctx.valid_doses;
+
+            // 4-dose early completion: dose 4 at >= 4y-4d with interval 3->4 >= 6m-4d
+            if valid.len() >= 4 {
+                let d4 = valid[3].0;
+                let d3 = valid[2].0;
+                let age_ok = d4 >= age_4y_minus_4d;
+                let interval_ok = compare_elapsed(d3, d4, &crate::time_period!("6m-4d"))
+                    != std::cmp::Ordering::Less;
+                if age_ok && interval_ok {
+                    return true;
+                }
+            }
+
+            // 5-dose completion: dose 5 must be before 2009-08-07 OR at/after 4y-4d
+            if valid.len() >= 5 && valid[4].1 == 5 {
+                let d5 = valid[4].0;
+                if d5 < aug_7_2009 || d5 >= age_4y_minus_4d {
+                    return true;
+                }
+            }
+
+            false
+        }
+        _ => false,
+    }
 }
 
 pub fn polio_recommendation_overrides() -> Vec<RecommendationOverrideRule> {
@@ -178,10 +193,40 @@ pub fn polio_custom_forecast_hook(
         }
     }
 
+    // == 4y-before-complete case ==
+    // When all series doses are valid but dose 4 (or 5 for fIPV) was given before age 4y-4d,
+    // the series isn't complete — forecast the next dose at age 4y.
+    let target_dose_number = valid_doses.len() + 1;
+    let is_final_awaiting_age = (forecast.series_name == "POLIO_4_DOSE_SERIES" && target_dose_number == 5)
+        || (forecast.series_name == "POLIO_FRACTIONAL_IPV_SERIES" && target_dose_number == 6);
+
+    if is_final_awaiting_age && forecast.status == crate::models::SeriesStatus::NotComplete {
+        let birth = patient.birth_date;
+        let age_4y = add_years(birth, 4);
+        // Overdue at 7y+4w-1d (Java treats the latest_recommended_age boundary as exclusive)
+        let age_7y_4w_minus_1d = add_years(birth, 7) + chrono::Duration::weeks(4) - chrono::Duration::days(1);
+        // Use max of age_4y and 6m from the last non-OPV administered shot (including invalid shots)
+        let last_non_opv = history.iter()
+            .filter(|d| {
+                let is_opv = d.cvx.0 == cvx!("178") || d.cvx.0 == cvx!("179")
+                    || ((d.cvx.0 == cvx!("02") || d.cvx.0 == cvx!("182")) && d.date >= NaiveDate::from_ymd_opt(2016, 4, 1).unwrap());
+                !is_opv
+            })
+            .last();
+        let mut earliest = age_4y;
+        if let Some(last_dose) = last_non_opv {
+            let interval_6m = add_months(last_dose.date, 6);
+            earliest = earliest.max(interval_6m);
+        }
+        forecast.earliest_date = Some(earliest);
+        forecast.recommended_date = Some(earliest);
+        forecast.overdue_date = Some(age_7y_4w_minus_1d);
+        return;
+    }
+
     // >= 4y shift rule
     // If the next dose to recommend is the second-to-last dose (Dose 3 for 4-dose, Dose 4 for 5-dose)
     // and patient is >= 4 years of age (or will be at the recommended date), recommend next dose at 6 months interval from last shot.
-    let target_dose_number = valid_doses.len() + 1;
     let is_second_to_last = (forecast.series_name == "POLIO_4_DOSE_SERIES" && target_dose_number == 3)
         || (forecast.series_name == "POLIO_FRACTIONAL_IPV_SERIES" && target_dose_number == 4);
 
@@ -279,26 +324,24 @@ pub fn polio_custom_evaluation_hook(
             return;
         }
 
-        // Final Dose below minimum age but absolute minimum interval is met override (>= 2009-08-07)
+        // Drools rule: "Mark target dose 4 (or 5 for fIPV) administered >= 8/7/2009 and before
+        // 4y-4d as VALID" — this also sets abs_min_interval from previous dose to 0d
+        // and abs_min_age to the dose-3 (or dose-4 for fIPV) abs_min_age (94d).
+        // Effectively: if the shot is before 4y-4d and post-2009, it's Valid as long as
+        // the patient meets the dose-3 abs_min_age (94 days old).
         let is_final_dose = (series_name == "POLIO_4_DOSE_SERIES" && target_dose_idx == 4)
             || (series_name == "POLIO_FRACTIONAL_IPV_SERIES" && target_dose_idx == 5);
             
         if is_final_dose && dose.date >= NaiveDate::from_ymd_opt(2009, 8, 7).unwrap() {
             let age_4y_minus_4d = add_years(ctx.patient.birth_date, 4) - chrono::Duration::days(4);
             if dose.date < age_4y_minus_4d {
-                if let Some((prev_date, _)) = ctx.valid_doses.last() {
-                    let interval_ok = compare_elapsed(
-                        *prev_date,
-                        dose.date,
-                        &crate::time_period!("6m-4d"),
-                    ) != std::cmp::Ordering::Less;
-                    
-                    if interval_ok {
-                        *status = DoseStatus::Accepted;
-                        reasons.clear();
-                        reasons.push(EvaluationReason::BelowMinimumAgeFinalDose);
-                        reasons.push(EvaluationReason::OutsideRoutineSeries); // Avoids completing the series
-                    }
+                // Dose-3 abs_min_age is 94d (from POLIO_4_DOSE_SERIES schedule)
+                let dose3_abs_min_age_ok = (dose.date - ctx.patient.birth_date).num_days() >= 94;
+                if dose3_abs_min_age_ok {
+                    // Mark as Valid — interval check is overridden to 0d per Drools rule.
+                    // The series is NOT complete because dose 4 before 4y-4d requires a 5th dose.
+                    *status = DoseStatus::Valid;
+                    reasons.clear();
                 }
             }
         }
@@ -323,6 +366,32 @@ pub fn polio_custom_extra_dose_hook(
     }
 
     let birth_date = ctx.patient.birth_date;
+    let age_4y_minus_4d = add_years(birth_date, 4) - chrono::Duration::days(4);
+    let aug_7_2009 = NaiveDate::from_ymd_opt(2009, 8, 7).unwrap();
+
+    // Handle the "awaiting-completion" dose: when all required doses are valid but the
+    // last final dose was given before 4y-4d (series not complete), the next shot is the
+    // required completion dose. It must meet 4y-4d age requirement.
+    let awaiting_completion = if series_name == "POLIO_4_DOSE_SERIES" {
+        ctx.valid_doses.len() == 4
+            && ctx.valid_doses.last().map(|(d, _)| *d >= aug_7_2009 && *d < age_4y_minus_4d).unwrap_or(false)
+    } else if series_name == "POLIO_FRACTIONAL_IPV_SERIES" {
+        ctx.valid_doses.len() == 5
+            && ctx.valid_doses.last().map(|(d, _)| *d >= aug_7_2009 && *d < age_4y_minus_4d).unwrap_or(false)
+    } else {
+        false
+    };
+
+    if awaiting_completion {
+        if dose.date >= age_4y_minus_4d {
+            // This completes the series — Valid
+            return Some((DoseStatus::Valid, crate::reasons![]));
+        } else {
+            // Required dose, but still before minimum age
+            return Some((DoseStatus::Invalid, crate::reasons![EvaluationReason::BelowMinimumAge]));
+        }
+    }
+
     let age_18 = add_years(birth_date, 18);
     if dose.date >= age_18 {
         if ctx.target_dose_number == ctx.valid_doses.len() + 1 {

@@ -42,9 +42,9 @@ pub fn hep_b_3_dose_child_adolescent_series() -> CompiledSeries {
             .latest_recommended_interval("18m+4w")
         )
         .interval(1, 3, |i| i
-            .abs_min_interval("112d")
+            .abs_min_interval("16w-4d")
             .min_interval("16w")
-            .earliest_recommended_interval("112d")
+            .earliest_recommended_interval("16w-4d")
         )
         .build()
 }
@@ -96,9 +96,9 @@ pub fn hep_b_4_dose_child_adolescent_series() -> CompiledSeries {
             .earliest_recommended_interval("0d")
         )
         .interval(1, 4, |i| i
-            .abs_min_interval("112d")
+            .abs_min_interval("16w-4d")
             .min_interval("16w")
-            .earliest_recommended_interval("112d")
+            .earliest_recommended_interval("16w-4d")
         )
         .build()
 }

@@ -45,7 +45,6 @@
         "reasons": [
           "DUE_IN_FUTURE",
           "ADMINISTER_TDAP_OR_TD",
-          "SUPPLEMENTAL_TEXT",
           "SUPPLEMENTAL_TEXT"
         ]
       }

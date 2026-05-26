@@ -626,6 +626,23 @@ impl<'a> EvaluationEngine<'a> {
             }
 
             if next_dose_idx > active_series.num_doses {
+                // If there's a custom completion hook and it says we're not done yet,
+                // generate a placeholder forecast and let the custom_forecast_hook refine it.
+                if self.custom_completion_hook.is_some() && !is_completed {
+                    let mut f = SeriesForecast {
+                        series_name: active_series.name.into(),
+                        earliest_date: None,
+                        recommended_date: None,
+                        overdue_date: None,
+                        latest_date: None,
+                        status: SeriesStatus::NotComplete,
+                        reasons: crate::reasons!["NOT_COMPLETE"],
+                    };
+                    if let Some(hook) = self.custom_forecast_hook {
+                        (hook)(patient, valid_doses, history, eval_date, &mut f);
+                    }
+                    return f;
+                }
                 let mut f = SeriesForecast {
                     series_name: active_series.name.into(),
                     earliest_date: None,

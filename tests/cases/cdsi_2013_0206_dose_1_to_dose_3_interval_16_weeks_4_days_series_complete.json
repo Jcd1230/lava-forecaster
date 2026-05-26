@@ -48,13 +48,13 @@
     "forecasts": [
       {
         "series_name": "HEP_B",
-        "earliest_date": "2025-11-14",
-        "recommended_date": "2025-11-14",
-        "overdue_date": "2027-04-13",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
         "latest_date": null,
-        "status": "NotComplete",
+        "status": "Complete",
         "reasons": [
-          "DUE_IN_FUTURE"
+          "COMPLETE"
         ]
       }
     ]

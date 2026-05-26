@@ -51,7 +51,7 @@
       {
         "dose_date": "2025-11-10",
         "cvx": "120",
-        "status": "Accepted",
+        "status": "Valid",
         "reasons": [],
         "dose_number": 4
       }

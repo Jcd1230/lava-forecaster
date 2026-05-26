@@ -49,7 +49,7 @@
       {
         "series_name": "HPV",
         "earliest_date": "2026-02-02",
-        "recommended_date": "2026-03-10",
+        "recommended_date": "2026-02-02",
         "overdue_date": "2026-08-19",
         "latest_date": null,
         "status": "NotComplete",

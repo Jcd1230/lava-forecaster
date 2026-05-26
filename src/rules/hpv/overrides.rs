@@ -48,11 +48,19 @@ pub fn hpv_custom_evaluation_hook(
         }
 
         // 3. Absolute minimum interval 1->3 for HPV_3_DOSE_SERIES
+        // For shots before 12/16/2016: abs_min 1->3 is 16w-4d (108 days)
+        // For shots on or after 12/16/2016: abs_min 1->3 is 5m-4d (~147 days)
         if series_name == "HPV_3_DOSE_SERIES" && target_dose_idx == 3 {
             if ctx.valid_doses.len() >= 2 {
                 let dose_1_date = ctx.valid_doses[0].0;
                 let dose_2_date = ctx.valid_doses[1].0;
-                let min_int_1_3 = crate::time_period!("5m-4d").add_to(dose_1_date);
+                let cutoff_2016 = NaiveDate::from_ymd_opt(2016, 12, 16).unwrap();
+                let abs_min_1_3 = if dose.date < cutoff_2016 {
+                    crate::time_period!("16w-4d") // Pre-2016: 108 days
+                } else {
+                    crate::time_period!("5m-4d")  // Post-2016: ~147 days
+                };
+                let min_int_1_3 = abs_min_1_3.add_to(dose_1_date);
                 let min_int_2_3 = crate::time_period!("80d").add_to(dose_2_date);
                 if dose.date < min_int_1_3 || dose.date < min_int_2_3 {
                     *status = DoseStatus::Invalid;

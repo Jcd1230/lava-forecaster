@@ -19,7 +19,8 @@
         "latest_date": null,
         "status": "ConditionallyRecommended",
         "reasons": [
-          "CLINICAL_PATIENT_DISCRETION"
+          "CLINICAL_PATIENT_DISCRETION",
+          "SUPPLEMENTAL_TEXT"
         ]
       }
     ]

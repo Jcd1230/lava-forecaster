@@ -55,16 +55,16 @@
       {
         "dose_date": "2023-02-24",
         "cvx": "110",
-        "status": "Accepted",
+        "status": "Valid",
         "reasons": [],
         "dose_number": 4
       },
       {
         "dose_date": "2025-11-10",
         "cvx": "110",
-        "status": "Accepted",
+        "status": "Invalid",
         "reasons": [],
-        "dose_number": 4
+        "dose_number": 5
       }
     ],
     "forecasts": [

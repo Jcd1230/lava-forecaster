@@ -40,7 +40,7 @@
       {
         "dose_date": "2012-03-22",
         "cvx": "137",
-        "status": "Invalid",
+        "status": "Valid",
         "reasons": [],
         "dose_number": 3
       }
@@ -48,13 +48,13 @@
     "forecasts": [
       {
         "series_name": "HPV",
-        "earliest_date": "2012-06-14",
-        "recommended_date": "2012-07-22",
-        "overdue_date": "2013-01-28",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
         "latest_date": null,
-        "status": "NotComplete",
+        "status": "Complete",
         "reasons": [
-          "DUE_IN_FUTURE"
+          "COMPLETE"
         ]
       }
     ]
