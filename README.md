@@ -82,6 +82,17 @@ Options:
 * `--group <GROUP>`: Filter by vaccine group name (e.g., `POLIO` or `DTP`).
 * `--case <CASE_NAME>`: Run a specific test case by name.
 
+### 1a. Running CDC Compliance Against the CDSi CSV Export
+The runner can also execute the Rust forecaster directly against the expected evaluation and forecast fields from the CDSi CSV export:
+```bash
+cargo run --release --bin test_runner -- --run-cdc-csv ../cdsi-healthy-childhood-and-adult-test-cases.csv
+```
+Options:
+* `--group <GROUP>`: Filter by internal vaccine group name (e.g., `POLIO` or `DTP`).
+* `--case <CASE_NAME_OR_TEST_ID>`: Run a specific CDC case by normalized case name or raw `CDC_Test_ID`.
+* `--rest-url <RUST_URL>`: Query a running Rust server instead of executing in-process.
+* `--verbose`, `-v`: Show detailed CDC side-by-side evaluation and forecast comparisons.
+
 ### 2. Generating Snapshots from Java ICE
 If Java reference snapshots are missing or need updating, run:
 ```bash
