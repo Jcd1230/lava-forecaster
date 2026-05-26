@@ -86,6 +86,15 @@ pub fn polio_custom_completion_hook(ctx: &crate::engine::EvaluationContext) -> b
                 if d4 < aug_7_2009 || d4 >= age_4y_minus_4d {
                     return true;
                 }
+
+                let completion_dose = valid.iter().find(|(_, dose_number)| *dose_number == 5);
+                if d4 >= aug_7_2009 && d4 < age_4y_minus_4d {
+                    if let Some((completion_date, _)) = completion_dose {
+                        if *completion_date >= age_4y_minus_4d {
+                            return true;
+                        }
+                    }
+                }
             }
 
             false
@@ -110,6 +119,15 @@ pub fn polio_custom_completion_hook(ctx: &crate::engine::EvaluationContext) -> b
                 let d5 = valid[4].0;
                 if d5 < aug_7_2009 || d5 >= age_4y_minus_4d {
                     return true;
+                }
+
+                let completion_dose = valid.iter().find(|(_, dose_number)| *dose_number == 6);
+                if d5 >= aug_7_2009 && d5 < age_4y_minus_4d {
+                    if let Some((completion_date, _)) = completion_dose {
+                        if *completion_date >= age_4y_minus_4d {
+                            return true;
+                        }
+                    }
                 }
             }
 
