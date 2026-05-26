@@ -24,8 +24,13 @@ fn serialize_flatbuffers_bulk(requests: &[ForecastRequest]) -> Vec<u8> {
     let mut builder = FlatBufferBuilder::new();
     let mut req_offsets = Vec::with_capacity(requests.len());
 
+    let date_to_epoch_days = |date: chrono::NaiveDate| {
+        let epoch = chrono::NaiveDate::from_ymd_opt(1970, 1, 1).unwrap();
+        (date - epoch).num_days() as u16
+    };
+
     for req in requests {
-        let birth_date_str = builder.create_string(&req.patient.birth_date.format("%Y-%m-%d").to_string());
+        let birth_date = date_to_epoch_days(req.patient.birth_date);
         let gender_str = builder.create_string(match req.patient.gender {
             ice_rust_forecaster_poc::models::Gender::Female => "Female",
             ice_rust_forecaster_poc::models::Gender::Male => "Male",
@@ -33,28 +38,28 @@ fn serialize_flatbuffers_bulk(requests: &[ForecastRequest]) -> Vec<u8> {
         });
 
         let patient_offset = fb::Patient::create(&mut builder, &fb::PatientArgs {
-            birth_date: Some(birth_date_str),
+            birth_date,
             gender: Some(gender_str),
         });
 
         let mut dose_offsets = Vec::with_capacity(req.history.len());
         for dose in &req.history {
-            let dose_date_str = builder.create_string(&dose.date.format("%Y-%m-%d").to_string());
+            let dose_date = date_to_epoch_days(dose.date);
             let cvx_str = builder.create_string(&dose.cvx.0.to_string());
             let dose_offset = fb::Dose::create(&mut builder, &fb::DoseArgs {
-                date: Some(dose_date_str),
+                date: dose_date,
                 cvx: Some(cvx_str),
             });
             dose_offsets.push(dose_offset);
         }
         let history_vec = builder.create_vector(&dose_offsets);
 
-        let exec_date_str = builder.create_string(&req.execution_date.format("%Y-%m-%d").to_string());
+        let exec_date = date_to_epoch_days(req.execution_date);
 
         let req_offset = fb::PatientRequest::create(&mut builder, &fb::PatientRequestArgs {
             patient: Some(patient_offset),
             history: Some(history_vec),
-            execution_date: Some(exec_date_str),
+            execution_date: exec_date,
         });
         req_offsets.push(req_offset);
     }

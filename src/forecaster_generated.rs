@@ -50,17 +50,17 @@ impl<'a> Dose<'a> {
   ) -> ::flatbuffers::WIPOffset<Dose<'bldr>> {
     let mut builder = DoseBuilder::new(_fbb);
     if let Some(x) = args.cvx { builder.add_cvx(x); }
-    if let Some(x) = args.date { builder.add_date(x); }
+    builder.add_date(args.date);
     builder.finish()
   }
 
 
   #[inline]
-  pub fn date(&self) -> Option<&'a str> {
+  pub fn date(&self) -> u16 {
     // Safety:
     // Created from valid Table for this object
     // which contains a valid value in this slot
-    unsafe { self._tab.get::<::flatbuffers::ForwardsUOffset<&str>>(Dose::VT_DATE, None)}
+    unsafe { self._tab.get::<u16>(Dose::VT_DATE, Some(0)).unwrap()}
   }
   #[inline]
   pub fn cvx(&self) -> Option<&'a str> {
@@ -77,21 +77,21 @@ impl ::flatbuffers::Verifiable for Dose<'_> {
     v: &mut ::flatbuffers::Verifier, pos: usize
   ) -> Result<(), ::flatbuffers::InvalidFlatbuffer> {
     v.visit_table(pos)?
-     .visit_field::<::flatbuffers::ForwardsUOffset<&str>>("date", Self::VT_DATE, false)?
+     .visit_field::<u16>("date", Self::VT_DATE, false)?
      .visit_field::<::flatbuffers::ForwardsUOffset<&str>>("cvx", Self::VT_CVX, false)?
      .finish();
     Ok(())
   }
 }
 pub struct DoseArgs<'a> {
-    pub date: Option<::flatbuffers::WIPOffset<&'a str>>,
+    pub date: u16,
     pub cvx: Option<::flatbuffers::WIPOffset<&'a str>>,
 }
 impl<'a> Default for DoseArgs<'a> {
   #[inline]
   fn default() -> Self {
     DoseArgs {
-      date: None,
+      date: 0,
       cvx: None,
     }
   }
@@ -103,8 +103,8 @@ pub struct DoseBuilder<'a: 'b, 'b, A: ::flatbuffers::Allocator + 'a> {
 }
 impl<'a: 'b, 'b, A: ::flatbuffers::Allocator + 'a> DoseBuilder<'a, 'b, A> {
   #[inline]
-  pub fn add_date(&mut self, date: ::flatbuffers::WIPOffset<&'b  str>) {
-    self.fbb_.push_slot_always::<::flatbuffers::WIPOffset<_>>(Dose::VT_DATE, date);
+  pub fn add_date(&mut self, date: u16) {
+    self.fbb_.push_slot::<u16>(Dose::VT_DATE, date, 0);
   }
   #[inline]
   pub fn add_cvx(&mut self, cvx: ::flatbuffers::WIPOffset<&'b  str>) {
@@ -163,17 +163,17 @@ impl<'a> Patient<'a> {
   ) -> ::flatbuffers::WIPOffset<Patient<'bldr>> {
     let mut builder = PatientBuilder::new(_fbb);
     if let Some(x) = args.gender { builder.add_gender(x); }
-    if let Some(x) = args.birth_date { builder.add_birth_date(x); }
+    builder.add_birth_date(args.birth_date);
     builder.finish()
   }
 
 
   #[inline]
-  pub fn birth_date(&self) -> Option<&'a str> {
+  pub fn birth_date(&self) -> u16 {
     // Safety:
     // Created from valid Table for this object
     // which contains a valid value in this slot
-    unsafe { self._tab.get::<::flatbuffers::ForwardsUOffset<&str>>(Patient::VT_BIRTH_DATE, None)}
+    unsafe { self._tab.get::<u16>(Patient::VT_BIRTH_DATE, Some(0)).unwrap()}
   }
   #[inline]
   pub fn gender(&self) -> Option<&'a str> {
@@ -190,21 +190,21 @@ impl ::flatbuffers::Verifiable for Patient<'_> {
     v: &mut ::flatbuffers::Verifier, pos: usize
   ) -> Result<(), ::flatbuffers::InvalidFlatbuffer> {
     v.visit_table(pos)?
-     .visit_field::<::flatbuffers::ForwardsUOffset<&str>>("birth_date", Self::VT_BIRTH_DATE, false)?
+     .visit_field::<u16>("birth_date", Self::VT_BIRTH_DATE, false)?
      .visit_field::<::flatbuffers::ForwardsUOffset<&str>>("gender", Self::VT_GENDER, false)?
      .finish();
     Ok(())
   }
 }
 pub struct PatientArgs<'a> {
-    pub birth_date: Option<::flatbuffers::WIPOffset<&'a str>>,
+    pub birth_date: u16,
     pub gender: Option<::flatbuffers::WIPOffset<&'a str>>,
 }
 impl<'a> Default for PatientArgs<'a> {
   #[inline]
   fn default() -> Self {
     PatientArgs {
-      birth_date: None,
+      birth_date: 0,
       gender: None,
     }
   }
@@ -216,8 +216,8 @@ pub struct PatientBuilder<'a: 'b, 'b, A: ::flatbuffers::Allocator + 'a> {
 }
 impl<'a: 'b, 'b, A: ::flatbuffers::Allocator + 'a> PatientBuilder<'a, 'b, A> {
   #[inline]
-  pub fn add_birth_date(&mut self, birth_date: ::flatbuffers::WIPOffset<&'b  str>) {
-    self.fbb_.push_slot_always::<::flatbuffers::WIPOffset<_>>(Patient::VT_BIRTH_DATE, birth_date);
+  pub fn add_birth_date(&mut self, birth_date: u16) {
+    self.fbb_.push_slot::<u16>(Patient::VT_BIRTH_DATE, birth_date, 0);
   }
   #[inline]
   pub fn add_gender(&mut self, gender: ::flatbuffers::WIPOffset<&'b  str>) {
@@ -276,9 +276,9 @@ impl<'a> PatientRequest<'a> {
     args: &'args PatientRequestArgs<'args>
   ) -> ::flatbuffers::WIPOffset<PatientRequest<'bldr>> {
     let mut builder = PatientRequestBuilder::new(_fbb);
-    if let Some(x) = args.execution_date { builder.add_execution_date(x); }
     if let Some(x) = args.history { builder.add_history(x); }
     if let Some(x) = args.patient { builder.add_patient(x); }
+    builder.add_execution_date(args.execution_date);
     builder.finish()
   }
 
@@ -298,11 +298,11 @@ impl<'a> PatientRequest<'a> {
     unsafe { self._tab.get::<::flatbuffers::ForwardsUOffset<::flatbuffers::Vector<'a, ::flatbuffers::ForwardsUOffset<Dose>>>>(PatientRequest::VT_HISTORY, None)}
   }
   #[inline]
-  pub fn execution_date(&self) -> Option<&'a str> {
+  pub fn execution_date(&self) -> u16 {
     // Safety:
     // Created from valid Table for this object
     // which contains a valid value in this slot
-    unsafe { self._tab.get::<::flatbuffers::ForwardsUOffset<&str>>(PatientRequest::VT_EXECUTION_DATE, None)}
+    unsafe { self._tab.get::<u16>(PatientRequest::VT_EXECUTION_DATE, Some(0)).unwrap()}
   }
 }
 
@@ -314,7 +314,7 @@ impl ::flatbuffers::Verifiable for PatientRequest<'_> {
     v.visit_table(pos)?
      .visit_field::<::flatbuffers::ForwardsUOffset<Patient>>("patient", Self::VT_PATIENT, false)?
      .visit_field::<::flatbuffers::ForwardsUOffset<::flatbuffers::Vector<'_, ::flatbuffers::ForwardsUOffset<Dose>>>>("history", Self::VT_HISTORY, false)?
-     .visit_field::<::flatbuffers::ForwardsUOffset<&str>>("execution_date", Self::VT_EXECUTION_DATE, false)?
+     .visit_field::<u16>("execution_date", Self::VT_EXECUTION_DATE, false)?
      .finish();
     Ok(())
   }
@@ -322,7 +322,7 @@ impl ::flatbuffers::Verifiable for PatientRequest<'_> {
 pub struct PatientRequestArgs<'a> {
     pub patient: Option<::flatbuffers::WIPOffset<Patient<'a>>>,
     pub history: Option<::flatbuffers::WIPOffset<::flatbuffers::Vector<'a, ::flatbuffers::ForwardsUOffset<Dose<'a>>>>>,
-    pub execution_date: Option<::flatbuffers::WIPOffset<&'a str>>,
+    pub execution_date: u16,
 }
 impl<'a> Default for PatientRequestArgs<'a> {
   #[inline]
@@ -330,7 +330,7 @@ impl<'a> Default for PatientRequestArgs<'a> {
     PatientRequestArgs {
       patient: None,
       history: None,
-      execution_date: None,
+      execution_date: 0,
     }
   }
 }
@@ -349,8 +349,8 @@ impl<'a: 'b, 'b, A: ::flatbuffers::Allocator + 'a> PatientRequestBuilder<'a, 'b,
     self.fbb_.push_slot_always::<::flatbuffers::WIPOffset<_>>(PatientRequest::VT_HISTORY, history);
   }
   #[inline]
-  pub fn add_execution_date(&mut self, execution_date: ::flatbuffers::WIPOffset<&'b  str>) {
-    self.fbb_.push_slot_always::<::flatbuffers::WIPOffset<_>>(PatientRequest::VT_EXECUTION_DATE, execution_date);
+  pub fn add_execution_date(&mut self, execution_date: u16) {
+    self.fbb_.push_slot::<u16>(PatientRequest::VT_EXECUTION_DATE, execution_date, 0);
   }
   #[inline]
   pub fn new(_fbb: &'b mut ::flatbuffers::FlatBufferBuilder<'a, A>) -> PatientRequestBuilder<'a, 'b, A> {
@@ -508,11 +508,11 @@ impl<'a> SeriesForecast<'a> {
     let mut builder = SeriesForecastBuilder::new(_fbb);
     if let Some(x) = args.reasons { builder.add_reasons(x); }
     if let Some(x) = args.status { builder.add_status(x); }
-    if let Some(x) = args.latest_date { builder.add_latest_date(x); }
-    if let Some(x) = args.overdue_date { builder.add_overdue_date(x); }
-    if let Some(x) = args.recommended_date { builder.add_recommended_date(x); }
-    if let Some(x) = args.earliest_date { builder.add_earliest_date(x); }
     if let Some(x) = args.series_name { builder.add_series_name(x); }
+    builder.add_latest_date(args.latest_date);
+    builder.add_overdue_date(args.overdue_date);
+    builder.add_recommended_date(args.recommended_date);
+    builder.add_earliest_date(args.earliest_date);
     builder.finish()
   }
 
@@ -525,32 +525,32 @@ impl<'a> SeriesForecast<'a> {
     unsafe { self._tab.get::<::flatbuffers::ForwardsUOffset<&str>>(SeriesForecast::VT_SERIES_NAME, None)}
   }
   #[inline]
-  pub fn earliest_date(&self) -> Option<&'a str> {
+  pub fn earliest_date(&self) -> u16 {
     // Safety:
     // Created from valid Table for this object
     // which contains a valid value in this slot
-    unsafe { self._tab.get::<::flatbuffers::ForwardsUOffset<&str>>(SeriesForecast::VT_EARLIEST_DATE, None)}
+    unsafe { self._tab.get::<u16>(SeriesForecast::VT_EARLIEST_DATE, Some(0)).unwrap()}
   }
   #[inline]
-  pub fn recommended_date(&self) -> Option<&'a str> {
+  pub fn recommended_date(&self) -> u16 {
     // Safety:
     // Created from valid Table for this object
     // which contains a valid value in this slot
-    unsafe { self._tab.get::<::flatbuffers::ForwardsUOffset<&str>>(SeriesForecast::VT_RECOMMENDED_DATE, None)}
+    unsafe { self._tab.get::<u16>(SeriesForecast::VT_RECOMMENDED_DATE, Some(0)).unwrap()}
   }
   #[inline]
-  pub fn overdue_date(&self) -> Option<&'a str> {
+  pub fn overdue_date(&self) -> u16 {
     // Safety:
     // Created from valid Table for this object
     // which contains a valid value in this slot
-    unsafe { self._tab.get::<::flatbuffers::ForwardsUOffset<&str>>(SeriesForecast::VT_OVERDUE_DATE, None)}
+    unsafe { self._tab.get::<u16>(SeriesForecast::VT_OVERDUE_DATE, Some(0)).unwrap()}
   }
   #[inline]
-  pub fn latest_date(&self) -> Option<&'a str> {
+  pub fn latest_date(&self) -> u16 {
     // Safety:
     // Created from valid Table for this object
     // which contains a valid value in this slot
-    unsafe { self._tab.get::<::flatbuffers::ForwardsUOffset<&str>>(SeriesForecast::VT_LATEST_DATE, None)}
+    unsafe { self._tab.get::<u16>(SeriesForecast::VT_LATEST_DATE, Some(0)).unwrap()}
   }
   #[inline]
   pub fn status(&self) -> Option<&'a str> {
@@ -575,10 +575,10 @@ impl ::flatbuffers::Verifiable for SeriesForecast<'_> {
   ) -> Result<(), ::flatbuffers::InvalidFlatbuffer> {
     v.visit_table(pos)?
      .visit_field::<::flatbuffers::ForwardsUOffset<&str>>("series_name", Self::VT_SERIES_NAME, false)?
-     .visit_field::<::flatbuffers::ForwardsUOffset<&str>>("earliest_date", Self::VT_EARLIEST_DATE, false)?
-     .visit_field::<::flatbuffers::ForwardsUOffset<&str>>("recommended_date", Self::VT_RECOMMENDED_DATE, false)?
-     .visit_field::<::flatbuffers::ForwardsUOffset<&str>>("overdue_date", Self::VT_OVERDUE_DATE, false)?
-     .visit_field::<::flatbuffers::ForwardsUOffset<&str>>("latest_date", Self::VT_LATEST_DATE, false)?
+     .visit_field::<u16>("earliest_date", Self::VT_EARLIEST_DATE, false)?
+     .visit_field::<u16>("recommended_date", Self::VT_RECOMMENDED_DATE, false)?
+     .visit_field::<u16>("overdue_date", Self::VT_OVERDUE_DATE, false)?
+     .visit_field::<u16>("latest_date", Self::VT_LATEST_DATE, false)?
      .visit_field::<::flatbuffers::ForwardsUOffset<&str>>("status", Self::VT_STATUS, false)?
      .visit_field::<::flatbuffers::ForwardsUOffset<::flatbuffers::Vector<'_, ::flatbuffers::ForwardsUOffset<&'_ str>>>>("reasons", Self::VT_REASONS, false)?
      .finish();
@@ -587,10 +587,10 @@ impl ::flatbuffers::Verifiable for SeriesForecast<'_> {
 }
 pub struct SeriesForecastArgs<'a> {
     pub series_name: Option<::flatbuffers::WIPOffset<&'a str>>,
-    pub earliest_date: Option<::flatbuffers::WIPOffset<&'a str>>,
-    pub recommended_date: Option<::flatbuffers::WIPOffset<&'a str>>,
-    pub overdue_date: Option<::flatbuffers::WIPOffset<&'a str>>,
-    pub latest_date: Option<::flatbuffers::WIPOffset<&'a str>>,
+    pub earliest_date: u16,
+    pub recommended_date: u16,
+    pub overdue_date: u16,
+    pub latest_date: u16,
     pub status: Option<::flatbuffers::WIPOffset<&'a str>>,
     pub reasons: Option<::flatbuffers::WIPOffset<::flatbuffers::Vector<'a, ::flatbuffers::ForwardsUOffset<&'a str>>>>,
 }
@@ -599,10 +599,10 @@ impl<'a> Default for SeriesForecastArgs<'a> {
   fn default() -> Self {
     SeriesForecastArgs {
       series_name: None,
-      earliest_date: None,
-      recommended_date: None,
-      overdue_date: None,
-      latest_date: None,
+      earliest_date: 0,
+      recommended_date: 0,
+      overdue_date: 0,
+      latest_date: 0,
       status: None,
       reasons: None,
     }
@@ -619,20 +619,20 @@ impl<'a: 'b, 'b, A: ::flatbuffers::Allocator + 'a> SeriesForecastBuilder<'a, 'b,
     self.fbb_.push_slot_always::<::flatbuffers::WIPOffset<_>>(SeriesForecast::VT_SERIES_NAME, series_name);
   }
   #[inline]
-  pub fn add_earliest_date(&mut self, earliest_date: ::flatbuffers::WIPOffset<&'b  str>) {
-    self.fbb_.push_slot_always::<::flatbuffers::WIPOffset<_>>(SeriesForecast::VT_EARLIEST_DATE, earliest_date);
+  pub fn add_earliest_date(&mut self, earliest_date: u16) {
+    self.fbb_.push_slot::<u16>(SeriesForecast::VT_EARLIEST_DATE, earliest_date, 0);
   }
   #[inline]
-  pub fn add_recommended_date(&mut self, recommended_date: ::flatbuffers::WIPOffset<&'b  str>) {
-    self.fbb_.push_slot_always::<::flatbuffers::WIPOffset<_>>(SeriesForecast::VT_RECOMMENDED_DATE, recommended_date);
+  pub fn add_recommended_date(&mut self, recommended_date: u16) {
+    self.fbb_.push_slot::<u16>(SeriesForecast::VT_RECOMMENDED_DATE, recommended_date, 0);
   }
   #[inline]
-  pub fn add_overdue_date(&mut self, overdue_date: ::flatbuffers::WIPOffset<&'b  str>) {
-    self.fbb_.push_slot_always::<::flatbuffers::WIPOffset<_>>(SeriesForecast::VT_OVERDUE_DATE, overdue_date);
+  pub fn add_overdue_date(&mut self, overdue_date: u16) {
+    self.fbb_.push_slot::<u16>(SeriesForecast::VT_OVERDUE_DATE, overdue_date, 0);
   }
   #[inline]
-  pub fn add_latest_date(&mut self, latest_date: ::flatbuffers::WIPOffset<&'b  str>) {
-    self.fbb_.push_slot_always::<::flatbuffers::WIPOffset<_>>(SeriesForecast::VT_LATEST_DATE, latest_date);
+  pub fn add_latest_date(&mut self, latest_date: u16) {
+    self.fbb_.push_slot::<u16>(SeriesForecast::VT_LATEST_DATE, latest_date, 0);
   }
   #[inline]
   pub fn add_status(&mut self, status: ::flatbuffers::WIPOffset<&'b  str>) {
@@ -706,17 +706,17 @@ impl<'a> DoseEvaluation<'a> {
     if let Some(x) = args.reasons { builder.add_reasons(x); }
     if let Some(x) = args.status { builder.add_status(x); }
     if let Some(x) = args.cvx { builder.add_cvx(x); }
-    if let Some(x) = args.dose_date { builder.add_dose_date(x); }
+    builder.add_dose_date(args.dose_date);
     builder.finish()
   }
 
 
   #[inline]
-  pub fn dose_date(&self) -> Option<&'a str> {
+  pub fn dose_date(&self) -> u16 {
     // Safety:
     // Created from valid Table for this object
     // which contains a valid value in this slot
-    unsafe { self._tab.get::<::flatbuffers::ForwardsUOffset<&str>>(DoseEvaluation::VT_DOSE_DATE, None)}
+    unsafe { self._tab.get::<u16>(DoseEvaluation::VT_DOSE_DATE, Some(0)).unwrap()}
   }
   #[inline]
   pub fn cvx(&self) -> Option<&'a str> {
@@ -754,7 +754,7 @@ impl ::flatbuffers::Verifiable for DoseEvaluation<'_> {
     v: &mut ::flatbuffers::Verifier, pos: usize
   ) -> Result<(), ::flatbuffers::InvalidFlatbuffer> {
     v.visit_table(pos)?
-     .visit_field::<::flatbuffers::ForwardsUOffset<&str>>("dose_date", Self::VT_DOSE_DATE, false)?
+     .visit_field::<u16>("dose_date", Self::VT_DOSE_DATE, false)?
      .visit_field::<::flatbuffers::ForwardsUOffset<&str>>("cvx", Self::VT_CVX, false)?
      .visit_field::<::flatbuffers::ForwardsUOffset<&str>>("status", Self::VT_STATUS, false)?
      .visit_field::<::flatbuffers::ForwardsUOffset<::flatbuffers::Vector<'_, ::flatbuffers::ForwardsUOffset<&'_ str>>>>("reasons", Self::VT_REASONS, false)?
@@ -764,7 +764,7 @@ impl ::flatbuffers::Verifiable for DoseEvaluation<'_> {
   }
 }
 pub struct DoseEvaluationArgs<'a> {
-    pub dose_date: Option<::flatbuffers::WIPOffset<&'a str>>,
+    pub dose_date: u16,
     pub cvx: Option<::flatbuffers::WIPOffset<&'a str>>,
     pub status: Option<::flatbuffers::WIPOffset<&'a str>>,
     pub reasons: Option<::flatbuffers::WIPOffset<::flatbuffers::Vector<'a, ::flatbuffers::ForwardsUOffset<&'a str>>>>,
@@ -774,7 +774,7 @@ impl<'a> Default for DoseEvaluationArgs<'a> {
   #[inline]
   fn default() -> Self {
     DoseEvaluationArgs {
-      dose_date: None,
+      dose_date: 0,
       cvx: None,
       status: None,
       reasons: None,
@@ -789,8 +789,8 @@ pub struct DoseEvaluationBuilder<'a: 'b, 'b, A: ::flatbuffers::Allocator + 'a> {
 }
 impl<'a: 'b, 'b, A: ::flatbuffers::Allocator + 'a> DoseEvaluationBuilder<'a, 'b, A> {
   #[inline]
-  pub fn add_dose_date(&mut self, dose_date: ::flatbuffers::WIPOffset<&'b  str>) {
-    self.fbb_.push_slot_always::<::flatbuffers::WIPOffset<_>>(DoseEvaluation::VT_DOSE_DATE, dose_date);
+  pub fn add_dose_date(&mut self, dose_date: u16) {
+    self.fbb_.push_slot::<u16>(DoseEvaluation::VT_DOSE_DATE, dose_date, 0);
   }
   #[inline]
   pub fn add_cvx(&mut self, cvx: ::flatbuffers::WIPOffset<&'b  str>) {

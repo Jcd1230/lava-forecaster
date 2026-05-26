@@ -1,19 +1,19 @@
 namespace org.cdsframework.ice.flatbuf;
 
 table Dose {
-  date: string;
+  date: ushort;
   cvx: string;
 }
 
 table Patient {
-  birth_date: string;
+  birth_date: ushort;
   gender: string;
 }
 
 table PatientRequest {
   patient: Patient;
   history: [Dose];
-  execution_date: string;
+  execution_date: ushort;
 }
 
 table BulkForecastRequest {
@@ -22,16 +22,16 @@ table BulkForecastRequest {
 
 table SeriesForecast {
   series_name: string;
-  earliest_date: string;
-  recommended_date: string;
-  overdue_date: string;
-  latest_date: string;
+  earliest_date: ushort;
+  recommended_date: ushort;
+  overdue_date: ushort;
+  latest_date: ushort;
   status: string;
   reasons: [string];
 }
 
 table DoseEvaluation {
-  dose_date: string;
+  dose_date: ushort;
   cvx: string;
   status: string;
   reasons: [string];

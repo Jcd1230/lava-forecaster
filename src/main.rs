@@ -131,6 +131,15 @@ async fn evaluate_bulk_flatbuffers_handler(
     use ice_rust_forecaster_poc::forecaster_generated::org::cdsframework::ice::flatbuf as fb;
     let req_start = Instant::now();
 
+    let epoch_days_to_date = |days: u16| {
+        NaiveDate::from_ymd_opt(1970, 1, 1).unwrap() + chrono::Duration::days(days as i64)
+    };
+
+    let date_to_epoch_days = |date: NaiveDate| {
+        let epoch = NaiveDate::from_ymd_opt(1970, 1, 1).unwrap();
+        (date - epoch).num_days() as u16
+    };
+
     let bulk_req = match ::flatbuffers::root::<fb::BulkForecastRequest>(&body) {
         Ok(r) => r,
         Err(e) => {
@@ -166,14 +175,10 @@ async fn evaluate_bulk_flatbuffers_handler(
     let internal_requests: Result<Vec<(models::Patient, Vec<models::Dose>, NaiveDate)>, String> = parsed_requests
         .iter()
         .map(|req| {
-            let exec_date_str = req.execution_date().ok_or("execution_date is required")?;
-            let exec_date = NaiveDate::parse_from_str(exec_date_str, "%Y-%m-%d")
-                .map_err(|e| format!("invalid execution_date '{}': {}", exec_date_str, e))?;
+            let exec_date = epoch_days_to_date(req.execution_date());
 
             let patient_fb = req.patient().ok_or("patient is required")?;
-            let birth_date_str = patient_fb.birth_date().ok_or("birth_date is required")?;
-            let birth_date = NaiveDate::parse_from_str(birth_date_str, "%Y-%m-%d")
-                .map_err(|e| format!("invalid birth_date '{}': {}", birth_date_str, e))?;
+            let birth_date = epoch_days_to_date(patient_fb.birth_date());
 
             let gender_str = patient_fb.gender().unwrap_or("Unknown");
             let gender = match gender_str {
@@ -186,9 +191,7 @@ async fn evaluate_bulk_flatbuffers_handler(
             if let Some(history_fb) = req.history() {
                 for j in 0..history_fb.len() {
                     let dose_fb = history_fb.get(j);
-                    let date_str = dose_fb.date().ok_or("dose date is required")?;
-                    let date = NaiveDate::parse_from_str(date_str, "%Y-%m-%d")
-                        .map_err(|e| format!("invalid dose date '{}': {}", date_str, e))?;
+                    let date = epoch_days_to_date(dose_fb.date());
                     let cvx_str = dose_fb.cvx().unwrap_or("");
                     let cvx = models::Cvx(cvx_str.parse::<u16>().unwrap_or(0));
                     history.push(models::Dose { date, cvx });
@@ -234,7 +237,7 @@ async fn evaluate_bulk_flatbuffers_handler(
             // Build evaluations vector
             let mut eval_offsets = Vec::with_capacity(vg.evaluations.len());
             for eval in vg.evaluations.iter() {
-                let dose_date = builder.create_string(&eval.dose_date.format("%Y-%m-%d").to_string());
+                let dose_date = date_to_epoch_days(eval.dose_date);
                 let cvx = builder.create_string(&eval.cvx.to_string());
                 let status_str = match eval.status {
                     models::DoseStatus::Valid => "Valid",
@@ -254,7 +257,7 @@ async fn evaluate_bulk_flatbuffers_handler(
                 let dose_number = eval.dose_number.unwrap_or(0) as i32;
 
                 let dose_eval_offset = fb::DoseEvaluation::create(&mut builder, &fb::DoseEvaluationArgs {
-                    dose_date: Some(dose_date),
+                    dose_date,
                     cvx: Some(cvx),
                     status: Some(status),
                     reasons: Some(reasons_vec),
@@ -268,10 +271,10 @@ async fn evaluate_bulk_flatbuffers_handler(
             let mut forecast_offsets = Vec::with_capacity(vg.forecasts.len());
             for fc in vg.forecasts.iter() {
                 let series_name = builder.create_string(&fc.series_name);
-                let earliest_date = fc.earliest_date.map(|d| builder.create_string(&d.format("%Y-%m-%d").to_string()));
-                let recommended_date = fc.recommended_date.map(|d| builder.create_string(&d.format("%Y-%m-%d").to_string()));
-                let overdue_date = fc.overdue_date.map(|d| builder.create_string(&d.format("%Y-%m-%d").to_string()));
-                let latest_date = fc.latest_date.map(|d| builder.create_string(&d.format("%Y-%m-%d").to_string()));
+                let earliest_date = fc.earliest_date.map(date_to_epoch_days).unwrap_or(0);
+                let recommended_date = fc.recommended_date.map(date_to_epoch_days).unwrap_or(0);
+                let overdue_date = fc.overdue_date.map(date_to_epoch_days).unwrap_or(0);
+                let latest_date = fc.latest_date.map(date_to_epoch_days).unwrap_or(0);
 
                 let status_str = match fc.status {
                     models::SeriesStatus::NotComplete => "NotComplete",
@@ -318,6 +321,7 @@ async fn evaluate_bulk_flatbuffers_handler(
         });
         response_offsets.push(forecast_resp);
     }
+
 
     let responses_vec = builder.create_vector(&response_offsets);
     let bulk_resp = fb::BulkForecastResponse::create(&mut builder, &fb::BulkForecastResponseArgs {
