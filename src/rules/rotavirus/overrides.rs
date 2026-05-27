@@ -38,10 +38,10 @@ pub fn rotavirus_custom_forecast_hook(
 
     if forecast.status == SeriesStatus::Complete {
         forecast.reasons = crate::reasons!["COMPLETE"];
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
-        forecast.latest_date = None;
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(None);
+        forecast.status = forecast.status.with_overdue_date(None);
+        forecast.status = forecast.status.with_latest_date(None);
         return;
     }
 
@@ -50,15 +50,15 @@ pub fn rotavirus_custom_forecast_hook(
     let date_8m = tp_8m.add_to(birth);
 
     let is_currently_gt_8m = eval_date > date_8m;
-    let is_rec_gt_8m = forecast.recommended_date.map_or(false, |d| d > date_8m);
+    let is_rec_gt_8m = forecast.status.recommended_date().map_or(false, |d| d > date_8m);
 
     if is_currently_gt_8m || is_rec_gt_8m {
         forecast.status = SeriesStatus::NotRecommended;
         forecast.reasons = crate::reasons!["TOO_OLD"];
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
-        forecast.latest_date = None;
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(None);
+        forecast.status = forecast.status.with_overdue_date(None);
+        forecast.status = forecast.status.with_latest_date(None);
         return;
     }
 
@@ -68,10 +68,10 @@ pub fn rotavirus_custom_forecast_hook(
     if eval_date >= date_105d && valid_doses.is_empty() {
         forecast.status = SeriesStatus::NotRecommended;
         forecast.reasons = crate::reasons!["TOO_OLD_TO_INITIATE"];
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
-        forecast.latest_date = None;
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(None);
+        forecast.status = forecast.status.with_overdue_date(None);
+        forecast.status = forecast.status.with_latest_date(None);
         return;
     }
 }

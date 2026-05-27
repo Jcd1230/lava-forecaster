@@ -1,5 +1,6 @@
 pub mod date_utils;
 pub mod engine;
+pub mod errors;
 pub mod legacy_models;
 pub mod models;
 pub mod rules;
@@ -7,18 +8,19 @@ pub mod schedule;
 pub mod forecaster_generated;
 
 use chrono::NaiveDate;
-use models::{Dose, Patient, VaccineGroupForecast, Cvx};
+use models::{Dose, Patient, VaccineGroupForecast};
 use crate::date_utils::TinyVec;
 
 
-pub fn parse_request(content: &str) -> Result<models::ForecastRequest, Box<dyn std::error::Error>> {
+pub fn parse_request(content: &str) -> Result<models::ForecastRequest, crate::errors::ForecasterError> {
     // Try to parse as simplified format first
     if let Ok(req) = serde_json::from_str::<models::ForecastRequest>(content) {
         return Ok(req);
     }
 
     // Otherwise, parse as legacy REST format and translate
-    let legacy_req: legacy_models::LegacyEvaluateRequest = serde_json::from_str(content)?;
+    let legacy_req: legacy_models::LegacyEvaluateRequest = serde_json::from_str(content)
+        .map_err(|e| crate::errors::ForecasterError::ParseError(e.to_string()))?;
     legacy_req.translate()
 }
 

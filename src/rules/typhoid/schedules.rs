@@ -9,9 +9,9 @@ pub fn typhoid_risk_series() -> CompiledSeries {
         .vaccine_group("TYPHOID")
         .num_doses(1)
         .dose(1, |d| {
-            d.abs_min_age("2y-4d")
-                .min_age("2y")
-                .earliest_recommended_age("2y")
+            d.abs_min_age(crate::time_period!("2y-4d"))
+                .min_age(crate::time_period!("2y"))
+                .earliest_recommended_age(crate::time_period!("2y"))
                 .cvx(allowed_cvx)
         })
         .build()

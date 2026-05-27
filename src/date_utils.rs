@@ -121,8 +121,8 @@ pub fn add_years(date: NaiveDate, duration: i32) -> NaiveDate {
 }
 
 impl TimePeriod {
-    pub fn parse(s: &str) -> Result<Self, String> {
-        Self::parse_const(s).map_err(|e| e.to_string())
+    pub fn parse(s: &str) -> Result<Self, crate::errors::ForecasterError> {
+        Self::parse_const(s).map_err(|e| crate::errors::ForecasterError::InvalidTimePeriod(e.to_string()))
     }
 
     pub const fn parse_const(s: &str) -> Result<Self, &'static str> {

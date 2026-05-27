@@ -34,18 +34,18 @@ fn season_start() -> NaiveDate {
     NaiveDate::from_ymd_opt(2025, 8, 27).unwrap()
 }
 
-fn age_ge(birth_date: NaiveDate, date_to_check: NaiveDate, age: &str) -> bool {
-    compare_elapsed(birth_date, date_to_check, &TimePeriod::parse(age).unwrap())
+fn age_ge(birth_date: NaiveDate, date_to_check: NaiveDate, age: TimePeriod) -> bool {
+    compare_elapsed(birth_date, date_to_check, &age)
         != std::cmp::Ordering::Less
 }
 
-fn age_lt(birth_date: NaiveDate, date_to_check: NaiveDate, age: &str) -> bool {
-    compare_elapsed(birth_date, date_to_check, &TimePeriod::parse(age).unwrap())
+fn age_lt(birth_date: NaiveDate, date_to_check: NaiveDate, age: TimePeriod) -> bool {
+    compare_elapsed(birth_date, date_to_check, &age)
         == std::cmp::Ordering::Less
 }
 
-fn has_in_season_dose_before_age(patient: &Patient, history: &[Dose], age: &str) -> bool {
-    let cutoff = TimePeriod::parse(age).unwrap().add_to(patient.birth_date);
+fn has_in_season_dose_before_age(patient: &Patient, history: &[Dose], age: TimePeriod) -> bool {
+    let cutoff = age.add_to(patient.birth_date);
     history
         .iter()
         .any(|dose| dose.date >= season_start() && dose.date < cutoff)
@@ -432,7 +432,6 @@ pub fn covid19_custom_forecast_hook(
         .max_by_key(|d| d.date);
 
     let age_6m = crate::time_period!("6m").add_to(patient.birth_date);
-    let age_2y = add_years(patient.birth_date, 2);
     let age_65y = add_years(patient.birth_date, 65);
 
     if active_series_name == "COVID_19_AUG_2025_LT_2_SERIES" {
@@ -451,13 +450,13 @@ pub fn covid19_custom_forecast_hook(
         if is_skipped {
             if current_season_valid_doses.len() >= 1 {
                 forecast.status = SeriesStatus::Complete;
-                forecast.earliest_date = None;
-                forecast.recommended_date = None;
-                forecast.overdue_date = None;
-                forecast.latest_date = None;
+                forecast.status = forecast.status.with_earliest_date(None);
+                forecast.status = forecast.status.with_recommended_date(None);
+                forecast.status = forecast.status.with_overdue_date(None);
+                forecast.status = forecast.status.with_latest_date(None);
                 forecast.reasons = crate::reasons!["COMPLETE_HIGH_RISK"];
             } else {
-                forecast.status = SeriesStatus::NotComplete;
+                forecast.status = SeriesStatus::default();
                 forecast.reasons = crate::reasons!["NOT_COMPLETE"];
                 
                 let mut earliest = season_start().max(age_6m);
@@ -471,22 +470,22 @@ pub fn covid19_custom_forecast_hook(
                     recommended = recommended.max(last + chrono::Duration::days(56));
                 }
 
-                forecast.earliest_date = Some(earliest);
-                forecast.recommended_date = Some(recommended);
-                forecast.overdue_date = None;
-                forecast.latest_date = None;
+                forecast.status = forecast.status.with_earliest_date(Some(earliest));
+                forecast.status = forecast.status.with_recommended_date(Some(recommended));
+                forecast.status = forecast.status.with_overdue_date(None);
+                forecast.status = forecast.status.with_latest_date(None);
             }
         } else {
             // Not skipped: needs 2 doses in current season
             if current_season_valid_doses.len() >= 2 {
                 forecast.status = SeriesStatus::Complete;
-                forecast.earliest_date = None;
-                forecast.recommended_date = None;
-                forecast.overdue_date = None;
-                forecast.latest_date = None;
+                forecast.status = forecast.status.with_earliest_date(None);
+                forecast.status = forecast.status.with_recommended_date(None);
+                forecast.status = forecast.status.with_overdue_date(None);
+                forecast.status = forecast.status.with_latest_date(None);
                 forecast.reasons = crate::reasons!["COMPLETE_HIGH_RISK"];
             } else if current_season_valid_doses.len() == 1 {
-                forecast.status = SeriesStatus::NotComplete;
+                forecast.status = SeriesStatus::default();
                 forecast.reasons = crate::reasons!["NOT_COMPLETE"];
 
                 let anchor_dose = last_current_season_dose.unwrap();
@@ -494,20 +493,20 @@ pub fn covid19_custom_forecast_hook(
                 let recommended = anchor_dose.date + chrono::Duration::days(28);
                 let overdue = crate::time_period!("8w").add_to(anchor_dose.date).pred_opt();
 
-                forecast.earliest_date = Some(earliest);
-                forecast.recommended_date = Some(recommended);
-                forecast.overdue_date = overdue;
-                forecast.latest_date = None;
+                forecast.status = forecast.status.with_earliest_date(Some(earliest));
+                forecast.status = forecast.status.with_recommended_date(Some(recommended));
+                forecast.status = forecast.status.with_overdue_date(overdue);
+                forecast.status = forecast.status.with_latest_date(None);
             } else {
                 // 0 current season doses
-                forecast.status = SeriesStatus::NotComplete;
+                forecast.status = SeriesStatus::default();
                 forecast.reasons = crate::reasons!["NOT_COMPLETE"];
 
                 if let Some(last_dose) = last_current_season_dose {
                     let earliest = last_dose.date + chrono::Duration::days(28);
                     let recommended = last_dose.date + chrono::Duration::days(28);
-                    forecast.earliest_date = Some(earliest);
-                    forecast.recommended_date = Some(recommended);
+                    forecast.status = forecast.status.with_earliest_date(Some(earliest));
+                    forecast.status = forecast.status.with_recommended_date(Some(recommended));
                 } else {
                     let mut earliest = season_start().max(age_6m);
                     let mut recommended = season_start().max(age_6m);
@@ -522,46 +521,46 @@ pub fn covid19_custom_forecast_hook(
                             recommended = recommended.max(last + chrono::Duration::days(28));
                         }
                     }
-                    forecast.earliest_date = Some(earliest);
-                    forecast.recommended_date = Some(recommended);
+                    forecast.status = forecast.status.with_earliest_date(Some(earliest));
+                    forecast.status = forecast.status.with_recommended_date(Some(recommended));
                 }
-                forecast.overdue_date = None;
-                forecast.latest_date = None;
+                forecast.status = forecast.status.with_overdue_date(None);
+                forecast.status = forecast.status.with_latest_date(None);
             }
         }
 
         // Clamp to minimum age for LT 2y series
-        forecast.earliest_date = forecast.earliest_date.map(|d| d.max(season_start()).max(age_6m));
-        forecast.recommended_date = forecast.recommended_date.map(|d| d.max(season_start()).max(age_6m));
+        forecast.status = forecast.status.with_earliest_date(forecast.status.earliest_date().map(|d| d.max(season_start()).max(age_6m)));
+        forecast.status = forecast.status.with_recommended_date(forecast.status.recommended_date().map(|d| d.max(season_start()).max(age_6m)));
 
     } else if active_series_name == "COVID_19_AUG_2025_2_Y_TO_64_Y_SERIES" {
         if current_season_valid_doses.len() >= 1 {
             forecast.status = SeriesStatus::Complete;
-            forecast.earliest_date = None;
-            forecast.recommended_date = None;
-            forecast.overdue_date = None;
-            forecast.latest_date = None;
+            forecast.status = forecast.status.with_earliest_date(None);
+            forecast.status = forecast.status.with_recommended_date(None);
+            forecast.status = forecast.status.with_overdue_date(None);
+            forecast.status = forecast.status.with_latest_date(None);
             forecast.reasons = crate::reasons!["COMPLETE_HIGH_RISK"];
         } else {
             let is_under_19 = eval_date < add_years(patient.birth_date, 19);
             if is_under_19 {
                 if prior_season_valid_doses.is_empty() {
-                    forecast.status = SeriesStatus::NotComplete;
+                    forecast.status = SeriesStatus::default();
                     forecast.reasons = crate::reasons!["NOT_COMPLETE"];
                 } else {
                     forecast.status = SeriesStatus::ConditionallyRecommended;
                     forecast.reasons = crate::reasons!["HIGH_RISK"];
                 }
             } else {
-                forecast.status = SeriesStatus::NotComplete;
+                forecast.status = SeriesStatus::default();
                 forecast.reasons = crate::reasons!["NOT_COMPLETE"];
             }
 
             if let Some(last_dose) = last_current_season_dose {
                 let earliest = last_dose.date + chrono::Duration::days(56);
                 let recommended = last_dose.date + chrono::Duration::days(56);
-                forecast.earliest_date = Some(earliest);
-                forecast.recommended_date = Some(recommended);
+                forecast.status = forecast.status.with_earliest_date(Some(earliest));
+                forecast.status = forecast.status.with_recommended_date(Some(recommended));
             } else {
                 let mut earliest = season_start().max(age_6m);
                 let mut recommended = season_start().max(age_6m);
@@ -577,47 +576,47 @@ pub fn covid19_custom_forecast_hook(
                     }
                 }
 
-                forecast.earliest_date = Some(earliest);
-                forecast.recommended_date = Some(recommended);
+                forecast.status = forecast.status.with_earliest_date(Some(earliest));
+                forecast.status = forecast.status.with_recommended_date(Some(recommended));
             }
-            forecast.overdue_date = None;
-            forecast.latest_date = None;
+            forecast.status = forecast.status.with_overdue_date(None);
+            forecast.status = forecast.status.with_latest_date(None);
         }
 
         // Clamp to minimum age for 2-64y series
-        forecast.earliest_date = forecast.earliest_date.map(|d| d.max(season_start()).max(age_6m));
-        forecast.recommended_date = forecast.recommended_date.map(|d| d.max(season_start()).max(age_6m));
+        forecast.status = forecast.status.with_earliest_date(forecast.status.earliest_date().map(|d| d.max(season_start()).max(age_6m)));
+        forecast.status = forecast.status.with_recommended_date(forecast.status.recommended_date().map(|d| d.max(season_start()).max(age_6m)));
 
     } else if active_series_name == "COVID_19_AUG_2025_GTE_65_SERIES" {
         if current_season_valid_doses.len() >= 2 {
             forecast.status = SeriesStatus::Complete;
-            forecast.earliest_date = None;
-            forecast.recommended_date = None;
-            forecast.overdue_date = None;
-            forecast.latest_date = None;
+            forecast.status = forecast.status.with_earliest_date(None);
+            forecast.status = forecast.status.with_recommended_date(None);
+            forecast.status = forecast.status.with_overdue_date(None);
+            forecast.status = forecast.status.with_latest_date(None);
             forecast.reasons = crate::reasons!["COMPLETE_HIGH_RISK"];
         } else if current_season_valid_doses.len() == 1 {
-            forecast.status = SeriesStatus::NotComplete;
+            forecast.status = SeriesStatus::default();
             forecast.reasons = crate::reasons!["NOT_COMPLETE"];
             
             let anchor_dose = last_current_season_dose.unwrap();
             let earliest = anchor_dose.date + chrono::Duration::days(56);
             let recommended = add_months(anchor_dose.date, 6);
 
-            forecast.earliest_date = Some(earliest);
-            forecast.recommended_date = Some(recommended);
-            forecast.overdue_date = None;
-            forecast.latest_date = None;
+            forecast.status = forecast.status.with_earliest_date(Some(earliest));
+            forecast.status = forecast.status.with_recommended_date(Some(recommended));
+            forecast.status = forecast.status.with_overdue_date(None);
+            forecast.status = forecast.status.with_latest_date(None);
         } else {
             // 0 current season doses
-            forecast.status = SeriesStatus::NotComplete;
+            forecast.status = SeriesStatus::default();
             forecast.reasons = crate::reasons!["NOT_COMPLETE"];
 
             if let Some(last_dose) = last_current_season_dose {
                 let earliest = last_dose.date + chrono::Duration::days(56);
                 let recommended = last_dose.date + chrono::Duration::days(56);
-                forecast.earliest_date = Some(earliest);
-                forecast.recommended_date = Some(recommended);
+                forecast.status = forecast.status.with_earliest_date(Some(earliest));
+                forecast.status = forecast.status.with_recommended_date(Some(recommended));
             } else {
                 let mut earliest = season_start().max(age_65y);
                 let mut recommended = season_start().max(age_65y);
@@ -633,16 +632,16 @@ pub fn covid19_custom_forecast_hook(
                     }
                 }
 
-                forecast.earliest_date = Some(earliest);
-                forecast.recommended_date = Some(recommended);
+                forecast.status = forecast.status.with_earliest_date(Some(earliest));
+                forecast.status = forecast.status.with_recommended_date(Some(recommended));
             }
-            forecast.overdue_date = None;
-            forecast.latest_date = None;
+            forecast.status = forecast.status.with_overdue_date(None);
+            forecast.status = forecast.status.with_latest_date(None);
         }
 
         // Clamp to minimum age for GTE 65y series
-        forecast.earliest_date = forecast.earliest_date.map(|d| d.max(season_start()).max(age_65y));
-        forecast.recommended_date = forecast.recommended_date.map(|d| d.max(season_start()).max(age_65y));
+        forecast.status = forecast.status.with_earliest_date(forecast.status.earliest_date().map(|d| d.max(season_start()).max(age_65y)));
+        forecast.status = forecast.status.with_recommended_date(forecast.status.recommended_date().map(|d| d.max(season_start()).max(age_65y)));
     }
 }
 
@@ -652,8 +651,8 @@ pub fn covid19_group_selection(
     eval_date: NaiveDate,
     candidate_forecasts: &mut [(&'static str, VaccineGroupForecast)],
 ) -> &'static str {
-    let selected_series_name = if age_lt(patient.birth_date, eval_date, "2y") 
-        || has_in_season_dose_before_age(patient, history, "2y") 
+    let selected_series_name = if age_lt(patient.birth_date, eval_date, crate::time_period!("2y")) 
+        || has_in_season_dose_before_age(patient, history, crate::time_period!("2y")) 
     {
         "COVID_19_AUG_2025_LT_2_SERIES"
     } else {
@@ -662,7 +661,7 @@ pub fn covid19_group_selection(
             && compare_elapsed(season_start(), age_65, &crate::time_period!("12m"))
                 != std::cmp::Ordering::Greater;
 
-        if age_ge(patient.birth_date, eval_date, "65y") 
+        if age_ge(patient.birth_date, eval_date, crate::time_period!("65y")) 
             || history.iter().any(|dose| dose.date >= season_start() && dose.date >= age_65) 
             || within_12m_of_65 
         {

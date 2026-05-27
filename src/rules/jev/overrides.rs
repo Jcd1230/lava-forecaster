@@ -57,10 +57,10 @@ pub fn jev_custom_forecast_hook(
             "COMPLETE_HIGH_RISK",
             "JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP",
         ];
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
-        forecast.latest_date = None;
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(None);
+        forecast.status = forecast.status.with_overdue_date(None);
+        forecast.status = forecast.status.with_latest_date(None);
         return;
     }
 
@@ -76,10 +76,10 @@ pub fn jev_custom_forecast_hook(
                 "JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP",
             ];
         }
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
-        forecast.latest_date = None;
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(None);
+        forecast.status = forecast.status.with_overdue_date(None);
+        forecast.status = forecast.status.with_latest_date(None);
         return;
     }
 
@@ -93,15 +93,15 @@ pub fn jev_custom_forecast_hook(
             let age_66_minus_7d = crate::time_period!("66y-7d").add_to(patient.birth_date);
             
             if prev_dose_date >= age_66_minus_7d {
-                forecast.overdue_date = None;
+                forecast.status = forecast.status.with_overdue_date(None);
             }
 
             let age_66 = add_years(patient.birth_date, 66);
-            if forecast.recommended_date.map(|d| d >= age_66).unwrap_or(false) {
+            if forecast.status.recommended_date().map(|d| d >= age_66).unwrap_or(false) {
                 let new_date = prev_dose_date + chrono::Duration::days(28);
-                forecast.earliest_date = Some(new_date);
-                forecast.recommended_date = Some(new_date);
-                forecast.overdue_date = None;
+                forecast.status = forecast.status.with_earliest_date(Some(new_date));
+                forecast.status = forecast.status.with_recommended_date(Some(new_date));
+                forecast.status = forecast.status.with_overdue_date(None);
             }
         }
     }

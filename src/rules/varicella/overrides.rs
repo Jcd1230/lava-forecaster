@@ -83,10 +83,10 @@ pub fn varicella_custom_forecast_hook(
     if forecast.status != SeriesStatus::Complete && patient.birth_date < pre_1980 {
         forecast.status = SeriesStatus::ConditionallyRecommended;
         forecast.reasons = crate::reasons!["CONDITIONAL"];
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
-        forecast.latest_date = None;
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(None);
+        forecast.status = forecast.status.with_overdue_date(None);
+        forecast.status = forecast.status.with_latest_date(None);
         return;
     }
 
@@ -95,9 +95,9 @@ pub fn varicella_custom_forecast_hook(
         && !history.is_empty()
         && history.iter().all(|dose| is_old_zoster(dose.cvx))
     {
-        forecast.earliest_date = Some(eval_date);
-        forecast.recommended_date = Some(eval_date);
-        forecast.overdue_date = Some(eval_date);
+        forecast.status = forecast.status.with_earliest_date(Some(eval_date));
+        forecast.status = forecast.status.with_recommended_date(Some(eval_date));
+        forecast.status = forecast.status.with_overdue_date(Some(eval_date));
         return;
     }
 
@@ -107,8 +107,8 @@ pub fn varicella_custom_forecast_hook(
             let dose1_date = valid_doses[0].0;
             let override_date = dose1_date + chrono::Duration::days(28);
 
-            forecast.earliest_date = Some(override_date);
-            forecast.recommended_date = Some(override_date);
+            forecast.status = forecast.status.with_earliest_date(Some(override_date));
+            forecast.status = forecast.status.with_recommended_date(Some(override_date));
         }
     }
 
@@ -122,12 +122,12 @@ pub fn varicella_custom_forecast_hook(
         if let Some(last_date) = last_live_virus {
             let conflict_free_date = last_date + chrono::Duration::days(28);
 
-            clamp_date_at_least(&mut forecast.earliest_date, conflict_free_date);
-            clamp_date_at_least(&mut forecast.recommended_date, conflict_free_date);
+            clamp_date_at_least(&mut forecast.status.earliest_date(), conflict_free_date);
+            clamp_date_at_least(&mut forecast.status.recommended_date(), conflict_free_date);
 
-            if let Some(earliest) = forecast.earliest_date {
-                if forecast.recommended_date.is_some() {
-                    clamp_date_at_least(&mut forecast.recommended_date, earliest);
+            if let Some(earliest) = forecast.status.earliest_date() {
+                if forecast.status.recommended_date().is_some() {
+                    clamp_date_at_least(&mut forecast.status.recommended_date(), earliest);
                 }
             }
         }

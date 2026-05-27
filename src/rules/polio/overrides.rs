@@ -179,19 +179,19 @@ pub fn polio_custom_forecast_hook(
     
     // 2009 Forecast Date Reset Hook
     if eval_date >= aug_7_2009 {
-        if let Some(ref mut recommended) = forecast.recommended_date {
+        if let Some(ref mut recommended) = forecast.status.recommended_date() {
             if *recommended < aug_7_2009 {
                 *recommended = aug_7_2009;
             }
         }
-        if let Some(ref mut earliest) = forecast.earliest_date {
+        if let Some(ref mut earliest) = forecast.status.earliest_date() {
             if *earliest < aug_7_2009 {
                 *earliest = aug_7_2009;
             }
         }
     } else {
         // Pre-2009 forecast override undo logic
-        if let Some(earliest) = forecast.earliest_date {
+        if let Some(earliest) = forecast.status.earliest_date() {
             if earliest > aug_7_2009 {
                 let target_dose = valid_doses.len() + 1;
                 let is_final_dose = (forecast.series_name == "POLIO_4_DOSE_SERIES" && target_dose == 4)
@@ -204,8 +204,8 @@ pub fn polio_custom_forecast_hook(
                         let interval_6m = add_months(*last_dose_date, 6);
                         new_earliest = new_earliest.max(interval_6m);
                     }
-                    forecast.earliest_date = Some(new_earliest);
-                    forecast.recommended_date = Some(new_earliest);
+                    forecast.status = forecast.status.with_earliest_date(Some(new_earliest));
+                    forecast.status = forecast.status.with_recommended_date(Some(new_earliest));
                 }
             }
         }
@@ -218,7 +218,7 @@ pub fn polio_custom_forecast_hook(
     let is_final_awaiting_age = (forecast.series_name == "POLIO_4_DOSE_SERIES" && target_dose_number == 5)
         || (forecast.series_name == "POLIO_FRACTIONAL_IPV_SERIES" && target_dose_number == 6);
 
-    if is_final_awaiting_age && forecast.status == crate::models::SeriesStatus::NotComplete {
+    if is_final_awaiting_age && matches!(forecast.status, crate::models::SeriesStatus::NotComplete { .. }) {
         let birth = patient.birth_date;
         let age_4y = add_years(birth, 4);
         // Overdue at 7y+4w-1d (Java treats the latest_recommended_age boundary as exclusive)
@@ -236,9 +236,9 @@ pub fn polio_custom_forecast_hook(
             let interval_6m = add_months(last_dose.date, 6);
             earliest = earliest.max(interval_6m);
         }
-        forecast.earliest_date = Some(earliest);
-        forecast.recommended_date = Some(earliest);
-        forecast.overdue_date = Some(age_7y_4w_minus_1d);
+        forecast.status = forecast.status.with_earliest_date(Some(earliest));
+        forecast.status = forecast.status.with_recommended_date(Some(earliest));
+        forecast.status = forecast.status.with_overdue_date(Some(age_7y_4w_minus_1d));
         return;
     }
 
@@ -251,21 +251,21 @@ pub fn polio_custom_forecast_hook(
     if is_second_to_last && !valid_doses.is_empty() {
         let birth = patient.birth_date;
         let age_4y = add_years(birth, 4);
-        let is_at_least_4y = eval_date >= age_4y || forecast.recommended_date.map(|r| r >= age_4y).unwrap_or(false);
+        let is_at_least_4y = eval_date >= age_4y || forecast.status.recommended_date().map(|r| r >= age_4y).unwrap_or(false);
         
         if is_at_least_4y {
             let (last_dose_date, _) = valid_doses.last().unwrap();
             let min_interval_date = add_months(*last_dose_date, 6);
             
-            let mut earliest = forecast.earliest_date.unwrap_or(min_interval_date).max(min_interval_date);
-            let mut recommended = forecast.recommended_date.unwrap_or(min_interval_date).max(min_interval_date);
+            let mut earliest = forecast.status.earliest_date().unwrap_or(min_interval_date).max(min_interval_date);
+            let mut recommended = forecast.status.recommended_date().unwrap_or(min_interval_date).max(min_interval_date);
             earliest = earliest.max(age_4y);
             recommended = recommended.max(age_4y);
             
-            forecast.earliest_date = Some(earliest);
-            forecast.recommended_date = Some(recommended);
+            forecast.status = forecast.status.with_earliest_date(Some(earliest));
+            forecast.status = forecast.status.with_recommended_date(Some(recommended));
             
-            if let Some(ref mut overdue) = forecast.overdue_date {
+            if let Some(ref mut overdue) = forecast.status.overdue_date() {
                 if *overdue < recommended {
                     *overdue = recommended;
                 }
@@ -301,17 +301,17 @@ pub fn polio_custom_forecast_hook(
             
             let min_interval_date = min_interval.add_to(last_dose.date);
             
-            if let Some(ref mut earliest) = forecast.earliest_date {
+            if let Some(ref mut earliest) = forecast.status.earliest_date() {
                 if *earliest < min_interval_date {
                     *earliest = min_interval_date;
                 }
             }
-            if let Some(ref mut recommended) = forecast.recommended_date {
+            if let Some(ref mut recommended) = forecast.status.recommended_date() {
                 if *recommended < min_interval_date {
                     *recommended = min_interval_date;
                 }
             }
-            if let Some(ref mut overdue) = forecast.overdue_date {
+            if let Some(ref mut overdue) = forecast.status.overdue_date() {
                 if *overdue < min_interval_date {
                     *overdue = min_interval_date;
                 }

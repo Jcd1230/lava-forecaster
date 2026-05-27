@@ -38,7 +38,7 @@ pub struct LegacyEvaluateRequest {
     pub evaluation_request: LegacyEvaluationRequest,
 }
 
-fn parse_xml_date(ds: &str) -> Result<NaiveDate, Box<dyn std::error::Error>> {
+fn parse_xml_date(ds: &str) -> Result<NaiveDate, crate::errors::ForecasterError> {
     let clean: String = ds.chars().filter(|c| c.is_ascii_digit() || *c == '-').collect();
     if clean.contains('-') {
         if clean.len() >= 10 {
@@ -63,7 +63,7 @@ fn handle_element(
     gender: &mut Gender,
     current_cvx: &mut Option<Cvx>,
     current_date: &mut Option<NaiveDate>,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<(), crate::errors::ForecasterError> {
     match e.local_name().as_ref() {
         b"birthTime" => {
             for attr in e.attributes() {
@@ -119,7 +119,7 @@ fn handle_element(
 }
 
 /// Parses the base64-encoded vMR XML content and extracts Patient demographics and immunization history.
-pub fn parse_vmr_xml(xml: &str) -> Result<(NaiveDate, Gender, Vec<Dose>), Box<dyn std::error::Error>> {
+pub fn parse_vmr_xml(xml: &str) -> Result<(NaiveDate, Gender, Vec<Dose>), crate::errors::ForecasterError> {
     let mut reader = Reader::from_str(xml);
     reader.trim_text(true);
 
@@ -159,7 +159,7 @@ pub fn parse_vmr_xml(xml: &str) -> Result<(NaiveDate, Gender, Vec<Dose>), Box<dy
                 }
             }
             Ok(Event::Eof) => break,
-            Err(e) => return Err(Box::new(e)),
+            Err(e) => return Err(e.into()),
             _ => {}
         }
         buf.clear();
@@ -171,7 +171,7 @@ pub fn parse_vmr_xml(xml: &str) -> Result<(NaiveDate, Gender, Vec<Dose>), Box<dy
 
 impl LegacyEvaluateRequest {
     /// Translates the legacy REST payload into the internal ForecastRequest.
-    pub fn translate(self) -> Result<ForecastRequest, Box<dyn std::error::Error>> {
+    pub fn translate(self) -> Result<ForecastRequest, crate::errors::ForecasterError> {
         // 1. Determine execution date (specifiedTime or submissionTime fallback)
         let eval_timestamp_ms = self.specified_time
             .or_else(|| self.interaction_id.as_ref().and_then(|id| id.submission_time))

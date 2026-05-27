@@ -27,10 +27,10 @@ pub fn yellow_fever_custom_forecast_hook(
             "COMPLETE_HIGH_RISK",
             "YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP",
         ];
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
-        forecast.latest_date = None;
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(None);
+        forecast.status = forecast.status.with_overdue_date(None);
+        forecast.status = forecast.status.with_latest_date(None);
         return;
     }
 
@@ -47,10 +47,10 @@ pub fn yellow_fever_custom_forecast_hook(
     if is_under_6m {
         forecast.status = SeriesStatus::NotRecommended;
         forecast.reasons = crate::reasons!["YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP"];
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
-        forecast.latest_date = None;
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(None);
+        forecast.status = forecast.status.with_overdue_date(None);
+        forecast.status = forecast.status.with_latest_date(None);
     } else if is_under_9m {
         forecast.status = SeriesStatus::ConditionallyRecommended;
         forecast.reasons = crate::reasons![
@@ -58,10 +58,10 @@ pub fn yellow_fever_custom_forecast_hook(
             "HIGH_RISK",
             "YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP",
         ];
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
-        forecast.latest_date = None;
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(None);
+        forecast.status = forecast.status.with_overdue_date(None);
+        forecast.status = forecast.status.with_latest_date(None);
     } else {
         // >= 9 months old and incomplete
         forecast.status = SeriesStatus::ConditionallyRecommended;
@@ -69,9 +69,9 @@ pub fn yellow_fever_custom_forecast_hook(
             "HIGH_RISK",
             "YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP",
         ];
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
-        forecast.latest_date = None;
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(None);
+        forecast.status = forecast.status.with_overdue_date(None);
+        forecast.status = forecast.status.with_latest_date(None);
     }
 }

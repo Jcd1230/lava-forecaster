@@ -161,35 +161,170 @@ impl Default for DoseEvaluation {
     }
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(untagged)]
 pub enum SeriesStatus {
-    #[default]
+    NotComplete {
+        earliest_date: Option<NaiveDate>,
+        recommended_date: Option<NaiveDate>,
+        overdue_date: Option<NaiveDate>,
+        latest_date: Option<NaiveDate>,
+    },
+    Complete,
+    NotRecommended,
+    ConditionallyRecommended,
+}
+
+impl Default for SeriesStatus {
+    fn default() -> Self {
+        Self::NotComplete {
+            earliest_date: None,
+            recommended_date: None,
+            overdue_date: None,
+            latest_date: None,
+        }
+    }
+}
+
+impl SeriesStatus {
+    pub fn earliest_date(&self) -> Option<NaiveDate> {
+        if let Self::NotComplete { earliest_date, .. } = self {
+            *earliest_date
+        } else {
+            None
+        }
+    }
+
+    pub fn recommended_date(&self) -> Option<NaiveDate> {
+        if let Self::NotComplete { recommended_date, .. } = self {
+            *recommended_date
+        } else {
+            None
+        }
+    }
+
+    pub fn overdue_date(&self) -> Option<NaiveDate> {
+        if let Self::NotComplete { overdue_date, .. } = self {
+            *overdue_date
+        } else {
+            None
+        }
+    }
+
+    pub fn latest_date(&self) -> Option<NaiveDate> {
+        if let Self::NotComplete { latest_date, .. } = self {
+            *latest_date
+        } else {
+            None
+        }
+    }
+
+    pub fn with_earliest_date(self, date: Option<NaiveDate>) -> Self {
+        if let Self::NotComplete { recommended_date, overdue_date, latest_date, .. } = self {
+            Self::NotComplete { earliest_date: date, recommended_date, overdue_date, latest_date }
+        } else {
+            self
+        }
+    }
+
+    pub fn with_recommended_date(self, date: Option<NaiveDate>) -> Self {
+        if let Self::NotComplete { earliest_date, overdue_date, latest_date, .. } = self {
+            Self::NotComplete { earliest_date, recommended_date: date, overdue_date, latest_date }
+        } else {
+            self
+        }
+    }
+
+    pub fn with_overdue_date(self, date: Option<NaiveDate>) -> Self {
+        if let Self::NotComplete { earliest_date, recommended_date, latest_date, .. } = self {
+            Self::NotComplete { earliest_date, recommended_date, overdue_date: date, latest_date }
+        } else {
+            self
+        }
+    }
+
+    pub fn with_latest_date(self, date: Option<NaiveDate>) -> Self {
+        if let Self::NotComplete { earliest_date, recommended_date, overdue_date, .. } = self {
+            Self::NotComplete { earliest_date, recommended_date, overdue_date, latest_date: date }
+        } else {
+            self
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(from = "FlatSeriesForecast", into = "FlatSeriesForecast")]
+pub struct SeriesForecast {
+    pub series_name: std::borrow::Cow<'static, str>,
+    pub status: SeriesStatus,
+    pub reasons: TinyVec<std::borrow::Cow<'static, str>, 2>,
+}
+
+#[derive(Serialize, Deserialize)]
+struct FlatSeriesForecast {
+    pub series_name: std::borrow::Cow<'static, str>,
+    pub earliest_date: Option<NaiveDate>,
+    pub recommended_date: Option<NaiveDate>,
+    pub overdue_date: Option<NaiveDate>,
+    pub latest_date: Option<NaiveDate>,
+    pub status: FlatSeriesStatus,
+    pub reasons: TinyVec<std::borrow::Cow<'static, str>, 2>,
+}
+
+#[derive(Serialize, Deserialize)]
+enum FlatSeriesStatus {
     NotComplete,
     Complete,
     NotRecommended,
     ConditionallyRecommended,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct SeriesForecast {
-    pub series_name: std::borrow::Cow<'static, str>,
-    pub earliest_date: Option<NaiveDate>,
-    pub recommended_date: Option<NaiveDate>,
-    pub overdue_date: Option<NaiveDate>,
-    pub latest_date: Option<NaiveDate>,
-    pub status: SeriesStatus,
-    pub reasons: TinyVec<std::borrow::Cow<'static, str>, 2>,
+impl From<SeriesForecast> for FlatSeriesForecast {
+    fn from(f: SeriesForecast) -> Self {
+        let status = match f.status {
+            SeriesStatus::NotComplete { .. } => FlatSeriesStatus::NotComplete,
+            SeriesStatus::Complete => FlatSeriesStatus::Complete,
+            SeriesStatus::NotRecommended => FlatSeriesStatus::NotRecommended,
+            SeriesStatus::ConditionallyRecommended => FlatSeriesStatus::ConditionallyRecommended,
+        };
+        Self {
+            series_name: f.series_name,
+            earliest_date: f.status.earliest_date(),
+            recommended_date: f.status.recommended_date(),
+            overdue_date: f.status.overdue_date(),
+            latest_date: f.status.latest_date(),
+            status,
+            reasons: f.reasons,
+        }
+    }
+}
+
+impl From<FlatSeriesForecast> for SeriesForecast {
+    fn from(f: FlatSeriesForecast) -> Self {
+        let status = match f.status {
+            FlatSeriesStatus::NotComplete => SeriesStatus::NotComplete {
+                earliest_date: f.earliest_date,
+                recommended_date: f.recommended_date,
+                overdue_date: f.overdue_date,
+                latest_date: f.latest_date,
+            },
+            FlatSeriesStatus::Complete => SeriesStatus::Complete,
+            FlatSeriesStatus::NotRecommended => SeriesStatus::NotRecommended,
+            FlatSeriesStatus::ConditionallyRecommended => SeriesStatus::ConditionallyRecommended,
+        };
+        Self {
+            series_name: f.series_name,
+            status,
+            reasons: f.reasons,
+        }
+    }
 }
 
 impl Default for SeriesForecast {
     fn default() -> Self {
         Self {
             series_name: std::borrow::Cow::Borrowed(""),
-            earliest_date: None,
-            recommended_date: None,
-            overdue_date: None,
-            latest_date: None,
-            status: SeriesStatus::NotComplete,
+            status: SeriesStatus::default(),
             reasons: TinyVec::new(),
         }
     }

@@ -149,25 +149,25 @@ pub fn mmr_custom_forecast_hook(
     let is_completed = forecast.status == SeriesStatus::Complete;
     let is_adult_complete = !valid_doses.is_empty() && (
         age_ge(patient.birth_date, eval_date, crate::time_period!("19y"))
-        || forecast.recommended_date.map(|d| age_ge(patient.birth_date, d, crate::time_period!("19y"))).unwrap_or(false)
+        || forecast.status.recommended_date().map(|d| age_ge(patient.birth_date, d, crate::time_period!("19y"))).unwrap_or(false)
     );
 
     if is_completed || is_adult_complete {
         forecast.status = SeriesStatus::Complete;
         forecast.reasons = crate::reasons!["COMPLETE_HIGH_RISK"];
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
-        forecast.latest_date = None;
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(None);
+        forecast.status = forecast.status.with_overdue_date(None);
+        forecast.status = forecast.status.with_latest_date(None);
     } else {
         // Case 2: Not complete. Check if born prior to 1957
         if patient.birth_date < pre_1957 {
             forecast.status = SeriesStatus::ConditionallyRecommended;
             forecast.reasons = crate::reasons!["CONDITIONAL"];
-            forecast.earliest_date = None;
-            forecast.recommended_date = None;
-            forecast.overdue_date = None;
-            forecast.latest_date = None;
+            forecast.status = forecast.status.with_earliest_date(None);
+            forecast.status = forecast.status.with_recommended_date(None);
+            forecast.status = forecast.status.with_overdue_date(None);
+            forecast.status = forecast.status.with_latest_date(None);
         } else {
             let last_live_virus = history.iter()
                 .filter(|d| is_live_virus(d.cvx))
@@ -177,12 +177,12 @@ pub fn mmr_custom_forecast_hook(
             if let Some(last_date) = last_live_virus {
                 let conflict_free_date = last_date + chrono::Duration::days(28);
                 
-                clamp_date_at_least(&mut forecast.earliest_date, conflict_free_date);
-                clamp_date_at_least(&mut forecast.recommended_date, conflict_free_date);
+                clamp_date_at_least(&mut forecast.status.earliest_date(), conflict_free_date);
+                clamp_date_at_least(&mut forecast.status.recommended_date(), conflict_free_date);
 
-                if let Some(earliest) = forecast.earliest_date {
-                    if forecast.recommended_date.is_some() {
-                        clamp_date_at_least(&mut forecast.recommended_date, earliest);
+                if let Some(earliest) = forecast.status.earliest_date() {
+                    if forecast.status.recommended_date().is_some() {
+                        clamp_date_at_least(&mut forecast.status.recommended_date(), earliest);
                     }
                 }
             }

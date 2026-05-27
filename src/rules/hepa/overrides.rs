@@ -88,21 +88,21 @@ pub fn hepa_custom_forecast_hook(
         if age_ge(patient.birth_date, eval_date, crate::time_period!("19y")) {
             forecast.status = SeriesStatus::ConditionallyRecommended;
             let age_2 = crate::date_utils::add_years(patient.birth_date, 2);
-            forecast.recommended_date = Some(age_2);
-            forecast.earliest_date = Some(age_2);
-            forecast.overdue_date = None;
+            forecast.status = forecast.status.with_recommended_date(Some(age_2));
+            forecast.status = forecast.status.with_earliest_date(Some(age_2));
+            forecast.status = forecast.status.with_overdue_date(None);
         }
     } else {
         if forecast.series_name == "HEP_A_ADULT_3_DOSE_SERIES" && valid_doses.len() == 2 {
             let dose_1_date = valid_doses[0].0;
             let rec_date = crate::date_utils::add_months(dose_1_date, 6);
-            clamp_date_at_least(&mut forecast.earliest_date, rec_date);
-            clamp_date_at_least(&mut forecast.recommended_date, rec_date);
+            clamp_date_at_least(&mut forecast.status.earliest_date(), rec_date);
+            clamp_date_at_least(&mut forecast.status.recommended_date(), rec_date);
         } else if forecast.series_name == "HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES" && valid_doses.len() == 3 {
             let dose_1_date = valid_doses[0].0;
             let rec_date = crate::date_utils::add_months(dose_1_date, 12);
-            clamp_date_at_least(&mut forecast.earliest_date, rec_date);
-            clamp_date_at_least(&mut forecast.recommended_date, rec_date);
+            clamp_date_at_least(&mut forecast.status.earliest_date(), rec_date);
+            clamp_date_at_least(&mut forecast.status.recommended_date(), rec_date);
         }
     }
 }

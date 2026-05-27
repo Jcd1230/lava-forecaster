@@ -9,17 +9,17 @@ pub fn covid19_aug2025_lt2_series() -> CompiledSeries {
 		.vaccine_group("COVID19")
 		.num_doses(2)
 		.dose(1, |d| {
-			d.abs_min_age("6m-4d")
-				.min_age("6m")
-				.earliest_recommended_age("6m")
+			d.abs_min_age(crate::time_period!("6m-4d"))
+				.min_age(crate::time_period!("6m"))
+				.earliest_recommended_age(crate::time_period!("6m"))
 				.cvx(ALL_COVID_CVX)
 		})
 		.dose(2, |d| d.cvx(ALL_COVID_CVX))
 		.interval(1, 2, |i| {
-			i.abs_min_interval("24d")
-				.min_interval("28d")
-				.earliest_recommended_interval("28d")
-				.latest_recommended_interval("8w")
+			i.abs_min_interval(crate::time_period!("24d"))
+				.min_interval(crate::time_period!("28d"))
+				.earliest_recommended_interval(crate::time_period!("28d"))
+				.latest_recommended_interval(crate::time_period!("8w"))
 		})
 		.build()
 }
@@ -29,7 +29,7 @@ pub fn covid19_aug2025_2y_to_64y_series() -> CompiledSeries {
 		.code("COVID_19_AUG_2025_2_Y_TO_64_Y_SERIES")
 		.vaccine_group("COVID19")
 		.num_doses(1)
-		.dose(1, |d| d.abs_min_age("2y").cvx(ALL_COVID_CVX))
+		.dose(1, |d| d.abs_min_age(crate::time_period!("2y")).cvx(ALL_COVID_CVX))
 		.build()
 }
 
@@ -38,12 +38,12 @@ pub fn covid19_aug2025_gte65_series() -> CompiledSeries {
 		.code("COVID_19_AUG_2025_GTE_65_SERIES")
 		.vaccine_group("COVID19")
 		.num_doses(2)
-		.dose(1, |d| d.abs_min_age("65y").cvx(ALL_COVID_CVX))
+		.dose(1, |d| d.abs_min_age(crate::time_period!("65y")).cvx(ALL_COVID_CVX))
 		.dose(2, |d| d.cvx(ALL_COVID_CVX))
 		.interval(1, 2, |i| {
-			i.abs_min_interval("8w-4d")
-				.min_interval("8w")
-				.earliest_recommended_interval("6m")
+			i.abs_min_interval(crate::time_period!("8w-4d"))
+				.min_interval(crate::time_period!("8w"))
+				.earliest_recommended_interval(crate::time_period!("6m"))
 		})
 		.build()
 }

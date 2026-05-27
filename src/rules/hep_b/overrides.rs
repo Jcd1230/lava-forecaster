@@ -300,11 +300,11 @@ pub fn hep_b_custom_forecast_hook(
     let latest_history_dose = history.iter().max_by_key(|dose| dose.date);
 
     if history.iter().any(|dose| dose.cvx.0 == cvx!("110"))
-        && forecast.status == SeriesStatus::NotComplete
+        && matches!(forecast.status, SeriesStatus::NotComplete { .. })
         && max_dose_number == 1
         && eval_date >= patient.birth_date + chrono::Duration::days(168)
     {
-        forecast.overdue_date = forecast.earliest_date.or(forecast.recommended_date);
+        forecast.status = forecast.status.with_overdue_date(forecast.status.earliest_date().or(forecast.status.recommended_date()));
     }
 
     if history.len() == 3
@@ -318,10 +318,10 @@ pub fn hep_b_custom_forecast_hook(
             .filter(|dose| matches!(dose.cvx.0, cvx!("08") | cvx!("8") | cvx!("42") | cvx!("45")))
             .count()
             == 2
-        && forecast.status == SeriesStatus::NotComplete
+        && matches!(forecast.status, SeriesStatus::NotComplete { .. })
         && eval_date >= patient.birth_date + chrono::Duration::days(168)
     {
-        forecast.overdue_date = forecast.earliest_date.or(forecast.recommended_date);
+        forecast.status = forecast.status.with_overdue_date(forecast.status.earliest_date().or(forecast.status.recommended_date()));
     }
 
     let merge_with_existing = |existing: Option<NaiveDate>, candidate: NaiveDate| {
@@ -336,12 +336,12 @@ pub fn hep_b_custom_forecast_hook(
                 {
                     let next_date = (first_dose_date + chrono::Duration::days(112))
                         .max(second_dose_date + chrono::Duration::days(56));
-                    forecast.earliest_date = Some(next_date);
-                    forecast.recommended_date = Some(next_date);
+                    forecast.status = forecast.status.with_earliest_date(Some(next_date));
+                    forecast.status = forecast.status.with_recommended_date(Some(next_date));
                 }
                 return;
             }
-            3 if forecast.status == SeriesStatus::NotComplete => {
+            3 if matches!(forecast.status, SeriesStatus::NotComplete { .. }) => {
                 if let (Some(first_dose_date), Some(second_dose_date), Some(third_dose_date)) = (
                     dose_date(valid_doses, 1),
                     dose_date(valid_doses, 2),
@@ -350,10 +350,9 @@ pub fn hep_b_custom_forecast_hook(
                     let next_date = (first_dose_date + chrono::Duration::days(112))
                         .max(second_dose_date + chrono::Duration::days(56))
                         .max(third_dose_date);
-                    forecast.earliest_date = Some(next_date);
-                    forecast.recommended_date = Some(next_date);
-                    forecast.overdue_date =
-                        Some(add_months(second_dose_date, 18) + chrono::Duration::days(27));
+                    forecast.status = forecast.status.with_earliest_date(Some(next_date));
+                    forecast.status = forecast.status.with_recommended_date(Some(next_date));
+                    forecast.status = forecast.status.with_overdue_date(Some(add_months(second_dose_date, 18) + chrono::Duration::days(27)));
                 }
                 return;
             }
@@ -373,15 +372,14 @@ pub fn hep_b_custom_forecast_hook(
                         .iter()
                         .any(|dose| dose.date < last_dose.date && dose.cvx.0 != cvx!("110"));
                     if history.len() > valid_doses.len() && !prior_non_pediarix {
-                        forecast.earliest_date = Some(last_dose.date + chrono::Duration::days(28));
-                        forecast.recommended_date =
-                            Some(last_dose.date + chrono::Duration::days(28));
-                        forecast.overdue_date = Some(last_dose.date + chrono::Duration::days(35));
+                        forecast.status = forecast.status.with_earliest_date(Some(last_dose.date + chrono::Duration::days(28)));
+                        forecast.status = forecast.status.with_recommended_date(Some(last_dose.date + chrono::Duration::days(28)));
+                        forecast.status = forecast.status.with_overdue_date(Some(last_dose.date + chrono::Duration::days(35)));
                         return;
                     }
                 }
                 if eval_date >= add_months(patient.birth_date, 4) {
-                    forecast.overdue_date = forecast.earliest_date.or(forecast.recommended_date);
+                    forecast.status = forecast.status.with_overdue_date(forecast.status.earliest_date().or(forecast.status.recommended_date()));
                 }
             }
             2 => {
@@ -391,18 +389,17 @@ pub fn hep_b_custom_forecast_hook(
                     let earliest = age_24_weeks
                         .max(first_dose_date + chrono::Duration::days(112))
                         .max(second_dose_date + chrono::Duration::days(56));
-                    forecast.earliest_date = Some(earliest);
-                    forecast.recommended_date =
-                        Some(recommended_age.max(first_dose_date + chrono::Duration::days(112)));
-                    forecast.overdue_date = Some(if eval_date >= overdue_age {
+                    forecast.status = forecast.status.with_earliest_date(Some(earliest));
+                    forecast.status = forecast.status.with_recommended_date(Some(recommended_age.max(first_dose_date + chrono::Duration::days(112))));
+                    forecast.status = forecast.status.with_overdue_date(Some(if eval_date >= overdue_age {
                         recommended_age.max(first_dose_date + chrono::Duration::days(112))
                     } else {
                         overdue_age
-                    });
+                    }));
                 }
                 return;
             }
-            3 if forecast.status == SeriesStatus::NotComplete => {
+            3 if matches!(forecast.status, SeriesStatus::NotComplete { .. }) => {
                 if let (Some(first_dose_date), Some(second_dose_date), Some(third_dose_date)) = (
                     dose_date(valid_doses, 1),
                     dose_date(valid_doses, 2),
@@ -412,10 +409,9 @@ pub fn hep_b_custom_forecast_hook(
                         .max(first_dose_date + chrono::Duration::days(112))
                         .max(second_dose_date + chrono::Duration::days(56))
                         .max(third_dose_date);
-                    forecast.earliest_date = Some(earliest);
-                    forecast.recommended_date = Some(recommended_age);
-                    forecast.overdue_date =
-                        Some(add_months(second_dose_date, 18) + chrono::Duration::days(27));
+                    forecast.status = forecast.status.with_earliest_date(Some(earliest));
+                    forecast.status = forecast.status.with_recommended_date(Some(recommended_age));
+                    forecast.status = forecast.status.with_overdue_date(Some(add_months(second_dose_date, 18) + chrono::Duration::days(27)));
                 }
                 return;
             }
@@ -424,7 +420,7 @@ pub fn hep_b_custom_forecast_hook(
     }
 
     if forecast.series_name == "HEP_B_ADULT_2_DOSE_SERIES"
-        && forecast.status == SeriesStatus::NotComplete
+        && matches!(forecast.status, SeriesStatus::NotComplete { .. })
     {
         if let Some(last_heplisav_dose) = history
             .iter()
@@ -432,47 +428,47 @@ pub fn hep_b_custom_forecast_hook(
             .max_by_key(|dose| dose.date)
         {
             let next_date = last_heplisav_dose.date + chrono::Duration::days(28);
-            forecast.earliest_date = Some(next_date);
-            forecast.recommended_date = Some(next_date);
-            forecast.overdue_date = Some(if valid_doses.is_empty() {
+            forecast.status = forecast.status.with_earliest_date(Some(next_date));
+            forecast.status = forecast.status.with_recommended_date(Some(next_date));
+            forecast.status = forecast.status.with_overdue_date(Some(if valid_doses.is_empty() {
                 next_date
             } else {
                 last_heplisav_dose.date + chrono::Duration::days(55)
-            });
+            }));
             return;
         }
     }
 
     match forecast.series_name.as_ref() {
         "HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES"
-            if forecast.status == SeriesStatus::NotComplete && max_dose_number == 1 =>
+            if matches!(forecast.status, SeriesStatus::NotComplete { .. }) && max_dose_number == 1 =>
         {
             if eval_date >= add_months(patient.birth_date, 4) {
-                forecast.overdue_date = forecast.earliest_date.or(forecast.recommended_date);
+                forecast.status = forecast.status.with_overdue_date(forecast.status.earliest_date().or(forecast.status.recommended_date()));
             }
         }
         "HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES"
-            if forecast.status == SeriesStatus::NotComplete && max_dose_number == 2 =>
+            if matches!(forecast.status, SeriesStatus::NotComplete { .. }) && max_dose_number == 2 =>
         {
             if let (Some(first_dose_date), Some(second_dose_date)) =
                 (dose_date(valid_doses, 1), dose_date(valid_doses, 2))
             {
                 let next_date = (first_dose_date + chrono::Duration::days(112))
                     .max(second_dose_date + chrono::Duration::days(56));
-                forecast.earliest_date = merge_with_existing(forecast.earliest_date, next_date);
-                forecast.recommended_date = merge_with_existing(
-                    forecast.recommended_date,
+                forecast.status = forecast.status.with_earliest_date(merge_with_existing(forecast.status.earliest_date(), next_date));
+                forecast.status = forecast.status.with_recommended_date(merge_with_existing(
+                    forecast.status.recommended_date(),
                     first_dose_date + chrono::Duration::days(112),
-                );
+                ));
                 if eval_date >= add_months(patient.birth_date, 20) {
-                    forecast.overdue_date = merge_with_existing(
-                        forecast.overdue_date,
-                        forecast.recommended_date.unwrap_or(next_date),
-                    );
+                    forecast.status = forecast.status.with_overdue_date(merge_with_existing(
+                        forecast.status.overdue_date(),
+                        forecast.status.recommended_date().unwrap_or(next_date),
+                    ));
                 }
             }
         }
-        "HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES" if forecast.status == SeriesStatus::NotComplete => {
+        "HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES" if matches!(forecast.status, SeriesStatus::NotComplete { .. }) => {
             if let Some(first_dose_date) = dose_date(valid_doses, 1) {
                 let mut next_date = first_dose_date + chrono::Duration::days(112);
                 if let Some(second_dose_date) = dose_date(valid_doses, 2) {
@@ -481,73 +477,71 @@ pub fn hep_b_custom_forecast_hook(
                 if let Some(third_dose_date) = dose_date(valid_doses, 3) {
                     next_date = next_date.max(third_dose_date);
                 }
-                forecast.earliest_date = merge_with_existing(forecast.earliest_date, next_date);
-                forecast.recommended_date =
-                    merge_with_existing(forecast.recommended_date, next_date);
+                forecast.status = forecast.status.with_earliest_date(merge_with_existing(forecast.status.earliest_date(), next_date));
+                forecast.status = forecast.status.with_recommended_date(merge_with_existing(forecast.status.recommended_date(), next_date));
                 if max_dose_number == 3 {
                     if let Some(second_dose_date) = dose_date(valid_doses, 2) {
                         let custom_overdue =
                             add_months(second_dose_date, 18) + chrono::Duration::days(27);
-                        forecast.overdue_date =
-                            merge_with_existing(forecast.overdue_date, custom_overdue);
+                        forecast.status = forecast.status.with_overdue_date(merge_with_existing(forecast.status.overdue_date(), custom_overdue));
                     }
                 } else if eval_date >= add_months(patient.birth_date, 20) {
-                    forecast.overdue_date = merge_with_existing(
-                        forecast.overdue_date,
-                        forecast.recommended_date.unwrap_or(next_date),
-                    );
+                    forecast.status = forecast.status.with_overdue_date(merge_with_existing(
+                        forecast.status.overdue_date(),
+                        forecast.status.recommended_date().unwrap_or(next_date),
+                    ));
                 }
             }
         }
         "HEP_B_ADULT_3_DOSE_SERIES"
-            if forecast.status == SeriesStatus::NotComplete && max_dose_number == 2 =>
+            if matches!(forecast.status, SeriesStatus::NotComplete { .. }) && max_dose_number == 2 =>
         {
             if let (Some(first_dose_date), Some(second_dose_date)) =
                 (dose_date(valid_doses, 1), dose_date(valid_doses, 2))
             {
-                forecast.earliest_date = Some(
+                forecast.status = forecast.status.with_earliest_date(Some(
                     (first_dose_date + chrono::Duration::days(112))
                         .max(second_dose_date + chrono::Duration::days(56)),
-                );
-                forecast.recommended_date = Some(
+                ));
+                forecast.status = forecast.status.with_recommended_date(Some(
                     add_months(first_dose_date, 6)
                         .max(second_dose_date + chrono::Duration::days(56)),
-                );
+                ));
             }
         }
         "HEP_B_3_DOSE_TWINRIX_SERIES"
-            if forecast.status == SeriesStatus::NotComplete && max_dose_number == 2 =>
+            if matches!(forecast.status, SeriesStatus::NotComplete { .. }) && max_dose_number == 2 =>
         {
             if let Some(first_dose_date) = dose_date(valid_doses, 1) {
                 let next_date = add_months(first_dose_date, 6);
-                forecast.earliest_date = Some(next_date);
-                forecast.recommended_date = Some(next_date);
+                forecast.status = forecast.status.with_earliest_date(Some(next_date));
+                forecast.status = forecast.status.with_recommended_date(Some(next_date));
             }
         }
         "HEP_B_4_DOSE_ACCELERATED_TWINRIX_SERIES"
-            if forecast.status == SeriesStatus::NotComplete =>
+            if matches!(forecast.status, SeriesStatus::NotComplete { .. }) =>
         {
             if max_dose_number == 2 {
                 if let Some(second_dose_date) = dose_date(valid_doses, 2) {
-                    forecast.earliest_date = Some(second_dose_date + chrono::Duration::days(14));
-                    forecast.recommended_date = Some(second_dose_date + chrono::Duration::days(14));
-                    forecast.overdue_date = Some(second_dose_date + chrono::Duration::days(22));
+                    forecast.status = forecast.status.with_earliest_date(Some(second_dose_date + chrono::Duration::days(14)));
+                    forecast.status = forecast.status.with_recommended_date(Some(second_dose_date + chrono::Duration::days(14)));
+                    forecast.status = forecast.status.with_overdue_date(Some(second_dose_date + chrono::Duration::days(22)));
                 }
             } else if max_dose_number == 3 {
                 if let Some(first_dose_date) = dose_date(valid_doses, 1) {
                     let next_date = add_months(first_dose_date, 12);
-                    forecast.earliest_date = Some(next_date);
-                    forecast.recommended_date = Some(next_date);
+                    forecast.status = forecast.status.with_earliest_date(Some(next_date));
+                    forecast.status = forecast.status.with_recommended_date(Some(next_date));
                 }
             }
         }
         "HEP_B_ADULT_2_DOSE_SERIES"
-            if forecast.status == SeriesStatus::NotComplete && max_dose_number == 1 =>
+            if matches!(forecast.status, SeriesStatus::NotComplete { .. }) && max_dose_number == 1 =>
         {
             if let Some(first_dose_date) = dose_date(valid_doses, 1) {
-                forecast.earliest_date = Some(first_dose_date + chrono::Duration::days(28));
-                forecast.recommended_date = Some(first_dose_date + chrono::Duration::days(28));
-                forecast.overdue_date = Some(first_dose_date + chrono::Duration::days(55));
+                forecast.status = forecast.status.with_earliest_date(Some(first_dose_date + chrono::Duration::days(28)));
+                forecast.status = forecast.status.with_recommended_date(Some(first_dose_date + chrono::Duration::days(28)));
+                forecast.status = forecast.status.with_overdue_date(Some(first_dose_date + chrono::Duration::days(55)));
             }
         }
         _ => {}
@@ -634,12 +628,11 @@ pub fn hep_b_group_selection(
                 && forecast_group
                     .forecasts
                     .iter()
-                    .any(|forecast| forecast.status == SeriesStatus::NotComplete)
+                    .any(|forecast| forecast.status == SeriesStatus::default())
             {
                 for forecast in forecast_group.forecasts.iter_mut() {
-                    if forecast.status == SeriesStatus::NotComplete {
-                        forecast.overdue_date =
-                            forecast.earliest_date.or(forecast.recommended_date);
+                    if matches!(forecast.status, SeriesStatus::NotComplete { .. }) {
+                        forecast.status = forecast.status.with_overdue_date(forecast.status.earliest_date().or(forecast.status.recommended_date()));
                     }
                 }
             }
@@ -715,10 +708,10 @@ pub fn hep_b_group_selection(
             for f in forecast.forecasts.iter_mut() {
                 f.status = SeriesStatus::Complete;
                 f.reasons = crate::reasons!["COMPLETE"];
-                f.earliest_date = None;
-                f.recommended_date = None;
-                f.overdue_date = None;
-                f.latest_date = None;
+                f.status = f.status.with_earliest_date(None);
+                f.status = f.status.with_recommended_date(None);
+                f.status = f.status.with_overdue_date(None);
+                f.status = f.status.with_latest_date(None);
             }
             return "HEP_B_ADULT_2_DOSE_SERIES";
         }

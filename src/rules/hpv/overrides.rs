@@ -9,11 +9,11 @@ fn is_hpv_cvx(cvx: Cvx) -> bool {
     matches!(cvx.0, cvx!("62") | cvx!("118") | cvx!("137") | cvx!("165"))
 }
 
-fn add_interval(date: NaiveDate, interval: &str) -> NaiveDate {
-    TimePeriod::parse(interval).unwrap().add_to(date)
+fn add_interval(date: NaiveDate, interval: TimePeriod) -> NaiveDate {
+    interval.add_to(date)
 }
 
-fn latest_boundary(date: NaiveDate, interval: &str) -> NaiveDate {
+fn latest_boundary(date: NaiveDate, interval: TimePeriod) -> NaiveDate {
     add_interval(date, interval) - chrono::Duration::days(1)
 }
 
@@ -94,23 +94,23 @@ pub fn hpv_custom_forecast_hook(
 
     if !has_hpv_history && eval_date >= age_27 && eval_date < age_46 {
         forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(None);
+        forecast.status = forecast.status.with_overdue_date(None);
         return;
     }
 
     if eval_date >= age_46 {
         forecast.status = SeriesStatus::NotRecommended;
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(None);
+        forecast.status = forecast.status.with_overdue_date(None);
         return;
     }
 
     if valid_doses.is_empty() {
         if eval_date >= age_15 {
-            forecast.overdue_date = Some(age_15 - chrono::Duration::days(1));
+            forecast.status = forecast.status.with_overdue_date(Some(age_15 - chrono::Duration::days(1)));
         }
         return;
     }
@@ -136,41 +136,41 @@ pub fn hpv_custom_forecast_hook(
         hpv_history_after_first_valid > valid_doses_after_first_valid;
 
     if valid_doses.len() == 1 && started_at_or_after_15 {
-        forecast.overdue_date = Some(latest_boundary(latest_hpv_dose_date, "16w"));
+        forecast.status = forecast.status.with_overdue_date(Some(latest_boundary(latest_hpv_dose_date, crate::time_period!("16w"))));
         return;
     }
 
     if valid_doses.len() == 1 && !started_at_or_after_15 && has_extra_hpv_history_after_first_valid {
-        forecast.earliest_date = Some(add_interval(first_valid_date, "5m"));
-        forecast.recommended_date = Some(add_interval(first_valid_date, "6m"));
-        forecast.overdue_date = Some(latest_boundary(first_valid_date, "13m+4w"));
+        forecast.status = forecast.status.with_earliest_date(Some(add_interval(first_valid_date, crate::time_period!("5m"))));
+        forecast.status = forecast.status.with_recommended_date(Some(add_interval(first_valid_date, crate::time_period!("6m"))));
+        forecast.status = forecast.status.with_overdue_date(Some(latest_boundary(first_valid_date, crate::time_period!("13m+4w"))));
         return;
     }
 
     if valid_doses.len() >= 2 {
         let second_valid_date = valid_doses[1].0;
-        let earliest_from_dose_1 = add_interval(first_valid_date, "5m");
-        let earliest_from_latest = add_interval(latest_hpv_dose_date, "12w");
+        let earliest_from_dose_1 = add_interval(first_valid_date, crate::time_period!("5m"));
+        let earliest_from_latest = add_interval(latest_hpv_dose_date, crate::time_period!("12w"));
         let earliest = earliest_from_dose_1.max(earliest_from_latest);
-        let recommended_from_dose_1 = add_interval(first_valid_date, "6m");
+        let recommended_from_dose_1 = add_interval(first_valid_date, crate::time_period!("6m"));
         let dose_1_to_2_meets_late_series_threshold =
-            second_valid_date >= add_interval(first_valid_date, "5m-4d");
+            second_valid_date >= add_interval(first_valid_date, crate::time_period!("5m-4d"));
 
-        forecast.earliest_date = Some(earliest);
-        forecast.recommended_date = Some(if has_extra_hpv_history_after_first_valid || dose_1_to_2_meets_late_series_threshold {
+        forecast.status = forecast.status.with_earliest_date(Some(earliest));
+        forecast.status = forecast.status.with_recommended_date(Some(if has_extra_hpv_history_after_first_valid || dose_1_to_2_meets_late_series_threshold {
             earliest
         } else {
             recommended_from_dose_1.max(earliest)
-        });
-        forecast.overdue_date = Some(if started_at_or_after_15 {
+        }));
+        forecast.status = forecast.status.with_overdue_date(Some(if started_at_or_after_15 {
             if has_extra_hpv_history_after_first_valid || !dose_1_to_2_meets_late_series_threshold {
-                latest_boundary(first_valid_date, "7m+4w")
+                latest_boundary(first_valid_date, crate::time_period!("7m+4w"))
             } else {
                 earliest
             }
         } else {
-            latest_boundary(first_valid_date, "13m+4w")
-        });
+            latest_boundary(first_valid_date, crate::time_period!("13m+4w"))
+        }));
     }
 }
 

@@ -271,13 +271,13 @@ async fn evaluate_bulk_flatbuffers_handler(
             let mut forecast_offsets = Vec::with_capacity(vg.forecasts.len());
             for fc in vg.forecasts.iter() {
                 let series_name = builder.create_string(&fc.series_name);
-                let earliest_date = fc.earliest_date.map(date_to_epoch_days).unwrap_or(0);
-                let recommended_date = fc.recommended_date.map(date_to_epoch_days).unwrap_or(0);
-                let overdue_date = fc.overdue_date.map(date_to_epoch_days).unwrap_or(0);
-                let latest_date = fc.latest_date.map(date_to_epoch_days).unwrap_or(0);
+                let earliest_date = fc.status.earliest_date().map(date_to_epoch_days).unwrap_or(0);
+                let recommended_date = fc.status.recommended_date().map(date_to_epoch_days).unwrap_or(0);
+                let overdue_date = fc.status.overdue_date().map(date_to_epoch_days).unwrap_or(0);
+                let latest_date = fc.status.latest_date().map(date_to_epoch_days).unwrap_or(0);
 
                 let status_str = match fc.status {
-                    models::SeriesStatus::NotComplete => "NotComplete",
+                    models::SeriesStatus::NotComplete { .. } => "NotComplete",
                     models::SeriesStatus::Complete => "Complete",
                     models::SeriesStatus::NotRecommended => "NotRecommended",
                     models::SeriesStatus::ConditionallyRecommended => "ConditionallyRecommended",
@@ -505,9 +505,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!(
                 "Forecast: status={:?}, earliest={:?}, recommended={:?}, overdue={:?}",
                 group_forecast.forecasts[0].status,
-                group_forecast.forecasts[0].earliest_date,
-                group_forecast.forecasts[0].recommended_date,
-                group_forecast.forecasts[0].overdue_date
+                group_forecast.forecasts[0].status.earliest_date(),
+                group_forecast.forecasts[0].status.recommended_date(),
+                group_forecast.forecasts[0].status.overdue_date()
             );
         }
     }

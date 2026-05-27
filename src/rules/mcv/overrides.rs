@@ -5,13 +5,12 @@ use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesFore
 use crate::date_utils::{TinyVec, TimePeriod, add_years};
 
 fn get_vaccine_min_age(cvx: Cvx) -> Option<TimePeriod> {
-    let s = match cvx.0 {
-        cvx!("114") | cvx!("147") => "9m-4d",
-        cvx!("136") => "2m-4d",
-        cvx!("203") | cvx!("108") | cvx!("32") => "2y-4d",
-        _ => return None,
-    };
-    TimePeriod::parse(s).ok()
+    match cvx.0 {
+        cvx!("114") | cvx!("147") => Some(crate::time_period!("9m-4d")),
+        cvx!("136") => Some(crate::time_period!("2m-4d")),
+        cvx!("203") | cvx!("108") | cvx!("32") => Some(crate::time_period!("2y-4d")),
+        _ => None,
+    }
 }
 
 pub fn mcv_completion_condition(ctx: &EvaluationContext) -> bool {
@@ -87,10 +86,10 @@ pub fn mcv_custom_forecast_hook(
     if forecast.status == SeriesStatus::Complete {
         forecast.status = SeriesStatus::Complete;
         forecast.reasons = crate::reasons!["COMPLETE_HIGH_RISK"];
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
-        forecast.latest_date = None;
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(None);
+        forecast.status = forecast.status.with_overdue_date(None);
+        forecast.status = forecast.status.with_latest_date(None);
         return;
     }
 
@@ -99,10 +98,10 @@ pub fn mcv_custom_forecast_hook(
     if eval_date >= age_19 {
         forecast.status = SeriesStatus::ConditionallyRecommended;
         forecast.reasons = crate::reasons!["HIGH_RISK"];
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
-        forecast.latest_date = None;
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(None);
+        forecast.status = forecast.status.with_overdue_date(None);
+        forecast.status = forecast.status.with_latest_date(None);
         return;
     }
 
@@ -110,7 +109,7 @@ pub fn mcv_custom_forecast_hook(
     if valid_doses.is_empty() {
         let age_16 = add_years(patient.birth_date, 16);
         if eval_date >= age_16 && eval_date < age_19 {
-            forecast.recommended_date = Some(age_16);
+            forecast.status = forecast.status.with_recommended_date(Some(age_16));
         }
     }
 }

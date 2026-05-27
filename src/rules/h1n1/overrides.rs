@@ -38,31 +38,31 @@ pub fn h1n1_custom_forecast_hook(
     if forecast.status == SeriesStatus::Complete {
         forecast.status = SeriesStatus::NotRecommended;
         forecast.reasons = crate::reasons!["COMPLETE"];
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
-        forecast.latest_date = None;
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(None);
+        forecast.status = forecast.status.with_overdue_date(None);
+        forecast.status = forecast.status.with_latest_date(None);
         return;
     }
 
     if eval_date > season_end {
         forecast.status = SeriesStatus::NotRecommended;
         forecast.reasons = crate::reasons!["VAC_GROUP_NO_LONGER_REC"];
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
-        forecast.latest_date = None;
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(None);
+        forecast.status = forecast.status.with_overdue_date(None);
+        forecast.status = forecast.status.with_latest_date(None);
         return;
     }
 
-    if let Some(rec_date) = forecast.recommended_date {
+    if let Some(rec_date) = forecast.status.recommended_date() {
         if rec_date > season_end {
             forecast.status = SeriesStatus::NotRecommended;
             forecast.reasons = crate::reasons!["VAC_GROUP_NO_LONGER_REC"];
-            forecast.earliest_date = None;
-            forecast.recommended_date = None;
-            forecast.overdue_date = None;
-            forecast.latest_date = None;
+            forecast.status = forecast.status.with_earliest_date(None);
+            forecast.status = forecast.status.with_recommended_date(None);
+            forecast.status = forecast.status.with_overdue_date(None);
+            forecast.status = forecast.status.with_latest_date(None);
         }
     }
 }

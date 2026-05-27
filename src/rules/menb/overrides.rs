@@ -189,10 +189,10 @@ pub fn menb_custom_forecast_hook(
 ) {
     if forecast.status == SeriesStatus::Complete {
         forecast.reasons = crate::reasons!["COMPLETE"];
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
-        forecast.latest_date = None;
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(None);
+        forecast.status = forecast.status.with_overdue_date(None);
+        forecast.status = forecast.status.with_latest_date(None);
         return;
     }
 
@@ -211,10 +211,10 @@ pub fn menb_custom_forecast_hook(
             forecast.status = SeriesStatus::ConditionallyRecommended;
             forecast.reasons = crate::reasons!["HIGH_RISK"];
         }
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
-        forecast.latest_date = None;
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(None);
+        forecast.status = forecast.status.with_overdue_date(None);
+        forecast.status = forecast.status.with_latest_date(None);
         return;
     }
 
@@ -222,8 +222,8 @@ pub fn menb_custom_forecast_hook(
         if let Some((dose1_date, _)) = valid_doses.first() {
             if *dose1_date >= policy_change_date() {
                 let anchor = crate::time_period!("6m").add_to(*dose1_date);
-                forecast.earliest_date = Some(forecast.earliest_date.map_or(anchor, |date| date.max(anchor)));
-                forecast.recommended_date = Some(forecast.recommended_date.map_or(anchor, |date| date.max(anchor)));
+                forecast.status = forecast.status.with_earliest_date(Some(forecast.status.earliest_date().map_or(anchor, |date| date.max(anchor))));
+                forecast.status = forecast.status.with_recommended_date(Some(forecast.status.recommended_date().map_or(anchor, |date| date.max(anchor))));
             } else {
                 let last_4c_shot = history
                     .iter()
@@ -232,8 +232,8 @@ pub fn menb_custom_forecast_hook(
                     .max()
                     .unwrap_or(*dose1_date);
                 let anchor = crate::time_period!("1m").add_to(last_4c_shot);
-                forecast.earliest_date = Some(anchor);
-                forecast.recommended_date = Some(anchor);
+                forecast.status = forecast.status.with_earliest_date(Some(anchor));
+                forecast.status = forecast.status.with_recommended_date(Some(anchor));
             }
         }
     }
@@ -241,12 +241,12 @@ pub fn menb_custom_forecast_hook(
     if matches!(forecast.series_name.as_ref(), "MEN_B_4_C_3_DOSE_SERIES" | "MEN_BF_HBP_3_DOSE_SERIES") {
         if let Some((dose1_date, _)) = valid_doses.first() {
             let anchor = crate::time_period!("6m").add_to(*dose1_date);
-            forecast.earliest_date = Some(forecast.earliest_date.map_or(anchor, |date| date.max(anchor)));
-            forecast.recommended_date = Some(forecast.recommended_date.map_or(anchor, |date| date.max(anchor)));
+            forecast.status = forecast.status.with_earliest_date(Some(forecast.status.earliest_date().map_or(anchor, |date| date.max(anchor))));
+            forecast.status = forecast.status.with_recommended_date(Some(forecast.status.recommended_date().map_or(anchor, |date| date.max(anchor))));
         }
     }
 
-    forecast.overdue_date = None;
+    forecast.status = forecast.status.with_overdue_date(None);
 }
 
 pub fn menb_custom_switch_hook(

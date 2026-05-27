@@ -23,10 +23,10 @@ pub fn cholera_custom_forecast_hook(
 ) {
     if forecast.status == SeriesStatus::Complete {
         forecast.reasons = crate::reasons!["COMPLETE"];
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
-        forecast.latest_date = None;
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(None);
+        forecast.status = forecast.status.with_overdue_date(None);
+        forecast.status = forecast.status.with_latest_date(None);
         return;
     }
 
@@ -43,10 +43,10 @@ pub fn cholera_custom_forecast_hook(
     if is_under_2y {
         forecast.status = SeriesStatus::NotRecommended;
         forecast.reasons = crate::reasons!["CHOLERA_NOT_ROUTINE_SEE_ACIP"];
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
-        forecast.latest_date = None;
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(None);
+        forecast.status = forecast.status.with_overdue_date(None);
+        forecast.status = forecast.status.with_latest_date(None);
     } else if is_under_65y {
         if valid_doses.is_empty() {
             forecast.status = SeriesStatus::ConditionallyRecommended;
@@ -54,10 +54,10 @@ pub fn cholera_custom_forecast_hook(
                 "HIGH_RISK",
                 "CHOLERA_NOT_ROUTINE_SEE_ACIP",
             ];
-            forecast.earliest_date = None;
-            forecast.recommended_date = None;
-            forecast.overdue_date = None;
-            forecast.latest_date = None;
+            forecast.status = forecast.status.with_earliest_date(None);
+            forecast.status = forecast.status.with_recommended_date(None);
+            forecast.status = forecast.status.with_overdue_date(None);
+            forecast.status = forecast.status.with_latest_date(None);
         } else {
             if !forecast.reasons.iter().any(|r| r == "CHOLERA_NOT_ROUTINE_SEE_ACIP") {
                 forecast.reasons.push("CHOLERA_NOT_ROUTINE_SEE_ACIP".into());
@@ -71,10 +71,10 @@ pub fn cholera_custom_forecast_hook(
                 "TOO_OLD",
                 "CHOLERA_NOT_ROUTINE_SEE_ACIP",
             ];
-            forecast.earliest_date = None;
-            forecast.recommended_date = None;
-            forecast.overdue_date = None;
-            forecast.latest_date = None;
+            forecast.status = forecast.status.with_earliest_date(None);
+            forecast.status = forecast.status.with_recommended_date(None);
+            forecast.status = forecast.status.with_overdue_date(None);
+            forecast.status = forecast.status.with_latest_date(None);
         } else {
             if !forecast.reasons.iter().any(|r| r == "CHOLERA_NOT_ROUTINE_SEE_ACIP") {
                 forecast.reasons.push("CHOLERA_NOT_ROUTINE_SEE_ACIP".into());

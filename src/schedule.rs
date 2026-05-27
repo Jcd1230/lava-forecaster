@@ -96,8 +96,8 @@ impl CompiledSeriesBuilder {
         self
     }
 
-    pub fn max_age_clamp(mut self, age: &str, status: crate::models::SeriesStatus) -> Self {
-        self.max_age_clamp = Some((TimePeriod::parse(age).unwrap(), status));
+    pub fn max_age_clamp(mut self, age: TimePeriod, status: crate::models::SeriesStatus) -> Self {
+        self.max_age_clamp = Some((age, status));
         self
     }
 
@@ -144,23 +144,23 @@ impl CompiledDoseRuleBuilder {
         }
     }
 
-    pub fn abs_min_age(mut self, age: &str) -> Self {
-        self.absolute_minimum_age = Some(TimePeriod::parse(age).unwrap());
+    pub fn abs_min_age(mut self, age: TimePeriod) -> Self {
+        self.absolute_minimum_age = Some(age);
         self
     }
 
-    pub fn min_age(mut self, age: &str) -> Self {
-        self.minimum_age = Some(TimePeriod::parse(age).unwrap());
+    pub fn min_age(mut self, age: TimePeriod) -> Self {
+        self.minimum_age = Some(age);
         self
     }
 
-    pub fn earliest_recommended_age(mut self, age: &str) -> Self {
-        self.earliest_recommended_age = Some(TimePeriod::parse(age).unwrap());
+    pub fn earliest_recommended_age(mut self, age: TimePeriod) -> Self {
+        self.earliest_recommended_age = Some(age);
         self
     }
 
-    pub fn latest_recommended_age(mut self, age: &str) -> Self {
-        self.latest_recommended_age = Some(TimePeriod::parse(age).unwrap());
+    pub fn latest_recommended_age(mut self, age: TimePeriod) -> Self {
+        self.latest_recommended_age = Some(age);
         self
     }
 
@@ -202,23 +202,23 @@ impl CompiledDoseIntervalBuilder {
         }
     }
 
-    pub fn abs_min_interval(mut self, int: &str) -> Self {
-        self.absolute_minimum_interval = Some(TimePeriod::parse(int).unwrap());
+    pub fn abs_min_interval(mut self, int: TimePeriod) -> Self {
+        self.absolute_minimum_interval = Some(int);
         self
     }
 
-    pub fn min_interval(mut self, int: &str) -> Self {
-        self.minimum_interval = Some(TimePeriod::parse(int).unwrap());
+    pub fn min_interval(mut self, int: TimePeriod) -> Self {
+        self.minimum_interval = Some(int);
         self
     }
 
-    pub fn earliest_recommended_interval(mut self, int: &str) -> Self {
-        self.earliest_recommended_interval = Some(TimePeriod::parse(int).unwrap());
+    pub fn earliest_recommended_interval(mut self, int: TimePeriod) -> Self {
+        self.earliest_recommended_interval = Some(int);
         self
     }
 
-    pub fn latest_recommended_interval(mut self, int: &str) -> Self {
-        self.latest_recommended_interval = Some(TimePeriod::parse(int).unwrap());
+    pub fn latest_recommended_interval(mut self, int: TimePeriod) -> Self {
+        self.latest_recommended_interval = Some(int);
         self
     }
 

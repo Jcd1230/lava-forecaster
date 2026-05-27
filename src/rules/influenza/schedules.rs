@@ -9,9 +9,9 @@ pub fn influenza_1_dose_series() -> CompiledSeries {
         .vaccine_group("INFLUENZA")
         .num_doses(1)
         .dose(1, |d| d
-            .abs_min_age("6m-4d")
-            .min_age("6m")
-            .earliest_recommended_age("6m")
+            .abs_min_age(crate::time_period!("6m-4d"))
+            .min_age(crate::time_period!("6m"))
+            .earliest_recommended_age(crate::time_period!("6m"))
             .cvx(ALLOWED_CVX)
         )
         .build()
@@ -23,18 +23,18 @@ pub fn influenza_2_dose_series() -> CompiledSeries {
         .vaccine_group("INFLUENZA")
         .num_doses(2)
         .dose(1, |d| d
-            .abs_min_age("6m-4d")
-            .min_age("6m")
-            .earliest_recommended_age("6m")
+            .abs_min_age(crate::time_period!("6m-4d"))
+            .min_age(crate::time_period!("6m"))
+            .earliest_recommended_age(crate::time_period!("6m"))
             .cvx(ALLOWED_CVX)
         )
         .dose(2, |d| d
             .cvx(ALLOWED_CVX)
         )
         .interval(1, 2, |i| i
-            .abs_min_interval("24d")
-            .min_interval("28d")
-            .earliest_recommended_interval("28d")
+            .abs_min_interval(crate::time_period!("24d"))
+            .min_interval(crate::time_period!("28d"))
+            .earliest_recommended_interval(crate::time_period!("28d"))
         )
         .build()
 }
@@ -45,18 +45,18 @@ pub fn influenza_2_dose_default_series() -> CompiledSeries {
         .vaccine_group("INFLUENZA")
         .num_doses(2)
         .dose(1, |d| d
-            .abs_min_age("6m-4d")
-            .min_age("6m")
-            .earliest_recommended_age("6m")
+            .abs_min_age(crate::time_period!("6m-4d"))
+            .min_age(crate::time_period!("6m"))
+            .earliest_recommended_age(crate::time_period!("6m"))
             .cvx(ALLOWED_CVX)
         )
         .dose(2, |d| d
             .cvx(ALLOWED_CVX)
         )
         .interval(1, 2, |i| i
-            .abs_min_interval("24d")
-            .min_interval("28d")
-            .earliest_recommended_interval("28d")
+            .abs_min_interval(crate::time_period!("24d"))
+            .min_interval(crate::time_period!("28d"))
+            .earliest_recommended_interval(crate::time_period!("28d"))
         )
         .build()
 }

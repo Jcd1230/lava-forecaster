@@ -218,7 +218,7 @@ fn map_rust_dose_status_to_cdc(eval: &DoseEvaluation) -> &'static str {
 
 fn map_rust_series_status_to_cdc(forecast: &SeriesForecast) -> &'static str {
     match forecast.status {
-        SeriesStatus::NotComplete => "Not complete",
+        SeriesStatus::NotComplete { .. } => "Not complete",
         SeriesStatus::Complete => "Complete",
         SeriesStatus::NotRecommended => "Aged out",
         SeriesStatus::ConditionallyRecommended => {
@@ -246,7 +246,7 @@ fn normalize_rust_results_to_cdc(
         .collect::<Vec<_>>();
 
     let forecast = if let Some(fc) = rust_fc {
-        let forecast_number = if fc.status == SeriesStatus::NotComplete {
+        let forecast_number = if matches!(fc.status, SeriesStatus::NotComplete { .. }) {
             Some(
                 rust_evals
                     .iter()
@@ -263,9 +263,9 @@ fn normalize_rust_results_to_cdc(
         CdcActualForecast {
             series_status: Some(map_rust_series_status_to_cdc(fc).to_string()),
             forecast_number,
-            earliest_date: fc.earliest_date,
-            recommended_date: fc.recommended_date,
-            overdue_date: fc.overdue_date,
+            earliest_date: fc.status.earliest_date(),
+            recommended_date: fc.status.recommended_date(),
+            overdue_date: fc.status.overdue_date(),
         }
     } else {
         CdcActualForecast {
@@ -929,9 +929,9 @@ fn map_legacy_status(legacy_status: &str, reasons: &[String]) -> SeriesStatus {
         return SeriesStatus::NotRecommended;
     }
     if legacy_status == "RECOMMENDED" || legacy_status == "FUTURE_RECOMMENDED" {
-        return SeriesStatus::NotComplete;
+        return SeriesStatus::default();
     }
-    SeriesStatus::NotComplete
+    SeriesStatus::default()
 }
 
 fn map_legacy_dose_status(status: &str) -> DoseStatus {
@@ -1249,13 +1249,19 @@ fn parse_legacy_xml(xml_content: &str, focus_code: &str) -> ExpectedResults {
                 } else if name_bytes == b"substanceAdministrationProposal" {
                     if prop_focus_matched {
                         let st = prop_status.as_deref().unwrap_or("RECOMMENDED");
+                        let legacy_status = map_legacy_status(st, &prop_reasons);
                         forecasts.push(SeriesForecast {
                             series_name: "".into(),
-                            earliest_date: prop_earliest,
-                            recommended_date: prop_recommended,
-                            overdue_date: prop_overdue,
-                            latest_date: None,
-                            status: map_legacy_status(st, &prop_reasons),
+                            status: if matches!(legacy_status, SeriesStatus::NotComplete { .. }) {
+                                SeriesStatus::NotComplete {
+                                    earliest_date: prop_earliest,
+                                    recommended_date: prop_recommended,
+                                    overdue_date: prop_overdue,
+                                    latest_date: None,
+                                }
+                            } else {
+                                legacy_status
+                            },
                             reasons: prop_reasons.iter().map(|r| r.clone().into()).collect(),
                         });
                     }
@@ -1437,16 +1443,16 @@ fn print_comparison_table(
     for field in &fields {
         let r_val = match (field, rust_fc) {
             (&"status", Some(fc)) => format!("{:?}", fc.status),
-            (&"earliest_date", Some(fc)) => fc.earliest_date.map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string()),
-            (&"recommended_date", Some(fc)) => fc.recommended_date.map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string()),
-            (&"overdue_date", Some(fc)) => fc.overdue_date.map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string()),
+            (&"earliest_date", Some(fc)) => fc.status.earliest_date().map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string()),
+            (&"recommended_date", Some(fc)) => fc.status.recommended_date().map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string()),
+            (&"overdue_date", Some(fc)) => fc.status.overdue_date().map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string()),
             _ => "-".to_string(),
         };
         let e_val = match (field, exp_fc) {
             (&"status", Some(fc)) => format!("{:?}", fc.status),
-            (&"earliest_date", Some(fc)) => fc.earliest_date.map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string()),
-            (&"recommended_date", Some(fc)) => fc.recommended_date.map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string()),
-            (&"overdue_date", Some(fc)) => fc.overdue_date.map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string()),
+            (&"earliest_date", Some(fc)) => fc.status.earliest_date().map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string()),
+            (&"recommended_date", Some(fc)) => fc.status.recommended_date().map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string()),
+            (&"overdue_date", Some(fc)) => fc.status.overdue_date().map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string()),
             _ => "-".to_string(),
         };
 
@@ -1751,25 +1757,25 @@ fn main() {
                                         rf.status, ef.status
                                     ));
                                 }
-                                if rf.earliest_date != ef.earliest_date {
+                                if rf.status.earliest_date() != ef.status.earliest_date() {
                                     is_ok = false;
                                     errors.push(format!(
                                         "Forecast earliest date mismatch: Rust={:?}, Expected={:?}",
-                                        rf.earliest_date, ef.earliest_date
+                                        rf.status.earliest_date(), ef.status.earliest_date()
                                     ));
                                 }
-                                if rf.recommended_date != ef.recommended_date {
+                                if rf.status.recommended_date() != ef.status.recommended_date() {
                                     is_ok = false;
                                     errors.push(format!(
                                         "Forecast recommended date mismatch: Rust={:?}, Expected={:?}",
-                                        rf.recommended_date, ef.recommended_date
+                                        rf.status.recommended_date(), ef.status.recommended_date()
                                     ));
                                 }
-                                if rf.overdue_date != ef.overdue_date {
+                                if rf.status.overdue_date() != ef.status.overdue_date() {
                                     is_ok = false;
                                     errors.push(format!(
                                         "Forecast overdue date mismatch: Rust={:?}, Expected={:?}",
-                                        rf.overdue_date, ef.overdue_date
+                                        rf.status.overdue_date(), ef.status.overdue_date()
                                     ));
                                 }
                             }

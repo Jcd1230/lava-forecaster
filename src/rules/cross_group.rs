@@ -12,7 +12,7 @@ pub fn post_process_all_groups(
         .iter()
         .find(|g| g.vaccine_group == "YELLOW_FEVER")
         .and_then(|g| g.forecasts.first())
-        .map(|f| f.status == crate::models::SeriesStatus::Complete)
+        .map(|f| matches!(f.status, crate::models::SeriesStatus::Complete))
         .unwrap_or(false);
 
     if yf_complete {
@@ -36,18 +36,18 @@ pub fn post_process_all_groups(
 
                 if is_live_group {
                     for f in g.forecasts.iter_mut() {
-                        if let Some(ref mut earliest) = f.earliest_date {
-                            let gap = *earliest - yf_date;
+                        if let Some(earliest) = f.status.earliest_date() {
+                            let gap = earliest - yf_date;
                             let is_conflict = if yf_date != eval_date {
                                 gap.num_days() < 30
                             } else {
-                                *earliest > yf_date && gap.num_days() < 30
+                                earliest > yf_date && gap.num_days() < 30
                             };
                             if is_conflict {
-                                *earliest = limit_date;
-                                if let Some(ref mut recommended) = f.recommended_date {
-                                    if *recommended < limit_date {
-                                        *recommended = limit_date;
+                                f.status = f.status.with_earliest_date(Some(limit_date));
+                                if let Some(recommended) = f.status.recommended_date() {
+                                    if recommended < limit_date {
+                                        f.status = f.status.with_recommended_date(Some(limit_date));
                                     }
                                 }
                             }

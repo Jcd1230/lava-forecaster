@@ -152,7 +152,7 @@ pub fn dtp_custom_forecast_hook(
     });
     
     if forecast.status == crate::models::SeriesStatus::Complete {
-        forecast.status = crate::models::SeriesStatus::NotComplete;
+        forecast.status = crate::models::SeriesStatus::default();
         forecast.reasons = crate::reasons!["NOT_COMPLETE"];
         
         if has_valid_tdap_ge_10 {
@@ -162,9 +162,9 @@ pub fn dtp_custom_forecast_hook(
             let recommended = add_years(last_valid_date, 10);
             let overdue = add_years(last_valid_date, 10) + chrono::Duration::days(28) - chrono::Duration::days(1);
             
-            forecast.earliest_date = Some(earliest);
-            forecast.recommended_date = Some(recommended);
-            forecast.overdue_date = Some(overdue);
+            forecast.status = forecast.status.with_earliest_date(Some(earliest));
+            forecast.status = forecast.status.with_recommended_date(Some(recommended));
+            forecast.status = forecast.status.with_overdue_date(Some(overdue));
         } else {
             // Adolescent Tdap booster needed
             let mut earliest = add_years(patient.birth_date, 11);
@@ -212,9 +212,9 @@ pub fn dtp_custom_forecast_hook(
                 recommended = recommended.max(min_interval_date);
             }
             
-            forecast.earliest_date = Some(earliest);
-            forecast.recommended_date = Some(recommended);
-            forecast.overdue_date = Some(overdue);
+            forecast.status = forecast.status.with_earliest_date(Some(earliest));
+            forecast.status = forecast.status.with_recommended_date(Some(recommended));
+            forecast.status = forecast.status.with_overdue_date(Some(overdue));
         }
     } else {
         // Series is not complete
@@ -226,16 +226,16 @@ pub fn dtp_custom_forecast_hook(
         let six_by_seven = eval_date < age_7 && history_count >= 6;
         
         if six_by_seven {
-            forecast.earliest_date = Some(age_7);
-            forecast.recommended_date = Some(age_7);
-            forecast.overdue_date = Some(age_7);
+            forecast.status = forecast.status.with_earliest_date(Some(age_7));
+            forecast.status = forecast.status.with_recommended_date(Some(age_7));
+            forecast.status = forecast.status.with_overdue_date(Some(age_7));
         } else if eval_date >= age_7 {
-            let earliest = forecast.earliest_date.unwrap_or(age_7).max(age_7);
-            let recommended = forecast.recommended_date.unwrap_or(age_7).max(age_7);
-            let overdue = forecast.overdue_date.unwrap_or(age_7).max(age_7);
-            forecast.earliest_date = Some(earliest);
-            forecast.recommended_date = Some(recommended);
-            forecast.overdue_date = Some(overdue);
+            let earliest = forecast.status.earliest_date().unwrap_or(age_7).max(age_7);
+            let recommended = forecast.status.recommended_date().unwrap_or(age_7).max(age_7);
+            let overdue = forecast.status.overdue_date().unwrap_or(age_7).max(age_7);
+            forecast.status = forecast.status.with_earliest_date(Some(earliest));
+            forecast.status = forecast.status.with_recommended_date(Some(recommended));
+            forecast.status = forecast.status.with_overdue_date(Some(overdue));
         }
 
         // If the last shot in history was ignored, adjust forecast dates accordingly
@@ -256,9 +256,9 @@ pub fn dtp_custom_forecast_hook(
         
         if is_last_shot_ignored {
             if let Some((earliest, recommended, overdue)) = get_ignored_adjustments(patient, valid_doses, forecast) {
-                forecast.earliest_date = earliest;
-                forecast.recommended_date = recommended;
-                forecast.overdue_date = overdue;
+                forecast.status = forecast.status.with_earliest_date(earliest);
+                forecast.status = forecast.status.with_recommended_date(recommended);
+                forecast.status = forecast.status.with_overdue_date(overdue);
             }
         }
     }

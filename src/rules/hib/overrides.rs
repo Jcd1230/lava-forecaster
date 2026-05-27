@@ -41,12 +41,10 @@ pub fn hib_custom_dose_number_hook(
     let mut target_dose_idx = ctx.target_dose_number;
 
     // Helper closure to check age boundaries
-    let is_age_ge = |age_str: &str| -> bool {
-        let tp = TimePeriod::parse(age_str).unwrap();
+    let is_age_ge = |tp: TimePeriod| -> bool {
         compare_elapsed(birth, ref_date, &tp) != std::cmp::Ordering::Less
     };
-    let is_age_lt = |age_str: &str| -> bool {
-        let tp = TimePeriod::parse(age_str).unwrap();
+    let is_age_lt = |tp: TimePeriod| -> bool {
         compare_elapsed(birth, ref_date, &tp) == std::cmp::Ordering::Less
     };
 
@@ -65,12 +63,12 @@ pub fn hib_custom_dose_number_hook(
         .count();
 
     // Check age ranges:
-    if is_age_ge("15m") {
+    if is_age_ge(crate::time_period!("15m")) {
         // Skip to 4: Patient over 15 Months
         if target_dose_idx < 4 {
             target_dose_idx = 4;
         }
-    } else if is_age_ge("12m") && is_age_lt("15m") {
+    } else if is_age_ge(crate::time_period!("12m")) && is_age_lt(crate::time_period!("15m")) {
         // Patient between 12 and 15 Months
         if count_hib_before_12m < 2 {
             if target_dose_idx < 3 {
@@ -81,7 +79,7 @@ pub fn hib_custom_dose_number_hook(
                 target_dose_idx = 4;
             }
         }
-    } else if is_age_ge("12m-28d") && is_age_lt("12m") {
+    } else if is_age_ge(crate::time_period!("12m-28d")) && is_age_lt(crate::time_period!("12m")) {
         // Patient between 12m-28d and 12m
         // Rule: Skip to 3 if patient has received exactly 1 prior dose which was administered < 7m of age
         let prior_hib_count = ctx.valid_doses.len();
@@ -93,7 +91,7 @@ pub fn hib_custom_dose_number_hook(
                 }
             }
         }
-    } else if is_age_ge("7m") && is_age_lt("12m") {
+    } else if is_age_ge(crate::time_period!("7m")) && is_age_lt(crate::time_period!("12m")) {
         // Patient between 7 and 12 Months
         if target_dose_idx < 2 {
             target_dose_idx = 2;
@@ -143,7 +141,7 @@ pub fn hib_custom_evaluation_hook(
     let age_ge_5y = compare_elapsed(birth, admin_date, &tp_5y) != std::cmp::Ordering::Less;
     if age_ge_5y {
         let num_doses = if series_name == "HIB_OMP_SERIES" { 3 } else { 4 };
-        let valid_before_5y = ctx.count_valid_doses_before("5y");
+        let valid_before_5y = ctx.count_valid_doses_before(crate::time_period!("5y"));
         if valid_before_5y < num_doses {
             *status = DoseStatus::Accepted;
             if !reasons.contains(&EvaluationReason::AboveRecommendedAgeSeries) {
@@ -159,7 +157,7 @@ pub fn hib_custom_evaluation_hook(
         let age_lt_1y_4d = compare_elapsed(birth, admin_date, &tp_1y_4d) == std::cmp::Ordering::Less;
         if age_lt_1y_4d {
             let hib_cvx = &[cvx!("17"), cvx!("22"), cvx!("46"), cvx!("47"), cvx!("48"), cvx!("49"), cvx!("50"), cvx!("51"), cvx!("102"), cvx!("120"), cvx!("132"), cvx!("146"), cvx!("148"), cvx!("170"), cvx!("198")];
-            let count_before_7m = ctx.count_cvx_before(hib_cvx, "7m");
+            let count_before_7m = ctx.count_cvx_before(hib_cvx, crate::time_period!("7m"));
             if count_before_7m == 0 {
                 *status = DoseStatus::Invalid;
                 if !reasons.contains(&EvaluationReason::BelowMinimumAge) {
@@ -185,10 +183,10 @@ pub fn hib_custom_forecast_hook(
         let effective_before_5y = effective_dose_number_before(valid_doses, age_5y);
         if effective_before_5y < doses_required {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.earliest_date = None;
-            forecast.recommended_date = None;
-            forecast.overdue_date = None;
-            forecast.latest_date = None;
+            forecast.status = forecast.status.with_earliest_date(None);
+            forecast.status = forecast.status.with_recommended_date(None);
+            forecast.status = forecast.status.with_overdue_date(None);
+            forecast.status = forecast.status.with_latest_date(None);
             return;
         }
     }
@@ -237,24 +235,24 @@ pub fn hib_custom_forecast_hook(
 
         if next_target_dose == 2 && eval_ge_7m && eval_lt_12m {
             if count_valid_before_7m == 0 {
-                forecast.recommended_date = Some(date_7m);
-                forecast.earliest_date = Some(date_7m);
-                forecast.overdue_date = Some(date_7m);
+                forecast.status = forecast.status.with_recommended_date(Some(date_7m));
+                forecast.status = forecast.status.with_earliest_date(Some(date_7m));
+                forecast.status = forecast.status.with_overdue_date(Some(date_7m));
             }
         } else if next_target_dose == 3 && eval_ge_12m && eval_lt_15m {
             if count_valid_before_12m < 2 {
-                forecast.recommended_date = Some(date_12m);
-                forecast.earliest_date = Some(date_12m);
+                forecast.status = forecast.status.with_recommended_date(Some(date_12m));
+                forecast.status = forecast.status.with_earliest_date(Some(date_12m));
             }
         } else if next_target_dose == 4 && eval_ge_12m && eval_lt_15m {
             if count_valid_before_12m == 2 {
-                forecast.recommended_date = Some(date_12m);
-                forecast.earliest_date = Some(date_12m);
+                forecast.status = forecast.status.with_recommended_date(Some(date_12m));
+                forecast.status = forecast.status.with_earliest_date(Some(date_12m));
             }
         } else if next_target_dose == 4 && eval_ge_15m && eval_lt_5y {
             if effective_before_15m < 4 {
-                forecast.recommended_date = Some(date_15m);
-                forecast.earliest_date = Some(date_15m);
+                forecast.status = forecast.status.with_recommended_date(Some(date_15m));
+                forecast.status = forecast.status.with_earliest_date(Some(date_15m));
             }
         }
     }
@@ -266,23 +264,22 @@ pub fn hib_custom_forecast_hook(
         let is_valid = valid_doses.iter().any(|(date, _)| *date == ld.date);
         if !is_valid {
             let target_dose_num = valid_doses.len() + 1;
-            let abs_min_age_str = match forecast.series_name.as_ref() {
+            let abs_min_age = match forecast.series_name.as_ref() {
                 "HIB_OMP_SERIES" => match target_dose_num {
-                    1 => Some("38d"),
-                    2 => Some("66d"),
-                    3 => Some("1y-4d"),
+                    1 => Some(crate::time_period!("38d")),
+                    2 => Some(crate::time_period!("66d")),
+                    3 => Some(crate::time_period!("1y-4d")),
                     _ => None,
                 },
                 _ => match target_dose_num {
-                    1 => Some("38d"),
-                    2 => Some("66d"),
-                    3 => Some("94d"),
-                    4 => Some("1y-4d"),
+                    1 => Some(crate::time_period!("38d")),
+                    2 => Some(crate::time_period!("66d")),
+                    3 => Some(crate::time_period!("94d")),
+                    4 => Some(crate::time_period!("1y-4d")),
                     _ => None,
                 },
             };
-            let is_below_min_age = if let Some(age_str) = abs_min_age_str {
-                let tp = TimePeriod::parse(age_str).unwrap();
+            let is_below_min_age = if let Some(tp) = abs_min_age {
                 compare_elapsed(birth, ld.date, &tp) == std::cmp::Ordering::Less
             } else {
                 false
@@ -290,17 +287,17 @@ pub fn hib_custom_forecast_hook(
 
             if !is_below_min_age {
                 let repeat_date = ld.date + chrono::Duration::days(28);
-                if let Some(ref mut earliest) = forecast.earliest_date {
+                if let Some(ref mut earliest) = forecast.status.earliest_date() {
                     if *earliest < repeat_date {
                         *earliest = repeat_date;
                     }
                 }
-                if let Some(ref mut recommended) = forecast.recommended_date {
+                if let Some(ref mut recommended) = forecast.status.recommended_date() {
                     if *recommended < repeat_date {
                         *recommended = repeat_date;
                     }
                 }
-                if let Some(ref mut overdue) = forecast.overdue_date {
+                if let Some(ref mut overdue) = forecast.status.overdue_date() {
                     if *overdue < repeat_date {
                         *overdue = repeat_date;
                     }

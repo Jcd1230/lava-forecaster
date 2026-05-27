@@ -152,40 +152,40 @@ pub fn influenza_custom_forecast_hook(
     let active_season = get_active_season(eval_date);
 
     if forecast.status == SeriesStatus::Complete {
-        forecast.status = SeriesStatus::NotComplete;
-        forecast.earliest_date = None;
-        forecast.recommended_date = Some(active_season.end + chrono::Duration::days(1));
-        forecast.overdue_date = None;
-        forecast.latest_date = None;
+        forecast.status = SeriesStatus::default();
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(Some(active_season.end + chrono::Duration::days(1)));
+        forecast.status = forecast.status.with_overdue_date(None);
+        forecast.status = forecast.status.with_latest_date(None);
         forecast.reasons = crate::reasons!["NOT_COMPLETE"];
         return;
     }
 
     // Clamp earliest and recommended dates to start of current season
-    if let Some(ref mut earliest) = forecast.earliest_date {
+    if let Some(ref mut earliest) = forecast.status.earliest_date() {
         if *earliest < active_season.start {
             *earliest = active_season.start;
         }
     } else {
-        forecast.earliest_date = Some(active_season.start);
+        forecast.status = forecast.status.with_earliest_date(Some(active_season.start));
     }
 
-    if let Some(ref mut recommended) = forecast.recommended_date {
+    if let Some(ref mut recommended) = forecast.status.recommended_date() {
         if *recommended < active_season.start {
             *recommended = active_season.start;
         }
     } else {
-        forecast.recommended_date = Some(active_season.start);
+        forecast.status = forecast.status.with_recommended_date(Some(active_season.start));
     }
 
-    if let Some(rec_date) = forecast.recommended_date {
+    if let Some(rec_date) = forecast.status.recommended_date() {
         if rec_date > active_season.end {
             let last_dose = history.iter().max_by_key(|d| d.date);
             if let Some(last) = last_dose {
                 let tp_6m_4d = crate::time_period!("6m-4d");
                 let age_6m_4d = tp_6m_4d.add_to(patient.birth_date);
                 if last.date >= age_6m_4d {
-                    forecast.recommended_date = Some(last.date + chrono::Duration::days(28));
+                    forecast.status = forecast.status.with_recommended_date(Some(last.date + chrono::Duration::days(28)));
                 }
             }
         }
@@ -414,8 +414,7 @@ pub fn influenza_group_selection(
     let age_10y = tp_10y.add_to(patient.birth_date);
     let is_under_10y = eval_date < age_10y;
     
-    let mut use_1_dose = false;
-    
+    let use_1_dose;
     if !is_under_9y {
         if is_under_10y {
             let current_season_dose_under_9y = history.iter()

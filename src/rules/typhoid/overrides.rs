@@ -38,10 +38,10 @@ pub fn typhoid_custom_forecast_hook(
             "COMPLETE_HIGH_RISK",
             "TYPHOID_NOT_ROUTINE_SEE_ACIP",
         ];
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
-        forecast.latest_date = None;
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(None);
+        forecast.status = forecast.status.with_overdue_date(None);
+        forecast.status = forecast.status.with_latest_date(None);
         return;
     }
 
@@ -53,10 +53,10 @@ pub fn typhoid_custom_forecast_hook(
     if is_under_2y {
         forecast.status = SeriesStatus::NotRecommended;
         forecast.reasons = crate::reasons!["TYPHOID_NOT_ROUTINE_SEE_ACIP"];
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
-        forecast.latest_date = None;
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(None);
+        forecast.status = forecast.status.with_overdue_date(None);
+        forecast.status = forecast.status.with_latest_date(None);
     } else {
         // >= 2 years old and not complete
         forecast.status = SeriesStatus::ConditionallyRecommended;
@@ -64,9 +64,9 @@ pub fn typhoid_custom_forecast_hook(
             "HIGH_RISK",
             "TYPHOID_NOT_ROUTINE_SEE_ACIP",
         ];
-        forecast.earliest_date = None;
-        forecast.recommended_date = None;
-        forecast.overdue_date = None;
-        forecast.latest_date = None;
+        forecast.status = forecast.status.with_earliest_date(None);
+        forecast.status = forecast.status.with_recommended_date(None);
+        forecast.status = forecast.status.with_overdue_date(None);
+        forecast.status = forecast.status.with_latest_date(None);
     }
 }

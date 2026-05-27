@@ -40,8 +40,7 @@ impl<'a> EvaluationContext<'a> {
     }
 
     /// Counts the number of valid doses administered before the specified age
-    pub fn count_valid_doses_before(&self, age_str: &str) -> usize {
-        let tp = TimePeriod::parse(age_str).unwrap();
+    pub fn count_valid_doses_before(&self, tp: TimePeriod) -> usize {
         let cutoff = tp.add_to(self.patient.birth_date);
         self.valid_doses
             .iter()
@@ -60,8 +59,7 @@ impl<'a> EvaluationContext<'a> {
     }
 
     /// Counts how many doses matching any of the provided CVX codes were administered before the specified age
-    pub fn count_cvx_before(&self, cvx_list: &[u16], age_str: &str) -> usize {
-        let tp = TimePeriod::parse(age_str).unwrap();
+    pub fn count_cvx_before(&self, cvx_list: &[u16], tp: TimePeriod) -> usize {
         let cutoff = tp.add_to(self.patient.birth_date);
         self.history
             .iter()
@@ -629,10 +627,7 @@ impl<'a> EvaluationEngine<'a> {
         let mut forecast = if is_completed {
             let mut f = SeriesForecast {
                 series_name: active_series.name.into(),
-                earliest_date: None,
-                recommended_date: None,
-                overdue_date: None,
-                latest_date: None,
+                
                 status: SeriesStatus::Complete,
                 reasons: crate::reasons!["COMPLETE"],
             };
@@ -676,11 +671,8 @@ impl<'a> EvaluationEngine<'a> {
                 if has_completion_hook && !is_completed {
                     let mut f = SeriesForecast {
                         series_name: active_series.name.into(),
-                        earliest_date: None,
-                        recommended_date: None,
-                        overdue_date: None,
-                        latest_date: None,
-                        status: SeriesStatus::NotComplete,
+                        
+                        status: SeriesStatus::default(),
                         reasons: crate::reasons!["NOT_COMPLETE"],
                     };
                     if let Some(policy) = self.policy {
@@ -690,10 +682,7 @@ impl<'a> EvaluationEngine<'a> {
                 }
                 let mut f = SeriesForecast {
                     series_name: active_series.name.into(),
-                    earliest_date: None,
-                    recommended_date: None,
-                    overdue_date: None,
-                    latest_date: None,
+                    
                     status: SeriesStatus::Complete,
                     reasons: crate::reasons!["COMPLETE"],
                 };
@@ -848,23 +837,19 @@ impl<'a> EvaluationEngine<'a> {
 
                 let mut f = SeriesForecast {
                     series_name: active_series.name.into(),
-                    earliest_date,
-                    recommended_date,
-                    overdue_date,
-                    latest_date: None,
-                    status: SeriesStatus::NotComplete,
+                    status: crate::models::SeriesStatus::NotComplete { earliest_date, recommended_date, overdue_date, latest_date: None },
                     reasons: crate::reasons!["NOT_COMPLETE"],
                 };
 
                 // Apply max age clamp if configured
                 if let Some((max_age, status)) = &active_series.max_age_clamp {
                     if eval_date >= max_age.add_to(patient.birth_date) {
-                        if f.status != SeriesStatus::Complete {
+                        if !matches!(f.status, SeriesStatus::Complete) {
                             f.status = status.clone();
-                            f.earliest_date = None;
-                            f.recommended_date = None;
-                            f.overdue_date = None;
-                            f.latest_date = None;
+                            f.status = f.status.with_earliest_date(None);
+                            f.status = f.status.with_recommended_date(None);
+                            f.status = f.status.with_overdue_date(None);
+                            f.status = f.status.with_latest_date(None);
                             f.reasons = crate::reasons!["MAX_AGE_EXCEEDED"];
                         }
                     }
@@ -881,17 +866,17 @@ impl<'a> EvaluationEngine<'a> {
 
         let last_group_date = history.iter().map(|d| d.date).max();
         if let Some(last_date) = last_group_date {
-            if let Some(ref mut earliest) = forecast.earliest_date {
+            if let Some(ref mut earliest) = forecast.status.earliest_date() {
                 if *earliest < last_date {
                     *earliest = last_date;
                 }
             }
-            if let Some(ref mut recommended) = forecast.recommended_date {
+            if let Some(ref mut recommended) = forecast.status.recommended_date() {
                 if *recommended < last_date {
                     *recommended = last_date;
                 }
             }
-            if let Some(ref mut overdue) = forecast.overdue_date {
+            if let Some(ref mut overdue) = forecast.status.overdue_date() {
                 if *overdue < last_date {
                     *overdue = last_date;
                 }
@@ -900,21 +885,21 @@ impl<'a> EvaluationEngine<'a> {
 
         // Align earliest <= recommended <= overdue
         if let (Some(earliest), Some(recommended)) =
-            (forecast.earliest_date, forecast.recommended_date.as_mut())
+            (forecast.status.earliest_date(), forecast.status.recommended_date().as_mut())
         {
             if *recommended < earliest {
                 *recommended = earliest;
             }
         }
         if let (Some(recommended), Some(overdue)) =
-            (forecast.recommended_date, forecast.overdue_date.as_mut())
+            (forecast.status.recommended_date(), forecast.status.overdue_date().as_mut())
         {
             if *overdue < recommended {
                 *overdue = recommended;
             }
         }
         if let (Some(earliest), Some(overdue)) =
-            (forecast.earliest_date, forecast.overdue_date.as_mut())
+            (forecast.status.earliest_date(), forecast.status.overdue_date().as_mut())
         {
             if *overdue < earliest {
                 *overdue = earliest;
