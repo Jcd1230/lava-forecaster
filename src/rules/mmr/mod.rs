@@ -12,12 +12,13 @@ pub fn definition() -> VaccineGroupDefinition {
         param_overrides: Vec::new(),
         completion_rules: Vec::new(),
         rec_overrides: Vec::new(),
-        custom_forecast_hook: Some(overrides::mmr_custom_forecast_hook),
+        custom_forecast_hook: None,
         custom_switch_hook: None,
-        custom_evaluation_hook: Some(overrides::mmr_custom_evaluation_hook),
-        custom_dose_number_hook: Some(overrides::mmr_custom_dose_number_hook),
+        custom_evaluation_hook: None,
+        custom_dose_number_hook: None,
         custom_extra_dose_hook: None,
-        custom_completion_hook: Some(overrides::mmr_custom_completion_hook),
+        custom_completion_hook: None,
         group_selection: None,
+        policy: Some(Box::new(overrides::MmrPolicy)),
     }
 }

@@ -35,6 +35,7 @@ pub fn definition() -> VaccineGroupDefinition {
         custom_extra_dose_hook: Some(overrides::dtp_custom_extra_dose_hook),
         custom_completion_hook: None,
         group_selection: Some(overrides::dtp_group_selection),
+        policy: None,
     }
 }
 

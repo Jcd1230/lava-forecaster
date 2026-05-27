@@ -434,3 +434,46 @@ pub fn pneumococcal_custom_forecast_hook(
         forecast.earliest_date.get_or_insert(ref_date);
     }
 }
+
+pub struct PneumococcalPolicy;
+
+impl crate::engine::EvaluationPolicy for PneumococcalPolicy {
+    fn custom_forecast_hook(
+        &self,
+        patient: &Patient,
+        valid_doses: &[(NaiveDate, usize)],
+        history: &[Dose],
+        eval_date: NaiveDate,
+        forecast: &mut SeriesForecast,
+    ) {
+        pneumococcal_custom_forecast_hook(patient, valid_doses, history, eval_date, forecast)
+    }
+
+    fn custom_evaluation_hook(
+        &self,
+        series_name: &str,
+        target_dose_idx: usize,
+        ctx: &EvaluationContext,
+        reasons: &mut TinyVec<EvaluationReason, 4>,
+        status: &mut DoseStatus,
+    ) {
+        pneumococcal_custom_evaluation_hook(series_name, target_dose_idx, ctx, reasons, status)
+    }
+
+    fn custom_dose_number_hook(
+        &self,
+        series_name: &str,
+        ctx: &EvaluationContext,
+    ) -> Option<usize> {
+        Some(pneumococcal_custom_dose_number_hook(series_name, ctx))
+    }
+
+    fn ignore_evaluation_for_maximum_date(&self, patient: &Patient, eval: &crate::models::DoseEvaluation) -> bool {
+        eval.cvx.0 == cvx!("33")
+            && compare_elapsed(
+                patient.birth_date,
+                eval.dose_date,
+                &crate::time_period!("2y"),
+            ) == std::cmp::Ordering::Less
+    }
+}

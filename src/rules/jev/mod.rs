@@ -21,6 +21,7 @@ pub fn definition() -> VaccineGroupDefinition {
         custom_extra_dose_hook: None,
         custom_completion_hook: None,
         group_selection: Some(overrides::jev_group_selection),
+        policy: None,
     }
 }
 

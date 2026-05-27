@@ -36,12 +36,19 @@ pub fn evaluate_patient_all_groups(
                 engine.param_overrides = &ruleset.param_overrides;
                 engine.completion_rules = &ruleset.completion_rules;
                 engine.rec_overrides = &ruleset.rec_overrides;
-                engine.custom_forecast_hook = ruleset.custom_forecast_hook;
-                engine.custom_switch_hook = ruleset.custom_switch_hook;
-                engine.custom_evaluation_hook = ruleset.custom_evaluation_hook;
-                engine.custom_dose_number_hook = ruleset.custom_dose_number_hook;
-                engine.custom_extra_dose_hook = ruleset.custom_extra_dose_hook;
-                engine.custom_completion_hook = ruleset.custom_completion_hook;
+                let legacy_policy = crate::rules::LegacyHookPolicy {
+                    custom_forecast_hook: ruleset.custom_forecast_hook,
+                    custom_switch_hook: ruleset.custom_switch_hook,
+                    custom_evaluation_hook: ruleset.custom_evaluation_hook,
+                    custom_dose_number_hook: ruleset.custom_dose_number_hook,
+                    custom_extra_dose_hook: ruleset.custom_extra_dose_hook,
+                    custom_completion_hook: ruleset.custom_completion_hook,
+                };
+                let policy_ref: &dyn crate::engine::EvaluationPolicy = ruleset
+                    .policy
+                    .as_deref()
+                    .unwrap_or(&legacy_policy);
+                engine.policy = Some(policy_ref);
 
                 let forecast =
                     engine.evaluate_patient(patient, history, eval_date, &ruleset.series);
@@ -65,12 +72,19 @@ pub fn evaluate_patient_all_groups(
                 engine.param_overrides = &ruleset.param_overrides;
                 engine.completion_rules = &ruleset.completion_rules;
                 engine.rec_overrides = &ruleset.rec_overrides;
-                engine.custom_forecast_hook = ruleset.custom_forecast_hook;
-                engine.custom_switch_hook = ruleset.custom_switch_hook;
-                engine.custom_evaluation_hook = ruleset.custom_evaluation_hook;
-                engine.custom_dose_number_hook = ruleset.custom_dose_number_hook;
-                engine.custom_extra_dose_hook = ruleset.custom_extra_dose_hook;
-                engine.custom_completion_hook = ruleset.custom_completion_hook;
+                let legacy_policy = crate::rules::LegacyHookPolicy {
+                    custom_forecast_hook: ruleset.custom_forecast_hook,
+                    custom_switch_hook: ruleset.custom_switch_hook,
+                    custom_evaluation_hook: ruleset.custom_evaluation_hook,
+                    custom_dose_number_hook: ruleset.custom_dose_number_hook,
+                    custom_extra_dose_hook: ruleset.custom_extra_dose_hook,
+                    custom_completion_hook: ruleset.custom_completion_hook,
+                };
+                let policy_ref: &dyn crate::engine::EvaluationPolicy = ruleset
+                    .policy
+                    .as_deref()
+                    .unwrap_or(&legacy_policy);
+                engine.policy = Some(policy_ref);
 
                 let forecast =
                     engine.evaluate_patient(patient, history, eval_date, &ruleset.series);
@@ -79,56 +93,8 @@ pub fn evaluate_patient_all_groups(
         }
     }
 
-    // Cross-group post-processing: YellowFever.adjustEarliestDateDueToYellowFeverVaccine
-    let yf_complete = results
-        .iter()
-        .find(|g| g.vaccine_group == "YELLOW_FEVER")
-        .and_then(|g| g.forecasts.first())
-        .map(|f| f.status == models::SeriesStatus::Complete)
-        .unwrap_or(false);
-
-    if yf_complete {
-        let last_yf_dose = history
-            .iter()
-            .filter(|d| d.cvx.0 == Cvx::YELLOW_FEVER || d.cvx.0 == Cvx::YELLOW_FEVER_UNSPECIFIED || d.cvx.0 == Cvx::YELLOW_FEVER_UNKNOWN)
-            .map(|d| d.date)
-            .max();
-
-        if let Some(yf_date) = last_yf_dose {
-            let limit_date = yf_date + chrono::Duration::days(30);
-            for g in results.iter_mut() {
-                if g.vaccine_group == "YELLOW_FEVER" {
-                    continue;
-                }
-
-                let is_live_group = g.vaccine_group == "MMR"
-                    || g.vaccine_group == "VARICELLA"
-                    || g.vaccine_group == "ROTAVIRUS"
-                    || g.vaccine_group == "CHOLERA";
-
-                if is_live_group {
-                    for f in g.forecasts.iter_mut() {
-                        if let Some(ref mut earliest) = f.earliest_date {
-                            let gap = *earliest - yf_date;
-                            let is_conflict = if yf_date != eval_date {
-                                gap.num_days() < 30
-                            } else {
-                                *earliest > yf_date && gap.num_days() < 30
-                            };
-                            if is_conflict {
-                                *earliest = limit_date;
-                                if let Some(ref mut recommended) = f.recommended_date {
-                                    if *recommended < limit_date {
-                                        *recommended = limit_date;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+    // Cross-group post-processing
+    rules::cross_group::post_process_all_groups(patient, history, eval_date, &mut results);
 
 
     results

@@ -278,3 +278,80 @@ pub fn mmr_custom_completion_hook(ctx: &EvaluationContext) -> bool {
     let d2_satisfied = m2 && mu2 && r2;
     d1_satisfied && d2_satisfied
 }
+
+pub struct MmrPolicy;
+
+impl crate::engine::EvaluationPolicy for MmrPolicy {
+    fn custom_forecast_hook(
+        &self,
+        patient: &Patient,
+        valid_doses: &[(NaiveDate, usize)],
+        history: &[Dose],
+        eval_date: NaiveDate,
+        forecast: &mut SeriesForecast,
+    ) {
+        mmr_custom_forecast_hook(patient, valid_doses, history, eval_date, forecast)
+    }
+
+    fn custom_evaluation_hook(
+        &self,
+        series_name: &str,
+        target_dose_idx: usize,
+        ctx: &EvaluationContext,
+        reasons: &mut TinyVec<EvaluationReason, 4>,
+        status: &mut DoseStatus,
+    ) {
+        mmr_custom_evaluation_hook(series_name, target_dose_idx, ctx, reasons, status)
+    }
+
+    fn custom_dose_number_hook(
+        &self,
+        series_name: &str,
+        ctx: &EvaluationContext,
+    ) -> Option<usize> {
+        Some(mmr_custom_dose_number_hook(series_name, ctx))
+    }
+
+    fn custom_completion_hook(&self, ctx: &EvaluationContext) -> Option<bool> {
+        Some(mmr_custom_completion_hook(ctx))
+    }
+
+    fn adjust_same_day_target_dose_number(
+        &self,
+        dose: &Dose,
+        evaluations: &[crate::models::DoseEvaluation],
+    ) -> Option<usize> {
+        let has_m = |c: Cvx| matches!(c.0, Cvx::MMR | Cvx::MEASLES_RUBELLA | Cvx::MEASLES | Cvx::MMRV);
+        let has_mu = |c: Cvx| matches!(c.0, Cvx::MMR | Cvx::MUMPS | Cvx::RUBELLA_MUMPS | Cvx::MMRV);
+        let has_r = |c: Cvx| matches!(c.0, Cvx::MMR | Cvx::MEASLES_RUBELLA | Cvx::RUBELLA | Cvx::RUBELLA_MUMPS | Cvx::MMRV);
+
+        let cur_cvx = dose.cvx;
+        let same_day_match = evaluations.iter().find(|e| {
+            e.dose_date == dose.date
+                && !((has_m(e.cvx) && has_m(cur_cvx))
+                    || (has_mu(e.cvx) && has_mu(cur_cvx))
+                    || (has_r(e.cvx) && has_r(cur_cvx)))
+        });
+        
+        if let Some(prev_eval) = same_day_match {
+            prev_eval.dose_number
+        } else {
+            None
+        }
+    }
+
+    fn is_same_day_duplicate(&self, dose: &Dose, sorted_history_subset: &[Dose]) -> bool {
+        let cur_cvx = dose.cvx;
+        sorted_history_subset.iter().any(|prev_dose| {
+            prev_dose.date == dose.date && {
+                let prev_cvx = prev_dose.cvx;
+                let has_m = |c: Cvx| matches!(c.0, Cvx::MMR | Cvx::MEASLES_RUBELLA | Cvx::MEASLES | Cvx::MMRV);
+                let has_mu = |c: Cvx| matches!(c.0, Cvx::MMR | Cvx::MUMPS | Cvx::RUBELLA_MUMPS | Cvx::MMRV);
+                let has_r = |c: Cvx| matches!(c.0, Cvx::MMR | Cvx::MEASLES_RUBELLA | Cvx::RUBELLA | Cvx::RUBELLA_MUMPS | Cvx::MMRV);
+                (has_m(prev_cvx) && has_m(cur_cvx))
+                    || (has_mu(prev_cvx) && has_mu(cur_cvx))
+                    || (has_r(prev_cvx) && has_r(cur_cvx))
+            }
+        })
+    }
+}
