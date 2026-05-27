@@ -90,7 +90,7 @@ pub fn evaluate_patient_all_groups(
     if yf_complete {
         let last_yf_dose = history
             .iter()
-            .filter(|d| d.cvx.0 == 37 || d.cvx.0 == 183 || d.cvx.0 == 184)
+            .filter(|d| d.cvx.0 == Cvx::YELLOW_FEVER || d.cvx.0 == Cvx::YELLOW_FEVER_UNSPECIFIED || d.cvx.0 == Cvx::YELLOW_FEVER_UNKNOWN)
             .map(|d| d.date)
             .max();
 

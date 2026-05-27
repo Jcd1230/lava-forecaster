@@ -17,6 +17,19 @@ pub struct Cvx(pub u16);
 impl Cvx {
     pub fn new(n: u16) -> Self { Self(n) }
     pub fn as_u16(self) -> u16 { self.0 }
+
+    // Named constants for commonly used CVX codes to eliminate magic numbers
+    pub const MMR: u16 = 3;
+    pub const MEASLES_RUBELLA: u16 = 4;
+    pub const MEASLES: u16 = 5;
+    pub const RUBELLA: u16 = 6;
+    pub const MUMPS: u16 = 7;
+    pub const PNEUMOCOCCAL_PPV23: u16 = 33;
+    pub const YELLOW_FEVER: u16 = 37;
+    pub const RUBELLA_MUMPS: u16 = 38;
+    pub const MMRV: u16 = 94;
+    pub const YELLOW_FEVER_UNSPECIFIED: u16 = 183;
+    pub const YELLOW_FEVER_UNKNOWN: u16 = 184;
 }
 
 impl std::fmt::Display for Cvx {

@@ -250,9 +250,9 @@ impl<'a> EvaluationEngine<'a> {
                 && i > 0
                 && sorted_history[i - 1].date == dose.date
             {
-                let has_m = |c: Cvx| matches!(c.0, 3 | 4 | 5 | 94);
-                let has_mu = |c: Cvx| matches!(c.0, 3 | 7 | 38 | 94);
-                let has_r = |c: Cvx| matches!(c.0, 3 | 4 | 6 | 38 | 94);
+                let has_m = |c: Cvx| matches!(c.0, Cvx::MMR | Cvx::MEASLES_RUBELLA | Cvx::MEASLES | Cvx::MMRV);
+                let has_mu = |c: Cvx| matches!(c.0, Cvx::MMR | Cvx::MUMPS | Cvx::RUBELLA_MUMPS | Cvx::MMRV);
+                let has_r = |c: Cvx| matches!(c.0, Cvx::MMR | Cvx::MEASLES_RUBELLA | Cvx::RUBELLA | Cvx::RUBELLA_MUMPS | Cvx::MMRV);
 
                 let cur_cvx = dose.cvx;
                 let same_day_match = evaluations.iter().enumerate().find(|(_, e)| {
@@ -275,9 +275,9 @@ impl<'a> EvaluationEngine<'a> {
                     prev_dose.date == dose.date && {
                         let prev_cvx = prev_dose.cvx;
                         if active_series.vaccine_group == "MMR" {
-                            let has_m = |c: Cvx| matches!(c.0, 3 | 4 | 5 | 94);
-                            let has_mu = |c: Cvx| matches!(c.0, 3 | 7 | 38 | 94);
-                            let has_r = |c: Cvx| matches!(c.0, 3 | 4 | 6 | 38 | 94);
+                            let has_m = |c: Cvx| matches!(c.0, Cvx::MMR | Cvx::MEASLES_RUBELLA | Cvx::MEASLES | Cvx::MMRV);
+                            let has_mu = |c: Cvx| matches!(c.0, Cvx::MMR | Cvx::MUMPS | Cvx::RUBELLA_MUMPS | Cvx::MMRV);
+                            let has_r = |c: Cvx| matches!(c.0, Cvx::MMR | Cvx::MEASLES_RUBELLA | Cvx::RUBELLA | Cvx::RUBELLA_MUMPS | Cvx::MMRV);
                             (has_m(prev_cvx) && has_m(cur_cvx))
                                 || (has_mu(prev_cvx) && has_mu(cur_cvx))
                                 || (has_r(prev_cvx) && has_r(cur_cvx))
@@ -708,7 +708,7 @@ impl<'a> EvaluationEngine<'a> {
                     })
                     .filter(|e| {
                         !(active_series.vaccine_group == "PNEUMOCOCCAL"
-                            && e.cvx.0 == 33
+                            && e.cvx.0 == Cvx::PNEUMOCOCCAL_PPV23
                             && compare_elapsed(
                                 patient.birth_date,
                                 e.dose_date,
