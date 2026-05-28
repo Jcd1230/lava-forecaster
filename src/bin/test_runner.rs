@@ -1566,9 +1566,15 @@ fn main() {
         for entry in entries {
             let entry = entry.unwrap();
             let path = entry.path();
-            if path.extension().map_or(false, |e| e == "json") {
+            let extension = path.extension().map_or("", |e| e.to_str().unwrap_or(""));
+            if extension == "json" || extension == "test" {
                 let content = fs::read_to_string(&path).unwrap();
-                if let Ok(mut tc) = serde_json::from_str::<UnifiedTestCase>(&content) {
+                let tc_opt = if extension == "json" {
+                    serde_json::from_str::<UnifiedTestCase>(&content).ok()
+                } else {
+                    ice_rust_forecaster_poc::test_dsl::parse_test_case_dsl(&content).ok()
+                };
+                if let Some(mut tc) = tc_opt {
                     println!("Recording Java snapshot for: {}", tc.name);
                     let doses_tuples: Vec<(NaiveDate, Cvx)> = tc.history
                         .iter()
@@ -1644,9 +1650,15 @@ fn main() {
         for entry in entries {
             let entry = entry.unwrap();
             let path = entry.path();
-            if path.extension().map_or(false, |e| e == "json") {
+            let extension = path.extension().map_or("", |e| e.to_str().unwrap_or(""));
+            if extension == "json" || extension == "test" {
                 let content = fs::read_to_string(&path).unwrap();
-                if let Ok(tc) = serde_json::from_str::<UnifiedTestCase>(&content) {
+                let tc_opt = if extension == "json" {
+                    serde_json::from_str::<UnifiedTestCase>(&content).ok()
+                } else {
+                    ice_rust_forecaster_poc::test_dsl::parse_test_case_dsl(&content).ok()
+                };
+                if let Some(tc) = tc_opt {
                     if let Some(ref fg) = filter_group {
                         if tc.group.to_uppercase() != *fg {
                             continue;

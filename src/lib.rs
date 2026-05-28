@@ -6,6 +6,7 @@ pub mod models;
 pub mod rules;
 pub mod schedule;
 pub mod forecaster_generated;
+pub mod test_dsl;
 
 use chrono::NaiveDate;
 use models::{Dose, Patient, VaccineGroupForecast};

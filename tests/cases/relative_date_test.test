@@ -1,0 +1,16 @@
+Test: relative_date_test
+Group: DTP
+
+Given a patient born on 2020-01-01
+And the evaluation date is 2026-05-20
+
+They receive CVX 106 at 2m of age -> valid
+They receive CVX 106 2m after dose 1 -> valid
+They receive CVX 106 2m after dose 2 -> valid
+They receive CVX 106 9m after dose 3 -> valid
+They receive CVX 106 3y after dose 4 -> valid
+
+Series status should be NotComplete
+Earliest date should be 2031-01-01
+Recommended date should be 2031-01-01
+Overdue date should be 2033-01-28
