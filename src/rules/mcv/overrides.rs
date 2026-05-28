@@ -2,7 +2,7 @@ use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus};
-use crate::date_utils::{TinyVec, TimePeriod, add_years};
+use crate::date_utils::{TinyVec, TimePeriod, add_years_unchecked};
 
 fn get_vaccine_min_age(cvx: Cvx) -> Option<TimePeriod> {
     match cvx.0 {
@@ -17,8 +17,8 @@ pub fn mcv_completion_condition(ctx: &EvaluationContext) -> bool {
     if ctx.valid_doses.len() == 1 {
         let (dose1_date, dose1_idx) = ctx.valid_doses[0];
         if dose1_idx == 1 {
-            let age_16 = add_years(ctx.patient.birth_date, 16);
-            let age_19 = add_years(ctx.patient.birth_date, 19);
+            let age_16 = add_years_unchecked(ctx.patient.birth_date, 16);
+            let age_19 = add_years_unchecked(ctx.patient.birth_date, 19);
             if dose1_date >= age_16 && dose1_date < age_19 {
                 // Confirm no prior administered doses before age 16y
                 let count_before_16 = ctx.history.iter().filter(|d| d.date < age_16).count();
@@ -43,7 +43,7 @@ pub fn mcv_custom_evaluation_hook(
 
         // 1. Dose 1 Evaluation Age Override
         if target_dose_idx == 1 {
-            let abs_min_age_10y = add_years(birth_date, 10);
+            let abs_min_age_10y = add_years_unchecked(birth_date, 10);
             if dose.date < abs_min_age_10y {
                 if let Some(min_age_tp) = get_vaccine_min_age(dose.cvx) {
                     let min_age_date = min_age_tp.add_to(birth_date);
@@ -61,9 +61,9 @@ pub fn mcv_custom_evaluation_hook(
         }
 
         // 2. Late Dose Evaluation (>= 22y)
-        let age_22 = add_years(birth_date, 22);
+        let age_22 = add_years_unchecked(birth_date, 22);
         if dose.date >= age_22 {
-            let age_19 = add_years(birth_date, 19);
+            let age_19 = add_years_unchecked(birth_date, 19);
             let valid_before_19 = ctx.valid_doses.iter().filter(|(dt, _)| *dt < age_19).count();
             if valid_before_19 < 2 {
                 *status = DoseStatus::Accepted;
@@ -94,7 +94,7 @@ pub fn mcv_custom_forecast_hook(
     }
 
     // 2. If patient is >= 19 years and did NOT complete the series before 19 years of age, Recommendation is Conditional/HIGH_RISK
-    let age_19 = add_years(patient.birth_date, 19);
+    let age_19 = add_years_unchecked(patient.birth_date, 19);
     if eval_date >= age_19 {
         forecast.status = SeriesStatus::ConditionallyRecommended;
         forecast.reasons = crate::reasons!["HIGH_RISK"];
@@ -107,7 +107,7 @@ pub fn mcv_custom_forecast_hook(
 
     // 3. Recommend Dose 1 at 16yrs of age if Patient >= 16yrs and < 19yrs of Age with 0 doses
     if valid_doses.is_empty() {
-        let age_16 = add_years(patient.birth_date, 16);
+        let age_16 = add_years_unchecked(patient.birth_date, 16);
         if eval_date >= age_16 && eval_date < age_19 {
             forecast.status = forecast.status.with_recommended_date(Some(age_16));
         }

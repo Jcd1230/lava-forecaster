@@ -24,6 +24,17 @@ src/
 
 ---
 
+## 1b. Error Handling Conventions
+
+The forecaster uses a single `ForecasterError` type (in `src/errors.rs`) for all fallible operations. When writing override code in vaccine group modules:
+
+- **Use `add_years_unchecked()` / `add_months_unchecked()`** for age computations with known-valid patient birth dates (these will never fail on real clinical data).
+- **Use `add_years()` / `add_months()`** (which return `Result`) only when processing untrusted external input or in contexts where graceful error propagation is needed.
+- **Use `TimePeriod::add_to()`** freely in schedule evaluation — it uses descriptive `expect()` messages since schedule periods are compile-time constants.
+- **Never use bare `.unwrap()`**. Prefer `.ok_or("context message")?` or `.expect("invariant description")` so failures are diagnosable.
+
+---
+
 ## 2. Step-by-Step Implementation Workflow
 
 To port a new vaccine group from Java ICE supporting data (under `opencds-decision-support-service/src/main/resources/data/.../Series/`):

@@ -47,17 +47,20 @@ pub fn parse_test_case_dsl(content: &str) -> Result<UnifiedTestCase, String> {
         } else if line.starts_with("Focus: ") {
             focus_code = line.replace("Focus: ", "").trim().to_string();
         } else if lower.contains("patient born on ") {
-            let date_str = lower.split("patient born on ").nth(1).unwrap().trim();
+            let date_str = lower.split("patient born on ").nth(1)
+                .ok_or("Missing date after 'patient born on'")?.trim();
             birth_date = Some(parse_date(date_str)?);
         } else if lower.contains("evaluation date is ") {
-            let date_str = lower.split("evaluation date is ").nth(1).unwrap().trim();
+            let date_str = lower.split("evaluation date is ").nth(1)
+                .ok_or("Missing date after 'evaluation date is'")?.trim();
             execution_date = Some(parse_date(date_str)?);
         } else if lower.contains("receive cvx ") {
             // "receive CVX 106 at 2 months of age" or "receive CVX 106 on 2020-03-01"
             // or "receive CVX 106 4 weeks after dose 1"
             let parts: Vec<&str> = lower.split("receive cvx ").collect();
             let after_cvx = parts[1].trim();
-            let cvx_str = after_cvx.split_whitespace().next().unwrap();
+            let cvx_str = after_cvx.split_whitespace().next()
+                .ok_or("Missing CVX code after 'receive cvx'")?;
             let cvx = cvx_str.parse::<u16>().map_err(|_| "Invalid CVX")?;
             
             let mut remainder = after_cvx[cvx_str.len()..].trim();
@@ -86,7 +89,8 @@ pub fn parse_test_case_dsl(content: &str) -> Result<UnifiedTestCase, String> {
                 let parts: Vec<&str> = remainder.split("after dose ").collect();
                 let period_str = parts[0].trim();
                 let dose_idx_str = parts[1].trim();
-                let dose_idx = dose_idx_str.parse::<usize>().unwrap() - 1;
+                let dose_idx = dose_idx_str.parse::<usize>()
+                    .map_err(|_| format!("Invalid dose number: {}", dose_idx_str))? - 1;
                 let tp = parse_period(period_str)?;
                 if dose_idx >= doses.len() {
                     return Err(format!("Reference to non-existent dose {}", dose_idx + 1));
@@ -109,11 +113,17 @@ pub fn parse_test_case_dsl(content: &str) -> Result<UnifiedTestCase, String> {
             }
             
         } else if lower.starts_with("then dose ") || (lower.starts_with("and dose ") && lower.contains(" status should be ")) {
-            let after_dose = lower.split("dose ").nth(1).unwrap();
-            let dose_num_str = after_dose.split_whitespace().next().unwrap();
-            let dose_num = dose_num_str.parse::<usize>().unwrap();
+            let after_dose = lower.split("dose ").nth(1)
+                .ok_or("Missing dose number after 'dose'")?
+                .trim();
+            let dose_num_str = after_dose.split_whitespace().next()
+                .ok_or("Missing dose number")?
+                .trim();
+            let dose_num = dose_num_str.parse::<usize>()
+                .map_err(|_| format!("Invalid dose number: {}", dose_num_str))?;
             
-            let status_str = after_dose.split(" status should be ").nth(1).unwrap().trim();
+            let status_str = after_dose.split(" status should be ").nth(1)
+                .ok_or("Missing status after 'status should be'")?.trim();
             let status = match status_str {
                 "valid" => DoseStatus::Valid,
                 "invalid" => DoseStatus::Invalid,
@@ -129,7 +139,8 @@ pub fn parse_test_case_dsl(content: &str) -> Result<UnifiedTestCase, String> {
                 cvx: doses[dose_num - 1].cvx,
             });
         } else if lower.contains("series status should be ") {
-            let status_str = lower.split("series status should be ").nth(1).unwrap().trim();
+            let status_str = lower.split("series status should be ").nth(1)
+                .ok_or("Missing status after 'series status should be'")?.trim();
             let status = match status_str {
                 "notcomplete" => "NotComplete",
                 "complete" => "Complete",
@@ -139,16 +150,20 @@ pub fn parse_test_case_dsl(content: &str) -> Result<UnifiedTestCase, String> {
             };
             expected_status = Some(status.to_string());
         } else if lower.contains("earliest date should be ") {
-            let d = lower.split("earliest date should be ").nth(1).unwrap().trim();
+            let d = lower.split("earliest date should be ").nth(1)
+                .ok_or("Missing date after 'earliest date should be'")?.trim();
             earliest_date = Some(parse_date(d)?);
         } else if lower.contains("recommended date should be ") {
-            let d = lower.split("recommended date should be ").nth(1).unwrap().trim();
+            let d = lower.split("recommended date should be ").nth(1)
+                .ok_or("Missing date after 'recommended date should be'")?.trim();
             recommended_date = Some(parse_date(d)?);
         } else if lower.contains("overdue date should be ") {
-            let d = lower.split("overdue date should be ").nth(1).unwrap().trim();
+            let d = lower.split("overdue date should be ").nth(1)
+                .ok_or("Missing date after 'overdue date should be'")?.trim();
             overdue_date = Some(parse_date(d)?);
         } else if lower.contains("latest date should be ") {
-            let d = lower.split("latest date should be ").nth(1).unwrap().trim();
+            let d = lower.split("latest date should be ").nth(1)
+                .ok_or("Missing date after 'latest date should be'")?.trim();
             latest_date = Some(parse_date(d)?);
         }
     }

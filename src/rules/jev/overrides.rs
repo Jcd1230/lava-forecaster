@@ -3,7 +3,7 @@ use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
-use crate::date_utils::{TinyVec, add_years, TimePeriod};
+use crate::date_utils::{TinyVec, add_years_unchecked, TimePeriod};
 
 pub fn jev_custom_evaluation_hook(
     series_name: &str,
@@ -14,8 +14,8 @@ pub fn jev_custom_evaluation_hook(
 ) {
     if let Some(dose) = ctx.current_dose {
         if target_dose_idx == 2 {
-            let age_18 = add_years(ctx.patient.birth_date, 18);
-            let age_66 = add_years(ctx.patient.birth_date, 66);
+            let age_18 = add_years_unchecked(ctx.patient.birth_date, 18);
+            let age_66 = add_years_unchecked(ctx.patient.birth_date, 66);
 
             if series_name == "JEVC_RISK_2_DOSE_SERIES" {
                 if dose.date >= age_18 && dose.date < age_66 {
@@ -96,7 +96,7 @@ pub fn jev_custom_forecast_hook(
                 forecast.status = forecast.status.with_overdue_date(None);
             }
 
-            let age_66 = add_years(patient.birth_date, 66);
+            let age_66 = add_years_unchecked(patient.birth_date, 66);
             if forecast.status.recommended_date().map(|d| d >= age_66).unwrap_or(false) {
                 let new_date = prev_dose_date + chrono::Duration::days(28);
                 forecast.status = forecast.status.with_earliest_date(Some(new_date));
@@ -124,7 +124,7 @@ pub fn jev_group_selection(
     
     let tp_18y_minus_4d = crate::time_period!("18y-4d");
     let age_18_minus_4d = tp_18y_minus_4d.add_to(patient.birth_date);
-    let age_66 = add_years(patient.birth_date, 66);
+    let age_66 = add_years_unchecked(patient.birth_date, 66);
 
     let select_accelerated = age_at_reference >= age_18_minus_4d && age_at_reference < age_66;
 

@@ -1,7 +1,7 @@
 use crate::engine::CandidateForecastsExt;
 use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
-use crate::date_utils::{TinyVec, add_years, add_months, compare_elapsed, TimePeriod};
+use crate::date_utils::{TinyVec, add_years_unchecked, add_months_unchecked, compare_elapsed, TimePeriod};
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, 
     Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus,
@@ -169,7 +169,7 @@ pub fn evaluate_doses_seasonally(
                 let mut is_valid_age = true;
                 if season == "COVID_19_AUG_2025_SEASON" {
                     if active_series_name == "COVID_19_AUG_2025_GTE_65_SERIES" {
-                        let age_65 = add_years(patient.birth_date, 65);
+                        let age_65 = add_years_unchecked(patient.birth_date, 65);
                         let within_12m_of_65 = season_start() < age_65
                             && compare_elapsed(season_start(), age_65, &crate::time_period!("12m"))
                                 != std::cmp::Ordering::Greater;
@@ -177,7 +177,7 @@ pub fn evaluate_doses_seasonally(
                             is_valid_age = false;
                         }
                     } else if active_series_name == "COVID_19_AUG_2025_2_Y_TO_64_Y_SERIES" {
-                        let age_2y = add_years(patient.birth_date, 2);
+                        let age_2y = add_years_unchecked(patient.birth_date, 2);
                         if dose.date < age_2y {
                             is_valid_age = false;
                         }
@@ -215,7 +215,7 @@ pub fn evaluate_doses_seasonally(
                             })
                             .count();
                         if age_at_season_start != std::cmp::Ordering::Less && novavax_count_in_season < 2 {
-                            let age_12y = add_years(patient.birth_date, 12);
+                            let age_12y = add_years_unchecked(patient.birth_date, 12);
                             if dose.date < age_12y {
                                 status = DoseStatus::Accepted;
                                 reasons.push(EvaluationReason::VaccineNotPartOfSeries);
@@ -239,7 +239,7 @@ pub fn evaluate_doses_seasonally(
                     let days_since_last = (dose.date - last_prior.dose_date).num_days();
                     
                     let season_key = if season == "COVID_19_AUG_2025_SEASON" {
-                        let age_65_date = add_years(patient.birth_date, 65);
+                        let age_65_date = add_years_unchecked(patient.birth_date, 65);
                         if dose.date >= age_65_date {
                             "COVID_19_AUG_2025_SEASON_GTE65"
                         } else {
@@ -294,7 +294,7 @@ pub fn evaluate_doses_seasonally(
 
         // 6. Dose numbering
         let season_key = if season == "COVID_19_AUG_2025_SEASON" {
-            let age_65_date = add_years(patient.birth_date, 65);
+            let age_65_date = add_years_unchecked(patient.birth_date, 65);
             if dose.date >= age_65_date {
                 "COVID_19_AUG_2025_SEASON_GTE65"
             } else {
@@ -432,7 +432,7 @@ pub fn covid19_custom_forecast_hook(
         .max_by_key(|d| d.date);
 
     let age_6m = crate::time_period!("6m").add_to(patient.birth_date);
-    let age_65y = add_years(patient.birth_date, 65);
+    let age_65y = add_years_unchecked(patient.birth_date, 65);
 
     if active_series_name == "COVID_19_AUG_2025_LT_2_SERIES" {
         // Skip check
@@ -542,7 +542,7 @@ pub fn covid19_custom_forecast_hook(
             forecast.status = forecast.status.with_latest_date(None);
             forecast.reasons = crate::reasons!["COMPLETE_HIGH_RISK"];
         } else {
-            let is_under_19 = eval_date < add_years(patient.birth_date, 19);
+            let is_under_19 = eval_date < add_years_unchecked(patient.birth_date, 19);
             if is_under_19 {
                 if prior_season_valid_doses.is_empty() {
                     forecast.status = SeriesStatus::default();
@@ -601,7 +601,7 @@ pub fn covid19_custom_forecast_hook(
             
             let anchor_dose = last_current_season_dose.unwrap();
             let earliest = anchor_dose.date + chrono::Duration::days(56);
-            let recommended = add_months(anchor_dose.date, 6);
+            let recommended = add_months_unchecked(anchor_dose.date, 6);
 
             forecast.status = forecast.status.with_earliest_date(Some(earliest));
             forecast.status = forecast.status.with_recommended_date(Some(recommended));
@@ -656,7 +656,7 @@ pub fn covid19_group_selection(
     {
         "COVID_19_AUG_2025_LT_2_SERIES"
     } else {
-        let age_65 = add_years(patient.birth_date, 65);
+        let age_65 = add_years_unchecked(patient.birth_date, 65);
         let within_12m_of_65 = season_start() < age_65
             && compare_elapsed(season_start(), age_65, &crate::time_period!("12m"))
                 != std::cmp::Ordering::Greater;

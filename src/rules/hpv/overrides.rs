@@ -3,7 +3,7 @@ use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
-use crate::date_utils::{TinyVec, TimePeriod, add_years};
+use crate::date_utils::{TinyVec, TimePeriod, add_years_unchecked};
 
 fn is_hpv_cvx(cvx: Cvx) -> bool {
     matches!(cvx.0, cvx!("62") | cvx!("118") | cvx!("137") | cvx!("165"))
@@ -34,7 +34,7 @@ pub fn hpv_custom_evaluation_hook(
         }
 
         // 2. Age-based acceptance cap: if >= 46 years and series is not complete, mark Accepted
-        let age_46 = add_years(ctx.patient.birth_date, 46);
+        let age_46 = add_years_unchecked(ctx.patient.birth_date, 46);
         if dose.date >= age_46 {
             // Check if series is not complete before this dose
             if ctx.valid_doses.len() < target_dose_idx {
@@ -86,9 +86,9 @@ pub fn hpv_custom_forecast_hook(
         return;
     }
 
-    let age_15 = add_years(patient.birth_date, 15);
-    let age_27 = add_years(patient.birth_date, 27);
-    let age_46 = add_years(patient.birth_date, 46);
+    let age_15 = add_years_unchecked(patient.birth_date, 15);
+    let age_27 = add_years_unchecked(patient.birth_date, 27);
+    let age_46 = add_years_unchecked(patient.birth_date, 46);
 
     let has_hpv_history = _history.iter().any(|dose| is_hpv_cvx(dose.cvx));
 
@@ -192,7 +192,7 @@ pub fn hpv_group_selection(
     match first_valid_dose_date {
         None => {
             // No doses administered yet: select based on age on evaluation date
-            let age_15 = add_years(patient.birth_date, 15);
+            let age_15 = add_years_unchecked(patient.birth_date, 15);
             if eval_date < age_15 {
                 "HPV_2_DOSE_SERIES"
             } else {
@@ -200,7 +200,7 @@ pub fn hpv_group_selection(
             }
         }
         Some(d1_date) => {
-            let age_15_at_d1 = add_years(patient.birth_date, 15);
+            let age_15_at_d1 = add_years_unchecked(patient.birth_date, 15);
             if d1_date < age_15_at_d1 {
                 // Initiated before age 15 -> eligible for 2-dose series
                 let has_valid_d2_in_2_dose = forecast_2.evaluations.iter()

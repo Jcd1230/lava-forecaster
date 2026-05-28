@@ -163,3 +163,30 @@ For logic that deviates from standard parameters, individual vaccine modules use
 * **Evaluation Overrides**: Modify validity or reasons for a dose dynamically (e.g. live-virus intervals).
 * **Forecast Overrides**: Exclude patients based on birth year, or conditionally complete vaccine series (e.g. HepB adult rules).
 * **Series Switches**: Dynamically change target series based on vaccines received.
+
+---
+
+## Error Handling
+
+The forecaster uses a standardized `ForecasterError` enum (defined in `src/errors.rs`) as the single error type across all modules:
+
+```rust
+pub enum ForecasterError {
+    ParseError(String),              // Malformed input (XML, JSON, date strings)
+    InvalidTimePeriod(String),       // Unparseable TimePeriod expression
+    DateArithmeticError { ... },     // Invalid or out-of-range date calculation
+    FlatbufferError(String),         // FlatBuffers encoding/decoding failure
+    TestDslError { line, detail },   // Test DSL file parsing failure
+}
+```
+
+### Design Principles
+
+1. **Fallible core, infallible hot path**: Functions like `add_months()` and `add_years()` return `Result<NaiveDate, ForecasterError>`, enabling proper error propagation in parsing and external-input contexts. For the evaluation engine's hot path (where inputs are always valid clinical dates), `_unchecked` convenience wrappers (`add_years_unchecked`, `add_months_unchecked`) are used — these panic with a descriptive message only if date arithmetic truly overflows (which cannot occur with valid patient data).
+
+2. **`TimePeriod::add_to` vs `try_add_to`**: The `add_to` method uses descriptive `expect()` messages (suitable for schedule evaluation where periods are compile-time constants). The `try_add_to` method returns `Result` for use in contexts where graceful recovery is needed.
+
+3. **No silent failures**: REST handlers return proper `StatusCode::BAD_REQUEST` on parse failures. The test DSL parser propagates all errors with context (line number, detail message).
+
+4. **From implementations**: Common external error types (`ParseIntError`, `Utf8Error`, `quick_xml::Error`, `chrono::ParseError`, etc.) all convert into `ForecasterError` via `From` trait implementations to enable `?` operator usage.
+

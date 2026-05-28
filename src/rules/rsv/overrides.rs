@@ -1,6 +1,6 @@
 use ice_cvx_macro::cvx;
 use chrono::{Datelike, NaiveDate};
-use crate::date_utils::{TinyVec, add_months, add_years, compare_elapsed, TimePeriod};
+use crate::date_utils::{TinyVec, add_months_unchecked, add_years_unchecked, compare_elapsed, TimePeriod};
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, 
     Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus,
@@ -157,7 +157,7 @@ pub fn rsv_custom_forecast_hook(
         return;
     }
 
-    let age_75 = add_years(patient.birth_date, 75);
+    let age_75 = add_years_unchecked(patient.birth_date, 75);
     let adult_recommendation_date = age_75.max(date(2024, 6, 26));
     forecast.status = SeriesStatus::default();
     forecast.reasons = crate::reasons!["NOT_COMPLETE"];
@@ -173,7 +173,7 @@ pub fn rsv_group_selection(
     eval_date: NaiveDate,
     _candidate_forecasts: &mut [(&'static str, VaccineGroupForecast)],
 ) -> &'static str {
-    let adult_start = add_months(patient.birth_date, 20);
+    let adult_start = add_months_unchecked(patient.birth_date, 20);
     if eval_date >= adult_start {
         "RSV_ADULT_SERIES"
     } else {

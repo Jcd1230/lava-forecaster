@@ -73,7 +73,7 @@ pub fn h1n1_group_selection(
     eval_date: NaiveDate,
     candidate_forecasts: &mut [(&'static str, VaccineGroupForecast)],
 ) -> &'static str {
-    let age_10y = crate::date_utils::add_years(patient.birth_date, 10);
+    let age_10y = crate::date_utils::add_years_unchecked(patient.birth_date, 10);
     
     let last_h1n1_dose = history.iter()
         .filter(|d| matches!(d.cvx.0, cvx!("125") | cvx!("126") | cvx!("127") | cvx!("128")))

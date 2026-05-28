@@ -90,7 +90,7 @@ pub fn zoster_custom_forecast_hook(
     }
 
     // Age 50 clamp: The entire Zoster series is recommended starting at age 50.
-    let age_50 = crate::date_utils::add_years(patient.birth_date, 50);
+    let age_50 = crate::date_utils::add_years_unchecked(patient.birth_date, 50);
 
     clamp_date_at_least(&mut forecast.status.earliest_date(), age_50);
     clamp_date_at_least(&mut forecast.status.recommended_date(), age_50);

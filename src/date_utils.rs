@@ -56,13 +56,14 @@ fn last_day_of_month(year: i32, month: u32) -> u32 {
                 28
             }
         }
-        _ => panic!("Invalid month: {}", month),
+        // Safety: callers always pass month values derived from NaiveDate::month() (1..=12)
+        _ => unreachable!("Invalid month: {}", month),
     }
 }
 
-pub fn add_months(date: NaiveDate, duration: i32) -> NaiveDate {
+pub fn add_months(date: NaiveDate, duration: i32) -> Result<NaiveDate, crate::errors::ForecasterError> {
     if duration == 0 {
-        return date;
+        return Ok(date);
     }
     
     let day_before = date.day();
@@ -87,17 +88,25 @@ pub fn add_months(date: NaiveDate, duration: i32) -> NaiveDate {
         rolled_over = true;
     }
     
-    let mut result = NaiveDate::from_ymd_opt(year, month as u32, target_day).unwrap();
+    let mut result = NaiveDate::from_ymd_opt(year, month as u32, target_day)
+        .ok_or_else(|| crate::errors::ForecasterError::DateArithmeticError {
+            operation: "add_months",
+            detail: format!("could not construct date {}-{:02}-{:02}", year, month, target_day),
+        })?;
     if rolled_over {
         // In ICE, adding months that clamp to the end-of-month rolls over by +1 day (e.g. Aug 31 + 1m -> Oct 1)
-        result = result.succ_opt().unwrap();
+        result = result.succ_opt()
+            .ok_or_else(|| crate::errors::ForecasterError::DateArithmeticError {
+                operation: "add_months",
+                detail: format!("successor of {} overflows", result),
+            })?;
     }
-    result
+    Ok(result)
 }
 
-pub fn add_years(date: NaiveDate, duration: i32) -> NaiveDate {
+pub fn add_years(date: NaiveDate, duration: i32) -> Result<NaiveDate, crate::errors::ForecasterError> {
     if duration == 0 {
-        return date;
+        return Ok(date);
     }
     
     let day_before = date.day();
@@ -113,11 +122,35 @@ pub fn add_years(date: NaiveDate, duration: i32) -> NaiveDate {
         rolled_over = true;
     }
     
-    let mut result = NaiveDate::from_ymd_opt(year, month, target_day).unwrap();
+    let mut result = NaiveDate::from_ymd_opt(year, month, target_day)
+        .ok_or_else(|| crate::errors::ForecasterError::DateArithmeticError {
+            operation: "add_years",
+            detail: format!("could not construct date {}-{:02}-{:02}", year, month, target_day),
+        })?;
     if rolled_over {
-        result = result.succ_opt().unwrap();
+        result = result.succ_opt()
+            .ok_or_else(|| crate::errors::ForecasterError::DateArithmeticError {
+                operation: "add_years",
+                detail: format!("successor of {} overflows", result),
+            })?;
     }
-    result
+    Ok(result)
+}
+
+/// Convenience wrapper: adds years to a date, panicking only on truly impossible
+/// date combinations (e.g. NaiveDate::MAX + 1y). Safe for clinical age computations
+/// where inputs are valid patient birth dates and offsets are small (< 200y).
+#[inline]
+pub fn add_years_unchecked(date: NaiveDate, duration: i32) -> NaiveDate {
+    add_years(date, duration).expect("date arithmetic overflow in add_years_unchecked")
+}
+
+/// Convenience wrapper: adds months to a date, panicking only on truly impossible
+/// date combinations. Safe for clinical age computations where inputs are valid
+/// patient birth dates and offsets are small.
+#[inline]
+pub fn add_months_unchecked(date: NaiveDate, duration: i32) -> NaiveDate {
+    add_months(date, duration).expect("date arithmetic overflow in add_months_unchecked")
 }
 
 impl TimePeriod {
@@ -200,30 +233,87 @@ impl TimePeriod {
                 match part.unit {
                     DurationUnit::Days => {
                         if part.value >= 0 {
-                            date = date.checked_add_days(Days::new(part.value as u64)).unwrap();
+                            date = date.checked_add_days(Days::new(part.value as u64))
+                                .expect("date overflow in add_to (days+)");
                         } else {
-                            date = date.checked_sub_days(Days::new((-part.value) as u64)).unwrap();
+                            date = date.checked_sub_days(Days::new((-part.value) as u64))
+                                .expect("date overflow in add_to (days-)");
                         }
                     }
                     DurationUnit::Weeks => {
                         let total_days = part.value * 7;
                         if total_days >= 0 {
-                            date = date.checked_add_days(Days::new(total_days as u64)).unwrap();
+                            date = date.checked_add_days(Days::new(total_days as u64))
+                                .expect("date overflow in add_to (weeks+)");
                         } else {
-                            date = date.checked_sub_days(Days::new((-total_days) as u64)).unwrap();
+                            date = date.checked_sub_days(Days::new((-total_days) as u64))
+                                .expect("date overflow in add_to (weeks-)");
                         }
                     }
                     DurationUnit::Months => {
-                        date = add_months(date, part.value);
+                        date = add_months(date, part.value)
+                            .expect("date overflow in add_to (months)");
                     }
                     DurationUnit::Years => {
-                        date = add_years(date, part.value);
+                        date = add_years(date, part.value)
+                            .expect("date overflow in add_to (years)");
                     }
                 }
             }
             idx += 1;
         }
         date
+    }
+
+    /// Fallible version of `add_to` that returns a `Result` instead of panicking.
+    /// Use this in contexts where graceful error propagation is preferred.
+    pub fn try_add_to(&self, mut date: NaiveDate) -> Result<NaiveDate, crate::errors::ForecasterError> {
+        let mut idx = 0;
+        while idx < self.parts.len() {
+            if let Some(ref part) = self.parts[idx] {
+                match part.unit {
+                    DurationUnit::Days => {
+                        if part.value >= 0 {
+                            date = date.checked_add_days(Days::new(part.value as u64))
+                                .ok_or_else(|| crate::errors::ForecasterError::DateArithmeticError {
+                                    operation: "add_to",
+                                    detail: format!("adding {} days to {} overflows", part.value, date),
+                                })?;
+                        } else {
+                            date = date.checked_sub_days(Days::new((-part.value) as u64))
+                                .ok_or_else(|| crate::errors::ForecasterError::DateArithmeticError {
+                                    operation: "add_to",
+                                    detail: format!("subtracting {} days from {} overflows", -part.value, date),
+                                })?;
+                        }
+                    }
+                    DurationUnit::Weeks => {
+                        let total_days = part.value * 7;
+                        if total_days >= 0 {
+                            date = date.checked_add_days(Days::new(total_days as u64))
+                                .ok_or_else(|| crate::errors::ForecasterError::DateArithmeticError {
+                                    operation: "add_to",
+                                    detail: format!("adding {} weeks to {} overflows", part.value, date),
+                                })?;
+                        } else {
+                            date = date.checked_sub_days(Days::new((-total_days) as u64))
+                                .ok_or_else(|| crate::errors::ForecasterError::DateArithmeticError {
+                                    operation: "add_to",
+                                    detail: format!("subtracting {} weeks from {} overflows", -part.value, date),
+                                })?;
+                        }
+                    }
+                    DurationUnit::Months => {
+                        date = add_months(date, part.value)?;
+                    }
+                    DurationUnit::Years => {
+                        date = add_years(date, part.value)?;
+                    }
+                }
+            }
+            idx += 1;
+        }
+        Ok(date)
     }
 }
 

@@ -1,6 +1,6 @@
 use crate::engine::CandidateForecastsExt;
 use ice_cvx_macro::cvx;
-use crate::date_utils::{TinyVec, add_years, TimePeriod};
+use crate::date_utils::{TinyVec, add_years_unchecked, TimePeriod};
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, 
     Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus, VaccineGroupForecast,
@@ -114,7 +114,7 @@ pub fn menb_custom_evaluation_hook(
         return;
     };
 
-    let age_10 = add_years(ctx.patient.birth_date, 10);
+    let age_10 = add_years_unchecked(ctx.patient.birth_date, 10);
     if matches!(dose.cvx.0, cvx!("162") | cvx!("163"))
         && dose.date >= age_10
         && reasons.contains(&EvaluationReason::BelowMinimumAge)
@@ -197,14 +197,14 @@ pub fn menb_custom_forecast_hook(
     }
 
     if valid_doses.is_empty() {
-        let age_10 = add_years(patient.birth_date, 10);
+        let age_10 = add_years_unchecked(patient.birth_date, 10);
         if eval_date < age_10 {
             forecast.status = SeriesStatus::NotRecommended;
             forecast.reasons = crate::reasons!["BELOW_MINIMUM_AGE_HIGH_RISK_SERIES"];
-        } else if eval_date < add_years(patient.birth_date, 16) {
+        } else if eval_date < add_years_unchecked(patient.birth_date, 16) {
             forecast.status = SeriesStatus::ConditionallyRecommended;
             forecast.reasons = crate::reasons!["HIGH_RISK"];
-        } else if eval_date < add_years(patient.birth_date, 24) {
+        } else if eval_date < add_years_unchecked(patient.birth_date, 24) {
             forecast.status = SeriesStatus::ConditionallyRecommended;
             forecast.reasons = crate::reasons!["CLINICAL_PATIENT_DISCRETION"];
         } else {

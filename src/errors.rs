@@ -1,10 +1,34 @@
 use std::fmt;
 
+/// Standardized error type for all forecaster operations.
+///
+/// Variants are organized by failure domain:
+/// - **Parse errors**: Malformed input (XML, JSON, DSL, date strings)
+/// - **Date arithmetic errors**: Invalid or out-of-range date calculations
+/// - **Evaluation errors**: Failures during dose evaluation or forecasting
+/// - **Serialization errors**: Response encoding failures (FlatBuffers, JSON)
 #[derive(Debug)]
 pub enum ForecasterError {
+    /// Failed to parse input data (XML, JSON, or other wire formats).
     ParseError(String),
+
+    /// A time period string could not be interpreted.
     InvalidTimePeriod(String),
+
+    /// A date arithmetic operation produced an invalid or out-of-range date.
+    DateArithmeticError {
+        operation: &'static str,
+        detail: String,
+    },
+
+    /// FlatBuffers serialization/deserialization failure.
     FlatbufferError(String),
+
+    /// A test DSL file could not be parsed.
+    TestDslError {
+        line: usize,
+        detail: String,
+    },
 }
 
 impl fmt::Display for ForecasterError {
@@ -12,7 +36,13 @@ impl fmt::Display for ForecasterError {
         match self {
             ForecasterError::ParseError(msg) => write!(f, "Parse error: {}", msg),
             ForecasterError::InvalidTimePeriod(msg) => write!(f, "Invalid time period: {}", msg),
+            ForecasterError::DateArithmeticError { operation, detail } => {
+                write!(f, "Date arithmetic error in {}: {}", operation, detail)
+            }
             ForecasterError::FlatbufferError(msg) => write!(f, "Flatbuffer error: {}", msg),
+            ForecasterError::TestDslError { line, detail } => {
+                write!(f, "Test DSL error at line {}: {}", line, detail)
+            }
         }
     }
 }

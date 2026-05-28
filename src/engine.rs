@@ -929,7 +929,7 @@ fn get_same_day_priority(
             _ => 0,
         },
         "HEP_A" => {
-            let age_19 = crate::date_utils::add_years(birth_date, 19);
+            let age_19 = crate::date_utils::add_years_unchecked(birth_date, 19);
             if dose_date >= age_19 {
                 if cvx_code == 52 {
                     0

@@ -2,7 +2,7 @@ use crate::engine::CandidateForecastsExt;
 use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::{EvaluationContext, ParameterOverrideRule, RecommendationOverrideRule};
-use crate::date_utils::{TinyVec, TimePeriod, compare_elapsed, add_years, add_months};
+use crate::date_utils::{TinyVec, TimePeriod, compare_elapsed, add_years_unchecked, add_months_unchecked};
 use crate::models::{Cvx, Patient, SeriesForecast, Dose, DoseStatus, EvaluationReason, VaccineGroupForecast, DoseEvaluation};
 use std::collections::HashMap;
 
@@ -62,7 +62,7 @@ pub fn polio_completion_rules() -> Vec<crate::engine::ConditionalCompletionRule>
 pub fn polio_custom_completion_hook(ctx: &crate::engine::EvaluationContext) -> bool {
     let aug_7_2009 = NaiveDate::from_ymd_opt(2009, 8, 7).unwrap();
     let birth = ctx.patient.birth_date;
-    let age_4y_minus_4d = add_years(birth, 4) - chrono::Duration::days(4);
+    let age_4y_minus_4d = add_years_unchecked(birth, 4) - chrono::Duration::days(4);
 
     match ctx.active_series_name {
         "POLIO_4_DOSE_SERIES" => {
@@ -198,10 +198,10 @@ pub fn polio_custom_forecast_hook(
                     || (forecast.series_name == "POLIO_FRACTIONAL_IPV_SERIES" && target_dose == 5);
                 if is_final_dose {
                     let birth = patient.birth_date;
-                    let age_4y = add_years(birth, 4);
+                    let age_4y = add_years_unchecked(birth, 4);
                     let mut new_earliest = age_4y;
                     if let Some((last_dose_date, _)) = valid_doses.last() {
-                        let interval_6m = add_months(*last_dose_date, 6);
+                        let interval_6m = add_months_unchecked(*last_dose_date, 6);
                         new_earliest = new_earliest.max(interval_6m);
                     }
                     forecast.status = forecast.status.with_earliest_date(Some(new_earliest));
@@ -220,9 +220,9 @@ pub fn polio_custom_forecast_hook(
 
     if is_final_awaiting_age && matches!(forecast.status, crate::models::SeriesStatus::NotComplete { .. }) {
         let birth = patient.birth_date;
-        let age_4y = add_years(birth, 4);
+        let age_4y = add_years_unchecked(birth, 4);
         // Overdue at 7y+4w-1d (Java treats the latest_recommended_age boundary as exclusive)
-        let age_7y_4w_minus_1d = add_years(birth, 7) + chrono::Duration::weeks(4) - chrono::Duration::days(1);
+        let age_7y_4w_minus_1d = add_years_unchecked(birth, 7) + chrono::Duration::weeks(4) - chrono::Duration::days(1);
         // Use max of age_4y and 6m from the last non-OPV administered shot (including invalid shots)
         let last_non_opv = history.iter()
             .filter(|d| {
@@ -233,7 +233,7 @@ pub fn polio_custom_forecast_hook(
             .last();
         let mut earliest = age_4y;
         if let Some(last_dose) = last_non_opv {
-            let interval_6m = add_months(last_dose.date, 6);
+            let interval_6m = add_months_unchecked(last_dose.date, 6);
             earliest = earliest.max(interval_6m);
         }
         forecast.status = forecast.status.with_earliest_date(Some(earliest));
@@ -250,12 +250,12 @@ pub fn polio_custom_forecast_hook(
 
     if is_second_to_last && !valid_doses.is_empty() {
         let birth = patient.birth_date;
-        let age_4y = add_years(birth, 4);
+        let age_4y = add_years_unchecked(birth, 4);
         let is_at_least_4y = eval_date >= age_4y || forecast.status.recommended_date().map(|r| r >= age_4y).unwrap_or(false);
         
         if is_at_least_4y {
             let (last_dose_date, _) = valid_doses.last().unwrap();
-            let min_interval_date = add_months(*last_dose_date, 6);
+            let min_interval_date = add_months_unchecked(*last_dose_date, 6);
             
             let mut earliest = forecast.status.earliest_date().unwrap_or(min_interval_date).max(min_interval_date);
             let mut recommended = forecast.status.recommended_date().unwrap_or(min_interval_date).max(min_interval_date);
@@ -351,7 +351,7 @@ pub fn polio_custom_evaluation_hook(
             || (series_name == "POLIO_FRACTIONAL_IPV_SERIES" && target_dose_idx == 5);
             
         if is_final_dose && dose.date >= NaiveDate::from_ymd_opt(2009, 8, 7).unwrap() {
-            let age_4y_minus_4d = add_years(ctx.patient.birth_date, 4) - chrono::Duration::days(4);
+            let age_4y_minus_4d = add_years_unchecked(ctx.patient.birth_date, 4) - chrono::Duration::days(4);
             if dose.date < age_4y_minus_4d {
                 // Dose-3 abs_min_age is 94d (from POLIO_4_DOSE_SERIES schedule)
                 let dose3_abs_min_age_ok = (dose.date - ctx.patient.birth_date).num_days() >= 94;
@@ -384,7 +384,7 @@ pub fn polio_custom_extra_dose_hook(
     }
 
     let birth_date = ctx.patient.birth_date;
-    let age_4y_minus_4d = add_years(birth_date, 4) - chrono::Duration::days(4);
+    let age_4y_minus_4d = add_years_unchecked(birth_date, 4) - chrono::Duration::days(4);
     let aug_7_2009 = NaiveDate::from_ymd_opt(2009, 8, 7).unwrap();
 
     // Handle the "awaiting-completion" dose: when all required doses are valid but the
@@ -410,7 +410,7 @@ pub fn polio_custom_extra_dose_hook(
         }
     }
 
-    let age_18 = add_years(birth_date, 18);
+    let age_18 = add_years_unchecked(birth_date, 18);
     if dose.date >= age_18 {
         if ctx.target_dose_number == ctx.valid_doses.len() + 1 {
             return Some((DoseStatus::Valid, crate::reasons![EvaluationReason::BoosterDose]));
