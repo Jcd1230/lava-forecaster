@@ -1,0 +1,36 @@
+target/
+**/target/
+ice-app/
+*.class
+
+.idea/
+*.iml
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+.ai/
+.output.txt
+
+tmp/
+curl-rest-tests/tmp/
+
+# Local VCS & Agent Directories
+.jj/
+
+# Python Cache Files
+**/__pycache__/
+**/*.pyc
+
+# Legacy ICE directories (not part of this repo)
+opencds-*/
+local-repo/
+fhir/
+ice-implementation-guide/
+.build_config/
+.gcp.config/
+pom.xml
+LICENSE-header.txt
+README.HISTORY
