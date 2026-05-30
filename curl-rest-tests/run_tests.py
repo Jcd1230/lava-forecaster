@@ -40,7 +40,7 @@ def main():
     print(f"Executing: {' '.join(cmd)}")
     import os
     repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    cargo_cwd = os.path.join(repo_root, "ice-rust-forecaster-poc")
+    cargo_cwd = repo_root
     try:
         res = subprocess.run(cmd, cwd=cargo_cwd, check=True)
         sys.exit(res.returncode)

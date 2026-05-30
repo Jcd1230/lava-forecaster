@@ -1,4 +1,5 @@
 [tools]
+rust = "latest"
 flatc = { version = "latest", exe = "flatc" }
 
 [tasks.test]

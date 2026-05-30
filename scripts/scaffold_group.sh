@@ -15,7 +15,7 @@ GROUP_LOWER=$(echo "$1" | tr '[:upper:]' '[:lower:]')
 GROUP_UPPER=$(echo "${2:-$1}" | tr '[:lower:]' '[:upper:]')
 
 # Correct paths relative to workspace root
-RULES_DIR="ice-rust-forecaster-poc/src/rules"
+RULES_DIR="src/rules"
 CASES_DIR="curl-rest-tests/cases"
 GROUP_DIR="${RULES_DIR}/${GROUP_LOWER}"
 
