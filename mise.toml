@@ -3,20 +3,20 @@ rust = "latest"
 flatc = { version = "latest", exe = "flatc" }
 
 [tasks.test]
-description = "Run rest verification tests against Rust POC"
-run = "python3 curl-rest-tests/run_tests.py"
+description = "Run verification tests against Rust snapshots"
+run = "cargo run --release --bin test_runner -- --run tests/cases"
 
 [tasks.test-group]
-description = "Run rest verification tests for one vaccine group"
-run = "python3 curl-rest-tests/run_tests.py --group"
+description = "Run verification tests for one vaccine group"
+run = "cargo run --release --bin test_runner -- --run tests/cases --group"
 
 [tasks.test-compare]
 description = "Compare outputs between Java ICE service and Rust POC"
-run = "python3 curl-rest-tests/run_tests.py --compare"
+run = "cargo run --release --bin test_runner -- --run tests/cases --compare"
 
 [tasks.test-record]
 description = "Record Java ICE output as the expected snapshot results"
-run = "python3 curl-rest-tests/run_tests.py --record"
+run = "cargo run --release --bin test_runner -- --record tests/cases"
 
 [tasks.scaffold]
 description = "Scaffold a new vaccine group module and registration"

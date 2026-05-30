@@ -13,6 +13,7 @@ ice-app/
 
 .ai/
 .output.txt
+planning/
 
 tmp/
 curl-rest-tests/tmp/

@@ -1,0 +1,321 @@
+    Checking pin-project-lite v0.2.17
+    Checking bytes v1.11.1
+    Checking itoa v1.0.18
+    Checking stable_deref_trait v1.2.1
+    Checking futures-core v0.3.32
+    Checking log v0.4.29
+    Checking memchr v2.8.0
+    Checking futures-sink v0.3.32
+    Checking once_cell v1.21.4
+    Checking slab v0.4.12
+    Checking libc v0.2.186
+    Checking serde_core v1.0.228
+    Checking writeable v0.6.3
+    Checking litemap v0.8.2
+    Checking zerofrom v0.1.8
+    Checking futures-task v0.3.32
+    Checking futures-io v0.3.32
+    Checking percent-encoding v2.3.2
+    Checking utf8_iter v1.0.4
+    Checking yoke v0.8.2
+    Checking tower-service v0.3.3
+    Checking bitflags v2.11.1
+    Checking equivalent v1.0.2
+    Checking hashbrown v0.17.1
+    Checking tracing-core v0.1.36
+    Checking icu_properties_data v2.2.0
+    Checking icu_normalizer_data v2.2.0
+    Checking cfg-if v1.0.4
+    Checking fnv v1.0.7
+    Checking try-lock v0.2.5
+    Checking foreign-types-shared v0.1.1
+    Checking atomic-waker v1.1.2
+    Checking httparse v1.10.1
+    Checking futures-channel v0.3.32
+    Checking foreign-types v0.3.2
+    Checking want v0.3.1
+    Checking form_urlencoded v1.2.2
+    Checking sync_wrapper v1.0.2
+    Checking zerovec v0.11.6
+    Checking zerotrie v0.2.4
+    Checking httpdate v1.0.3
+    Checking tower-layer v0.3.3
+    Checking crossbeam-utils v0.8.21
+    Checking base64 v0.22.1
+    Checking ryu v1.0.23
+    Checking ipnet v2.12.0
+    Checking openssl-probe v0.2.1
+    Checking zmij v1.0.21
+    Checking http v1.4.0
+    Checking mime v0.3.17
+    Checking zeroize v1.8.2
+    Checking num-traits v0.2.19
+    Checking encoding_rs v0.8.35
+    Checking matchit v0.7.3
+    Checking iana-time-zone v0.1.65
+    Checking futures-util v0.3.32
+    Checking csv-core v0.1.13
+    Checking rustls-pki-types v1.14.1
+    Checking tracing v0.1.44
+    Checking indexmap v2.14.0
+    Checking either v1.16.0
+    Checking flatbuffers v25.12.19
+    Checking crossbeam-epoch v0.9.18
+    Checking mio v1.2.0
+    Checking socket2 v0.6.3
+    Checking openssl-sys v0.9.116
+    Checking jemalloc-sys v0.5.4+5.3.0-patched
+    Checking crossbeam-deque v0.8.6
+    Checking jemallocator v0.5.4
+    Checking tinystr v0.8.3
+    Checking potential_utf v0.1.5
+    Checking rayon-core v1.13.0
+    Checking http-body v1.0.1
+    Checking icu_collections v2.2.0
+    Checking icu_locale_core v2.2.0
+    Checking http-body-util v0.1.3
+    Checking tokio v1.52.3
+    Checking openssl v0.10.80
+    Checking rayon v1.12.0
+    Checking serde v1.0.228
+    Checking serde_json v1.0.149
+    Checking serde_path_to_error v0.1.20
+    Checking csv v1.4.0
+    Checking icu_provider v2.2.0
+    Checking icu_properties v2.2.0
+    Checking smallvec v1.15.1
+    Checking serde_urlencoded v0.7.1
+    Checking chrono v0.4.44
+    Checking quick-xml v0.31.0
+    Checking icu_normalizer v2.2.0
+    Checking axum-core v0.4.5
+    Checking idna_adapter v1.2.2
+    Checking idna v1.1.0
+    Checking url v2.5.8
+    Checking native-tls v0.2.18
+    Checking tokio-util v0.7.18
+    Checking tower v0.5.3
+    Checking tokio-native-tls v0.3.1
+    Checking tower-http v0.6.11
+    Checking h2 v0.4.14
+    Checking hyper v1.9.0
+    Checking hyper-util v0.1.20
+    Checking hyper-tls v0.6.0
+    Checking axum v0.7.9
+    Checking reqwest v0.12.28
+    Checking ice-rust-forecaster-poc v0.1.0 (/home/jason/projects/ice)
+warning: unused import: `TimePeriod`
+ --> src/rules/polio/overrides.rs:5:34
+  |
+5 | use crate::date_utils::{TinyVec, TimePeriod, compare_elapsed, add_years_u...
+  |                                  ^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `Cvx`
+ --> src/rules/polio/overrides.rs:6:21
+  |
+6 | use crate::models::{Cvx, Patient, SeriesForecast, Dose, DoseStatus, Evalu...
+  |                     ^^^
+
+warning: unused import: `std::collections::HashMap`
+ --> src/rules/polio/overrides.rs:7:5
+  |
+7 | use std::collections::HashMap;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `Cvx`
+ --> src/rules/hepa/overrides.rs:6:21
+  |
+6 | use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, Ser...
+  |                     ^^^
+
+warning: unused import: `std::collections::HashMap`
+ --> src/rules/hepa/overrides.rs:8:5
+  |
+8 | use std::collections::HashMap;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::engine::CandidateForecastsExt`
+ --> src/rules/dtp/overrides.rs:1:5
+  |
+1 | use crate::engine::CandidateForecastsExt;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `std::collections::HashMap`
+ --> src/rules/dtp/overrides.rs:7:5
+  |
+7 | use std::collections::HashMap;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `TimePeriod`
+ --> src/rules/menb/overrides.rs:3:55
+  |
+3 | use crate::date_utils::{TinyVec, add_years_unchecked, TimePeriod};
+  |                                                       ^^^^^^^^^^
+
+warning: unused import: `std::collections::HashMap`
+ --> src/rules/menb/overrides.rs:9:5
+  |
+9 | use std::collections::HashMap;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::models::SeriesStatus`
+ --> src/rules/rotavirus/schedules.rs:3:5
+  |
+3 | use crate::models::SeriesStatus;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `Cvx`
+ --> src/rules/rotavirus/overrides.rs:6:21
+  |
+6 | use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, Ser...
+  |                     ^^^
+
+warning: unused import: `Cvx`
+ --> src/rules/influenza/overrides.rs:6:21
+  |
+6 | use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, Ser...
+  |                     ^^^
+
+warning: unused import: `ice_cvx_macro::cvx`
+ --> src/rules/cholera/overrides.rs:2:5
+  |
+2 | use ice_cvx_macro::cvx;
+  |     ^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `Cvx`
+ --> src/rules/cholera/overrides.rs:5:21
+  |
+5 | use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, Ser...
+  |                     ^^^
+
+warning: unused import: `Cvx`
+ --> src/rules/typhoid/overrides.rs:4:21
+  |
+4 | use crate::models::{Cvx, Dose, DoseStatus, EvaluationReason, Patient, Ser...
+  |                     ^^^
+
+warning: unused import: `ice_cvx_macro::cvx`
+ --> src/rules/yellow_fever/overrides.rs:2:5
+  |
+2 | use ice_cvx_macro::cvx;
+  |     ^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `Cvx`
+ --> src/rules/yellow_fever/overrides.rs:4:21
+  |
+4 | use crate::models::{Cvx, Dose, DoseStatus, EvaluationReason, Patient, Ser...
+  |                     ^^^
+
+warning: unused import: `ice_cvx_macro::cvx`
+ --> src/rules/jev/overrides.rs:2:5
+  |
+2 | use ice_cvx_macro::cvx;
+  |     ^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `Cvx`
+ --> src/rules/jev/overrides.rs:5:21
+  |
+5 | use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, Ser...
+  |                     ^^^
+
+warning: unused import: `TimePeriod`
+ --> src/rules/jev/overrides.rs:6:55
+  |
+6 | use crate::date_utils::{TinyVec, add_years_unchecked, TimePeriod};
+  |                                                       ^^^^^^^^^^
+
+warning: unused import: `Cvx`
+ --> src/rules/h1n1/overrides.rs:6:21
+  |
+6 | use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, Ser...
+  |                     ^^^
+
+warning: unused import: `Cvx`
+ --> src/rules/mpox/overrides.rs:5:21
+  |
+5 | use crate::models::{Cvx, 
+  |                     ^^^
+
+warning: variable does not need to be mutable
+   --> src/engine.rs:627:13
+    |
+627 |         let mut forecast = if is_completed {
+    |             ----^^^^^^^^
+    |             |
+    |             help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `satisfied_count`
+   --> src/engine.rs:622:9
+    |
+622 |         satisfied_count: usize,
+    |         ^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_satisfied_count`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src/date_utils.rs:7:17
+    |
+  7 |             let mut r = $crate::date_utils::TinyVec::new();
+    |                 ----^
+    |                 |
+    |                 help: remove this `mut`
+    |
+   ::: src/rules/polio/overrides.rs:406:45
+    |
+406 |             return Some((DoseStatus::Valid, crate::reasons![]));
+    |                                             ----------------- in this macro invocation
+    |
+    = note: this warning originates in the macro `crate::reasons` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: variable does not need to be mutable
+  --> src/test_dsl.rs:13:9
+   |
+13 |     let mut gender = Gender::Female;
+   |         ----^^^^^^
+   |         |
+   |         help: remove this `mut`
+
+warning: function `has_same_day_mixed_live_virus` is never used
+  --> src/rules/mmr/overrides.rs:18:4
+   |
+18 | fn has_same_day_mixed_live_virus(history: &[Dose], eval_date: NaiveDate)...
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: using `.clone()` on a double reference, which returns `&str` instead of cloning the inner type
+   --> src/rules/hib/overrides.rs:424:33
+    |
+424 |         return default_selection.clone();
+    |                                 ^^^^^^^^
+    |
+    = note: `#[warn(suspicious_double_ref_op)]` on by default
+
+warning: `ice-rust-forecaster-poc` (lib) generated 28 warnings (run `cargo fix --lib -p ice-rust-forecaster-poc` to apply 26 suggestions)
+warning: unused import: `VaccineGroupForecast`
+  --> src/main.rs:11:61
+   |
+11 | ...ponse, Gender, Patient, VaccineGroupForecast, Cvx},
+   |                            ^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `ice-rust-forecaster-poc` (bin "ice-rust-forecaster-poc") generated 1 warning (run `cargo fix --bin "ice-rust-forecaster-poc" -p ice-rust-forecaster-poc` to apply 1 suggestion)
+warning: field `histories` is never read
+    --> src/bin/test_runner.rs:1324:5
+     |
+1322 | struct RawTestSuite {
+     |        ------------ field in this struct
+1323 |     #[serde(default)]
+1324 |     histories: HashMap<String, serde_json::Value>,
+     |     ^^^^^^^^^
+     |
+     = note: `RawTestSuite` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `ice-rust-forecaster-poc` (bin "test_runner") generated 1 warning
+    Finished `release` profile [optimized] target(s) in 10.81s

@@ -50,17 +50,6 @@ mise run scaffold menb MENB
 ```
 This generates `src/rules/menb/`, wires it into `src/rules/mod.rs`, and creates `curl-rest-tests/cases/menb.json`.
 
-### Step 0.5: Bootstrap Baseline Java Tests
-Before implementing custom logic, generate a conservative baseline test matrix from the legacy series YAML and record Java snapshots:
-```bash
-mise run bootstrap-group-tests -- --group <group_lower>
-```
-Example:
-```bash
-mise run bootstrap-group-tests -- --group cholera
-```
-This requires the Java ICE server to be running (`mise run run`). The bootstrap command refuses to overwrite existing `curl-rest-tests/cases/<group>.json` or `<group>.expected.json` unless `--force` is passed. It is intended to create a starting point only: after researching Drools rules, add targeted cases for edge behavior such as brand switches, same-day duplicates, age clamps, seasonal boundaries, and special recommendation overrides.
-
 ### Step A: Define the Schedules (`schedules.rs`)
 Create `src/rules/<vaccine_group>/schedules.rs` (or modify the scaffolded stub) and translate the series YAML definitions into our type-safe internal builder DSL.
 
@@ -303,16 +292,16 @@ When working an already-ported group that still differs from Java, use a tighter
 
 1. Produce a fresh full-CDSi baseline log and keep it under `curl-rest-tests/tmp/`:
     ```bash
-    python3 curl-rest-tests/run_tests.py --compare --cdsi > curl-rest-tests/tmp/ice_cdsi_compare_<label>.txt 2>&1
+    cargo run --release --bin test_runner -- --run tests/cases --compare > curl-rest-tests/tmp/ice_cdsi_compare_<label>.txt 2>&1
     ```
 2. Pull the target group's failures from that log and cluster them by behavior rather than by individual case name.
 3. Run the target group only:
     ```bash
-    python3 curl-rest-tests/run_tests.py --group cdsi_<group_lower> --compare
+    cargo run --release --bin test_runner -- --run tests/cases --group <GROUP_UPPER> --compare
     ```
 4. For edge-case debugging, run a single case with full output:
     ```bash
-    python3 curl-rest-tests/run_tests.py --group cdsi_<group_lower> --case <test_case_name> --compare -v
+    cargo run --release --bin test_runner -- --run tests/cases --group <GROUP_UPPER> --case <test_case_name> --compare -v
     ```
 5. After the group passes, run a new full-CDSi compare into a second saved log.
 6. Compare per-group failure counts between the old and new logs to confirm that only the target bucket moved.
@@ -351,9 +340,9 @@ For already-ported groups, check selection and overrides before changing `schedu
 
 ### Command Choice: Raw Runner vs `mise`
 
-- Prefer raw `python3 curl-rest-tests/run_tests.py --compare ...` commands while debugging an existing parity bucket so saved logs and runner behavior stay explicit.
+- Prefer raw `cargo run --release --bin test_runner -- --run tests/cases --compare ...` commands while debugging an existing parity bucket so saved logs and runner behavior stay explicit.
 - Use `mise run test-record` or `mise run test-compare` when you intentionally want recording behavior.
-- Use `mise run scaffold` and `mise run bootstrap-group-tests` when starting a genuinely new group.
+- Use `mise run scaffold` when starting a genuinely new group.
 
 ### Direct Rust Inspection for Ambiguous Cases
 

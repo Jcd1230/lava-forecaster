@@ -1,6 +1,6 @@
 # High-Performance Rust ICE Forecaster PoC
 
-This subproject is a high-performance Rust-based Proof of Concept (PoC) for the **Immunization Calculation Engine (ICE)**. It implements the CDC Clinical Decision Support for Immunization (CDSi) evaluation and forecasting engine using a type-safe, compile-time Domain Specific Language (DSL) in Rust.
+This repository is a high-performance Rust-based Proof of Concept (PoC) for the **Immunization Calculation Engine (ICE)**. It implements the CDC Clinical Decision Support for Immunization (CDSi) evaluation and forecasting engine using a type-safe, compile-time Domain Specific Language (DSL) in Rust.
 
 By compile-time pre-compilation of rules, schema-free internal representations, and memory-efficient static data structures, the Rust Forecaster achieves sub-millisecond latencies and high throughput suited for real-time and bulk processing workloads.
 
@@ -9,7 +9,7 @@ By compile-time pre-compilation of rules, schema-free internal representations, 
 ## Project Structure
 
 ```
-ice-rust-forecaster-poc/
+.
 ├── Cargo.toml                # Workspace Cargo configuration
 ├── forecaster.fbs            # FlatBuffers schema for high-throughput bulk evaluation
 ├── ice-cvx-macro/            # Proc-macro library converting CVX codes to u16 IDs at compile time
@@ -32,7 +32,8 @@ ice-rust-forecaster-poc/
 │   │       └── overrides.rs  # Custom evaluation and forecast overrides (closure hooks)
 │   └── bin/
 │       ├── test_runner.rs    # Rust-native local test runner for UnifiedTestCase formats
-│       └── benchmark.rs      # Latency & throughput benchmarking tool
+│       ├── benchmark.rs      # In-process latency & throughput benchmarking tool
+│       └── rest_benchmark.rs # REST endpoint benchmarking tool
 └── tests/
     └── cases/                # Standard and CDSi unified test case JSON files (.json & .expected.json)
 ```
@@ -102,7 +103,7 @@ cargo run --release --bin test_runner -- --record tests/cases [http://localhost:
 
 ### 3. Using `mise` Commands (Workspace-wide)
 From the project root, a set of convenience scripts are available via `mise`:
-* `mise run test`: Runs the Python verification harness.
+* `mise run test`: Runs the Rust-native verification runner.
 * `mise run test-group -- <group>`: Runs verification for a single vaccine group.
 * `mise run test-compare -- --group <group>`: Directly runs differential testing between live Java and Rust PoC.
 

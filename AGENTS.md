@@ -6,7 +6,7 @@ Welcome! This guide provides a quick-start reference for AI agents and developer
 
 - **Java ICE Engine**: Legacy Drools-based server requiring **Java 25** and **Maven 3.9**.
 - **Rust Forecaster PoC**: High-performance Rust-based implementation of the evaluation engine.
-- **Verification Tests**: Python 3 scripts for running verification and comparative test suites.
+- **Verification Tests**: Rust-native `test_runner` and benchmarking binaries.
 - **Tooling**: Managed via `mise` (for Java and Maven version consistency).
 
 ## Reference Guides
@@ -23,9 +23,7 @@ Welcome! This guide provides a quick-start reference for AI agents and developer
 All major tasks are configured as `mise` commands or native Cargo binaries. 
 
 > [!TIP]
-> **Preferred Testing Method**: The Rust-native `test_runner` is significantly faster than the Python wrapper and evaluates the exact `UnifiedTestCase` formats. Always prefer running tests with Cargo when working offline.
-> 
-> *Note: All `cargo` commands below must be executed from within the `ice-rust-forecaster-poc/` subdirectory.*
+> **Preferred Testing Method**: The Rust-native `test_runner` is the supported verification path and evaluates the exact `UnifiedTestCase` formats.
 
 | Command | Description |
 |---|---|
@@ -37,7 +35,6 @@ All major tasks are configured as `mise` commands or native Cargo binaries.
 | `cargo run --release --bin test_runner -- --run tests/cases --group <GROUP> --compare` | Runs the Rust test runner and compares dynamically against the live Java ICE server. |
 | `cargo run --release --bin test_runner -- --run tests/cases --case <CASE> -v` | Runs a single case with side-by-side verbose details. |
 | `cargo run --release --bin test_runner -- --record tests/cases` | Connects to the live Java ICE server and records expected output snapshots directly into case JSONs. |
-| `python3 curl-rest-tests/run_tests.py --group <GROUP> --compare` | (Alternative Wrapper) Runs the test suite via Python wrapper, delegating to the Cargo binary. |
 
 ## Crucial Gotchas & Project Context
 
