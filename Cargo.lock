@@ -608,6 +608,7 @@ dependencies = [
  "serde_json",
  "smallvec",
  "tokio",
+ "tower",
 ]
 
 [[package]]

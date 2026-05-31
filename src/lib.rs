@@ -1,6 +1,7 @@
 pub mod date_utils;
 pub mod engine;
 pub mod errors;
+pub mod fhir;
 pub mod forecaster_generated;
 pub mod legacy_models;
 pub mod models;

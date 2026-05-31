@@ -32,6 +32,9 @@ jemallocator = { version = "0.5", optional = true }
 default = ["jemalloc"]
 jemalloc = ["dep:jemallocator"]
 
+[dev-dependencies]
+tower = { version = "0.5", features = ["util"] }
+
 [profile.release]
 lto = "fat"
 codegen-units = 1

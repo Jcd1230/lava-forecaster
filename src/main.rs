@@ -11,6 +11,10 @@ use ice_rust_forecaster_poc::{
     models::{self, Dose, ForecastResponse, Gender, Patient, Cvx},
 };
 
+async fn health_handler() -> impl axum::response::IntoResponse {
+    axum::Json(serde_json::json!({ "status": "ok" }))
+}
+
 async fn evaluate_handler(
     body: String,
 ) -> impl axum::response::IntoResponse {
@@ -348,6 +352,301 @@ async fn evaluate_bulk_flatbuffers_handler(
     (StatusCode::OK, resp_headers, finished_data).into_response()
 }
 
+async fn fhir_recommend_handler(
+    body: String,
+) -> impl axum::response::IntoResponse {
+    use axum::http::{StatusCode, HeaderMap, HeaderValue};
+    use axum::response::IntoResponse;
+    use ice_rust_forecaster_poc::fhir;
+
+    let params: fhir::Parameters = match serde_json::from_str(&body) {
+        Ok(p) => p,
+        Err(e) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                HeaderMap::new(),
+                format!("Failed to parse FHIR Parameters: {}", e),
+            ).into_response();
+        }
+    };
+
+    let mut patient_resource = None;
+    let mut history_resources = Vec::new();
+    let mut assessment_date = None;
+
+    for param in params.parameter {
+        if param.name == "patient" {
+            if let Some(fhir::FhirResource::Patient(p)) = param.resource {
+                patient_resource = Some(p);
+            }
+        } else if param.name == "immunization" {
+            if let Some(fhir::FhirResource::Immunization(imm)) = param.resource {
+                history_resources.push(imm);
+            }
+        } else if param.name == "assessmentDate" {
+            if let Some(val_str) = param.value_string {
+                let clean_date = val_str.chars().take(10).collect::<String>();
+                if let Ok(d) = NaiveDate::parse_from_str(&clean_date, "%Y-%m-%d") {
+                    assessment_date = Some(d);
+                }
+            }
+        }
+    }
+
+    let patient_r = match patient_resource {
+        Some(p) => p,
+        None => {
+            return (
+                StatusCode::BAD_REQUEST,
+                HeaderMap::new(),
+                "Missing 'patient' parameter in FHIR Parameters request".to_string(),
+            ).into_response();
+        }
+    };
+
+    let patient_id = patient_r.id.clone().unwrap_or_else(|| "anonymous".to_string());
+
+    let internal_patient = match models::Patient::try_from(patient_r) {
+        Ok(p) => p,
+        Err(e) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                HeaderMap::new(),
+                format!("Invalid patient resource: {}", e),
+            ).into_response();
+        }
+    };
+
+    let mut internal_history = Vec::new();
+    for imm in history_resources {
+        match models::Dose::try_from(imm) {
+            Ok(d) => internal_history.push(d),
+            Err(e) => {
+                return (
+                    StatusCode::BAD_REQUEST,
+                    HeaderMap::new(),
+                    format!("Invalid immunization resource: {}", e),
+                ).into_response();
+            }
+        }
+    }
+
+    let exec_date = assessment_date.unwrap_or_else(|| chrono::Utc::now().date_naive());
+
+    let results = evaluate_patient_all_groups(&internal_patient, &internal_history, exec_date);
+
+    // Build the outgoing bundle containing evaluation and recommendation resources
+    let mut bundle_entries = Vec::new();
+
+    // 1. Recommendation
+    let recommendation = fhir::make_immunization_recommendation(&patient_id, exec_date, &results);
+    bundle_entries.push(fhir::OutgoingBundleEntry {
+        resource: fhir::OutgoingFhirResource::ImmunizationRecommendation(recommendation),
+    });
+
+    // 2. Evaluations
+    for vg in results.iter() {
+        for (i, eval) in vg.evaluations.iter().enumerate() {
+            let evaluation = fhir::make_immunization_evaluation(&patient_id, i, eval, &vg.vaccine_group);
+            bundle_entries.push(fhir::OutgoingBundleEntry {
+                resource: fhir::OutgoingFhirResource::ImmunizationEvaluation(evaluation),
+            });
+        }
+    }
+
+    let response_bundle = fhir::OutgoingBundle {
+        resource_type: "Bundle".to_string(),
+        bundle_type: "searchset".to_string(),
+        entry: bundle_entries,
+    };
+
+    let response_json = match serde_json::to_string(&response_bundle) {
+        Ok(j) => j,
+        Err(e) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                HeaderMap::new(),
+                format!("Failed to serialize FHIR bundle response: {}", e),
+            ).into_response();
+        }
+    };
+
+    let mut resp_headers = HeaderMap::new();
+    resp_headers.insert("Content-Type", HeaderValue::from_static("application/fhir+json"));
+
+    (StatusCode::OK, resp_headers, response_json).into_response()
+}
+
+async fn cds_discovery_handler() -> impl axum::response::IntoResponse {
+    use axum::http::{StatusCode, HeaderMap, HeaderValue};
+    use axum::response::IntoResponse;
+
+    let response_json = serde_json::json!({
+        "services": [
+            {
+                "id": "immunization-forecaster",
+                "hook": "patient-view",
+                "title": "Immunization Forecaster",
+                "description": "Calculates immunization evaluation and forecasting according to CDC/ACIP guidelines.",
+                "prefetch": {
+                    "patient": "Patient/{{context.patientId}}",
+                    "immunizations": "Immunization?patient={{context.patientId}}"
+                }
+            }
+        ]
+    });
+
+    let mut resp_headers = HeaderMap::new();
+    resp_headers.insert("Content-Type", HeaderValue::from_static("application/json"));
+
+    (StatusCode::OK, resp_headers, response_json.to_string()).into_response()
+}
+
+async fn cds_forecast_handler(
+    body: String,
+) -> impl axum::response::IntoResponse {
+    use axum::http::{StatusCode, HeaderMap, HeaderValue};
+    use axum::response::IntoResponse;
+    use ice_rust_forecaster_poc::fhir;
+    use ice_rust_forecaster_poc::models::SeriesStatus;
+
+    let req: fhir::CDSRequest = match serde_json::from_str(&body) {
+        Ok(r) => r,
+        Err(e) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                HeaderMap::new(),
+                format!("Failed to parse CDS Hook request: {}", e),
+            ).into_response();
+        }
+    };
+
+    let patient_val = match req.prefetch.as_ref().and_then(|p| p.get("patient")) {
+        Some(p) => p,
+        None => {
+            return (
+                StatusCode::BAD_REQUEST,
+                HeaderMap::new(),
+                "Missing 'patient' resource in prefetch context".to_string(),
+            ).into_response();
+        }
+    };
+
+    let patient_r: fhir::Patient = match serde_json::from_value(patient_val.clone()) {
+        Ok(p) => p,
+        Err(e) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                HeaderMap::new(),
+                format!("Invalid patient resource in prefetch: {}", e),
+            ).into_response();
+        }
+    };
+
+    let mut history = Vec::new();
+    if let Some(imm_bundle_val) = req.prefetch.as_ref().and_then(|p| p.get("immunizations")) {
+        if let Ok(bundle) = serde_json::from_value::<fhir::Bundle>(imm_bundle_val.clone()) {
+            if let Some(entries) = bundle.entry {
+                for entry in entries {
+                    if let fhir::FhirResource::Immunization(imm) = entry.resource {
+                        match models::Dose::try_from(imm) {
+                            Ok(d) => history.push(d),
+                            Err(e) => {
+                                return (
+                                    StatusCode::BAD_REQUEST,
+                                    HeaderMap::new(),
+                                    format!("Invalid immunization resource in prefetch: {}", e),
+                                ).into_response();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    let internal_patient = match models::Patient::try_from(patient_r) {
+        Ok(p) => p,
+        Err(e) => {
+            return (
+                StatusCode::BAD_REQUEST,
+                HeaderMap::new(),
+                format!("Invalid patient details: {}", e),
+            ).into_response();
+        }
+    };
+
+    let exec_date = chrono::Utc::now().date_naive();
+    let results = evaluate_patient_all_groups(&internal_patient, &history, exec_date);
+
+    let mut due_vaccines = Vec::new();
+    for vg in &results {
+        for fc in &vg.forecasts {
+            match fc.status {
+                SeriesStatus::NotComplete { .. } => {
+                    if fc.status.overdue_date().map(|d| exec_date >= d).unwrap_or(false) {
+                        due_vaccines.push(format!("{} (OVERDUE)", vg.vaccine_group));
+                    } else if fc.status.recommended_date().map(|d| exec_date >= d).unwrap_or(false) {
+                        due_vaccines.push(format!("{} (DUE)", vg.vaccine_group));
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+
+    let summary = if due_vaccines.is_empty() {
+        "Patient is up-to-date on all vaccinations.".to_string()
+    } else {
+        format!("Patient is due for: {}", due_vaccines.join(", "))
+    };
+
+    let detail = if due_vaccines.is_empty() {
+        None
+    } else {
+        Some(format!("Based on age and immunization history, the clinical decision support engine recommends administering the following vaccine series: {}", due_vaccines.join(", ")))
+    };
+
+    let indicator = if due_vaccines.iter().any(|v| v.contains("OVERDUE")) {
+        "warning".to_string()
+    } else {
+        "info".to_string()
+    };
+
+    let card = fhir::Card {
+        summary,
+        detail,
+        indicator,
+        source: fhir::Source {
+            label: "ICE Rust Forecaster".to_string(),
+            url: None,
+            icon: None,
+        },
+        suggestions: None,
+        links: None,
+    };
+
+    let response = fhir::CDSResponse {
+        cards: vec![card],
+    };
+
+    let response_json = match serde_json::to_string(&response) {
+        Ok(j) => j,
+        Err(e) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                HeaderMap::new(),
+                format!("Failed to serialize CDS response: {}", e),
+            ).into_response();
+        }
+    };
+
+    let mut resp_headers = HeaderMap::new();
+    resp_headers.insert("Content-Type", HeaderValue::from_static("application/json"));
+
+    (StatusCode::OK, resp_headers, response_json).into_response()
+}
+
 fn run_server() -> Result<(), Box<dyn std::error::Error>> {
     ice_rust_forecaster_poc::init_rayon_pool();
 
@@ -358,16 +657,20 @@ fn run_server() -> Result<(), Box<dyn std::error::Error>> {
 
     rt.block_on(async {
         use axum::{
-            routing::post,
+            routing::{get, post},
             Router,
         };
         use std::net::SocketAddr;
 
         let app = Router::new()
+            .route("/health", get(health_handler))
             .route("/evaluate", post(evaluate_handler))
             .route("/opencds-decision-support-service/api/resources/evaluate", post(evaluate_handler))
             .route("/evaluate_bulk", post(evaluate_bulk_handler))
-            .route("/evaluate_bulk_flatbuffers", post(evaluate_bulk_flatbuffers_handler));
+            .route("/evaluate_bulk_flatbuffers", post(evaluate_bulk_flatbuffers_handler))
+            .route("/fhir/R4/Immunization/$recommend", post(fhir_recommend_handler))
+            .route("/cds-services", get(cds_discovery_handler))
+            .route("/cds-services/immunization-forecaster", post(cds_forecast_handler));
 
         let addr = SocketAddr::from(([0, 0, 0, 0], 8081));
         println!("Rust PoC REST server listening on http://{}", addr);
@@ -575,4 +878,187 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     Ok(())
+}
+
+#[cfg(test)]
+mod integration_tests {
+    use super::*;
+    use axum::{
+        body::Body,
+        http::{Request, StatusCode},
+        routing::{get, post},
+        Router,
+    };
+    use tower::ServiceExt; // for `oneshot`
+    use serde_json::json;
+
+    #[tokio::test]
+    async fn test_cds_discovery_endpoint() {
+        let app = Router::new().route("/cds-services", get(cds_discovery_handler));
+        
+        let response = app
+            .oneshot(
+                Request::builder()
+                    .uri("/cds-services")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::OK);
+        assert_eq!(
+            response.headers().get("content-type").unwrap(),
+            "application/json"
+        );
+
+        let body_bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+            .await
+            .unwrap();
+        let body: serde_json::Value = serde_json::from_slice(&body_bytes).unwrap();
+        
+        assert_eq!(body["services"][0]["id"], "immunization-forecaster");
+        assert_eq!(body["services"][0]["hook"], "patient-view");
+    }
+
+    #[tokio::test]
+    async fn test_fhir_recommend_endpoint() {
+        let app = Router::new().route("/fhir/R4/Immunization/$recommend", post(fhir_recommend_handler));
+
+        let payload = json!({
+            "resourceType": "Parameters",
+            "parameter": [
+                {
+                    "name": "patient",
+                    "resource": {
+                        "resourceType": "Patient",
+                        "id": "test-patient",
+                        "birthDate": "2020-01-01",
+                        "gender": "female"
+                    }
+                },
+                {
+                    "name": "immunization",
+                    "resource": {
+                        "resourceType": "Immunization",
+                        "status": "completed",
+                        "vaccineCode": {
+                            "coding": [
+                                {
+                                    "system": "http://hl7.org/fhir/sid/cvx",
+                                    "code": "10",
+                                    "display": "IPV"
+                                }
+                            ]
+                        },
+                        "occurrenceDateTime": "2020-03-01T00:00:00Z"
+                    }
+                }
+            ]
+        });
+
+        let response = app
+            .oneshot(
+                Request::builder()
+                    .method("POST")
+                    .uri("/fhir/R4/Immunization/$recommend")
+                    .header("content-type", "application/json")
+                    .body(Body::from(payload.to_string()))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::OK);
+        assert_eq!(
+            response.headers().get("content-type").unwrap(),
+            "application/fhir+json"
+        );
+
+        let body_bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+            .await
+            .unwrap();
+        let body: serde_json::Value = serde_json::from_slice(&body_bytes).unwrap();
+        
+        assert_eq!(body["resourceType"], "Bundle");
+        assert_eq!(body["type"], "searchset");
+        
+        let entries = body["entry"].as_array().unwrap();
+        assert!(!entries.is_empty());
+        let rec = &entries[0]["resource"];
+        assert_eq!(rec["resourceType"], "ImmunizationRecommendation");
+        assert_eq!(rec["patient"]["reference"], "Patient/test-patient");
+    }
+
+    #[tokio::test]
+    async fn test_cds_forecast_endpoint() {
+        let app = Router::new().route("/cds-services/immunization-forecaster", post(cds_forecast_handler));
+
+        let payload = json!({
+            "hook": "patient-view",
+            "hookInstance": "d15c7dbf-648b-49e0-8b09-b6957a05051a",
+            "context": {
+                "userId": "Practitioner/123",
+                "patientId": "test-patient"
+            },
+            "prefetch": {
+                "patient": {
+                    "resourceType": "Patient",
+                    "id": "test-patient",
+                    "birthDate": "2020-01-01",
+                    "gender": "female"
+                },
+                "immunizations": {
+                    "resourceType": "Bundle",
+                    "type": "searchset",
+                    "entry": [
+                        {
+                            "resource": {
+                                "resourceType": "Immunization",
+                                "status": "completed",
+                                "vaccineCode": {
+                                    "coding": [
+                                        {
+                                            "system": "http://hl7.org/fhir/sid/cvx",
+                                            "code": "10",
+                                            "display": "IPV"
+                                        }
+                                    ]
+                                },
+                                "occurrenceDateTime": "2020-03-01T00:00:00Z"
+                            }
+                        }
+                    ]
+                }
+            }
+        });
+
+        let response = app
+            .oneshot(
+                Request::builder()
+                    .method("POST")
+                    .uri("/cds-services/immunization-forecaster")
+                    .header("content-type", "application/json")
+                    .body(Body::from(payload.to_string()))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::OK);
+        assert_eq!(
+            response.headers().get("content-type").unwrap(),
+            "application/json"
+        );
+
+        let body_bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+            .await
+            .unwrap();
+        let body: serde_json::Value = serde_json::from_slice(&body_bytes).unwrap();
+        
+        let cards = body["cards"].as_array().unwrap();
+        assert_eq!(cards.len(), 1);
+        assert_eq!(cards[0]["source"]["label"], "ICE Rust Forecaster");
+        assert!(cards[0]["summary"].as_str().unwrap().contains("Patient is due for"));
+    }
 }
