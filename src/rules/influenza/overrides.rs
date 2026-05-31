@@ -3,7 +3,7 @@ use crate::engine::CandidateForecastsExt;
 use ice_cvx_macro::cvx;
 use chrono::{Datelike, NaiveDate};
 use crate::engine::EvaluationContext;
-use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast, DoseEvaluation};
+use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast, DoseEvaluation};
 
 pub struct SeasonDates {
     pub start: NaiveDate,

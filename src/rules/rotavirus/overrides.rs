@@ -3,7 +3,7 @@ use crate::engine::CandidateForecastsExt;
 use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
-use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
+use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
 
 pub fn rotavirus_custom_evaluation_hook(
     _series_name: &str,

@@ -1,10 +1,8 @@
-use crate::engine::CandidateForecastsExt;
 use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, VaccineGroupForecast};
 use crate::date_utils::{TinyVec, add_years_unchecked, add_months_unchecked};
-use std::collections::HashMap;
 
 pub fn is_pertussis_vaccine(cvx: Cvx) -> bool {
     // DT/Td (tetanus/diphtheria only, no pertussis) CVX codes

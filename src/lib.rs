@@ -1,16 +1,29 @@
 pub mod date_utils;
 pub mod engine;
 pub mod errors;
+pub mod forecaster_generated;
 pub mod legacy_models;
 pub mod models;
 pub mod rules;
 pub mod schedule;
-pub mod forecaster_generated;
 pub mod test_dsl;
+
+use std::sync::Once;
 
 use chrono::NaiveDate;
 use models::{Dose, Patient, VaccineGroupForecast};
 use crate::date_utils::TinyVec;
+
+static INIT_RAYON_POOL: Once = Once::new();
+
+pub fn init_rayon_pool() {
+    INIT_RAYON_POOL.call_once(|| {
+        rayon::ThreadPoolBuilder::new()
+            .stack_size(8 * 1024 * 1024)
+            .build_global()
+            .expect("failed to initialize global rayon thread pool");
+    });
+}
 
 
 pub fn parse_request(content: &str) -> Result<models::ForecastRequest, crate::errors::ForecasterError> {

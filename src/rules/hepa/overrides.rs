@@ -3,9 +3,8 @@ use crate::engine::CandidateForecastsExt;
 use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
-use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
+use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
 use crate::rules::helpers::{clamp_date_at_least, age_ge, interval_ge, interval_lt};
-use std::collections::HashMap;
 
 pub fn hepa_custom_switch_hook(
     current_series_name: &str,

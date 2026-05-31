@@ -2,8 +2,7 @@ use crate::date_utils::TinyVec;
 use crate::engine::CandidateForecastsExt;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
-use crate::models::{Cvx, 
-    Dose,
+use crate::models::{Dose,
     DoseStatus,
     EvaluationReason,
     Patient,

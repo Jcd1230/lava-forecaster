@@ -10,7 +10,7 @@ pub fn parse_test_case_dsl(content: &str) -> Result<UnifiedTestCase, String> {
     let mut focus_code = String::from("000");
     
     let mut birth_date = None;
-    let mut gender = Gender::Female;
+    let gender = Gender::Female;
     let mut execution_date = None;
     
     let mut doses: Vec<Dose> = Vec::new();

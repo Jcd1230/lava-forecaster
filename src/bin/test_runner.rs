@@ -1320,8 +1320,8 @@ struct RawSuiteCase {
 
 #[derive(Debug, Deserialize)]
 struct RawTestSuite {
-    #[serde(default)]
-    histories: HashMap<String, serde_json::Value>,
+    #[serde(default, rename = "histories")]
+    _histories: HashMap<String, serde_json::Value>,
     test_cases: Vec<RawSuiteCase>,
 }
 

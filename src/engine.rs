@@ -619,12 +619,12 @@ impl<'a> EvaluationEngine<'a> {
         history: &[Dose],
         valid_doses: &[(NaiveDate, usize)],
         evaluations: &[DoseEvaluation],
-        satisfied_count: usize,
+        _satisfied_count: usize,
         is_completed: bool,
         eval_date: NaiveDate,
         active_series: &CompiledSeries,
     ) -> SeriesForecast {
-        let mut forecast = if is_completed {
+        let forecast = if is_completed {
             let mut f = SeriesForecast {
                 series_name: active_series.name.into(),
                 

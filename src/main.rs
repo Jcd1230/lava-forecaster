@@ -8,7 +8,7 @@ static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
 use ice_rust_forecaster_poc::{
     parse_request, evaluate_patient_all_groups, rules,
-    models::{self, Dose, ForecastResponse, Gender, Patient, VaccineGroupForecast, Cvx},
+    models::{self, Dose, ForecastResponse, Gender, Patient, Cvx},
 };
 
 async fn evaluate_handler(
@@ -349,7 +349,10 @@ async fn evaluate_bulk_flatbuffers_handler(
 }
 
 fn run_server() -> Result<(), Box<dyn std::error::Error>> {
+    ice_rust_forecaster_poc::init_rayon_pool();
+
     let rt = tokio::runtime::Builder::new_multi_thread()
+        .thread_stack_size(8 * 1024 * 1024)
         .enable_all()
         .build()?;
 

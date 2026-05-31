@@ -10,10 +10,13 @@ static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
 use ice_rust_forecaster_poc::{
     evaluate_patient_all_groups,
+    init_rayon_pool,
     models::UnifiedTestCase,
 };
 
 fn main() {
+    init_rayon_pool();
+
     let args: Vec<String> = std::env::args().collect();
     let cases_dir_str = args.get(1).map(|s| s.as_str()).unwrap_or("tests/cases");
     let cases_dir = Path::new(cases_dir_str);

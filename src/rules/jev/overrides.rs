@@ -1,9 +1,8 @@
 use crate::engine::CandidateForecastsExt;
-use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
-use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
-use crate::date_utils::{TinyVec, add_years_unchecked, TimePeriod};
+use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
+use crate::date_utils::{TinyVec, add_years_unchecked};
 
 pub fn jev_custom_evaluation_hook(
     series_name: &str,

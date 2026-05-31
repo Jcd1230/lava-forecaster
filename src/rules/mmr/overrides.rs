@@ -15,17 +15,6 @@ fn is_mmr_group(cvx: Cvx) -> bool {
     MMR_CVX.contains(&cvx.0)
 }
 
-fn has_same_day_mixed_live_virus(history: &[Dose], eval_date: NaiveDate) -> bool {
-    let has_mmr_live = history
-        .iter()
-        .any(|dose| dose.date == eval_date && is_mmr_group(dose.cvx));
-    let has_non_mmr_live = history
-        .iter()
-        .any(|dose| dose.date == eval_date && is_live_virus(dose.cvx) && !is_mmr_group(dose.cvx));
-
-    has_mmr_live && has_non_mmr_live
-}
-
 fn get_valid_doses_cvx(ctx: &EvaluationContext) -> Vec<Cvx> {
     let mut cvxs = Vec::new();
     let mut history_idx = 0;

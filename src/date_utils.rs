@@ -2,7 +2,10 @@ use chrono::{Datelike, Days, NaiveDate};
 
 #[macro_export]
 macro_rules! reasons {
-    ($($x:expr),* $(,)?) => {
+    () => {
+        $crate::date_utils::TinyVec::new()
+    };
+    ($($x:expr),+ $(,)?) => {
         {
             let mut r = $crate::date_utils::TinyVec::new();
             $(

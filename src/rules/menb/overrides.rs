@@ -1,12 +1,11 @@
 use crate::engine::CandidateForecastsExt;
 use ice_cvx_macro::cvx;
-use crate::date_utils::{TinyVec, add_years_unchecked, TimePeriod};
+use crate::date_utils::{TinyVec, add_years_unchecked};
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, 
     Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus, VaccineGroupForecast,
 };
 use chrono::NaiveDate;
-use std::collections::HashMap;
 
 const DUPLICATE_POLICY_CHANGE_DATE: (i32, u32, u32) = (2024, 10, 25);
 

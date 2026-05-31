@@ -1,6 +1,8 @@
 use std::fs;
 use std::path::Path;
 use std::process::Command;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
 use tokio::net::TcpStream;
 use reqwest::Client;
@@ -9,6 +11,10 @@ use flatbuffers::FlatBufferBuilder;
 
 use ice_rust_forecaster_poc::models::{UnifiedTestCase, ForecastRequest, BulkForecastRequest};
 use ice_rust_forecaster_poc::forecaster_generated::org::cdsframework::ice::flatbuf as fb;
+
+const BULK_BENCHMARK_BATCH_SIZE: usize = 128;
+const SINGLE_JSON_CONCURRENCY: &[usize] = &[1, 10, 50];
+const BULK_CONCURRENCY: &[usize] = &[1, 4, 8];
 
 struct ServerGuard(std::process::Child);
 
@@ -140,15 +146,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         })
         .collect();
 
+    let bulk_requests: Vec<ForecastRequest> = cases
+        .iter()
+        .take(BULK_BENCHMARK_BATCH_SIZE.min(num_cases))
+        .map(|tc| ForecastRequest {
+            patient: tc.patient.clone(),
+            history: tc.history.clone(),
+            execution_date: tc.execution_date,
+        })
+        .collect();
     let bulk_req_data = BulkForecastRequest {
-        requests: cases
-            .iter()
-            .map(|tc| ForecastRequest {
-                patient: tc.patient.clone(),
-                history: tc.history.clone(),
-                execution_date: tc.execution_date,
-            })
-            .collect(),
+        requests: bulk_requests,
     };
     let bulk_json_payload = serde_json::to_string(&bulk_req_data)?;
     let bulk_fb_payload = serialize_flatbuffers_bulk(&bulk_req_data.requests);
@@ -178,9 +186,35 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Warmup complete.");
 
     // Benchmark runners
-    run_benchmark("Single JSON (/evaluate)", &client, &single_json_payloads, "application/json", "http://127.0.0.1:8081/evaluate", 1).await?;
-    run_benchmark("Bulk JSON (/evaluate_bulk)", &client, &[bulk_json_payload.clone()], "application/json", "http://127.0.0.1:8081/evaluate_bulk", num_cases).await?;
-    run_benchmark("Bulk FlatBuffers (/evaluate_bulk_flatbuffers)", &client, &[bulk_fb_payload], "application/octet-stream", "http://127.0.0.1:8081/evaluate_bulk_flatbuffers", num_cases).await?;
+    println!("Using bulk benchmark batch size: {} requests", bulk_req_data.requests.len());
+
+    run_benchmark(
+        "Single JSON (/evaluate)",
+        &client,
+        &single_json_payloads,
+        "application/json",
+        "http://127.0.0.1:8081/evaluate",
+        1,
+        SINGLE_JSON_CONCURRENCY,
+    ).await?;
+    run_benchmark(
+        "Bulk JSON (/evaluate_bulk)",
+        &client,
+        &[bulk_json_payload.clone()],
+        "application/json",
+        "http://127.0.0.1:8081/evaluate_bulk",
+        bulk_req_data.requests.len(),
+        BULK_CONCURRENCY,
+    ).await?;
+    run_benchmark(
+        "Bulk FlatBuffers (/evaluate_bulk_flatbuffers)",
+        &client,
+        &[bulk_fb_payload],
+        "application/octet-stream",
+        "http://127.0.0.1:8081/evaluate_bulk_flatbuffers",
+        bulk_req_data.requests.len(),
+        BULK_CONCURRENCY,
+    ).await?;
 
     Ok(())
 }
@@ -192,12 +226,14 @@ async fn run_benchmark(
     content_type: &'static str,
     url: &'static str,
     batch_size: usize,
+    concurrency_levels: &[usize],
 ) -> Result<(), Box<dyn std::error::Error>> {
     println!("\n==================================================");
     println!("Benchmarking: {}", name);
     println!("==================================================");
 
-    for concurrency in [1, 10, 50] {
+    for &concurrency in concurrency_levels {
+        let logged_failure = Arc::new(AtomicBool::new(false));
         let duration = Duration::from_secs(3);
         let start = Instant::now();
         let mut tasks = Vec::new();
@@ -208,6 +244,7 @@ async fn run_benchmark(
             let client = client.clone();
             let payloads = payloads.to_vec();
             let tx = tx.clone();
+            let logged_failure = logged_failure.clone();
             
             let handle = tokio::spawn(async move {
                 let mut index = 0;
@@ -223,8 +260,18 @@ async fn run_benchmark(
                         .await;
                     
                     if let Ok(r) = resp {
-                        if r.status().is_success() {
+                        let status = r.status();
+                        let body = r.bytes().await.unwrap_or_default();
+                        if status.is_success() {
                             let _ = tx.send(req_start.elapsed()).await;
+                        } else if !logged_failure.swap(true, Ordering::Relaxed) {
+                            let snippet = String::from_utf8_lossy(&body);
+                            println!(
+                                "Concurrency {:2} first failure: HTTP {} body: {}",
+                                concurrency,
+                                status,
+                                snippet.chars().take(200).collect::<String>()
+                            );
                         }
                     }
                 }

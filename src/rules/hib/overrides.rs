@@ -421,7 +421,7 @@ pub fn hib_group_selection(
             };
         }
 
-        return default_selection.clone();
+        return default_selection;
     }
 
     four_dose_name

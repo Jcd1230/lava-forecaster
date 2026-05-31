@@ -2,9 +2,8 @@ use crate::engine::CandidateForecastsExt;
 use ice_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::{EvaluationContext, ParameterOverrideRule, RecommendationOverrideRule};
-use crate::date_utils::{TinyVec, TimePeriod, compare_elapsed, add_years_unchecked, add_months_unchecked};
-use crate::models::{Cvx, Patient, SeriesForecast, Dose, DoseStatus, EvaluationReason, VaccineGroupForecast, DoseEvaluation};
-use std::collections::HashMap;
+use crate::date_utils::{TinyVec, compare_elapsed, add_years_unchecked, add_months_unchecked};
+use crate::models::{Patient, SeriesForecast, Dose, DoseStatus, EvaluationReason, VaccineGroupForecast, DoseEvaluation};
 
 pub fn polio_parameter_overrides() -> Vec<ParameterOverrideRule> {
     vec![
