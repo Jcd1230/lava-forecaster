@@ -89,15 +89,35 @@ impl<'de> Deserialize<'de> for Cvx {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DiseaseImmunity {
+    pub disease: String,
+    pub date: NaiveDate,
+    pub reason: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Contraindication {
+    pub date: NaiveDate,
+    pub target: String,
+    pub reason: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Patient {
     pub birth_date: NaiveDate,
     pub gender: Gender,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub immunities: Vec<DiseaseImmunity>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub contraindications: Vec<Contraindication>,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Dose {
     pub date: NaiveDate,
     pub cvx: Cvx,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_valid: Option<bool>,
 }
 
 impl Default for Dose {
@@ -105,6 +125,7 @@ impl Default for Dose {
         Self {
             date: NaiveDate::from_ymd_opt(1970, 1, 1).unwrap(),
             cvx: Cvx::default(),
+            is_valid: None,
         }
     }
 }
@@ -137,6 +158,8 @@ pub enum EvaluationReason {
     AboveRecommendedAgeSeries,
     OutsideFluVacSeason,
     VaccineNotAllowedInUs,
+    DoseOverrideValid,
+    DoseOverrideInvalid,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

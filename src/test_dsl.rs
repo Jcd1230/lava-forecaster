@@ -100,7 +100,7 @@ pub fn parse_test_case_dsl(content: &str) -> Result<UnifiedTestCase, String> {
             } else {
                 return Err(format!("Could not parse dose timing: {}", remainder));
             };
-            doses.push(Dose { cvx: Cvx(cvx), date });
+            doses.push(Dose { cvx: Cvx(cvx), date, is_valid: None });
             
             if let Some(status) = inline_status {
                 expected_evals.push(DoseEvaluation {
@@ -201,6 +201,8 @@ pub fn parse_test_case_dsl(content: &str) -> Result<UnifiedTestCase, String> {
         patient: Patient {
             birth_date: bdate,
             gender,
+            immunities: Vec::new(),
+            contraindications: Vec::new(),
         },
         history: doses,
         execution_date: edate,

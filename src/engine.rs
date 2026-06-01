@@ -285,6 +285,32 @@ impl<'a> EvaluationEngine<'a> {
             let dose = &sorted_history[i];
             let mut target_dose_idx =
                 valid_doses.iter().map(|(_, num)| *num).max().unwrap_or(0) + 1;
+
+            if let Some(valid_override) = dose.is_valid {
+                let output_dose_number = std::cmp::min(target_dose_idx, valid_doses.len() + 1);
+                let (status, reason) = if valid_override {
+                    valid_doses.push((dose.date, target_dose_idx));
+                    (DoseStatus::Valid, EvaluationReason::DoseOverrideValid)
+                } else {
+                    (DoseStatus::Invalid, EvaluationReason::DoseOverrideInvalid)
+                };
+
+                evaluations.push(DoseEvaluation {
+                    dose_date: dose.date,
+                    cvx: dose.cvx,
+                    status,
+                    reasons: crate::reasons![reason],
+                    dose_number: Some(output_dose_number),
+                });
+
+                if target_dose_idx >= active_series.num_doses && valid_override {
+                    is_completed = true;
+                }
+
+                i += 1;
+                continue;
+            }
+
             if let Some(policy) = self.policy {
                 let ctx = EvaluationContext::new(
                     patient,
@@ -576,7 +602,10 @@ impl<'a> EvaluationEngine<'a> {
             })
         };
 
-        let is_completed = is_completed || series_completed;
+        let mut is_completed = is_completed || series_completed;
+        if !is_completed && is_patient_immune_to_group(patient, active_series.vaccine_group, eval_date) {
+            is_completed = true;
+        }
 
         let satisfied_count = evaluations
             .iter()
@@ -624,6 +653,18 @@ impl<'a> EvaluationEngine<'a> {
         eval_date: NaiveDate,
         active_series: &CompiledSeries,
     ) -> SeriesForecast {
+        if is_group_contraindicated(patient, active_series.vaccine_group, eval_date) {
+            let mut f = SeriesForecast {
+                series_name: active_series.name.into(),
+                status: SeriesStatus::NotRecommended,
+                reasons: crate::reasons!["CONTRAINDICATION"],
+            };
+            if let Some(policy) = self.policy {
+                policy.custom_forecast_hook(patient, valid_doses, history, eval_date, &mut f);
+            }
+            return f;
+        }
+
         let forecast = if is_completed {
             let mut f = SeriesForecast {
                 series_name: active_series.name.into(),
@@ -995,3 +1036,41 @@ fn get_same_day_priority(
         _ => 0,
     }
 }
+
+fn is_patient_immune_to_group(patient: &crate::models::Patient, group: &str, eval_date: NaiveDate) -> bool {
+    let group_lower = group.to_lowercase();
+    patient.immunities.iter().any(|imm| {
+        let imm_disease_lower = imm.disease.to_lowercase();
+        let matches_group = if group_lower.contains("hepb") || group_lower.contains("hep_b") || group_lower.contains("hep b") || group_lower.contains("hepatitis b") {
+            imm_disease_lower.contains("hepb") || imm_disease_lower.contains("hep_b") || imm_disease_lower.contains("hep b") || imm_disease_lower.contains("hepatitis b")
+        } else if group_lower.contains("varicella") {
+            imm_disease_lower.contains("varicella") || imm_disease_lower.contains("chickenpox")
+        } else if group_lower.contains("measles") {
+            imm_disease_lower.contains("measles") || imm_disease_lower.contains("rubeola")
+        } else if group_lower.contains("mumps") {
+            imm_disease_lower.contains("mumps")
+        } else if group_lower.contains("rubella") {
+            imm_disease_lower.contains("rubella") || imm_disease_lower.contains("german measles")
+        } else if group_lower.contains("mmr") {
+            imm_disease_lower.contains("mmr") || imm_disease_lower.contains("measles") || imm_disease_lower.contains("mumps") || imm_disease_lower.contains("rubella")
+        } else {
+            imm_disease_lower == group_lower
+        };
+        
+        matches_group && eval_date >= imm.date
+    })
+}
+
+fn is_group_contraindicated(patient: &crate::models::Patient, group: &str, eval_date: NaiveDate) -> bool {
+    let group_lower = group.to_lowercase();
+    patient.contraindications.iter().any(|c| {
+        let target_lower = c.target.to_lowercase();
+        let matches_group = if group_lower.contains("dtp") || group_lower.contains("dtap") || group_lower.contains("dt") || group_lower.contains("tdap") || group_lower.contains("td") || group_lower.contains("diphtheria") || group_lower.contains("tetanus") || group_lower.contains("pertussis") {
+            target_lower.contains("dtp") || target_lower.contains("dtap") || target_lower.contains("dt") || target_lower.contains("tdap") || target_lower.contains("td") || target_lower.contains("diphtheria") || target_lower.contains("tetanus") || target_lower.contains("pertussis")
+        } else {
+            target_lower == group_lower
+        };
+        matches_group && eval_date >= c.date
+    })
+}
+

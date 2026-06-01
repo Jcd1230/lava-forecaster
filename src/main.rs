@@ -198,11 +198,20 @@ async fn evaluate_bulk_flatbuffers_handler(
                     let date = epoch_days_to_date(dose_fb.date());
                     let cvx_str = dose_fb.cvx().unwrap_or("");
                     let cvx = models::Cvx(cvx_str.parse::<u16>().unwrap_or(0));
-                    history.push(models::Dose { date, cvx });
+                    history.push(models::Dose { date, cvx, is_valid: None });
                 }
             }
 
-            Ok((models::Patient { birth_date, gender }, history, exec_date))
+            Ok((
+                models::Patient {
+                    birth_date,
+                    gender,
+                    immunities: Vec::new(),
+                    contraindications: Vec::new(),
+                },
+                history,
+                exec_date,
+            ))
         })
         .collect();
 
@@ -728,67 +737,80 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 3. Define test patient cases
     let eval_date = NaiveDate::from_ymd_opt(2026, 5, 20).unwrap();
 
-    // Patient A: Follows standard 4-dose schedule
     let patient_a = Patient {
         birth_date: NaiveDate::from_ymd_opt(2020, 1, 1).unwrap(),
         gender: Gender::Female,
+        immunities: Vec::new(),
+        contraindications: Vec::new(),
     };
     let history_a = vec![
         Dose {
             date: NaiveDate::from_ymd_opt(2020, 3, 1).unwrap(),
             cvx: Cvx(10),
+            is_valid: None,
         }, // Dose 1 (2 months) - OK
         Dose {
             date: NaiveDate::from_ymd_opt(2020, 5, 1).unwrap(),
             cvx: Cvx(10),
+            is_valid: None,
         }, // Dose 2 (4 months) - OK
         Dose {
             date: NaiveDate::from_ymd_opt(2020, 7, 1).unwrap(),
             cvx: Cvx(10),
+            is_valid: None,
         }, // Dose 3 (6 months) - OK
     ];
 
-    // Patient B: 3 doses, with the 3rd dose given after age 4 -> Should complete!
     let patient_b = Patient {
         birth_date: NaiveDate::from_ymd_opt(2020, 1, 1).unwrap(),
         gender: Gender::Male,
+        immunities: Vec::new(),
+        contraindications: Vec::new(),
     };
     let history_b = vec![
         Dose {
             date: NaiveDate::from_ymd_opt(2020, 3, 1).unwrap(),
             cvx: Cvx(10),
+            is_valid: None,
         }, // Dose 1
         Dose {
             date: NaiveDate::from_ymd_opt(2020, 5, 1).unwrap(),
             cvx: Cvx(10),
+            is_valid: None,
         }, // Dose 2
         Dose {
             date: NaiveDate::from_ymd_opt(2024, 6, 1).unwrap(),
             cvx: Cvx(10),
+            is_valid: None,
         }, // Dose 3 (age 4y 5m, interval 4y)
     ];
 
-    // Patient C: Pre-2009 immunization with shorter intervals
     let patient_c = Patient {
         birth_date: NaiveDate::from_ymd_opt(2008, 1, 1).unwrap(),
         gender: Gender::Female,
+        immunities: Vec::new(),
+        contraindications: Vec::new(),
     };
     let history_c = vec![
         Dose {
             date: NaiveDate::from_ymd_opt(2008, 2, 10).unwrap(),
             cvx: Cvx(10),
+            is_valid: None,
         }, // Dose 1
         Dose {
             date: NaiveDate::from_ymd_opt(2008, 3, 15).unwrap(),
             cvx: Cvx(10),
+            is_valid: None,
         }, // Dose 2
         Dose {
             date: NaiveDate::from_ymd_opt(2008, 4, 20).unwrap(),
             cvx: Cvx(10),
+            is_valid: None,
         }, // Dose 3
         Dose {
             date: NaiveDate::from_ymd_opt(2008, 5, 20).unwrap(),
             cvx: Cvx(10),
+            is_valid: None,
         }, // Dose 4 (min interval is 30 days, pre-2009 check should allow 24d)
     ];
 

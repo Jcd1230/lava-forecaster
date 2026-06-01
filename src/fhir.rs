@@ -281,7 +281,12 @@ impl TryFrom<Patient> for InternalPatient {
             _ => Gender::Unknown,
         };
 
-        Ok(InternalPatient { birth_date, gender })
+        Ok(InternalPatient {
+            birth_date,
+            gender,
+            immunities: Vec::new(),
+            contraindications: Vec::new(),
+        })
     }
 }
 
@@ -308,7 +313,11 @@ impl TryFrom<Immunization> for Dose {
         let cvx_val = cvx_code.parse::<u16>()
             .map_err(|e| format!("Invalid CVX code (not a u16): {}", e))?;
 
-        Ok(Dose { date, cvx: Cvx(cvx_val) })
+        Ok(Dose {
+            date,
+            cvx: Cvx(cvx_val),
+            is_valid: None,
+        })
     }
 }
 

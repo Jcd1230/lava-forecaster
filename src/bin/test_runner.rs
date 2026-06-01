@@ -329,7 +329,7 @@ fn load_cdc_csv_cases(csv_path: &Path) -> Result<Vec<CdcCsvCase>, String> {
                     .map_err(|_| format!("Invalid CVX '{}' in test case {} dose {}", cvx_str, test_id, idx))?,
             );
 
-            history.push(Dose { date: dose_date, cvx });
+            history.push(Dose { date: dose_date, cvx, is_valid: None });
 
             let status = row.get(&status_key).map(|s| s.trim()).unwrap_or("").to_string();
             let reason = row
@@ -366,7 +366,12 @@ fn load_cdc_csv_cases(csv_path: &Path) -> Result<Vec<CdcCsvCase>, String> {
                 name: case_name,
                 group: group_name.to_string(),
                 focus_code: focus_code.to_string(),
-                patient: Patient { birth_date: dob, gender },
+                patient: Patient {
+                    birth_date: dob,
+                    gender,
+                    immunities: Vec::new(),
+                    contraindications: Vec::new(),
+                },
                 history,
                 execution_date,
                 expected: None,
@@ -1350,6 +1355,7 @@ fn import_python_cases(input_file: &Path, output_dir: &Path) {
             resolved_doses.push(Dose {
                 date: resolved_date,
                 cvx: Cvx(cvx_num),
+                is_valid: None,
             });
         }
 
@@ -1367,6 +1373,8 @@ fn import_python_cases(input_file: &Path, output_dir: &Path) {
             patient: Patient {
                 birth_date: dob,
                 gender,
+                immunities: Vec::new(),
+                contraindications: Vec::new(),
             },
             history: resolved_doses,
             execution_date: resolved_eval_date,

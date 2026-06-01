@@ -3,7 +3,7 @@ use chrono::NaiveDate;
 use base64::{Engine as _, engine::general_purpose::STANDARD};
 use quick_xml::events::Event;
 use quick_xml::reader::Reader;
-use crate::models::{Patient, Gender, Dose, ForecastRequest, Cvx};
+use crate::models::{Patient, Gender, Dose, ForecastRequest, Cvx, DiseaseImmunity, Contraindication};
 
 #[derive(Debug, Deserialize)]
 pub struct LegacyInteractionId {
@@ -55,106 +55,273 @@ fn parse_xml_date(ds: &str) -> Result<NaiveDate, crate::errors::ForecasterError>
     }
 }
 
-/// Helper function to parse elements in XML, matching local name (ignoring prefixes)
-fn handle_element(
-    e: &quick_xml::events::BytesStart,
-    in_event: bool,
-    birth_date: &mut Option<NaiveDate>,
-    gender: &mut Gender,
-    current_cvx: &mut Option<Cvx>,
-    current_date: &mut Option<NaiveDate>,
-) -> Result<(), crate::errors::ForecasterError> {
-    match e.local_name().as_ref() {
-        b"birthTime" => {
-            for attr in e.attributes() {
-                let attr = attr?;
-                if attr.key.as_ref() == b"value" {
-                    let val_str = std::str::from_utf8(&attr.value)?;
-                    *birth_date = Some(parse_xml_date(val_str)?);
-                }
-            }
-        }
-        b"gender" => {
-            for attr in e.attributes() {
-                let attr = attr?;
-                if attr.key.as_ref() == b"code" {
-                    let code_str = std::str::from_utf8(&attr.value)?;
-                    *gender = match code_str {
-                        "M" | "m" => Gender::Male,
-                        "F" | "f" => Gender::Female,
-                        _ => Gender::Unknown,
-                    };
-                }
-            }
-        }
-        b"substanceCode" if in_event => {
-            for attr in e.attributes() {
-                let attr = attr?;
-                if attr.key.as_ref() == b"code" {
-                    let code_str = std::str::from_utf8(&attr.value)?;
-                    let code_num = code_str.parse::<u16>()?;
-                    *current_cvx = Some(Cvx(code_num));
-                }
-            }
-        }
-        b"administrationTimeInterval" if in_event => {
-            let mut low = None;
-            let mut high = None;
-            for attr in e.attributes() {
-                let attr = attr?;
-                match attr.key.as_ref() {
-                    b"low" => low = Some(std::str::from_utf8(&attr.value)?.to_string()),
-                    b"high" => high = Some(std::str::from_utf8(&attr.value)?.to_string()),
-                    _ => {}
-                }
-            }
-            let date_str = low.or(high);
-            if let Some(ds) = date_str {
-                *current_date = Some(parse_xml_date(&ds)?);
-            }
-        }
-        _ => {}
+enum EitherObservation {
+    Immunity(DiseaseImmunity),
+    Contraindication(Contraindication),
+}
+
+fn map_observation(
+    focus: Option<String>,
+    value: Option<String>,
+    interpretations: &[String],
+    date: Option<NaiveDate>,
+    dob: NaiveDate,
+) -> Option<EitherObservation> {
+    let focus_str = focus.as_deref().unwrap_or("");
+    let is_immunity = interpretations.iter().any(|i| {
+        let il = i.to_lowercase();
+        il.contains("immune") || il.contains("immunity") || il.contains("documented")
+    });
+
+    let date = date.unwrap_or(dob);
+
+    if is_immunity {
+        let disease = if focus_str.contains("HEP_B") || focus_str.contains("27836007") || focus_str.contains("22322") {
+            "HepB"
+        } else if focus_str.contains("VARICELLA") || focus_str.contains("38907003") || focus_str.contains("15410") {
+            "Varicella"
+        } else if focus_str.contains("MEASLES") || focus_str.contains("14189004") {
+            "Measles"
+        } else if focus_str.contains("MUMPS") || focus_str.contains("36989005") {
+            "Mumps"
+        } else if focus_str.contains("RUBELLA") || focus_str.contains("36653000") {
+            "Rubella"
+        } else {
+            focus_str
+        };
+        let reason = interpretations.first().cloned().unwrap_or_else(|| "PROOF_OF_IMMUNITY".to_string());
+        Some(EitherObservation::Immunity(DiseaseImmunity {
+            disease: disease.to_string(),
+            date,
+            reason,
+        }))
+    } else {
+        // Contraindication
+        let target = if focus_str.contains("PERTUSSIS") || focus_str.contains("70654002") {
+            "DTP"
+        } else {
+            focus_str
+        };
+        let reason = interpretations.first().or(value.as_ref()).cloned().unwrap_or_else(|| "CONTRAINDICATION".to_string());
+        Some(EitherObservation::Contraindication(Contraindication {
+            date,
+            target: target.to_string(),
+            reason,
+        }))
     }
-    Ok(())
 }
 
 /// Parses the base64-encoded vMR XML content and extracts Patient demographics and immunization history.
-pub fn parse_vmr_xml(xml: &str) -> Result<(NaiveDate, Gender, Vec<Dose>), crate::errors::ForecasterError> {
+pub fn parse_vmr_xml(xml: &str) -> Result<(Patient, Vec<Dose>), crate::errors::ForecasterError> {
     let mut reader = Reader::from_str(xml);
     reader.trim_text(true);
 
     let mut birth_date = None;
     let mut gender = Gender::Unknown;
     let mut doses = Vec::new();
+    let mut immunities = Vec::new();
+    let mut contraindications = Vec::new();
     let mut buf = Vec::new();
 
     let mut in_event = false;
     let mut current_cvx = None;
     let mut current_date = None;
+    let mut current_is_valid = None;
+
+    let mut in_obs = false;
+    let mut obs_focus = None;
+    let mut obs_value = None;
+    let mut obs_interpretations = Vec::new();
+    let mut obs_date = None;
 
     loop {
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(ref e)) => {
-                if e.local_name().as_ref() == b"substanceAdministrationEvent" {
+                let local_name = e.local_name();
+                let tag = local_name.as_ref();
+                if tag == b"substanceAdministrationEvent" {
                     in_event = true;
                     current_cvx = None;
                     current_date = None;
+                    current_is_valid = None;
+                } else if tag == b"observationResult" {
+                    in_obs = true;
+                    obs_focus = None;
+                    obs_value = None;
+                    obs_interpretations.clear();
+                    obs_date = None;
+                } else if in_event {
+                    if tag == b"substanceCode" {
+                        for attr in e.attributes() {
+                            let attr = attr?;
+                            if attr.key.as_ref() == b"code" {
+                                let code_str = std::str::from_utf8(&attr.value)?;
+                                let code_num = code_str.parse::<u16>()?;
+                                current_cvx = Some(Cvx(code_num));
+                            }
+                        }
+                    } else if tag == b"administrationTimeInterval" {
+                        let mut low = None;
+                        let mut high = None;
+                        for attr in e.attributes() {
+                            let attr = attr?;
+                            match attr.key.as_ref() {
+                                b"low" => low = Some(std::str::from_utf8(&attr.value)?.to_string()),
+                                b"high" => high = Some(std::str::from_utf8(&attr.value)?.to_string()),
+                                _ => {}
+                            }
+                        }
+                        let date_str = low.or(high);
+                        if let Some(ds) = date_str {
+                            current_date = Some(parse_xml_date(&ds)?);
+                        }
+                    } else if tag == b"isValid" {
+                        for attr in e.attributes() {
+                            let attr = attr?;
+                            if attr.key.as_ref() == b"value" {
+                                let val_str = std::str::from_utf8(&attr.value)?;
+                                current_is_valid = Some(val_str == "true" || val_str == "1");
+                            }
+                        }
+                    }
+                } else if in_obs {
+                    if tag == b"observationFocus" {
+                        for attr in e.attributes() {
+                            let attr = attr?;
+                            if attr.key.as_ref() == b"code" {
+                                obs_focus = Some(std::str::from_utf8(&attr.value)?.to_string());
+                            }
+                        }
+                    } else if tag == b"concept" {
+                        for attr in e.attributes() {
+                            let attr = attr?;
+                            if attr.key.as_ref() == b"code" {
+                                obs_value = Some(std::str::from_utf8(&attr.value)?.to_string());
+                            }
+                        }
+                    } else if tag == b"interpretation" {
+                        for attr in e.attributes() {
+                            let attr = attr?;
+                            if attr.key.as_ref() == b"code" {
+                                obs_interpretations.push(std::str::from_utf8(&attr.value)?.to_string());
+                            }
+                        }
+                    } else if tag == b"observationEventTime" {
+                        let mut val = None;
+                        let mut low = None;
+                        for attr in e.attributes() {
+                            let attr = attr?;
+                            if attr.key.as_ref() == b"value" {
+                                val = Some(std::str::from_utf8(&attr.value)?.to_string());
+                            } else if attr.key.as_ref() == b"low" {
+                                low = Some(std::str::from_utf8(&attr.value)?.to_string());
+                            }
+                        }
+                        let date_str = val.or(low);
+                        if let Some(ds) = date_str {
+                            obs_date = Some(parse_xml_date(&ds)?);
+                        }
+                    }
                 } else {
-                    handle_element(e, in_event, &mut birth_date, &mut gender, &mut current_cvx, &mut current_date)?;
+                    if tag == b"birthTime" {
+                        for attr in e.attributes() {
+                            let attr = attr?;
+                            if attr.key.as_ref() == b"value" {
+                                let val_str = std::str::from_utf8(&attr.value)?;
+                                birth_date = Some(parse_xml_date(val_str)?);
+                            }
+                        }
+                    } else if tag == b"gender" {
+                        for attr in e.attributes() {
+                            let attr = attr?;
+                            if attr.key.as_ref() == b"code" {
+                                let code_str = std::str::from_utf8(&attr.value)?;
+                                gender = match code_str {
+                                    "M" | "m" => Gender::Male,
+                                    "F" | "f" => Gender::Female,
+                                    _ => Gender::Unknown,
+                                };
+                            }
+                        }
+                    }
                 }
             }
             Ok(Event::Empty(ref e)) => {
-                handle_element(e, in_event, &mut birth_date, &mut gender, &mut current_cvx, &mut current_date)?;
-                if e.local_name().as_ref() == b"substanceAdministrationEvent" {
-                    // Though unexpected to be empty, reset just in case
-                    in_event = false;
+                let local_name = e.local_name();
+                let tag = local_name.as_ref();
+                if in_event {
+                    if tag == b"isValid" {
+                        for attr in e.attributes() {
+                            let attr = attr?;
+                            if attr.key.as_ref() == b"value" {
+                                let val_str = std::str::from_utf8(&attr.value)?;
+                                current_is_valid = Some(val_str == "true" || val_str == "1");
+                            }
+                        }
+                    }
+                } else if in_obs {
+                    if tag == b"observationFocus" {
+                        for attr in e.attributes() {
+                            let attr = attr?;
+                            if attr.key.as_ref() == b"code" {
+                                obs_focus = Some(std::str::from_utf8(&attr.value)?.to_string());
+                            }
+                        }
+                    } else if tag == b"concept" {
+                        for attr in e.attributes() {
+                            let attr = attr?;
+                            if attr.key.as_ref() == b"code" {
+                                obs_value = Some(std::str::from_utf8(&attr.value)?.to_string());
+                            }
+                        }
+                    } else if tag == b"interpretation" {
+                        for attr in e.attributes() {
+                            let attr = attr?;
+                            if attr.key.as_ref() == b"code" {
+                                obs_interpretations.push(std::str::from_utf8(&attr.value)?.to_string());
+                            }
+                        }
+                    }
+                } else {
+                    if tag == b"birthTime" {
+                        for attr in e.attributes() {
+                            let attr = attr?;
+                            if attr.key.as_ref() == b"value" {
+                                let val_str = std::str::from_utf8(&attr.value)?;
+                                birth_date = Some(parse_xml_date(val_str)?);
+                            }
+                        }
+                    } else if tag == b"gender" {
+                        for attr in e.attributes() {
+                            let attr = attr?;
+                            if attr.key.as_ref() == b"code" {
+                                let code_str = std::str::from_utf8(&attr.value)?;
+                                gender = match code_str {
+                                    "M" | "m" => Gender::Male,
+                                    "F" | "f" => Gender::Female,
+                                    _ => Gender::Unknown,
+                                };
+                            }
+                        }
+                    }
                 }
             }
             Ok(Event::End(ref e)) => {
-                if e.local_name().as_ref() == b"substanceAdministrationEvent" {
+                let local_name = e.local_name();
+                let tag = local_name.as_ref();
+                if tag == b"substanceAdministrationEvent" {
                     in_event = false;
                     if let (Some(date), Some(cvx)) = (current_date, current_cvx.take()) {
-                        doses.push(Dose { date, cvx });
+                        doses.push(Dose { date, cvx, is_valid: current_is_valid });
+                    }
+                } else if tag == b"observationResult" {
+                    in_obs = false;
+                    let dob_fallback = birth_date.unwrap_or_else(|| NaiveDate::from_ymd_opt(1970, 1, 1).unwrap());
+                    if let Some(mapped) = map_observation(obs_focus.take(), obs_value.take(), &obs_interpretations, obs_date.take(), dob_fallback) {
+                        match mapped {
+                            EitherObservation::Immunity(imm) => immunities.push(imm),
+                            EitherObservation::Contraindication(c) => contraindications.push(c),
+                        }
                     }
                 }
             }
@@ -166,7 +333,15 @@ pub fn parse_vmr_xml(xml: &str) -> Result<(NaiveDate, Gender, Vec<Dose>), crate:
     }
 
     let birth_date = birth_date.ok_or("Missing birthTime in XML payload")?;
-    Ok((birth_date, gender, doses))
+    Ok((
+        Patient {
+            birth_date,
+            gender,
+            immunities,
+            contraindications,
+        },
+        doses,
+    ))
 }
 
 impl LegacyEvaluateRequest {
@@ -195,10 +370,10 @@ impl LegacyEvaluateRequest {
         let xml_str = std::str::from_utf8(&xml_bytes)?;
 
         // 3. Parse XML
-        let (birth_date, gender, history) = parse_vmr_xml(xml_str)?;
+        let (patient, history) = parse_vmr_xml(xml_str)?;
 
         Ok(ForecastRequest {
-            patient: Patient { birth_date, gender },
+            patient,
             history,
             execution_date: eval_date,
         })
