@@ -70,6 +70,14 @@ cargo run --release -- <path_to_request.json>
 
 ---
 
+## WebAssembly (WASM) Integration
+
+The LAVA Forecaster can be compiled to WebAssembly (WASM) to run directly inside web browsers or Node.js environments.
+
+For a complete guide on how to build and integrate the WASM build into your web projects, see the [WebAssembly Integration Guide](file:///home/jason/projects/ice/wasm_integration_guide.md).
+
+---
+
 ## Testing & Verification
 
 Verification matches Rust evaluation and forecasting logic against the Java ICE reference implementation.
