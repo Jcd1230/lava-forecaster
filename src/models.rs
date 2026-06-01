@@ -100,7 +100,12 @@ pub struct Contraindication {
     pub date: NaiveDate,
     pub target: String,
     pub reason: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub valid_until: Option<NaiveDate>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cvx: Option<Cvx>,
 }
+
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Patient {
@@ -160,6 +165,7 @@ pub enum EvaluationReason {
     VaccineNotAllowedInUs,
     DoseOverrideValid,
     DoseOverrideInvalid,
+    ContraindicatedVaccine,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

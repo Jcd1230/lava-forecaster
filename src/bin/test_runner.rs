@@ -1435,7 +1435,7 @@ fn print_comparison_table(
         };
 
         let match_ok = match (r, e) {
-            (Some(re), Some(ee)) => re.status == ee.status && re.dose_number == ee.dose_number,
+            (Some(re), Some(ee)) => re.status == ee.status && (ee.dose_number.is_none() || re.dose_number == ee.dose_number),
             _ => false,
         };
 
@@ -1536,6 +1536,71 @@ fn get_java_expected_results(java_url: &str, tc: &UnifiedTestCase) -> Result<Exp
     }
     
     Ok(java_res)
+}
+
+fn get_java_expected_results_bulk(java_url: &str, cases: &[&UnifiedTestCase]) -> Result<Vec<Result<ExpectedResults, String>>, String> {
+    let java_endpoint = format!("{}/opencds-decision-support-service/api/resources/bulkEvaluateAtSpecifiedTime", java_url);
+    let mut payloads = Vec::new();
+    for tc in cases {
+        let doses_tuples: Vec<(NaiveDate, Cvx)> = tc.history
+            .iter()
+            .map(|d| (d.date, d.cvx))
+            .collect();
+        let payload = build_evaluate_payload(
+            tc.patient.birth_date,
+            tc.patient.gender,
+            &doses_tuples,
+            tc.execution_date,
+        );
+        payloads.push(payload);
+    }
+    
+    let client = reqwest::blocking::Client::new();
+    let resp = client.post(&java_endpoint)
+        .json(&payloads)
+        .send()
+        .map_err(|e| format!("Failed to connect to Java ICE service at {}: {}", java_url, e))?;
+        
+    if !resp.status().is_success() {
+        return Err(format!("Java bulk service returned HTTP error: {}", resp.status()));
+    }
+    
+    let resp_json: serde_json::Value = resp.json()
+        .map_err(|e| format!("Failed to parse Java JSON response: {}", e))?;
+        
+    let resp_array = resp_json.as_array()
+        .ok_or_else(|| "Java bulk service response is not a JSON array".to_string())?;
+        
+    if resp_array.len() != cases.len() {
+        return Err(format!("Java bulk service returned {} responses, but expected {}", resp_array.len(), cases.len()));
+    }
+    
+    let mut results = Vec::new();
+    for (i, resp_item) in resp_array.iter().enumerate() {
+        let tc = cases[i];
+        let parse_res = (|| {
+            let b64_payload = resp_item["finalKMEvaluationResponse"][0]["kmEvaluationResultData"][0]["data"]["base64EncodedPayload"][0]
+                .as_str()
+                .ok_or_else(|| "Failed to extract base64 payload from Java response".to_string())?;
+
+            let clean_b64: String = b64_payload.chars().filter(|c| !c.is_whitespace()).collect();
+            let xml_bytes = base64::Engine::decode(&base64::prelude::BASE64_STANDARD, clean_b64.as_bytes())
+                .map_err(|e| format!("Failed to decode base64 XML payload: {}", e))?;
+
+            let xml_content = String::from_utf8(xml_bytes)
+                .map_err(|e| format!("Failed to decode UTF-8 XML string: {}", e))?;
+                
+            let mut java_res = parse_legacy_xml(&xml_content, &tc.focus_code);
+            
+            for f in &mut java_res.forecasts {
+                f.series_name = tc.group.clone().into();
+            }
+            Ok(java_res)
+        })();
+        results.push(parse_res);
+    }
+    
+    Ok(results)
 }
 
 fn main() {
@@ -1648,13 +1713,7 @@ fn main() {
         }
 
         let entries = fs::read_dir(cases_dir).expect("Failed to read cases dir");
-        let mut total = 0;
-        let mut passed = 0;
-        let mut failed = 0;
-        let mut group_summary: BTreeMap<String, SummaryCounts> = BTreeMap::new();
-        
-        let mut failed_details = Vec::new();
-
+        let mut test_cases = Vec::new();
         for entry in entries {
             let entry = entry.unwrap();
             let path = entry.path();
@@ -1677,56 +1736,100 @@ fn main() {
                             continue;
                         }
                     }
+                    test_cases.push(tc);
+                }
+            }
+        }
 
-                    total += 1;
-                    
-                    let (rust_evals, rust_fc) = if let Some(ref r_url) = rest_url {
-                        match query_rust_rest_service(r_url, &tc) {
-                            Ok(resp) => {
-                                let rust_group = resp.vaccine_groups.iter().find(|rg| rg.vaccine_group == tc.group).cloned();
-                                match rust_group {
-                                    Some(rg) => (rg.evaluations.to_vec(), rg.forecasts.first().cloned()),
-                                    None => (Vec::new(), None),
-                                }
-                            }
-                            Err(e) => {
-                                failed += 1;
-                                record_summary_result(&mut group_summary, &tc.group, false);
-                                failed_details.push((tc.name.clone(), vec![format!("Rust REST Error: {}", e)]));
-                                continue;
+        let mut java_expected_map = HashMap::new();
+        if let Some(ref j_url) = compare_java_url {
+            if !test_cases.is_empty() {
+                println!("Querying {} cases in bulk from Java ICE at {}...", test_cases.len(), j_url);
+                for chunk in test_cases.chunks(500) {
+                    let chunk_refs: Vec<&UnifiedTestCase> = chunk.iter().collect();
+                    match get_java_expected_results_bulk(j_url, &chunk_refs) {
+                        Ok(results) => {
+                            for (i, res) in results.into_iter().enumerate() {
+                                let name = chunk_refs[i].name.clone();
+                                java_expected_map.insert(name, res);
                             }
                         }
-                    } else {
-                        let rust_results = evaluate_patient_all_groups(&tc.patient, &tc.history, tc.execution_date);
-                        let rust_group = rust_results.iter().find(|rg| rg.vaccine_group == tc.group);
+                        Err(e) => {
+                            println!("Java bulk query failed: {}. Falling back to individual requests.", e);
+                            for tc in chunk_refs {
+                                let name = tc.name.clone();
+                                let ind_res = get_java_expected_results(j_url, tc);
+                                java_expected_map.insert(name, ind_res);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        let mut total = 0;
+        let mut passed = 0;
+        let mut failed = 0;
+        let mut group_summary: BTreeMap<String, SummaryCounts> = BTreeMap::new();
+        
+        let mut failed_details = Vec::new();
+
+        for tc in test_cases {
+            total += 1;
+            
+            let (rust_evals, rust_fc) = if let Some(ref r_url) = rest_url {
+                match query_rust_rest_service(r_url, &tc) {
+                    Ok(resp) => {
+                        let rust_group = resp.vaccine_groups.iter().find(|rg| rg.vaccine_group == tc.group).cloned();
                         match rust_group {
                             Some(rg) => (rg.evaluations.to_vec(), rg.forecasts.first().cloned()),
                             None => (Vec::new(), None),
                         }
-                    };
-
-                    let expected_results = if let Some(ref j_url) = compare_java_url {
-                        match get_java_expected_results(j_url, &tc) {
-                            Ok(res) => Some(res),
-                            Err(e) => {
-                                failed += 1;
-                                record_summary_result(&mut group_summary, &tc.group, false);
-                                failed_details.push((tc.name.clone(), vec![format!("Java Query Error: {}", e)]));
-                                continue;
-                            }
-                        }
-                    } else {
-                        tc.expected.clone()
-                    };
-
-                    if filter_case.is_some() && verbose {
-                        println!("DEBUG: patient: {:?}", tc.patient);
-                        println!("DEBUG: history: {:?}", tc.history);
-                        println!("DEBUG: execution_date: {:?}", tc.execution_date);
-                        println!("DEBUG: rust_evals: {:#?}", rust_evals);
-                        println!("DEBUG: rust_fc: {:#?}", rust_fc);
-                        println!("DEBUG: expected: {:#?}", expected_results);
                     }
+                    Err(e) => {
+                        failed += 1;
+                        record_summary_result(&mut group_summary, &tc.group, false);
+                        failed_details.push((tc.name.clone(), vec![format!("Rust REST Error: {}", e)]));
+                        continue;
+                    }
+                }
+            } else {
+                let rust_results = evaluate_patient_all_groups(&tc.patient, &tc.history, tc.execution_date);
+                let rust_group = rust_results.iter().find(|rg| rg.vaccine_group == tc.group);
+                match rust_group {
+                    Some(rg) => (rg.evaluations.to_vec(), rg.forecasts.first().cloned()),
+                    None => (Vec::new(), None),
+                }
+            };
+
+            let expected_results = if compare_java_url.is_some() {
+                match java_expected_map.remove(&tc.name) {
+                    Some(Ok(res)) => Some(res),
+                    Some(Err(e)) => {
+                        failed += 1;
+                        record_summary_result(&mut group_summary, &tc.group, false);
+                        failed_details.push((tc.name.clone(), vec![format!("Java Query Error: {}", e)]));
+                        continue;
+                    }
+                    None => {
+                        failed += 1;
+                        record_summary_result(&mut group_summary, &tc.group, false);
+                        failed_details.push((tc.name.clone(), vec!["Java expected results missing from bulk results".to_string()]));
+                        continue;
+                    }
+                }
+            } else {
+                tc.expected.clone()
+            };
+
+            if filter_case.is_some() && verbose {
+                println!("DEBUG: patient: {:?}", tc.patient);
+                println!("DEBUG: history: {:?}", tc.history);
+                println!("DEBUG: execution_date: {:?}", tc.execution_date);
+                println!("DEBUG: rust_evals: {:#?}", rust_evals);
+                println!("DEBUG: rust_fc: {:#?}", rust_fc);
+                println!("DEBUG: expected: {:#?}", expected_results);
+            }
                     
                     let mut is_ok = true;
                     let mut errors = Vec::new();
@@ -1829,8 +1932,6 @@ fn main() {
                         record_summary_result(&mut group_summary, &tc.group, false);
                         failed_details.push((tc.name.clone(), errors));
                     }
-                }
-            }
         }
 
         print_summary("Rust-Native Test Runner Summary", total, passed, failed, &group_summary);

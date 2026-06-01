@@ -14,6 +14,8 @@ pub fn parse_test_case_dsl(content: &str) -> Result<UnifiedTestCase, String> {
     let mut execution_date = None;
     
     let mut doses: Vec<Dose> = Vec::new();
+    let mut immunities = Vec::new();
+    let mut contraindications = Vec::new();
     
     let mut expected_evals = Vec::new();
     let mut expected_status = None;
@@ -54,10 +56,85 @@ pub fn parse_test_case_dsl(content: &str) -> Result<UnifiedTestCase, String> {
             let date_str = lower.split("evaluation date is ").nth(1)
                 .ok_or("Missing date after 'evaluation date is'")?.trim();
             execution_date = Some(parse_date(date_str)?);
+        } else if lower.contains("patient is immune to ") {
+            let idx = lower.find("patient is immune to ").unwrap() + "patient is immune to ".len();
+            let after = &line[idx..].trim();
+            let on_idx = after.to_lowercase().find(" on ");
+            if on_idx.is_none() {
+                return Err("Missing 'on' date in immunity definition".to_string());
+            }
+            let on_idx = on_idx.unwrap();
+            let disease = after[..on_idx].trim().to_string();
+            let mut date_part = after[on_idx + 4..].trim();
+            let mut reason = "Titer positive".to_string();
+            let lower_date_part = date_part.to_lowercase();
+            if let Some(r_idx) = lower_date_part.find("(reason:") {
+                let r_part = date_part[r_idx..].replace("(reason:", "").replace("(Reason:", "").replace(")", "").trim().to_string();
+                if !r_part.is_empty() {
+                    reason = r_part;
+                }
+                date_part = date_part[..r_idx].trim();
+            }
+            let date = parse_date(date_part)?;
+            immunities.push(crate::models::DiseaseImmunity {
+                disease,
+                date,
+                reason,
+            });
+        } else if lower.contains("patient is contraindicated for ") {
+            let idx = lower.find("patient is contraindicated for ").unwrap() + "patient is contraindicated for ".len();
+            let after = &line[idx..].trim();
+            let on_idx = after.to_lowercase().find(" on ");
+            if on_idx.is_none() {
+                return Err("Missing 'on' date in contraindication definition".to_string());
+            }
+            let on_idx = on_idx.unwrap();
+            let target_part = after[..on_idx].trim();
+            let mut date_part = after[on_idx + 4..].trim();
+            
+            let mut valid_until = None;
+            let lower_date_part = date_part.to_lowercase();
+            if let Some(u_idx) = lower_date_part.find(" until ") {
+                let until_part = date_part[u_idx + 7..].trim();
+                valid_until = Some(parse_date(until_part)?);
+                date_part = date_part[..u_idx].trim();
+            }
+
+            let date = parse_date(date_part)?;
+            
+            let mut cvx = None;
+            let target = target_part.to_string();
+            if target_part.to_lowercase().starts_with("cvx ") {
+                let cvx_val_str = target_part[4..].trim();
+                if let Ok(c_val) = cvx_val_str.parse::<u16>() {
+                    cvx = Some(Cvx(c_val));
+                }
+            }
+
+            contraindications.push(crate::models::Contraindication {
+                date,
+                target,
+                reason: "Contraindication".to_string(),
+                valid_until,
+                cvx,
+            });
         } else if lower.contains("receive cvx ") {
-            // "receive CVX 106 at 2 months of age" or "receive CVX 106 on 2020-03-01"
-            // or "receive CVX 106 4 weeks after dose 1"
-            let parts: Vec<&str> = lower.split("receive cvx ").collect();
+            let mut clean_line = line.to_string();
+            let mut is_valid_override = None;
+            let lower_line = clean_line.to_lowercase();
+            if lower_line.contains("(is_valid: true)") || lower_line.contains("(isvalid: true)") {
+                is_valid_override = Some(true);
+                clean_line = clean_line.replace("(is_valid: true)", "").replace("(is_valid: True)", "")
+                                       .replace("(isvalid: true)", "").replace("(isvalid: True)", "");
+            } else if lower_line.contains("(is_valid: false)") || lower_line.contains("(isvalid: false)") {
+                is_valid_override = Some(false);
+                clean_line = clean_line.replace("(is_valid: false)", "").replace("(is_valid: False)", "")
+                                       .replace("(isvalid: false)", "").replace("(isvalid: False)", "");
+            }
+            let clean_line = clean_line.trim().to_string();
+            let lower_clean = clean_line.to_lowercase();
+            
+            let parts: Vec<&str> = lower_clean.split("receive cvx ").collect();
             let after_cvx = parts[1].trim();
             let cvx_str = after_cvx.split_whitespace().next()
                 .ok_or("Missing CVX code after 'receive cvx'")?;
@@ -100,11 +177,11 @@ pub fn parse_test_case_dsl(content: &str) -> Result<UnifiedTestCase, String> {
             } else {
                 return Err(format!("Could not parse dose timing: {}", remainder));
             };
-            doses.push(Dose { cvx: Cvx(cvx), date, is_valid: None });
+            doses.push(Dose { cvx: Cvx(cvx), date, is_valid: is_valid_override });
             
             if let Some(status) = inline_status {
                 expected_evals.push(DoseEvaluation {
-                    dose_number: Some(doses.len()),
+                    dose_number: None,
                     status,
                     reasons: Default::default(),
                     dose_date: date,
@@ -132,7 +209,7 @@ pub fn parse_test_case_dsl(content: &str) -> Result<UnifiedTestCase, String> {
                 _ => return Err(format!("Unknown dose status {}", status_str)),
             };
             expected_evals.push(DoseEvaluation {
-                dose_number: Some(dose_num),
+                dose_number: None,
                 status,
                 reasons: Default::default(),
                 dose_date: doses[dose_num - 1].date,
@@ -201,8 +278,8 @@ pub fn parse_test_case_dsl(content: &str) -> Result<UnifiedTestCase, String> {
         patient: Patient {
             birth_date: bdate,
             gender,
-            immunities: Vec::new(),
-            contraindications: Vec::new(),
+            immunities,
+            contraindications,
         },
         history: doses,
         execution_date: edate,

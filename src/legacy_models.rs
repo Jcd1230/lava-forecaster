@@ -107,6 +107,8 @@ fn map_observation(
             date,
             target: target.to_string(),
             reason,
+            valid_until: None,
+            cvx: None,
         }))
     }
 }

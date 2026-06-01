@@ -1,0 +1,8 @@
+Test: custom_extended_immunity
+Group: HEP_B
+Focus: 100
+Patient born on 2025-11-10
+Evaluation date is 2025-11-12
+Patient is immune to HepB on 2025-11-10 (reason: Serology positive)
+Receive CVX 45 on 2025-11-10 (is_valid: true) -> valid
+Series status should be complete

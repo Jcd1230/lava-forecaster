@@ -311,6 +311,20 @@ impl<'a> EvaluationEngine<'a> {
                 continue;
             }
 
+            let is_contraindicated = is_dose_contraindicated(patient, dose.cvx, dose.date, &active_series.vaccine_group);
+            if is_contraindicated {
+                let output_dose_number = std::cmp::min(target_dose_idx, valid_doses.len() + 1);
+                evaluations.push(DoseEvaluation {
+                    dose_date: dose.date,
+                    cvx: dose.cvx,
+                    status: DoseStatus::Invalid,
+                    reasons: crate::reasons![EvaluationReason::ContraindicatedVaccine],
+                    dose_number: Some(output_dose_number),
+                });
+                i += 1;
+                continue;
+            }
+
             if let Some(policy) = self.policy {
                 let ctx = EvaluationContext::new(
                     patient,
@@ -1064,13 +1078,43 @@ fn is_patient_immune_to_group(patient: &crate::models::Patient, group: &str, eva
 fn is_group_contraindicated(patient: &crate::models::Patient, group: &str, eval_date: NaiveDate) -> bool {
     let group_lower = group.to_lowercase();
     patient.contraindications.iter().any(|c| {
+        if c.cvx.is_some() {
+            return false;
+        }
         let target_lower = c.target.to_lowercase();
         let matches_group = if group_lower.contains("dtp") || group_lower.contains("dtap") || group_lower.contains("dt") || group_lower.contains("tdap") || group_lower.contains("td") || group_lower.contains("diphtheria") || group_lower.contains("tetanus") || group_lower.contains("pertussis") {
             target_lower.contains("dtp") || target_lower.contains("dtap") || target_lower.contains("dt") || target_lower.contains("tdap") || target_lower.contains("td") || target_lower.contains("diphtheria") || target_lower.contains("tetanus") || target_lower.contains("pertussis")
         } else {
             target_lower == group_lower
         };
-        matches_group && eval_date >= c.date
+        let active = eval_date >= c.date && c.valid_until.map_or(true, |until| eval_date < until);
+        matches_group && active
+    })
+}
+
+fn is_dose_contraindicated(patient: &crate::models::Patient, cvx: Cvx, date: NaiveDate, group: &str) -> bool {
+    let group_lower = group.to_lowercase();
+    patient.contraindications.iter().any(|c| {
+        let active = date >= c.date && c.valid_until.map_or(true, |until| date < until);
+        if !active {
+            return false;
+        }
+        if let Some(c_cvx) = c.cvx {
+            if c_cvx == cvx {
+                return true;
+            }
+        } else {
+            let target_lower = c.target.to_lowercase();
+            let matches_group = if group_lower.contains("dtp") || group_lower.contains("dtap") || group_lower.contains("dt") || group_lower.contains("tdap") || group_lower.contains("td") || group_lower.contains("diphtheria") || group_lower.contains("tetanus") || group_lower.contains("pertussis") {
+                target_lower.contains("dtp") || target_lower.contains("dtap") || target_lower.contains("dt") || target_lower.contains("tdap") || target_lower.contains("td") || target_lower.contains("diphtheria") || target_lower.contains("tetanus") || target_lower.contains("pertussis")
+            } else {
+                target_lower == group_lower
+            };
+            if matches_group {
+                return true;
+            }
+        }
+        false
     })
 }
 
