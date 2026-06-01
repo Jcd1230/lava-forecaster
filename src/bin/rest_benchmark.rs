@@ -9,8 +9,8 @@ use reqwest::Client;
 use serde_json;
 use flatbuffers::FlatBufferBuilder;
 
-use ice_rust_forecaster_poc::models::{UnifiedTestCase, ForecastRequest, BulkForecastRequest};
-use ice_rust_forecaster_poc::forecaster_generated::org::cdsframework::ice::flatbuf as fb;
+use lava_forecaster::models::{UnifiedTestCase, ForecastRequest, BulkForecastRequest};
+use lava_forecaster::forecaster_generated::org::cdsframework::ice::flatbuf as fb;
 
 const BULK_BENCHMARK_BATCH_SIZE: usize = 128;
 const SINGLE_JSON_CONCURRENCY: &[usize] = &[1, 10, 50];
@@ -38,9 +38,9 @@ fn serialize_flatbuffers_bulk(requests: &[ForecastRequest]) -> Vec<u8> {
     for req in requests {
         let birth_date = date_to_epoch_days(req.patient.birth_date);
         let gender_str = builder.create_string(match req.patient.gender {
-            ice_rust_forecaster_poc::models::Gender::Female => "Female",
-            ice_rust_forecaster_poc::models::Gender::Male => "Male",
-            ice_rust_forecaster_poc::models::Gender::Unknown => "Unknown",
+            lava_forecaster::models::Gender::Female => "Female",
+            lava_forecaster::models::Gender::Male => "Male",
+            lava_forecaster::models::Gender::Unknown => "Unknown",
         });
 
         let patient_offset = fb::Patient::create(&mut builder, &fb::PatientArgs {
@@ -94,14 +94,14 @@ async fn wait_for_server(addr: &str, timeout_secs: u64) -> bool {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("=== Building REST Server in Release Profile ===");
     let build_status = Command::new("cargo")
-        .args(["build", "--release", "--bin", "ice-rust-forecaster-poc", "--features", "jemalloc"])
+        .args(["build", "--release", "--bin", "lava-forecaster", "--features", "jemalloc"])
         .status()?;
     if !build_status.success() {
         panic!("Failed to build REST server binary");
     }
 
     println!("Starting REST server...");
-    let child = Command::new("target/release/ice-rust-forecaster-poc")
+    let child = Command::new("target/release/lava-forecaster")
         .arg("--server")
         .spawn()?;
     let _guard = ServerGuard(child);

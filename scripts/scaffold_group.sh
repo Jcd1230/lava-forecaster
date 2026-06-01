@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# Scaffold a new vaccine group in the Rust PoC and add test suite placeholder.
+# Scaffold a new vaccine group in the LAVA Forecaster and add test suite placeholder.
 # Usage: ./scripts/scaffold_group.sh <group_lower> [GROUP_UPPER]
 
 if [ -z "$1" ]; then

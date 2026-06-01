@@ -1,11 +1,11 @@
-# ICE & Rust Forecaster PoC Agent Guide
+# LAVA Forecaster Agent Guide
 
-Welcome! This guide provides a quick-start reference for AI agents and developers working on the Immunization Calculation Engine (ICE) and its Rust-based Forecaster Proof of Concept (PoC).
+Welcome! This guide provides a quick-start reference for AI agents and developers working on the Immunization Calculation Engine (ICE) and its high-performance Rust-based LAVA Forecaster.
 
 ## Tech Stack Summary
 
 - **Java ICE Engine**: Legacy Drools-based server requiring **Java 25** and **Maven 3.9**.
-- **Rust Forecaster PoC**: High-performance Rust-based implementation of the evaluation engine.
+- **Rust LAVA Forecaster**: High-performance Rust-based implementation of the evaluation engine.
 - **Verification Tests**: Rust-native `test_runner` and benchmarking binaries.
 - **Tooling**: Managed via `mise` (for Java and Maven version consistency).
 
@@ -30,7 +30,7 @@ All major tasks are configured as `mise` commands or native Cargo binaries.
 | `mise run build` | Builds the Java ICE Maven project (`mvn clean install`). |
 | `mise run run` | Runs the Java ICE server (exploded WAR) on `http://localhost:8080`. |
 | `mise run scaffold <group_lower> [GROUP_UPPER]` | Scaffolds a new vaccine group module (directory structure, files, mod.rs registration, test JSON). |
-| `cargo run --release --bin test_runner -- --run tests/cases` | **(Preferred)** Runs the Rust-native test runner to verify PoC logic against expected snapshots (offline). |
+| `cargo run --release --bin test_runner -- --run tests/cases` | **(Preferred)** Runs the Rust-native test runner to verify LAVA logic against expected snapshots (offline). |
 | `cargo run --release --bin test_runner -- --run tests/cases --group <GROUP>` | Runs the Rust-native test runner for a specific vaccine group (e.g., `POLIO`, `DTP`, `MMR`). |
 | `cargo run --release --bin test_runner -- --run tests/cases --group <GROUP> --compare` | Runs the Rust test runner and compares dynamically against the live Java ICE server. |
 | `cargo run --release --bin test_runner -- --run tests/cases --case <CASE> -v` | Runs a single case with side-by-side verbose details. |

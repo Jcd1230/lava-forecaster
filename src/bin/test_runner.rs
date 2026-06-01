@@ -4,7 +4,7 @@ use std::path::Path;
 use chrono::{Datelike, NaiveDate};
 use csv::ReaderBuilder;
 use serde::Deserialize;
-use ice_rust_forecaster_poc::{
+use lava_forecaster::{
     evaluate_patient_all_groups,
     models::{
         Dose, DoseEvaluation, DoseStatus, EvaluationReason, ExpectedResults,
@@ -1461,9 +1461,9 @@ fn print_comparison_table(
     println!();
 }
 
-fn query_rust_rest_service(rust_url: &str, tc: &UnifiedTestCase) -> Result<ice_rust_forecaster_poc::models::ForecastResponse, String> {
+fn query_rust_rest_service(rust_url: &str, tc: &UnifiedTestCase) -> Result<lava_forecaster::models::ForecastResponse, String> {
     let client = reqwest::blocking::Client::new();
-    let req_payload = ice_rust_forecaster_poc::models::ForecastRequest {
+    let req_payload = lava_forecaster::models::ForecastRequest {
         patient: tc.patient.clone(),
         history: tc.history.clone(),
         execution_date: tc.execution_date,
@@ -1478,7 +1478,7 @@ fn query_rust_rest_service(rust_url: &str, tc: &UnifiedTestCase) -> Result<ice_r
         return Err(format!("Rust REST server returned error: {}", resp.status()));
     }
     
-    let resp_data: ice_rust_forecaster_poc::models::ForecastResponse = resp.json()
+    let resp_data: lava_forecaster::models::ForecastResponse = resp.json()
         .map_err(|e| format!("Failed to parse Rust REST response: {}", e))?;
     
     Ok(resp_data)
@@ -1572,7 +1572,7 @@ fn main() {
                 let tc_opt = if extension == "json" {
                     serde_json::from_str::<UnifiedTestCase>(&content).ok()
                 } else {
-                    ice_rust_forecaster_poc::test_dsl::parse_test_case_dsl(&content).ok()
+                    lava_forecaster::test_dsl::parse_test_case_dsl(&content).ok()
                 };
                 if let Some(mut tc) = tc_opt {
                     println!("Recording Java snapshot for: {}", tc.name);
@@ -1656,7 +1656,7 @@ fn main() {
                 let tc_opt = if extension == "json" {
                     serde_json::from_str::<UnifiedTestCase>(&content).ok()
                 } else {
-                    ice_rust_forecaster_poc::test_dsl::parse_test_case_dsl(&content).ok()
+                    lava_forecaster::test_dsl::parse_test_case_dsl(&content).ok()
                 };
                 if let Some(tc) = tc_opt {
                     if let Some(ref fg) = filter_group {

@@ -1,6 +1,6 @@
 # Onboarding & Porting Guide: Implementing Vaccine Groups in Rust
 
-This guide provides step-by-step instructions, codebase pointers, and concrete Rust DSL examples to help developers and AI agents implement new vaccine groups and series in the **High-Performance Rust ICE Forecaster PoC**.
+This guide provides step-by-step instructions, codebase pointers, and concrete Rust DSL examples to help developers and AI agents implement new vaccine groups and series in the **LAVA Forecaster**.
 
 ---
 
@@ -256,9 +256,9 @@ All testing and verification commands are managed via `mise`:
 
 | Command | Description |
 |---|---|
-| `mise run test-compare -- --group <name>` | Compares Rust PoC outputs against live Java. **Auto-records missing expected snapshots.** |
-| `mise run test -- --group <name>` | Runs Rust PoC verification against recorded snapshots. **Does not require Java.** |
-| `mise run test-group -- <name>` | Shortcut for Rust PoC verification of one vaccine group against recorded snapshots. |
+| `mise run test-compare -- --group <name>` | Compares LAVA Forecaster outputs against live Java. **Auto-records missing expected snapshots.** |
+| `mise run test -- --group <name>` | Runs LAVA Forecaster verification against recorded snapshots. **Does not require Java.** |
+| `mise run test-group -- <name>` | Shortcut for LAVA Forecaster verification of one vaccine group against recorded snapshots. |
 | `mise run test-record -- --group <name>` | Queries Java ICE and records snapshots. |
 
 ### Workflow for a New Vaccine Group

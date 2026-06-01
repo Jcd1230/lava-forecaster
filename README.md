@@ -1,8 +1,8 @@
-# High-Performance Rust ICE Forecaster PoC
+# Lightspeed Antigen & Vaccine Assessment (LAVA) Forecaster
 
-This repository is a high-performance Rust-based Proof of Concept (PoC) for the **Immunization Calculation Engine (ICE)**. It implements the CDC Clinical Decision Support for Immunization (CDSi) evaluation and forecasting engine using a type-safe, compile-time Domain Specific Language (DSL) in Rust.
+This repository is the **Lightspeed Antigen & Vaccine Assessment (LAVA) Forecaster**, a high-performance Rust-based implementation of the **Immunization Calculation Engine (ICE)**. It implements the CDC Clinical Decision Support for Immunization (CDSi) evaluation and forecasting engine using a type-safe, compile-time Domain Specific Language (DSL) in Rust.
 
-By compile-time pre-compilation of rules, schema-free internal representations, and memory-efficient static data structures, the Rust Forecaster achieves sub-millisecond latencies and high throughput suited for real-time and bulk processing workloads.
+By compile-time pre-compilation of rules, schema-free internal representations, and memory-efficient static data structures, the LAVA Forecaster achieves sub-millisecond latencies and high throughput suited for real-time and bulk processing workloads.
 
 ---
 
@@ -105,7 +105,7 @@ cargo run --release --bin test_runner -- --record tests/cases [http://localhost:
 From the project root, a set of convenience scripts are available via `mise`:
 * `mise run test`: Runs the Rust-native verification runner.
 * `mise run test-group -- <group>`: Runs verification for a single vaccine group.
-* `mise run test-compare -- --group <group>`: Directly runs differential testing between live Java and Rust PoC.
+* `mise run test-compare -- --group <group>`: Directly runs differential testing between live Java and LAVA Forecaster.
 
 ---
 

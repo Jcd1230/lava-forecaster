@@ -11,7 +11,7 @@ description = "Run verification tests for one vaccine group"
 run = "cargo run --release --bin test_runner -- --run tests/cases --group"
 
 [tasks.test-compare]
-description = "Compare outputs between Java ICE service and Rust POC"
+description = "Compare outputs between Java ICE service and LAVA Forecaster"
 run = "cargo run --release --bin test_runner -- --run tests/cases --compare"
 
 [tasks.test-record]

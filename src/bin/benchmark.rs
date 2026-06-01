@@ -8,7 +8,7 @@ use rayon::prelude::*;
 #[global_allocator]
 static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
-use ice_rust_forecaster_poc::{
+use lava_forecaster::{
     evaluate_patient_all_groups,
     init_rayon_pool,
     models::UnifiedTestCase,

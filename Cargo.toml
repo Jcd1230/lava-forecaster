@@ -1,8 +1,8 @@
 [package]
-name = "ice-rust-forecaster-poc"
+name = "lava-forecaster"
 version = "0.1.0"
 edition = "2024"
-default-run = "ice-rust-forecaster-poc"
+default-run = "lava-forecaster"
 
 [workspace]
 members = [

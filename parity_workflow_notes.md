@@ -111,7 +111,7 @@ When a compare case is still ambiguous, run the Rust binary directly on a one-of
 2. Run the binary from the Rust crate directory:
 
 ```bash
-cd ice-rust-forecaster-poc
+# From the project root:
 cargo run -- /path/to/request.json
 ```
 

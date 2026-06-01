@@ -591,27 +591,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ice-rust-forecaster-poc"
-version = "0.1.0"
-dependencies = [
- "axum",
- "base64",
- "chrono",
- "csv",
- "flatbuffers",
- "ice-cvx-macro",
- "jemallocator",
- "quick-xml",
- "rayon",
- "reqwest",
- "serde",
- "serde_json",
- "smallvec",
- "tokio",
- "tower",
-]
-
-[[package]]
 name = "icu_collections"
 version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -774,6 +753,27 @@ dependencies = [
  "futures-util",
  "once_cell",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "lava-forecaster"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "base64",
+ "chrono",
+ "csv",
+ "flatbuffers",
+ "ice-cvx-macro",
+ "jemallocator",
+ "quick-xml",
+ "rayon",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "smallvec",
+ "tokio",
+ "tower",
 ]
 
 [[package]]

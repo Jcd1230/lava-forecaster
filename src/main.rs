@@ -6,7 +6,7 @@ use rayon::prelude::*;
 #[global_allocator]
 static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
-use ice_rust_forecaster_poc::{
+use lava_forecaster::{
     parse_request, evaluate_patient_all_groups, rules,
     models::{self, Dose, ForecastResponse, Gender, Patient, Cvx},
 };
@@ -132,7 +132,7 @@ async fn evaluate_bulk_flatbuffers_handler(
 ) -> impl axum::response::IntoResponse {
     use axum::http::{StatusCode, HeaderMap, HeaderValue};
     use axum::response::IntoResponse;
-    use ice_rust_forecaster_poc::forecaster_generated::org::cdsframework::ice::flatbuf as fb;
+    use lava_forecaster::forecaster_generated::org::cdsframework::ice::flatbuf as fb;
     let req_start = Instant::now();
 
     let epoch_days_to_date = |days: u16| {
@@ -357,7 +357,7 @@ async fn fhir_recommend_handler(
 ) -> impl axum::response::IntoResponse {
     use axum::http::{StatusCode, HeaderMap, HeaderValue};
     use axum::response::IntoResponse;
-    use ice_rust_forecaster_poc::fhir;
+    use lava_forecaster::fhir;
 
     let params: fhir::Parameters = match serde_json::from_str(&body) {
         Ok(p) => p,
@@ -507,8 +507,8 @@ async fn cds_forecast_handler(
 ) -> impl axum::response::IntoResponse {
     use axum::http::{StatusCode, HeaderMap, HeaderValue};
     use axum::response::IntoResponse;
-    use ice_rust_forecaster_poc::fhir;
-    use ice_rust_forecaster_poc::models::SeriesStatus;
+    use lava_forecaster::fhir;
+    use lava_forecaster::models::SeriesStatus;
 
     let req: fhir::CDSRequest = match serde_json::from_str(&body) {
         Ok(r) => r,
@@ -618,7 +618,7 @@ async fn cds_forecast_handler(
         detail,
         indicator,
         source: fhir::Source {
-            label: "ICE Rust Forecaster".to_string(),
+            label: "LAVA Forecaster".to_string(),
             url: None,
             icon: None,
         },
@@ -648,7 +648,7 @@ async fn cds_forecast_handler(
 }
 
 fn run_server() -> Result<(), Box<dyn std::error::Error>> {
-    ice_rust_forecaster_poc::init_rayon_pool();
+    lava_forecaster::init_rayon_pool();
 
     let rt = tokio::runtime::Builder::new_multi_thread()
         .thread_stack_size(8 * 1024 * 1024)
@@ -673,7 +673,7 @@ fn run_server() -> Result<(), Box<dyn std::error::Error>> {
             .route("/cds-services/immunization-forecaster", post(cds_forecast_handler));
 
         let addr = SocketAddr::from(([0, 0, 0, 0], 8081));
-        println!("Rust PoC REST server listening on http://{}", addr);
+        println!("LAVA Forecaster REST server listening on http://{}", addr);
 
         let listener = tokio::net::TcpListener::bind(addr).await?;
         axum::serve(listener, app).await?;
@@ -710,7 +710,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Ok(());
     }
 
-    println!("=== High-Performance Rust ICE Forecaster PoC (Compile-Time DSL) ===");
+    println!("=== Lightspeed Antigen & Vaccine Assessment / LAVA Forecaster ===");
 
     for ruleset in rules::get_all_groups() {
         println!(

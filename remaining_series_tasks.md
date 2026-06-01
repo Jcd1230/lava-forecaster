@@ -1,6 +1,6 @@
 # Task List: Remaining Vaccine Groups & Series Implementation
 
-This task list tracks the remaining vaccine groups and series from the legacy Drools-based Java ICE engine that need to be ported to the high-performance Rust forecaster PoC.
+This task list tracks the vaccine groups and series from the legacy Drools-based Java ICE engine that have been ported to the high-performance Rust LAVA Forecaster.
 
 To implement a group, follow the guidelines in the [Onboarding & Implementation Guide](file:///home/jason/projects/ice/agent_onboarding_guide.md).
 
