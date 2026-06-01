@@ -20,6 +20,9 @@ Make sure you have:
 
 We use `wasm-pack` to build the compiled WASM binary and generate its corresponding JavaScript/TypeScript bindings. Choose the build command based on your target environment:
 
+> [!TIP]
+> **Pre-built Release Assets**: If you do not want to build the WebAssembly packages locally, pre-built tarball archives for all three targets (`bundler`, `web`, and `nodejs`) are automatically attached to every tagged release on the [GitHub Releases page](https://github.com/Jcd1230/lava-forecaster/releases).
+
 ### A. Targeting Node.js (CommonJS)
 Useful for server-side JS environments, microservices, or local scripting:
 ```bash
