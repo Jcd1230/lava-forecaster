@@ -299,6 +299,21 @@ pub fn hep_b_custom_forecast_hook(
     let all_pediarix = !valid_cvxs.is_empty() && valid_cvxs.iter().all(|cvx| *cvx == cvx!("110"));
     let latest_history_dose = history.iter().max_by_key(|dose| dose.date);
 
+    if max_dose_number == 0 {
+        if let Some(last_dose) = latest_history_dose {
+            if matches!(forecast.status, SeriesStatus::NotComplete { .. }) {
+                let earliest = forecast.status.earliest_date().unwrap_or(patient.birth_date);
+                let recommended = forecast.status.recommended_date().unwrap_or(patient.birth_date);
+                let overdue = forecast.status.overdue_date().unwrap_or(patient.birth_date);
+                
+                let spaced_date = last_dose.date + chrono::Duration::days(28);
+                forecast.status = forecast.status.with_earliest_date(Some(earliest.max(spaced_date)));
+                forecast.status = forecast.status.with_recommended_date(Some(recommended.max(spaced_date)));
+                forecast.status = forecast.status.with_overdue_date(Some(overdue.max(spaced_date)));
+            }
+        }
+    }
+
     if history.iter().any(|dose| dose.cvx.0 == cvx!("110"))
         && matches!(forecast.status, SeriesStatus::NotComplete { .. })
         && max_dose_number == 1
