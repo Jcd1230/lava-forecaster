@@ -36,7 +36,7 @@ jobs:
       - name: Build and upload
         uses: taiki-e/upload-rust-binary-action@v1
         with:
-          bin: ice-rust-forecaster-poc
+          bin: lava-forecaster
           target: ${{ matrix.target }}
           tar: unix
           zip: windows
