@@ -1,4 +1,4 @@
-use ice_cvx_macro::cvx;
+use lava_cvx_macro::cvx;
 use crate::schedule::CompiledSeries;
 
 pub fn h1n1_1_dose_series() -> CompiledSeries {

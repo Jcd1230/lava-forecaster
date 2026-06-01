@@ -42,7 +42,7 @@ impl std::fmt::Display for Cvx {
     }
 }
 
-use ice_cvx_macro::generate_cvx_registry;
+use lava_cvx_macro::generate_cvx_registry;
 
 // Generates `cvx_to_id` and `id_to_cvx` helpers
 generate_cvx_registry!();

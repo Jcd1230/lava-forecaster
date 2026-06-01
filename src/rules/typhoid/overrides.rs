@@ -1,5 +1,5 @@
 use crate::date_utils::TinyVec;
-use ice_cvx_macro::cvx;
+use lava_cvx_macro::cvx;
 use crate::engine::EvaluationContext;
 use crate::models::{Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus};
 use chrono::NaiveDate;

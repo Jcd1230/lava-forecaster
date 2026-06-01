@@ -1058,7 +1058,7 @@ mod integration_tests {
         
         let cards = body["cards"].as_array().unwrap();
         assert_eq!(cards.len(), 1);
-        assert_eq!(cards[0]["source"]["label"], "ICE Rust Forecaster");
+        assert_eq!(cards[0]["source"]["label"], "LAVA Forecaster");
         assert!(cards[0]["summary"].as_str().unwrap().contains("Patient is due for"));
     }
 }

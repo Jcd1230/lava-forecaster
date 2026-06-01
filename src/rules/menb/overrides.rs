@@ -1,5 +1,5 @@
 use crate::engine::CandidateForecastsExt;
-use ice_cvx_macro::cvx;
+use lava_cvx_macro::cvx;
 use crate::date_utils::{TinyVec, add_years_unchecked};
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, 

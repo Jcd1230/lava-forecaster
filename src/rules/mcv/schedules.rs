@@ -1,4 +1,4 @@
-use ice_cvx_macro::cvx;
+use lava_cvx_macro::cvx;
 use crate::schedule::CompiledSeries;
 
 pub fn mcv_42_dose_series() -> CompiledSeries {

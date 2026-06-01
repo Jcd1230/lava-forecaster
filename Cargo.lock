@@ -582,15 +582,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ice-cvx-macro"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "icu_collections"
 version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -756,6 +747,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "lava-cvx-macro"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "lava-forecaster"
 version = "0.1.0"
 dependencies = [
@@ -764,8 +764,8 @@ dependencies = [
  "chrono",
  "csv",
  "flatbuffers",
- "ice-cvx-macro",
  "jemallocator",
+ "lava-cvx-macro",
  "quick-xml",
  "rayon",
  "reqwest",

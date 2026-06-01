@@ -1,4 +1,4 @@
-use ice_cvx_macro::cvx;
+use lava_cvx_macro::cvx;
 use chrono::NaiveDate;
 
 use crate::date_utils::{TinyVec, compare_elapsed, TimePeriod};

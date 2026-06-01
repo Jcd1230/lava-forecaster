@@ -1,4 +1,4 @@
-use ice_cvx_macro::cvx;
+use lava_cvx_macro::cvx;
 use crate::schedule::CompiledSeries;
 
 pub fn zoster_2_dose_series() -> CompiledSeries {

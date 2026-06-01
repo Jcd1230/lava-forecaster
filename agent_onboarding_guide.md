@@ -55,7 +55,7 @@ Create `src/rules/<vaccine_group>/schedules.rs` (or modify the scaffolded stub) 
 
 #### Example: Varicella 2-Dose Series
 ```rust
-use ice_cvx_macro::cvx;
+use lava_cvx_macro::cvx;
 use crate::schedule::CompiledSeries;
 
 pub fn varicella_2_dose_series() -> CompiledSeries {

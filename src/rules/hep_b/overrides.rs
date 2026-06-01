@@ -6,7 +6,7 @@ use crate::models::{
     VaccineGroupForecast,
 };
 use chrono::NaiveDate;
-use ice_cvx_macro::cvx;
+use lava_cvx_macro::cvx;
 
 const CHILD_SERIES_ABSOLUTE_MIN_INTERVAL_DAYS: i64 = 108;
 

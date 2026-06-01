@@ -1,4 +1,4 @@
-use ice_cvx_macro::cvx;
+use lava_cvx_macro::cvx;
 use crate::schedule::CompiledSeries;
 
 const ALLOWED_CVX: &[u16] = &[cvx!("151"), cvx!("144"), cvx!("149"), cvx!("88"), cvx!("111"), cvx!("155"), cvx!("15"), cvx!("141"), cvx!("153"), cvx!("16"), cvx!("135"), cvx!("150"), cvx!("140"), cvx!("158"), cvx!("161"), cvx!("166"), cvx!("168"), cvx!("171"), cvx!("185"), cvx!("186"), cvx!("194"), cvx!("197"), cvx!("200"), cvx!("201"), cvx!("202"), cvx!("205"), cvx!("231"), cvx!("320"), cvx!("331"), cvx!("333")];

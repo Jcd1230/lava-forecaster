@@ -1,5 +1,5 @@
 use crate::engine::CandidateForecastsExt;
-use ice_cvx_macro::cvx;
+use lava_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::{EvaluationContext, ParameterOverrideRule, RecommendationOverrideRule};
 use crate::date_utils::{TinyVec, compare_elapsed, add_years_unchecked, add_months_unchecked};

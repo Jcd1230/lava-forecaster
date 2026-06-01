@@ -1,6 +1,6 @@
 use crate::date_utils::TinyVec;
 use crate::engine::CandidateForecastsExt;
-use ice_cvx_macro::cvx;
+use lava_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};

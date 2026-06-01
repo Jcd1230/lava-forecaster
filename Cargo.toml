@@ -7,7 +7,7 @@ default-run = "lava-forecaster"
 [workspace]
 members = [
     ".",
-    "ice-cvx-macro"
+    "lava-cvx-macro"
 ]
 
 [dependencies]
@@ -21,7 +21,7 @@ axum = "0.7"
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 rayon = "1.10"
 reqwest = { version = "0.12", features = ["blocking", "json"] }
-ice-cvx-macro = { path = "./ice-cvx-macro" }
+lava-cvx-macro = { path = "./lava-cvx-macro" }
 flatbuffers = "25.2.10"
 smallvec = { version = "1.13", features = ["serde", "union"] }
 

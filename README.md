@@ -12,7 +12,7 @@ By compile-time pre-compilation of rules, schema-free internal representations, 
 .
 ├── Cargo.toml                # Workspace Cargo configuration
 ├── forecaster.fbs            # FlatBuffers schema for high-throughput bulk evaluation
-├── ice-cvx-macro/            # Proc-macro library converting CVX codes to u16 IDs at compile time
+├── lava-cvx-macro/            # Proc-macro library converting CVX codes to u16 IDs at compile time
 │   ├── Cargo.toml
 │   └── src/lib.rs
 ├── src/
@@ -129,7 +129,7 @@ Vaccine schedules are written using a declarative builder pattern. This avoids r
 
 ### Example Schedule (`schedules.rs`)
 ```rust
-use ice_cvx_macro::cvx;
+use lava_cvx_macro::cvx;
 use crate::schedule::CompiledSeries;
 
 pub fn varicella_2_dose_series() -> CompiledSeries {
