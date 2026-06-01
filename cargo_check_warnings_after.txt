@@ -1,2 +1,0 @@
-    Checking ice-rust-forecaster-poc v0.1.0 (/home/jason/projects/ice)
-    Finished `release` profile [optimized] target(s) in 1.43s

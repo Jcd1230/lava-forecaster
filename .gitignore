@@ -35,3 +35,8 @@ ice-implementation-guide/
 pom.xml
 LICENSE-header.txt
 README.HISTORY
+
+# Local build / check logs
+*.log
+cargo_check_warnings*.txt
+
