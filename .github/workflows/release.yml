@@ -42,3 +42,28 @@ jobs:
           zip: windows
           include: README.md
           token: ${{ secrets.GITHUB_TOKEN }}
+
+  upload-wasm-assets:
+    needs: create-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Rust target
+        run: rustup target add wasm32-unknown-unknown
+
+      - name: Build WASM Packages
+        run: |
+          npx wasm-pack build --target bundler --out-dir pkg/bundler
+          npx wasm-pack build --target web --out-dir pkg/web
+          npx wasm-pack build --target nodejs --out-dir pkg/nodejs
+
+      - name: Archive WASM Packages
+        run: tar -czvf lava-forecaster-wasm.tar.gz -C pkg bundler web nodejs
+
+      - name: Upload WASM Asset to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: lava-forecaster-wasm.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
