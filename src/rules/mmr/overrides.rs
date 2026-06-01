@@ -166,12 +166,16 @@ pub fn mmr_custom_forecast_hook(
             if let Some(last_date) = last_live_virus {
                 let conflict_free_date = last_date + chrono::Duration::days(28);
                 
-                clamp_date_at_least(&mut forecast.status.earliest_date(), conflict_free_date);
-                clamp_date_at_least(&mut forecast.status.recommended_date(), conflict_free_date);
+                if let Some(d) = forecast.status.earliest_date_mut() {
+                    clamp_date_at_least(d, conflict_free_date);
+                }
+                if let Some(d) = forecast.status.recommended_date_mut() {
+                    clamp_date_at_least(d, conflict_free_date);
+                }
 
                 if let Some(earliest) = forecast.status.earliest_date() {
-                    if forecast.status.recommended_date().is_some() {
-                        clamp_date_at_least(&mut forecast.status.recommended_date(), earliest);
+                    if let Some(d) = forecast.status.recommended_date_mut() {
+                        clamp_date_at_least(d, earliest);
                     }
                 }
             }

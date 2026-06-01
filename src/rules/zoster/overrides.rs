@@ -92,8 +92,12 @@ pub fn zoster_custom_forecast_hook(
     // Age 50 clamp: The entire Zoster series is recommended starting at age 50.
     let age_50 = crate::date_utils::add_years_unchecked(patient.birth_date, 50);
 
-    clamp_date_at_least(&mut forecast.status.earliest_date(), age_50);
-    clamp_date_at_least(&mut forecast.status.recommended_date(), age_50);
+    if let Some(d) = forecast.status.earliest_date_mut() {
+        clamp_date_at_least(d, age_50);
+    }
+    if let Some(d) = forecast.status.recommended_date_mut() {
+        clamp_date_at_least(d, age_50);
+    }
 
     // Live-virus spacing rule:
     // If the last CVX 121/188 (old zoster) was administered, forecast dates must be at least
@@ -119,8 +123,12 @@ pub fn zoster_custom_forecast_hook(
     if let Some(last_date) = live_virus_date {
         let spacing_date = last_date + chrono::Duration::days(56); // 8 weeks
 
-        clamp_date_at_least(&mut forecast.status.earliest_date(), spacing_date);
-        clamp_date_at_least(&mut forecast.status.recommended_date(), spacing_date);
+        if let Some(d) = forecast.status.earliest_date_mut() {
+            clamp_date_at_least(d, spacing_date);
+        }
+        if let Some(d) = forecast.status.recommended_date_mut() {
+            clamp_date_at_least(d, spacing_date);
+        }
     }
 
     // If a recombinant zoster dose was attempted too soon after live zoster, the failed
@@ -142,14 +150,20 @@ pub fn zoster_custom_forecast_hook(
         let earliest_date = last_invalid_date + chrono::Duration::days(28);
         let recommended_date = last_invalid_date + chrono::Duration::days(56);
 
-        clamp_date_at_least(&mut forecast.status.earliest_date(), earliest_date);
-        clamp_date_at_least(&mut forecast.status.recommended_date(), recommended_date);
+        if let Some(d) = forecast.status.earliest_date_mut() {
+            clamp_date_at_least(d, earliest_date);
+        }
+        if let Some(d) = forecast.status.recommended_date_mut() {
+            clamp_date_at_least(d, recommended_date);
+        }
     }
 
     // Ensure recommended >= earliest after all adjustments
-    if let (Some(earliest), Some(recommended)) = (forecast.status.earliest_date(), forecast.status.recommended_date().as_mut()) {
-        if *recommended < earliest {
-            *recommended = earliest;
+    if let (Some(earliest), Some(recommended)) = (forecast.status.earliest_date(), forecast.status.recommended_date_mut()) {
+        if let Some(rec) = recommended {
+            if *rec < earliest {
+                *rec = earliest;
+            }
         }
     }
 

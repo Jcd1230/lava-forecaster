@@ -162,7 +162,7 @@ pub fn influenza_custom_forecast_hook(
     }
 
     // Clamp earliest and recommended dates to start of current season
-    if let Some(ref mut earliest) = forecast.status.earliest_date() {
+    if let Some(Some(earliest)) = forecast.status.earliest_date_mut() {
         if *earliest < active_season.start {
             *earliest = active_season.start;
         }
@@ -170,7 +170,7 @@ pub fn influenza_custom_forecast_hook(
         forecast.status = forecast.status.with_earliest_date(Some(active_season.start));
     }
 
-    if let Some(ref mut recommended) = forecast.status.recommended_date() {
+    if let Some(Some(recommended)) = forecast.status.recommended_date_mut() {
         if *recommended < active_season.start {
             *recommended = active_season.start;
         }

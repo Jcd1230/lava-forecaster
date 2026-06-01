@@ -679,7 +679,7 @@ impl<'a> EvaluationEngine<'a> {
             return f;
         }
 
-        let forecast = if is_completed {
+        let mut forecast = if is_completed {
             let mut f = SeriesForecast {
                 series_name: active_series.name.into(),
                 
@@ -919,45 +919,47 @@ impl<'a> EvaluationEngine<'a> {
             }
         };
 
-        let last_group_date = history.iter().map(|d| d.date).max();
-        if let Some(last_date) = last_group_date {
-            if let Some(ref mut earliest) = forecast.status.earliest_date() {
-                if *earliest < last_date {
-                    *earliest = last_date;
+        if let crate::models::SeriesStatus::NotComplete {
+            ref mut earliest_date,
+            ref mut recommended_date,
+            ref mut overdue_date,
+            ..
+        } = forecast.status
+        {
+            let last_group_date = history.iter().map(|d| d.date).max();
+            if let Some(last_date) = last_group_date {
+                if let Some(earliest) = earliest_date {
+                    if *earliest < last_date {
+                        *earliest = last_date;
+                    }
+                }
+                if let Some(recommended) = recommended_date {
+                    if *recommended < last_date {
+                        *recommended = last_date;
+                    }
+                }
+                if let Some(overdue) = overdue_date {
+                    if *overdue < last_date {
+                        *overdue = last_date;
+                    }
                 }
             }
-            if let Some(ref mut recommended) = forecast.status.recommended_date() {
-                if *recommended < last_date {
-                    *recommended = last_date;
-                }
-            }
-            if let Some(ref mut overdue) = forecast.status.overdue_date() {
-                if *overdue < last_date {
-                    *overdue = last_date;
-                }
-            }
-        }
 
-        // Align earliest <= recommended <= overdue
-        if let (Some(earliest), Some(recommended)) =
-            (forecast.status.earliest_date(), forecast.status.recommended_date().as_mut())
-        {
-            if *recommended < earliest {
-                *recommended = earliest;
+            // Align earliest <= recommended <= overdue
+            if let (Some(earliest), Some(recommended)) = (*earliest_date, recommended_date.as_mut()) {
+                if *recommended < earliest {
+                    *recommended = earliest;
+                }
             }
-        }
-        if let (Some(recommended), Some(overdue)) =
-            (forecast.status.recommended_date(), forecast.status.overdue_date().as_mut())
-        {
-            if *overdue < recommended {
-                *overdue = recommended;
+            if let (Some(recommended), Some(overdue)) = (*recommended_date, overdue_date.as_mut()) {
+                if *overdue < recommended {
+                    *overdue = recommended;
+                }
             }
-        }
-        if let (Some(earliest), Some(overdue)) =
-            (forecast.status.earliest_date(), forecast.status.overdue_date().as_mut())
-        {
-            if *overdue < earliest {
-                *overdue = earliest;
+            if let (Some(earliest), Some(overdue)) = (*earliest_date, overdue_date.as_mut()) {
+                if *overdue < earliest {
+                    *overdue = earliest;
+                }
             }
         }
 

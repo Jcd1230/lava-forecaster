@@ -178,12 +178,12 @@ pub fn polio_custom_forecast_hook(
     
     // 2009 Forecast Date Reset Hook
     if eval_date >= aug_7_2009 {
-        if let Some(ref mut recommended) = forecast.status.recommended_date() {
+        if let Some(Some(recommended)) = forecast.status.recommended_date_mut() {
             if *recommended < aug_7_2009 {
                 *recommended = aug_7_2009;
             }
         }
-        if let Some(ref mut earliest) = forecast.status.earliest_date() {
+        if let Some(Some(earliest)) = forecast.status.earliest_date_mut() {
             if *earliest < aug_7_2009 {
                 *earliest = aug_7_2009;
             }
@@ -300,17 +300,17 @@ pub fn polio_custom_forecast_hook(
             
             let min_interval_date = min_interval.add_to(last_dose.date);
             
-            if let Some(ref mut earliest) = forecast.status.earliest_date() {
+            if let Some(Some(earliest)) = forecast.status.earliest_date_mut() {
                 if *earliest < min_interval_date {
                     *earliest = min_interval_date;
                 }
             }
-            if let Some(ref mut recommended) = forecast.status.recommended_date() {
+            if let Some(Some(recommended)) = forecast.status.recommended_date_mut() {
                 if *recommended < min_interval_date {
                     *recommended = min_interval_date;
                 }
             }
-            if let Some(ref mut overdue) = forecast.status.overdue_date() {
+            if let Some(Some(overdue)) = forecast.status.overdue_date_mut() {
                 if *overdue < min_interval_date {
                     *overdue = min_interval_date;
                 }

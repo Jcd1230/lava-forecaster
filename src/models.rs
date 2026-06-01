@@ -279,6 +279,38 @@ impl SeriesStatus {
             self
         }
     }
+
+    pub fn earliest_date_mut(&mut self) -> Option<&mut Option<NaiveDate>> {
+        if let Self::NotComplete { earliest_date, .. } = self {
+            Some(earliest_date)
+        } else {
+            None
+        }
+    }
+
+    pub fn recommended_date_mut(&mut self) -> Option<&mut Option<NaiveDate>> {
+        if let Self::NotComplete { recommended_date, .. } = self {
+            Some(recommended_date)
+        } else {
+            None
+        }
+    }
+
+    pub fn overdue_date_mut(&mut self) -> Option<&mut Option<NaiveDate>> {
+        if let Self::NotComplete { overdue_date, .. } = self {
+            Some(overdue_date)
+        } else {
+            None
+        }
+    }
+
+    pub fn latest_date_mut(&mut self) -> Option<&mut Option<NaiveDate>> {
+        if let Self::NotComplete { latest_date, .. } = self {
+            Some(latest_date)
+        } else {
+            None
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

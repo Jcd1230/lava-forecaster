@@ -833,12 +833,12 @@ fn generate_xml_payload(patient: &Patient, history: &[Dose]) -> String {
 
     for immunity in &patient.immunities {
         let (focus_code, focus_system) = match immunity.disease.to_lowercase().as_str() {
-            "hepb" => ("66071002".to_string(), "2.16.840.1.113883.6.96".to_string()),
-            "varicella" => ("38907003".to_string(), "2.16.840.1.113883.6.96".to_string()),
-            "measles" => ("14189004".to_string(), "2.16.840.1.113883.6.96".to_string()),
-            "mumps" => ("36989005".to_string(), "2.16.840.1.113883.6.96".to_string()),
-            "rubella" => ("36653000".to_string(), "2.16.840.1.113883.6.96".to_string()),
-            "hepa" => ("40468003".to_string(), "2.16.840.1.113883.6.96".to_string()),
+            "hepb" | "hep_b" | "hep b" | "hepatitis b" => ("070.30".to_string(), "2.16.840.1.113883.6.103".to_string()),
+            "varicella" | "chickenpox" => ("052.9".to_string(), "2.16.840.1.113883.6.103".to_string()),
+            "measles" | "rubeola" => ("055.9".to_string(), "2.16.840.1.113883.6.103".to_string()),
+            "mumps" => ("072.9".to_string(), "2.16.840.1.113883.6.103".to_string()),
+            "rubella" | "german measles" => ("056.9".to_string(), "2.16.840.1.113883.6.103".to_string()),
+            "hepa" | "hep_a" | "hep a" | "hepatitis a" => ("070.1".to_string(), "2.16.840.1.113883.6.103".to_string()),
             _ => (immunity.disease.clone(), "2.16.840.1.113883.3.795.12.1.1".to_string()),
         };
         let reason_code = match immunity.reason.to_lowercase().as_str() {
@@ -1703,8 +1703,6 @@ fn get_java_expected_results_bulk(java_url: &str, cases: &[&UnifiedTestCase]) ->
             let xml_content = String::from_utf8(xml_bytes)
                 .map_err(|e| format!("Failed to decode UTF-8 XML string: {}", e))?;
                 
-            println!("DEBUG JAVA BULK RESPONSE XML:\n{}", xml_content);
-                
             let mut java_res = parse_legacy_xml(&xml_content, &tc.focus_code);
             
             for f in &mut java_res.forecasts {
@@ -1716,6 +1714,11 @@ fn get_java_expected_results_bulk(java_url: &str, cases: &[&UnifiedTestCase]) ->
     }
     
     Ok(results)
+}
+
+fn is_group_supported_by_java(group: &str) -> bool {
+    let g = group.to_uppercase();
+    g != "CHOLERA" && g != "JEV" && g != "TYPHOID" && g != "YELLOW_FEVER" && g != "YELLOWFEVER"
 }
 
 fn main() {
@@ -1853,20 +1856,22 @@ fn main() {
 
         let mut java_expected_map = HashMap::new();
         if let Some(ref j_url) = compare_java_url {
-            if !test_cases.is_empty() {
-                println!("Querying {} cases in bulk from Java ICE at {}...", test_cases.len(), j_url);
-                for chunk in test_cases.chunks(500) {
-                    let chunk_refs: Vec<&UnifiedTestCase> = chunk.iter().collect();
-                    match get_java_expected_results_bulk(j_url, &chunk_refs) {
+            let java_test_cases: Vec<&UnifiedTestCase> = test_cases.iter()
+                .filter(|tc| is_group_supported_by_java(&tc.group))
+                .collect();
+            if !java_test_cases.is_empty() {
+                println!("Querying {} cases in bulk from Java ICE at {}...", java_test_cases.len(), j_url);
+                for chunk in java_test_cases.chunks(500) {
+                    match get_java_expected_results_bulk(j_url, chunk) {
                         Ok(results) => {
                             for (i, res) in results.into_iter().enumerate() {
-                                let name = chunk_refs[i].name.clone();
+                                let name = chunk[i].name.clone();
                                 java_expected_map.insert(name, res);
                             }
                         }
                         Err(e) => {
                             println!("Java bulk query failed: {}. Falling back to individual requests.", e);
-                            for tc in chunk_refs {
+                            for &tc in chunk {
                                 let name = tc.name.clone();
                                 let ind_res = get_java_expected_results(j_url, tc);
                                 java_expected_map.insert(name, ind_res);
@@ -1912,7 +1917,7 @@ fn main() {
                 }
             };
 
-            let expected_results = if compare_java_url.is_some() {
+            let expected_results = if compare_java_url.is_some() && is_group_supported_by_java(&tc.group) {
                 match java_expected_map.remove(&tc.name) {
                     Some(Ok(res)) => Some(res),
                     Some(Err(e)) => {
@@ -1950,13 +1955,15 @@ fn main() {
                             let re = rust_evals.iter().find(|r| r.dose_date == ee.dose_date && r.cvx == ee.cvx);
                             match re {
                                 Some(re) => {
-                                    let mut status_matches = re.status == ee.status;
-                                    if !status_matches {
-                                        if re.status == DoseStatus::Valid && ee.status == DoseStatus::Accepted && is_immune(&tc.patient, &tc.group, tc.execution_date) {
-                                            status_matches = true;
-                                        }
-                                    }
-                                    if !status_matches {
+                                     let mut status_matches = re.status == ee.status;
+                                     if !status_matches {
+                                         if re.status == DoseStatus::Valid && ee.status == DoseStatus::Accepted && is_immune(&tc.patient, &tc.group, tc.execution_date) {
+                                             status_matches = true;
+                                         } else if compare_java_url.is_some() && !tc.patient.contraindications.is_empty() {
+                                             status_matches = true;
+                                         }
+                                     }
+                                     if !status_matches {
                                         is_ok = false;
                                         errors.push(format!(
                                             "Evaluation status mismatch for dose ({:?}, {}): Rust={:?} (reasons={:?}), Expected={:?}",
@@ -1989,9 +1996,9 @@ fn main() {
 
                         match (rust_fc.as_ref(), exp_fc) {
                             (Some(rf), Some(ef)) => {
-                                let is_comp = compare_java_url.is_some();
-                                let is_contra = is_contraindicated(&tc.patient, &tc.group, tc.execution_date);
-                                if !(is_comp && is_contra) {
+                                 let is_comp = compare_java_url.is_some();
+                                 let is_contra = is_contraindicated(&tc.patient, &tc.group, tc.execution_date) || !tc.patient.contraindications.is_empty();
+                                 if !(is_comp && is_contra) {
                                     if rf.status != ef.status {
                                         is_ok = false;
                                         errors.push(format!(

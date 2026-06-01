@@ -76,16 +76,24 @@ fn map_observation(
     let date = date.unwrap_or(dob);
 
     if is_immunity {
-        let disease = if focus_str.contains("HEP_B") || focus_str.contains("27836007") || focus_str.contains("22322") {
+        let disease = if focus_str.contains("HEP_B") || focus_str.contains("27836007") || focus_str.contains("22322")
+            || focus_str == "070.30" || focus_str == "B19.10" || focus_str.contains("271511000") || focus_str.contains("161467007") {
             "HepB"
-        } else if focus_str.contains("VARICELLA") || focus_str.contains("38907003") || focus_str.contains("15410") {
+        } else if focus_str.contains("VARICELLA") || focus_str.contains("38907003") || focus_str.contains("15410")
+            || focus_str == "052.9" || focus_str == "B01.9" || focus_str.contains("371113008") || focus_str.contains("161719005") {
             "Varicella"
-        } else if focus_str.contains("MEASLES") || focus_str.contains("14189004") {
+        } else if focus_str.contains("MEASLES") || focus_str.contains("14189004")
+            || focus_str == "055.9" || focus_str == "B05.9" || focus_str.contains("371111005") || focus_str.contains("161278002") {
             "Measles"
-        } else if focus_str.contains("MUMPS") || focus_str.contains("36989005") {
+        } else if focus_str.contains("MUMPS") || focus_str.contains("36989005")
+            || focus_str == "072.9" || focus_str == "B26.9" || focus_str.contains("371112003") {
             "Mumps"
-        } else if focus_str.contains("RUBELLA") || focus_str.contains("36653000") {
+        } else if focus_str.contains("RUBELLA") || focus_str.contains("36653000")
+            || focus_str == "056.9" || focus_str == "B06.9" || focus_str.contains("278968001") || focus_str.contains("161280008") {
             "Rubella"
+        } else if focus_str.contains("HEP_A") || focus_str.contains("40468003")
+            || focus_str == "070.1" || focus_str == "B15.9" || focus_str.contains("278971009") || focus_str.contains("161466003") {
+            "HepA"
         } else {
             focus_str
         };

@@ -95,13 +95,21 @@ pub fn hepa_custom_forecast_hook(
         if forecast.series_name == "HEP_A_ADULT_3_DOSE_SERIES" && valid_doses.len() == 2 {
             let dose_1_date = valid_doses[0].0;
             let rec_date = crate::date_utils::add_months_unchecked(dose_1_date, 6);
-            clamp_date_at_least(&mut forecast.status.earliest_date(), rec_date);
-            clamp_date_at_least(&mut forecast.status.recommended_date(), rec_date);
+            if let Some(d) = forecast.status.earliest_date_mut() {
+                clamp_date_at_least(d, rec_date);
+            }
+            if let Some(d) = forecast.status.recommended_date_mut() {
+                clamp_date_at_least(d, rec_date);
+            }
         } else if forecast.series_name == "HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES" && valid_doses.len() == 3 {
             let dose_1_date = valid_doses[0].0;
             let rec_date = crate::date_utils::add_months_unchecked(dose_1_date, 12);
-            clamp_date_at_least(&mut forecast.status.earliest_date(), rec_date);
-            clamp_date_at_least(&mut forecast.status.recommended_date(), rec_date);
+            if let Some(d) = forecast.status.earliest_date_mut() {
+                clamp_date_at_least(d, rec_date);
+            }
+            if let Some(d) = forecast.status.recommended_date_mut() {
+                clamp_date_at_least(d, rec_date);
+            }
         }
     }
 }

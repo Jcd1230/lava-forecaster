@@ -271,10 +271,33 @@ pub fn parse_test_case_dsl(content: &str) -> Result<UnifiedTestCase, String> {
         reasons: Default::default(),
     };
 
+    let mut resolved_focus_code = focus_code;
+    if resolved_focus_code == "000" {
+        resolved_focus_code = match group.to_lowercase().as_str() {
+            "hepb" | "hep_b" | "hep b" | "hepatitis b" => "100".to_string(),
+            "dtp" | "dtap" | "diphtheria" | "tetanus" | "pertussis" => "200".to_string(),
+            "hib" => "300".to_string(),
+            "polio" | "ipv" | "opv" => "400".to_string(),
+            "mmr" => "500".to_string(),
+            "varicella" | "chickenpox" => "600".to_string(),
+            "zoster" | "shingles" => "620".to_string(),
+            "pneumo" | "pneumococcal" => "750".to_string(),
+            "flu" | "influenza" => "800".to_string(),
+            "hepa" | "hep_a" | "hep a" | "hepatitis a" => "810".to_string(),
+            "rota" | "rotavirus" => "820".to_string(),
+            "mcv" | "mening" | "meningococcal" => "830".to_string(),
+            "menb" => "835".to_string(),
+            "hpv" => "840".to_string(),
+            "covid" | "covid19" | "covid-19" => "850".to_string(),
+            "rsv" => "875".to_string(),
+            _ => "000".to_string(),
+        };
+    }
+
     Ok(UnifiedTestCase {
         name,
         group,
-        focus_code,
+        focus_code: resolved_focus_code,
         patient: Patient {
             birth_date: bdate,
             gender,

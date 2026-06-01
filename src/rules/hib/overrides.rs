@@ -287,17 +287,17 @@ pub fn hib_custom_forecast_hook(
 
             if !is_below_min_age {
                 let repeat_date = ld.date + chrono::Duration::days(28);
-                if let Some(ref mut earliest) = forecast.status.earliest_date() {
+                if let Some(Some(earliest)) = forecast.status.earliest_date_mut() {
                     if *earliest < repeat_date {
                         *earliest = repeat_date;
                     }
                 }
-                if let Some(ref mut recommended) = forecast.status.recommended_date() {
+                if let Some(Some(recommended)) = forecast.status.recommended_date_mut() {
                     if *recommended < repeat_date {
                         *recommended = repeat_date;
                     }
                 }
-                if let Some(ref mut overdue) = forecast.status.overdue_date() {
+                if let Some(Some(overdue)) = forecast.status.overdue_date_mut() {
                     if *overdue < repeat_date {
                         *overdue = repeat_date;
                     }
