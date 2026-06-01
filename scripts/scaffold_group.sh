@@ -16,7 +16,7 @@ GROUP_UPPER=$(echo "${2:-$1}" | tr '[:lower:]' '[:upper:]')
 
 # Correct paths relative to workspace root
 RULES_DIR="src/rules"
-CASES_DIR="curl-rest-tests/cases"
+CASES_DIR="tests/relative"
 GROUP_DIR="${RULES_DIR}/${GROUP_LOWER}"
 
 if [ -d "${GROUP_DIR}" ]; then
@@ -97,7 +97,7 @@ pub fn ${GROUP_LOWER}_custom_forecast_hook(
 }
 EOF
 
-# 5. Write curl-rest-tests case placeholder
+# 5. Write tests/relative case placeholder
 mkdir -p "${CASES_DIR}"
 cat << EOF > "${CASES_DIR}/${GROUP_LOWER}.json"
 {

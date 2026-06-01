@@ -16,7 +16,7 @@ ice-app/
 planning/
 
 tmp/
-curl-rest-tests/tmp/
+tests/relative/tmp/
 
 # Local VCS & Agent Directories
 .jj/

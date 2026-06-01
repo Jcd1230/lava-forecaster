@@ -51,12 +51,12 @@ All major tasks are configured as `mise` commands or native Cargo binaries.
 When reducing Java-vs-Rust discrepancies for an existing group, use this loop:
 
 1. Run a full CDSi compare dynamically:
-	 - `cargo run --release --bin test_runner -- --run tests/cases --compare > curl-rest-tests/tmp/ice_cdsi_compare_<label>.txt 2>&1`
+	 - `cargo run --release --bin test_runner -- --run tests/cases --compare > tests/relative/tmp/ice_cdsi_compare_<label>.txt 2>&1`
 2. Pick the next smallest remaining bucket from that log.
 3. Run the target group alone with Java comparison:
 	 - `cargo run --release --bin test_runner -- --run tests/cases --group <GROUP> --compare`
 4. Use `--case <name> -v` for representative edge cases to see side-by-side comparisons.
-5. After the group passes, re-run the full compare into a new log under `curl-rest-tests/tmp/`.
+5. After the group passes, re-run the full compare into a new log under `tests/relative/tmp/`.
 6. Diff per-group failure counts between the previous and new full-compare logs to check for regressions outside the target group.
 
 For detailed mismatch-routing guidance, use [parity_workflow_notes.md](file:///home/jason/projects/ice/parity_workflow_notes.md). For the fuller source-of-truth map and implementation touchpoints, use [agent_onboarding_guide.md](file:///home/jason/projects/ice/agent_onboarding_guide.md).
@@ -64,9 +64,9 @@ For detailed mismatch-routing guidance, use [parity_workflow_notes.md](file:///h
 ## At-a-Glance Compare Triage
 
 - List failing groups from a saved full compare:
-	- `rg -n 'FAIL:|CDSI_' curl-rest-tests/tmp/ice_cdsi_compare_<label>.txt`
+	- `rg -n 'FAIL:|CDSI_' tests/relative/tmp/ice_cdsi_compare_<label>.txt`
 - Check whether a target bucket has been eliminated:
-	- `rg 'CDSI_HPV' curl-rest-tests/tmp/ice_cdsi_compare_<label>.txt`
+	- `rg 'CDSI_HPV' tests/relative/tmp/ice_cdsi_compare_<label>.txt`
 	- No matches means the bucket is gone.
 - Diff group counts between two saved full compares:
 	- `awk '/FAIL:/{g=$NF; sub(/[()]/, "", g); sub(/[()]/, "", g); count[g]++} END {for (g in count) print g, count[g]}' <before_log> | sort > before.counts`

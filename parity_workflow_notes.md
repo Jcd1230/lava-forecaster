@@ -4,12 +4,12 @@ This file captures practical lessons from reducing Java-vs-Rust discrepancies in
 
 ## Compare Log Workflow
 
-Use saved full-CDSi compare logs under `curl-rest-tests/tmp/` so you can compare before/after results without rerunning Java for every question.
+Use saved full-CDSi compare logs under `tests/relative/tmp/` so you can compare before/after results without rerunning Java for every question.
 
 Create a baseline log:
 
 ```bash
-cargo run --release --bin test_runner -- --run tests/cases --compare > curl-rest-tests/tmp/ice_cdsi_compare_<label>.txt 2>&1
+cargo run --release --bin test_runner -- --run tests/cases --compare > tests/relative/tmp/ice_cdsi_compare_<label>.txt 2>&1
 ```
 
 Run a target group only:
@@ -29,13 +29,13 @@ cargo run --release --bin test_runner -- --run tests/cases --group <group> --cas
 List failing buckets from a saved full compare:
 
 ```bash
-rg -n 'FAIL:|CDSI_' curl-rest-tests/tmp/ice_cdsi_compare_<label>.txt
+rg -n 'FAIL:|CDSI_' tests/relative/tmp/ice_cdsi_compare_<label>.txt
 ```
 
 Check whether a bucket has been eliminated:
 
 ```bash
-rg 'CDSI_HPV' curl-rest-tests/tmp/ice_cdsi_compare_<label>.txt
+rg 'CDSI_HPV' tests/relative/tmp/ice_cdsi_compare_<label>.txt
 ```
 
 No matches means that bucket is gone.
@@ -43,9 +43,9 @@ No matches means that bucket is gone.
 Diff per-group failure counts between two saved full compares:
 
 ```bash
-awk '/FAIL:/{g=$NF; sub(/[()]/, "", g); sub(/[()]/, "", g); count[g]++} END {for (g in count) print g, count[g]}' curl-rest-tests/tmp/ice_cdsi_compare_before.txt | sort > curl-rest-tests/tmp/before.counts
-awk '/FAIL:/{g=$NF; sub(/[()]/, "", g); sub(/[()]/, "", g); count[g]++} END {for (g in count) print g, count[g]}' curl-rest-tests/tmp/ice_cdsi_compare_after.txt | sort > curl-rest-tests/tmp/after.counts
-join -a1 -a2 -e0 -o 0,1.2,2.2 curl-rest-tests/tmp/before.counts curl-rest-tests/tmp/after.counts | awk '$2 != $3'
+awk '/FAIL:/{g=$NF; sub(/[()]/, "", g); sub(/[()]/, "", g); count[g]++} END {for (g in count) print g, count[g]}' tests/relative/tmp/ice_cdsi_compare_before.txt | sort > tests/relative/tmp/before.counts
+awk '/FAIL:/{g=$NF; sub(/[()]/, "", g); sub(/[()]/, "", g); count[g]++} END {for (g in count) print g, count[g]}' tests/relative/tmp/ice_cdsi_compare_after.txt | sort > tests/relative/tmp/after.counts
+join -a1 -a2 -e0 -o 0,1.2,2.2 tests/relative/tmp/before.counts tests/relative/tmp/after.counts | awk '$2 != $3'
 ```
 
 ## Mismatch Routing
@@ -72,8 +72,8 @@ For an existing parity bucket, this order usually minimizes wasted reading:
 
 1. Saved full compare log for the current baseline.
 2. Targeted group compare output.
-3. Raw case input in `curl-rest-tests/cases/<group>.json`.
-4. Expected Java snapshot in `curl-rest-tests/cases/<group>.expected.json`.
+3. Raw case input in `tests/relative/<group>.json`.
+4. Expected Java snapshot in `tests/relative/<group>.expected.json`.
 5. Java `Evaluation^<Group>.dslr` and `Recommendation^<Group>.dslr`.
 6. Java `SeriesSelection.drl` if series choice or dose numbering looks wrong.
 7. Supporting-data YAML under `ice-supporting-data/Series/`.
@@ -83,9 +83,9 @@ Treat the raw case JSON as authoritative when a case name sounds misleading.
 
 ## Case Files
 
-- `curl-rest-tests/cases/<group>.json`: raw request-style test inputs.
-- `curl-rest-tests/cases/<group>.expected.json`: recorded Java output snapshots.
-- `curl-rest-tests/tmp/ice_cdsi_compare_<label>.txt`: saved before/after compare logs used for bucket triage and regression checks.
+- `tests/relative/<group>.json`: raw request-style test inputs.
+- `tests/relative/<group>.expected.json`: recorded Java output snapshots.
+- `tests/relative/tmp/ice_cdsi_compare_<label>.txt`: saved before/after compare logs used for bucket triage and regression checks.
 
 When a label and the actual dates disagree, trust the dates in the raw case file.
 
@@ -119,8 +119,8 @@ The binary writes parsed patient/history debug lines to stderr and the full fore
 
 ## Test Runner Notes
 
-- Use workspace-local temp logs under `curl-rest-tests/tmp/` instead of `/tmp/`.
-- `curl-rest-tests` `RelativeDateResolver` only applies the first offset chunk after the base reference. Use a single offset expression such as `birth + 406d` instead of chained forms like `birth + 1y+40d`.
+- Use workspace-local temp logs under `tests/relative/tmp/` instead of `/tmp/`.
+- `tests/relative` `RelativeDateResolver` only applies the first offset chunk after the base reference. Use a single offset expression such as `birth + 406d` instead of chained forms like `birth + 1y+40d`.
 
 ## Engine Behavior Notes
 

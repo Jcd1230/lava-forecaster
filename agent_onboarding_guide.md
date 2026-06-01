@@ -48,7 +48,7 @@ Example:
 ```bash
 mise run scaffold menb MENB
 ```
-This generates `src/rules/menb/`, wires it into `src/rules/mod.rs`, and creates `curl-rest-tests/cases/menb.json`.
+This generates `src/rules/menb/`, wires it into `src/rules/mod.rs`, and creates `tests/relative/menb.json`.
 
 ### Step A: Define the Schedules (`schedules.rs`)
 Create `src/rules/<vaccine_group>/schedules.rs` (or modify the scaffolded stub) and translate the series YAML definitions into our type-safe internal builder DSL.
@@ -290,9 +290,9 @@ All testing and verification commands are managed via `mise`:
 
 When working an already-ported group that still differs from Java, use a tighter compare loop:
 
-1. Produce a fresh full-CDSi baseline log and keep it under `curl-rest-tests/tmp/`:
+1. Produce a fresh full-CDSi baseline log and keep it under `tests/relative/tmp/`:
     ```bash
-    cargo run --release --bin test_runner -- --run tests/cases --compare > curl-rest-tests/tmp/ice_cdsi_compare_<label>.txt 2>&1
+    cargo run --release --bin test_runner -- --run tests/cases --compare > tests/relative/tmp/ice_cdsi_compare_<label>.txt 2>&1
     ```
 2. Pull the target group's failures from that log and cluster them by behavior rather than by individual case name.
 3. Run the target group only:
@@ -310,10 +310,10 @@ When working an already-ported group that still differs from Java, use a tighter
 
 For parity fixes on already-ported groups, use this reading order before changing code:
 
-1. Saved full compare log under `curl-rest-tests/tmp/` to identify the current bucket and representative failure shapes.
+1. Saved full compare log under `tests/relative/tmp/` to identify the current bucket and representative failure shapes.
 2. Targeted group compare output to confirm the current mismatch set.
-3. Raw case inputs in `curl-rest-tests/cases/<group>.json`.
-4. Expected Java snapshots in `curl-rest-tests/cases/<group>.expected.json`.
+3. Raw case inputs in `tests/relative/<group>.json`.
+4. Expected Java snapshots in `tests/relative/<group>.expected.json`.
 5. Java `Evaluation^<Group>.dslr` for dose validity and reason mismatches.
 6. Java `Recommendation^<Group>.dslr` for forecast date and forecast status mismatches.
 7. Java `SeriesSelection.drl` if the selected series or effective dose numbering looks wrong.
@@ -362,15 +362,15 @@ This is the fastest way to inspect selected vaccine-group output, evaluations, a
 
 - Check whether a bucket is still present in a full compare log:
   ```bash
-  rg 'CDSI_HPV' curl-rest-tests/tmp/ice_cdsi_compare_<label>.txt
+  rg 'CDSI_HPV' tests/relative/tmp/ice_cdsi_compare_<label>.txt
   ```
   No matches means that group no longer has failures.
 
 - Diff failure counts between two saved full-CDSi logs:
   ```bash
-  awk '/FAIL:/{g=$NF; sub(/[()]/, "", g); sub(/[()]/, "", g); count[g]++} END {for (g in count) print g, count[g]}' curl-rest-tests/tmp/ice_cdsi_compare_before.txt | sort > curl-rest-tests/tmp/before.counts
-  awk '/FAIL:/{g=$NF; sub(/[()]/, "", g); sub(/[()]/, "", g); count[g]++} END {for (g in count) print g, count[g]}' curl-rest-tests/tmp/ice_cdsi_compare_after.txt | sort > curl-rest-tests/tmp/after.counts
-  join -a1 -a2 -e0 -o 0,1.2,2.2 curl-rest-tests/tmp/before.counts curl-rest-tests/tmp/after.counts | awk '$2 != $3'
+  awk '/FAIL:/{g=$NF; sub(/[()]/, "", g); sub(/[()]/, "", g); count[g]++} END {for (g in count) print g, count[g]}' tests/relative/tmp/ice_cdsi_compare_before.txt | sort > tests/relative/tmp/before.counts
+  awk '/FAIL:/{g=$NF; sub(/[()]/, "", g); sub(/[()]/, "", g); count[g]++} END {for (g in count) print g, count[g]}' tests/relative/tmp/ice_cdsi_compare_after.txt | sort > tests/relative/tmp/after.counts
+  join -a1 -a2 -e0 -o 0,1.2,2.2 tests/relative/tmp/before.counts tests/relative/tmp/after.counts | awk '$2 != $3'
   ```
 
 ### Debugging Heuristics That Save Time

@@ -9,7 +9,7 @@ from datetime import datetime
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
 CSV_PATH = os.path.join(PROJECT_ROOT, "cdsi-healthy-childhood-and-adult-test-cases.csv")
-CASES_DIR = os.path.join(PROJECT_ROOT, "curl-rest-tests", "cases")
+CASES_DIR = os.path.join(PROJECT_ROOT, "tests", "relative")
 
 # Mapping from CDSi Vaccine_Group to internal group name and focus code
 GROUP_MAP = {
