@@ -59,11 +59,17 @@ jobs:
           npx wasm-pack build --target nodejs --out-dir pkg/nodejs
 
       - name: Archive WASM Packages
-        run: tar -czvf lava-forecaster-wasm.tar.gz -C pkg bundler web nodejs
+        run: |
+          tar -czvf lava-forecaster-wasm-bundler.tar.gz -C pkg/bundler .
+          tar -czvf lava-forecaster-wasm-web.tar.gz -C pkg/web .
+          tar -czvf lava-forecaster-wasm-nodejs.tar.gz -C pkg/nodejs .
 
-      - name: Upload WASM Asset to Release
+      - name: Upload WASM Assets to Release
         uses: softprops/action-gh-release@v2
         with:
-          files: lava-forecaster-wasm.tar.gz
+          files: |
+            lava-forecaster-wasm-bundler.tar.gz
+            lava-forecaster-wasm-web.tar.gz
+            lava-forecaster-wasm-nodejs.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
