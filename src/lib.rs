@@ -9,14 +9,20 @@ pub mod rules;
 pub mod schedule;
 pub mod test_dsl;
 
-use std::sync::Once;
+#[cfg(target_arch = "wasm32")]
+pub mod wasm;
 
 use chrono::NaiveDate;
 use models::{Dose, Patient, VaccineGroupForecast};
 use crate::date_utils::TinyVec;
 
+#[cfg(not(target_arch = "wasm32"))]
+use std::sync::Once;
+
+#[cfg(not(target_arch = "wasm32"))]
 static INIT_RAYON_POOL: Once = Once::new();
 
+#[cfg(not(target_arch = "wasm32"))]
 pub fn init_rayon_pool() {
     INIT_RAYON_POOL.call_once(|| {
         rayon::ThreadPoolBuilder::new()
