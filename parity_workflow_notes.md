@@ -127,3 +127,14 @@ The binary writes parsed patient/history debug lines to stderr and the full fore
 - Engine completion counts `Accepted` doses unless they carry `OutsideRoutineSeries` or `VaccineNotLicensedForMales`.
 - For groups like MCV or HPV, add `OutsideRoutineSeries` when Java marks an accepted dose as ignored for completion.
 - Many parity fixes belong in selection or override hooks, not `schedules.rs`. For already-ported groups, treat `schedules.rs` as the last place to edit unless the Java supporting data itself is clearly different.
+
+## Immunity, Contraindication, and Unsupported Group Parity
+
+### 1. Immunity Coding (ICD-9 vs. SNOMED)
+* **Java ICE Expectation**: When sending immunity data via XML payloads to Java ICE, the `observationFocus` element must use **ICD-9-CM** codes (e.g., code system `2.16.840.1.113883.6.103`), such as `070.30` for Hepatitis B, rather than SNOMED codes.
+* **Rust LAVA Forecaster Mapping**: In the test runner XML generator, make sure to map the patient's immunity diseases to their corresponding ICD-9 codes. 
+* **Reverse Mapping in `legacy_models.rs`**: When parsing the incoming legacy XML payload from Java ICE, the parser must reverse map the ICD-9, ICD-10, LOINC, and SNOMED codes back into internal disease name strings (e.g., `070.30` or `B19.10` -> `"HepB"`).
+
+### 2. Unsupported Java ICE Groups
+* Groups such as `Cholera`, `JEV`, `Typhoid`, and `Yellow Fever` are only supported in the Rust LAVA Forecaster, not in the legacy Java ICE rules.
+* In `--compare` mode, the test runner must filter these groups out of bulk/individual requests to Java ICE and instead compare them against their own pre-recorded or hand-written expected JSON snapshots.

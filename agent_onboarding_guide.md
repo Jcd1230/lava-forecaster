@@ -457,3 +457,9 @@ The legacy engine sometimes forces a series forecast status to `ConditionallyRec
 - A patient receiving a booster-only vaccine (e.g., CVX 50) at an invalid age, with no prior valid doses.
 - A patient exceeding the absolute maximum age for catch-up (e.g., >= 5 years old for Hib) without completing the series.
 If you observe `ConditionallyRecommended` with cleared dates in test outputs, check the custom forecast hook for these types of conditions.
+
+### Test Case Default Focus Codes
+By default, the test DSL parser (`test_dsl.rs`) initializes `focus_code` to `"000"`. If a test case does not declare an explicit `Focus: ` line, the runner automatically resolves the focus code from the `Group` field (e.g. `DTP` -> `200`). This ensures that dynamic compare parsing correctly filters evaluations and forecasts when matching Java XML results.
+
+### ICD-9 Immunity Coding Requirement
+Always ensure that patient immunities sent in the XML payload query use **ICD-9-CM** codes (e.g. `070.30` for HepB, OID `2.16.840.1.113883.6.103`), which Java ICE expects in `observationFocus`. Avoid using SNOMED OIDs for immunities as Java ICE's `cdm.xml` might fail to map them to the correct internal concepts in certain execution flows. Correspondingly, `legacy_models.rs` will map returned ICD codes back to internal disease string representations (`"HepB"`, `"Varicella"`, etc.).
