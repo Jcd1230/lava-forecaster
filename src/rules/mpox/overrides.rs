@@ -1,4 +1,4 @@
-use crate::date_utils::TinyVec;
+use crate::date_utils::SmallVec;
 use crate::engine::CandidateForecastsExt;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
@@ -40,7 +40,7 @@ pub fn mpox_custom_evaluation_hook(
     series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut TinyVec<EvaluationReason, 4>,
+    reasons: &mut SmallVec<[EvaluationReason; 4]>,
     status: &mut DoseStatus,
 ) {
     let Some(primary_dose_count) = series_primary_dose_count(series_name) else {
@@ -60,7 +60,7 @@ pub fn mpox_custom_evaluation_hook(
 pub fn mpox_custom_extra_dose_hook(
     series_name: &str,
     ctx: &EvaluationContext,
-) -> Option<(DoseStatus, TinyVec<EvaluationReason, 4>)> {
+) -> Option<(DoseStatus, SmallVec<[EvaluationReason; 4]>)> {
     let primary_dose_count = series_primary_dose_count(series_name)?;
     if ctx.valid_doses.len() == primary_dose_count
         && ctx.target_dose_number == primary_dose_count + 1

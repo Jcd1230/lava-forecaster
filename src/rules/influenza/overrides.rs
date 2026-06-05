@@ -1,4 +1,4 @@
-use crate::date_utils::TinyVec;
+use crate::date_utils::SmallVec;
 use crate::engine::CandidateForecastsExt;
 use lava_cvx_macro::cvx;
 use chrono::{Datelike, NaiveDate};
@@ -77,7 +77,7 @@ pub fn influenza_custom_evaluation_hook(
     _series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut TinyVec<EvaluationReason, 4>,
+    reasons: &mut SmallVec<[EvaluationReason; 4]>,
     status: &mut DoseStatus,
 ) {
     let Some(dose) = ctx.current_dose else {
@@ -308,7 +308,7 @@ fn evaluate_history_seasonally(patient: &Patient, history: &[Dose]) -> Vec<DoseE
         let season_key = active_season.start.to_string();
 
         let mut status = DoseStatus::Valid;
-        let mut reasons = TinyVec::<EvaluationReason, 4>::new();
+        let mut reasons = SmallVec::<[EvaluationReason; 4]>::new();
 
         // 1. Prior to DOB check
         if dose.date < patient.birth_date {

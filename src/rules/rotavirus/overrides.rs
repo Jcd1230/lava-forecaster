@@ -1,4 +1,4 @@
-use crate::date_utils::TinyVec;
+use crate::date_utils::SmallVec;
 use crate::engine::CandidateForecastsExt;
 use lava_cvx_macro::cvx;
 use chrono::NaiveDate;
@@ -9,7 +9,7 @@ pub fn rotavirus_custom_evaluation_hook(
     _series_name: &str,
     _target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut TinyVec<EvaluationReason, 4>,
+    reasons: &mut SmallVec<[EvaluationReason; 4]>,
     status: &mut DoseStatus,
 ) {
     let Some(dose) = ctx.current_dose else {

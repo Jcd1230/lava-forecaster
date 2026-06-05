@@ -1,4 +1,4 @@
-use crate::date_utils::{compare_elapsed, TimePeriod, TinyVec};
+use crate::date_utils::{compare_elapsed, TimePeriod, SmallVec};
 use crate::models::{
     Cvx, Dose, DoseEvaluation, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus,
     VaccineGroupForecast,
@@ -87,7 +87,7 @@ pub type CustomEvaluationHook = fn(
     series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut TinyVec<EvaluationReason, 4>,
+    reasons: &mut SmallVec<[EvaluationReason; 4]>,
     status: &mut DoseStatus,
 );
 
@@ -96,7 +96,7 @@ pub type CustomDoseNumberHook = fn(series_name: &str, ctx: &EvaluationContext) -
 pub type CustomExtraDoseHook = fn(
     series_name: &str,
     ctx: &EvaluationContext,
-) -> Option<(DoseStatus, TinyVec<EvaluationReason, 4>)>;
+) -> Option<(DoseStatus, SmallVec<[EvaluationReason; 4]>)>;
 
 pub type CustomCompletionHook = fn(ctx: &EvaluationContext) -> bool;
 
@@ -177,7 +177,7 @@ pub trait EvaluationPolicy: Send + Sync {
         _series_name: &str,
         _target_dose_idx: usize,
         _ctx: &EvaluationContext,
-        _reasons: &mut TinyVec<EvaluationReason, 4>,
+        _reasons: &mut SmallVec<[EvaluationReason; 4]>,
         _status: &mut DoseStatus,
     ) {}
 
@@ -193,7 +193,7 @@ pub trait EvaluationPolicy: Send + Sync {
         &self,
         _series_name: &str,
         _ctx: &EvaluationContext,
-    ) -> Option<(DoseStatus, TinyVec<EvaluationReason, 4>)> {
+    ) -> Option<(DoseStatus, SmallVec<[EvaluationReason; 4]>)> {
         None
     }
 
@@ -245,7 +245,7 @@ impl<'a> EvaluationEngine<'a> {
         group_series: &'a [CompiledSeries],
     ) -> VaccineGroupForecast {
         // 1. Filter and sort history chronologically (only keep doses relevant to this series or group)
-        let mut sorted_history = TinyVec::<Dose, 32>::new();
+        let mut sorted_history = SmallVec::<[Dose; 32]>::new();
         for dose in history {
             let keep = if group_series.is_empty() {
                 self.series
@@ -274,8 +274,8 @@ impl<'a> EvaluationEngine<'a> {
             }
         });
 
-        let mut evaluations = TinyVec::<DoseEvaluation, 8>::new();
-        let mut valid_doses = TinyVec::<(NaiveDate, usize), 32>::new();
+        let mut evaluations = SmallVec::<[DoseEvaluation; 8]>::new();
+        let mut valid_doses = SmallVec::<[(NaiveDate, usize); 32]>::new();
         let mut is_completed = false;
         let mut active_series: &'a CompiledSeries = self.series;
 
@@ -491,7 +491,7 @@ impl<'a> EvaluationEngine<'a> {
                 }
             }
 
-            let mut reasons = TinyVec::<EvaluationReason, 4>::new();
+            let mut reasons = SmallVec::<[EvaluationReason; 4]>::new();
             let mut is_valid = true;
 
             // Check vaccine code eligibility
@@ -645,7 +645,7 @@ impl<'a> EvaluationEngine<'a> {
             active_series,
         );
 
-        let mut forecasts = TinyVec::new();
+        let mut forecasts = SmallVec::new();
         forecasts.push(forecast);
 
         VaccineGroupForecast {

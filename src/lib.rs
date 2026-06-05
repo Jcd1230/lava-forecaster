@@ -14,7 +14,7 @@ pub mod wasm;
 
 use chrono::NaiveDate;
 use models::{Dose, Patient, VaccineGroupForecast};
-use crate::date_utils::TinyVec;
+use crate::date_utils::SmallVec;
 
 #[cfg(not(target_arch = "wasm32"))]
 use std::sync::Once;
@@ -49,11 +49,11 @@ pub fn evaluate_patient_all_groups(
     patient: &Patient,
     history: &[Dose],
     eval_date: NaiveDate,
-) -> TinyVec<VaccineGroupForecast, 24> {
-    let mut results = TinyVec::<VaccineGroupForecast, 24>::new();
+) -> SmallVec<[VaccineGroupForecast; 24]> {
+    let mut results = SmallVec::<[VaccineGroupForecast; 24]>::new();
     for ruleset in rules::get_all_groups() {
         if let Some(group_selection) = ruleset.group_selection {
-            let mut candidate_forecasts = TinyVec::<(&'static str, VaccineGroupForecast), 4>::new();
+            let mut candidate_forecasts = SmallVec::<[(&'static str, VaccineGroupForecast); 4]>::new();
             for series in &ruleset.series {
                 let mut engine = engine::EvaluationEngine::new(series);
                 engine.param_overrides = &ruleset.param_overrides;

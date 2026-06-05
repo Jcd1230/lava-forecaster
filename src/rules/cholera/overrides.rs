@@ -1,4 +1,4 @@
-use crate::date_utils::TinyVec;
+use crate::date_utils::SmallVec;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus};
@@ -7,7 +7,7 @@ pub fn cholera_custom_evaluation_hook(
     _series_name: &str,
     _target_dose_idx: usize,
     _ctx: &EvaluationContext,
-    _reasons: &mut TinyVec<EvaluationReason, 4>,
+    _reasons: &mut SmallVec<[EvaluationReason; 4]>,
     _status: &mut DoseStatus,
 ) {
     // Standard CDSi parameters in schedules.rs are sufficient; no custom dose evaluation logic needed.

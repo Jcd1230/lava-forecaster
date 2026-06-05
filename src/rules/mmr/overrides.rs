@@ -1,4 +1,4 @@
-use crate::date_utils::TinyVec;
+use crate::date_utils::SmallVec;
 use lava_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
@@ -34,7 +34,7 @@ pub fn mmr_custom_evaluation_hook(
     _series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut TinyVec<EvaluationReason, 4>,
+    reasons: &mut SmallVec<[EvaluationReason; 4]>,
     status: &mut DoseStatus,
 ) {
     if let Some(dose) = ctx.current_dose {
@@ -291,7 +291,7 @@ impl crate::engine::EvaluationPolicy for MmrPolicy {
         series_name: &str,
         target_dose_idx: usize,
         ctx: &EvaluationContext,
-        reasons: &mut TinyVec<EvaluationReason, 4>,
+        reasons: &mut SmallVec<[EvaluationReason; 4]>,
         status: &mut DoseStatus,
     ) {
         mmr_custom_evaluation_hook(series_name, target_dose_idx, ctx, reasons, status)

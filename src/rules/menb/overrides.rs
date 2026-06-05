@@ -1,6 +1,6 @@
 use crate::engine::CandidateForecastsExt;
 use lava_cvx_macro::cvx;
-use crate::date_utils::{TinyVec, add_years_unchecked};
+use crate::date_utils::{SmallVec, add_years_unchecked};
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, 
     Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus, VaccineGroupForecast,
@@ -106,7 +106,7 @@ pub fn menb_custom_evaluation_hook(
     series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut TinyVec<EvaluationReason, 4>,
+    reasons: &mut SmallVec<[EvaluationReason; 4]>,
     status: &mut DoseStatus,
 ) {
     let Some(dose) = ctx.current_dose else {

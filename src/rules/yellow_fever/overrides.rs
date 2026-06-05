@@ -1,4 +1,4 @@
-use crate::date_utils::TinyVec;
+use crate::date_utils::SmallVec;
 use crate::engine::EvaluationContext;
 use crate::models::{Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus};
 use chrono::NaiveDate;
@@ -7,7 +7,7 @@ pub fn yellow_fever_custom_evaluation_hook(
     _series_name: &str,
     _target_dose_idx: usize,
     _ctx: &EvaluationContext,
-    _reasons: &mut TinyVec<EvaluationReason, 4>,
+    _reasons: &mut SmallVec<[EvaluationReason; 4]>,
     _status: &mut DoseStatus,
 ) {
     // Standard CDSi evaluation is sufficient.

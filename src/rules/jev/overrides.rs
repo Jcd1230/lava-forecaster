@@ -2,13 +2,13 @@ use crate::engine::CandidateForecastsExt;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
-use crate::date_utils::{TinyVec, add_years_unchecked};
+use crate::date_utils::{SmallVec, add_years_unchecked};
 
 pub fn jev_custom_evaluation_hook(
     series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut TinyVec<EvaluationReason, 4>,
+    reasons: &mut SmallVec<[EvaluationReason; 4]>,
     status: &mut DoseStatus,
 ) {
     if let Some(dose) = ctx.current_dose {

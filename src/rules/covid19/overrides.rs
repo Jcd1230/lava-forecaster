@@ -1,7 +1,7 @@
 use crate::engine::CandidateForecastsExt;
 use lava_cvx_macro::cvx;
 use chrono::NaiveDate;
-use crate::date_utils::{TinyVec, add_years_unchecked, add_months_unchecked, compare_elapsed, TimePeriod};
+use crate::date_utils::{SmallVec, add_years_unchecked, add_months_unchecked, compare_elapsed, TimePeriod};
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, 
     Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus,
@@ -130,7 +130,7 @@ pub fn evaluate_doses_seasonally(
     for (i, dose) in sorted_history.iter().enumerate() {
         let season = get_covid_season(dose.date);
         let mut status = DoseStatus::Valid;
-        let mut reasons = TinyVec::<EvaluationReason, 4>::new();
+        let mut reasons = SmallVec::<[EvaluationReason; 4]>::new();
 
         // 1. DOB check
         if dose.date < patient.birth_date {
@@ -387,7 +387,7 @@ pub fn covid19_custom_evaluation_hook(
     series_name: &str,
     _target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut TinyVec<EvaluationReason, 4>,
+    reasons: &mut SmallVec<[EvaluationReason; 4]>,
     status: &mut DoseStatus,
 ) {
     if let Some(dose) = ctx.current_dose {

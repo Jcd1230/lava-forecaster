@@ -1,4 +1,4 @@
-use crate::date_utils::{add_months_unchecked, add_years_unchecked, TinyVec};
+use crate::date_utils::{add_months_unchecked, add_years_unchecked, SmallVec};
 use crate::engine::CandidateForecastsExt;
 use crate::engine::EvaluationContext;
 use crate::models::{
@@ -106,7 +106,7 @@ pub fn hep_b_custom_evaluation_hook(
     series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut TinyVec<EvaluationReason, 4>,
+    reasons: &mut SmallVec<[EvaluationReason; 4]>,
     status: &mut DoseStatus,
 ) {
     if let Some(dose) = ctx.current_dose {
@@ -695,7 +695,7 @@ pub fn hep_b_group_selection(
                         dose_date: dose.date,
                         cvx: dose.cvx.clone(),
                         status: DoseStatus::Valid,
-                        reasons: TinyVec::new(),
+                        reasons: SmallVec::new(),
                         dose_number: Some(dose_num),
                     });
                     d1_done = true;
@@ -704,7 +704,7 @@ pub fn hep_b_group_selection(
                         dose_date: dose.date,
                         cvx: dose.cvx.clone(),
                         status: DoseStatus::Valid,
-                        reasons: TinyVec::new(),
+                        reasons: SmallVec::new(),
                         dose_number: Some(dose_num),
                     });
                     d2_done = true;

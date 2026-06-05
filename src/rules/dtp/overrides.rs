@@ -2,7 +2,7 @@ use lava_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, VaccineGroupForecast};
-use crate::date_utils::{TinyVec, add_years_unchecked, add_months_unchecked};
+use crate::date_utils::{SmallVec, add_years_unchecked, add_months_unchecked};
 
 pub fn is_pertussis_vaccine(cvx: Cvx) -> bool {
     // DT/Td (tetanus/diphtheria only, no pertussis) CVX codes
@@ -29,7 +29,7 @@ pub fn dtp_custom_evaluation_hook(
     series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut TinyVec<EvaluationReason, 4>,
+    reasons: &mut SmallVec<[EvaluationReason; 4]>,
     status: &mut DoseStatus,
 ) {
     if series_name != "DTP_5_DOSE_SERIES" && series_name != "DTP_3_DOSE_SERIES" {
@@ -86,7 +86,7 @@ pub fn dtp_custom_dose_number_hook(
 pub fn dtp_custom_extra_dose_hook(
     series_name: &str,
     ctx: &EvaluationContext,
-) -> Option<(DoseStatus, TinyVec<EvaluationReason, 4>)> {
+) -> Option<(DoseStatus, SmallVec<[EvaluationReason; 4]>)> {
     if series_name != "DTP_5_DOSE_SERIES" && series_name != "DTP_3_DOSE_SERIES" {
         return None;
     }
@@ -96,7 +96,7 @@ pub fn dtp_custom_extra_dose_hook(
     let t_completed = is_adolescent_tdap_completed(ctx);
     if t_completed {
         // Any subsequent dose is valid as a recurring decennial booster
-        return Some((DoseStatus::Valid, TinyVec::new()));
+        return Some((DoseStatus::Valid, SmallVec::new()));
     }
     
     let is_tdap = dose.cvx.0 == cvx!("115") || dose.cvx.0 == cvx!("198");
@@ -110,7 +110,7 @@ pub fn dtp_custom_extra_dose_hook(
                     return Some((DoseStatus::Accepted, crate::reasons![EvaluationReason::BoosterDose]));
                 }
             }
-            return Some((DoseStatus::Valid, TinyVec::new()));
+            return Some((DoseStatus::Valid, SmallVec::new()));
         } else {
             let has_prior_tdap_ge_7 = ctx.valid_doses.iter().any(|(v_date, _)| {
                 let is_prior_tdap = ctx.history.iter().any(|d| d.date == *v_date && (d.cvx.0 == cvx!("115") || d.cvx.0 == cvx!("198")));
@@ -123,7 +123,7 @@ pub fn dtp_custom_extra_dose_hook(
                         return Some((DoseStatus::Accepted, crate::reasons![EvaluationReason::BoosterDose]));
                     }
                 }
-                return Some((DoseStatus::Valid, TinyVec::new()));
+                return Some((DoseStatus::Valid, SmallVec::new()));
             }
         }
     }

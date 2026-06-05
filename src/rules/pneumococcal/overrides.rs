@@ -1,7 +1,7 @@
 use lava_cvx_macro::cvx;
 use chrono::NaiveDate;
 
-use crate::date_utils::{TinyVec, compare_elapsed, TimePeriod};
+use crate::date_utils::{SmallVec, compare_elapsed, TimePeriod};
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus};
 
@@ -95,7 +95,7 @@ pub fn pneumococcal_custom_evaluation_hook(
     _series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut TinyVec<EvaluationReason, 4>,
+    reasons: &mut SmallVec<[EvaluationReason; 4]>,
     status: &mut DoseStatus,
 ) {
     let dose = match ctx.current_dose {
@@ -454,7 +454,7 @@ impl crate::engine::EvaluationPolicy for PneumococcalPolicy {
         series_name: &str,
         target_dose_idx: usize,
         ctx: &EvaluationContext,
-        reasons: &mut TinyVec<EvaluationReason, 4>,
+        reasons: &mut SmallVec<[EvaluationReason; 4]>,
         status: &mut DoseStatus,
     ) {
         pneumococcal_custom_evaluation_hook(series_name, target_dose_idx, ctx, reasons, status)

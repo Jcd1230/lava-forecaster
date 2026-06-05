@@ -2,7 +2,7 @@ use crate::engine::CandidateForecastsExt;
 use lava_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::{EvaluationContext, ParameterOverrideRule, RecommendationOverrideRule};
-use crate::date_utils::{TinyVec, compare_elapsed, add_years_unchecked, add_months_unchecked};
+use crate::date_utils::{SmallVec, compare_elapsed, add_years_unchecked, add_months_unchecked};
 use crate::models::{Patient, SeriesForecast, Dose, DoseStatus, EvaluationReason, VaccineGroupForecast, DoseEvaluation};
 
 pub fn polio_parameter_overrides() -> Vec<ParameterOverrideRule> {
@@ -323,7 +323,7 @@ pub fn polio_custom_evaluation_hook(
     series_name: &str,
     target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut TinyVec<EvaluationReason, 4>,
+    reasons: &mut SmallVec<[EvaluationReason; 4]>,
     status: &mut DoseStatus,
 ) {
     if series_name != "POLIO_4_DOSE_SERIES" && series_name != "POLIO_FRACTIONAL_IPV_SERIES" {
@@ -368,7 +368,7 @@ pub fn polio_custom_evaluation_hook(
 pub fn polio_custom_extra_dose_hook(
     series_name: &str,
     ctx: &EvaluationContext,
-) -> Option<(DoseStatus, TinyVec<EvaluationReason, 4>)> {
+) -> Option<(DoseStatus, SmallVec<[EvaluationReason; 4]>)> {
     if series_name != "POLIO_4_DOSE_SERIES" && series_name != "POLIO_FRACTIONAL_IPV_SERIES" {
         return None;
     }

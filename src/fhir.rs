@@ -542,9 +542,9 @@ mod tests {
         let forecasts = vec![
             VaccineGroupForecast {
                 vaccine_group: std::borrow::Cow::Borrowed("Polio"),
-                evaluations: crate::date_utils::TinyVec::new(),
+                evaluations: crate::date_utils::SmallVec::new(),
                 forecasts: {
-                    let mut v = crate::date_utils::TinyVec::new();
+                    let mut v = crate::date_utils::SmallVec::new();
                     v.push(SeriesForecast {
                         series_name: std::borrow::Cow::Borrowed("IPVs"),
                         status: SeriesStatus::NotComplete {
@@ -553,7 +553,7 @@ mod tests {
                             overdue_date: Some(NaiveDate::from_ymd_opt(2022, 7, 1).unwrap()),
                             latest_date: None,
                         },
-                        reasons: crate::date_utils::TinyVec::new(),
+                        reasons: crate::date_utils::SmallVec::new(),
                     });
                     v
                 },

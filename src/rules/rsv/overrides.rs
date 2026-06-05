@@ -1,6 +1,6 @@
 use lava_cvx_macro::cvx;
 use chrono::{Datelike, NaiveDate};
-use crate::date_utils::{TinyVec, add_months_unchecked, add_years_unchecked, compare_elapsed, TimePeriod};
+use crate::date_utils::{SmallVec, add_months_unchecked, add_years_unchecked, compare_elapsed, TimePeriod};
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, 
     Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus,
@@ -59,7 +59,7 @@ pub fn rsv_custom_evaluation_hook(
     series_name: &str,
     _target_dose_idx: usize,
     ctx: &EvaluationContext,
-    reasons: &mut TinyVec<EvaluationReason, 4>,
+    reasons: &mut SmallVec<[EvaluationReason; 4]>,
     status: &mut DoseStatus,
 ) {
     let Some(dose) = ctx.current_dose else {

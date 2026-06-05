@@ -3,11 +3,11 @@ use chrono::{Datelike, Days, NaiveDate};
 #[macro_export]
 macro_rules! reasons {
     () => {
-        $crate::date_utils::TinyVec::new()
+        $crate::date_utils::SmallVec::new()
     };
     ($($x:expr),+ $(,)?) => {
         {
-            let mut r = $crate::date_utils::TinyVec::new();
+            let mut r = $crate::date_utils::SmallVec::new();
             $(
                 r.push($x.into());
             )*
@@ -356,5 +356,5 @@ mod tests {
     }
 }
 
-pub type TinyVec<T, const N: usize> = smallvec::SmallVec<[T; N]>;
+pub use smallvec::SmallVec;
 

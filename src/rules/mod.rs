@@ -63,7 +63,7 @@ impl crate::engine::EvaluationPolicy for LegacyHookPolicy {
         series_name: &str,
         target_dose_idx: usize,
         ctx: &crate::engine::EvaluationContext,
-        reasons: &mut crate::date_utils::TinyVec<crate::models::EvaluationReason, 4>,
+        reasons: &mut crate::date_utils::SmallVec<[crate::models::EvaluationReason; 4]>,
         status: &mut crate::models::DoseStatus,
     ) {
         if let Some(hook) = self.custom_evaluation_hook {
@@ -83,7 +83,7 @@ impl crate::engine::EvaluationPolicy for LegacyHookPolicy {
         &self,
         series_name: &str,
         ctx: &crate::engine::EvaluationContext,
-    ) -> Option<(crate::models::DoseStatus, crate::date_utils::TinyVec<crate::models::EvaluationReason, 4>)> {
+    ) -> Option<(crate::models::DoseStatus, crate::date_utils::SmallVec<[crate::models::EvaluationReason; 4]>)> {
         self.custom_extra_dose_hook.and_then(|h| (h)(series_name, ctx))
     }
 
