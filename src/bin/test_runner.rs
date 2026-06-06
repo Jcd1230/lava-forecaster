@@ -12,6 +12,9 @@ use lava_forecaster::{
     },
 };
 
+#[path = "test_runner/fuzzer.rs"]
+mod fuzzer;
+
 #[derive(Debug, Clone)]
 struct CdcExpectedDose {
     dose_date: NaiveDate,
@@ -466,7 +469,7 @@ fn print_cdc_comparison_table(
     println!("{:<18} | {:<22} | {:<22}", "past_due_date", format_optional_date(rust_fc.overdue_date), format_optional_date(exp_fc.overdue_date));
 }
 
-fn run_cdc_csv_mode(args: &[String]) {
+fn run_cdc_csv_mode(client: &reqwest::blocking::Client, args: &[String]) {
     let csv_path = Path::new(&args[2]);
 
     let mut filter_group = None;
@@ -517,7 +520,7 @@ fn run_cdc_csv_mode(args: &[String]) {
         total += 1;
 
         let (rust_evals, rust_fc) = if let Some(ref r_url) = rest_url {
-            match query_rust_rest_service(r_url, tc) {
+            match query_rust_rest_service(client, r_url, tc) {
                 Ok(resp) => {
                     let rust_group = resp.vaccine_groups.iter().find(|rg| rg.vaccine_group == tc.group).cloned();
                     match rust_group {
@@ -1413,8 +1416,7 @@ fn parse_legacy_xml(xml_content: &str, focus_code: &str) -> ExpectedResults {
 }
 
 // REST call to Java ICE
-fn query_java_service(java_endpoint: &str, payload: serde_json::Value) -> String {
-    let client = reqwest::blocking::Client::new();
+fn query_java_service(client: &reqwest::blocking::Client, java_endpoint: &str, payload: serde_json::Value) -> String {
     let resp = client
         .post(java_endpoint)
         .json(&payload)
@@ -1592,8 +1594,7 @@ fn print_comparison_table(
     println!();
 }
 
-fn query_rust_rest_service(rust_url: &str, tc: &UnifiedTestCase) -> Result<lava_forecaster::models::ForecastResponse, String> {
-    let client = reqwest::blocking::Client::new();
+fn query_rust_rest_service(client: &reqwest::blocking::Client, rust_url: &str, tc: &UnifiedTestCase) -> Result<lava_forecaster::models::ForecastResponse, String> {
     let req_payload = lava_forecaster::models::ForecastRequest {
         patient: tc.patient.clone(),
         history: tc.history.clone(),
@@ -1615,15 +1616,13 @@ fn query_rust_rest_service(rust_url: &str, tc: &UnifiedTestCase) -> Result<lava_
     Ok(resp_data)
 }
 
-fn get_java_expected_results(java_url: &str, tc: &UnifiedTestCase) -> Result<ExpectedResults, String> {
+fn get_java_expected_results(client: &reqwest::blocking::Client, java_url: &str, tc: &UnifiedTestCase) -> Result<ExpectedResults, String> {
     let java_endpoint = format!("{}/opencds-decision-support-service/api/resources/evaluateAtSpecifiedTime", java_url);
     let payload = build_evaluate_payload(
         &tc.patient,
         &tc.history,
         tc.execution_date,
     );
-    
-    let client = reqwest::blocking::Client::new();
     let resp = client.post(&java_endpoint)
         .json(&payload)
         .send()
@@ -1656,7 +1655,7 @@ fn get_java_expected_results(java_url: &str, tc: &UnifiedTestCase) -> Result<Exp
     Ok(java_res)
 }
 
-fn get_java_expected_results_bulk(java_url: &str, cases: &[&UnifiedTestCase]) -> Result<Vec<Result<ExpectedResults, String>>, String> {
+fn get_java_expected_results_bulk(client: &reqwest::blocking::Client, java_url: &str, cases: &[&UnifiedTestCase]) -> Result<Vec<Result<ExpectedResults, String>>, String> {
     let java_endpoint = format!("{}/opencds-decision-support-service/api/resources/bulkEvaluateAtSpecifiedTime", java_url);
     let mut payloads = Vec::new();
     for tc in cases {
@@ -1667,8 +1666,6 @@ fn get_java_expected_results_bulk(java_url: &str, cases: &[&UnifiedTestCase]) ->
         );
         payloads.push(payload);
     }
-    
-    let client = reqwest::blocking::Client::new();
     let resp = client.post(&java_endpoint)
         .json(&payloads)
         .send()
@@ -1722,6 +1719,7 @@ fn is_group_supported_by_java(group: &str) -> bool {
 }
 
 fn main() {
+    let client = reqwest::blocking::Client::new();
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 2 {
         println!("=== Rust-Native Centralized Test Runner ===");
@@ -1730,12 +1728,18 @@ fn main() {
         println!("  test-runner --record <cases_dir> [java_url]");
         println!("  test-runner --run <cases_dir> [options]");
         println!("  test-runner --run-cdc-csv <csv_path> [options]");
+        println!("  test-runner --fuzz <count> [options]");
         println!("Options under --run:");
         println!("  --group <group_name>    Filter cases by group (e.g. POLIO)");
         println!("  --case <case_name>      Filter cases by name");
         println!("  --compare [java_url]    Compare outputs dynamically with a live Java ICE server (default: http://localhost:8080)");
         println!("  --rest-url <rust_url>   Query Rust server at rust_url (e.g. http://localhost:8081) instead of in-process execution");
         println!("  --verbose, -v           Show detailed side-by-side evaluation tables");
+        println!("Options under --fuzz:");
+        println!("  --group <group_name>    Generate cases only for group (e.g. POLIO)");
+        println!("  --compare [java_url]    ICE server URL (default: http://localhost:8080)");
+        println!("  --fuzz-seed <seed>      Deterministic seed for reproducibility");
+        println!("  --shrink                Shrink failing cases to minimal reproducing history");
         return;
     }
 
@@ -1746,7 +1750,46 @@ fn main() {
         fs::create_dir_all(output_dir).unwrap();
         import_python_cases(input_suite, output_dir);
     } else if mode == "--run-cdc-csv" {
-        run_cdc_csv_mode(&args);
+        run_cdc_csv_mode(&client, &args);
+    } else if mode == "--fuzz" {
+        let fuzz_count = args[2].parse::<usize>().expect("Invalid fuzz count");
+
+        let mut filter_group = None;
+        let mut compare_java_url = "http://localhost:8080".to_string();
+        let mut fuzz_seed = None;
+        let mut shrink = false;
+
+        let mut idx = 3;
+        while idx < args.len() {
+            if args[idx] == "--group" {
+                filter_group = Some(args[idx + 1].to_uppercase());
+                idx += 2;
+            } else if args[idx] == "--compare" {
+                if idx + 1 < args.len() && !args[idx + 1].starts_with('-') {
+                    compare_java_url = args[idx + 1].clone();
+                    idx += 2;
+                } else {
+                    compare_java_url = "http://localhost:8080".to_string();
+                    idx += 1;
+                }
+            } else if args[idx] == "--fuzz-seed" {
+                fuzz_seed = Some(args[idx + 1].parse::<u64>().expect("Invalid fuzz seed"));
+                idx += 2;
+            } else if args[idx] == "--shrink" {
+                shrink = true;
+                idx += 1;
+            } else {
+                idx += 1;
+            }
+        }
+
+        match fuzzer::run_fuzz(&client, fuzz_count, fuzz_seed, filter_group, &compare_java_url, shrink) {
+            Ok(_) => std::process::exit(0),
+            Err(e) => {
+                println!("Fuzz execution failed: {}", e);
+                std::process::exit(1);
+            }
+        }
     } else if mode == "--record" {
         let cases_dir = Path::new(&args[2]);
         let java_uri = args.get(3).map(|s| s.as_str()).unwrap_or("http://localhost:8080");
@@ -1772,7 +1815,7 @@ fn main() {
                         &tc.history,
                         tc.execution_date,
                     );
-                    let xml_out = query_java_service(&java_endpoint, payload);
+                    let xml_out = query_java_service(&client, &java_endpoint, payload);
                     let mut java_res = parse_legacy_xml(&xml_out, &tc.focus_code);
                     
                     // Fill in series names for expected forecasts to match Rust
@@ -1862,7 +1905,7 @@ fn main() {
             if !java_test_cases.is_empty() {
                 println!("Querying {} cases in bulk from Java ICE at {}...", java_test_cases.len(), j_url);
                 for chunk in java_test_cases.chunks(500) {
-                    match get_java_expected_results_bulk(j_url, chunk) {
+                    match get_java_expected_results_bulk(&client, j_url, chunk) {
                         Ok(results) => {
                             for (i, res) in results.into_iter().enumerate() {
                                 let name = chunk[i].name.clone();
@@ -1873,7 +1916,7 @@ fn main() {
                             println!("Java bulk query failed: {}. Falling back to individual requests.", e);
                             for &tc in chunk {
                                 let name = tc.name.clone();
-                                let ind_res = get_java_expected_results(j_url, tc);
+                                let ind_res = get_java_expected_results(&client, j_url, tc);
                                 java_expected_map.insert(name, ind_res);
                             }
                         }
@@ -1893,7 +1936,7 @@ fn main() {
             total += 1;
             
             let (rust_evals, rust_fc) = if let Some(ref r_url) = rest_url {
-                match query_rust_rest_service(r_url, &tc) {
+                match query_rust_rest_service(&client, r_url, &tc) {
                     Ok(resp) => {
                         let rust_group = resp.vaccine_groups.iter().find(|rg| rg.vaccine_group == tc.group).cloned();
                         match rust_group {
