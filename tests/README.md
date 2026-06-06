@@ -21,6 +21,20 @@ cargo run --release --bin test_runner -- --run <cases_dir> [options]
 *   `--compare [java_url]`: Compare LAVA Forecaster outputs dynamically with a live Java ICE server (default URL: `http://localhost:8080`).
 *   `--rest-url <rust_url>`: Query a running Rust REST server (e.g. `http://localhost:8081`) instead of executing LAVA in-process.
 *   `--verbose` or `-v`: Output detailed, side-by-side comparison tables of evaluations and forecasts.
+*   `--trace` or `--explain`: Dump a step-by-step decision trace log to stdout after evaluation. Shows the engine's internal decisions for each age check, interval check, parameter override, forecast date calculation, max-age clamp, and every custom hook invocation. Useful for diagnosing forecast date or evaluation status mismatches without manual breakpoints.
+
+#### Comparison Table Details
+
+When running with `-v` or on a failing case, the evaluation comparison table includes ignored-status annotation on `Invalid` evaluations:
+
+```
+Date         | CVX  | Rust Evaluation              | Expected Evaluation          | Status
+------------------------------------------------------------------------------------------
+2016-02-06   | 02   | Valid #1                     | Valid #1                     | OK
+2016-05-06   | 178  | Invalid (Ignored) #2         | Invalid (Ignored) #2         | OK
+```
+
+The `(Ignored)` / `(Not Ignored)` tag is determined by `is_eval_ignored()` in the engine, which accounts for group-specific rules (e.g., bivalent OPV CVX 178/179 and post-April-2016 CVX 182 shots in the POLIO group are always ignored regardless of evaluation status).
 
 ---
 

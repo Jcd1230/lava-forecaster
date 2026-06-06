@@ -358,6 +358,38 @@ If compare output still does not make the failure mode obvious, run the Rust bin
 
 This is the fastest way to inspect selected vaccine-group output, evaluations, and forecast dates without involving the Java compare harness.
 
+### Step-by-Step Trace Diagnostics
+
+For evaluation-status or forecast-date mismatches that are still ambiguous after inspecting raw output, use the built-in `--trace` / `--explain` flag to get a line-by-line log of every decision the engine made for that case:
+
+```bash
+cargo run --release --bin test_runner -- --run tests/cases --case <test_case_name> --trace
+```
+
+The trace table format is:
+
+```
+Step                                     | Location        | Description
+----------------------------------------------------------------------------------------------------
+age_check                                | src/engine.rs:610 | Dose 1 cvx 02 age check: date=2016-02-06 ...
+polio_eval_opv_ignored                   | src/rules/polio/overrides.rs:332 | OPV shot cvx=178 ...
+forecast_dates                           | src/engine.rs:926 | Dose 2 minimum age: ...
+forecast_custom_forecast_hook            | src/engine.rs:1051 | Custom forecast hook mutated status from ... to ...
+```
+
+**What it covers:**
+- `age_check` — absolute minimum age computation and pass/fail for each dose
+- `interval_check` — absolute minimum interval, anchoring dose, and pass/fail
+- `parameter_override` — which rule triggered a pre-2009 or other parameter override
+- `forecast_recommendation_override` — which recommendation override rule fired
+- `forecast_dates` — min age, min/rec/overdue interval, sequential vs. non-sequential anchor, and calculated dates
+- `forecast_max_age_clamp` — when a max-age clamp fires and what status it shifts to
+- `forecast_complete` / `forecast_not_completed_awaiting_custom_hook` — which completion branch was taken
+- `forecast_custom_forecast_hook` / `custom_evaluation_hook` — when a custom hook mutated status or dates
+- Polio-specific: `polio_eval_opv_ignored`, `polio_eval_final_dose_pre4y_valid`, `polio_forecast_4y_shift`, `polio_forecast_awaiting_completion`, `polio_extra_dose_*`
+
+Combine with `-v` to see both the trace and the side-by-side evaluation table in a single pass.
+
 ### Quick Compare-Log Commands
 
 - Check whether a bucket is still present in a full compare log:
@@ -380,6 +412,8 @@ This is the fastest way to inspect selected vaccine-group output, evaluations, a
 - Be cautious with adult policy rules such as `ConditionallyRecommended` and `NotRecommended`: Java often applies them only when no relevant series history exists. Started series frequently remain `NotComplete` with real forecast dates.
 - `Accepted` does not necessarily mean “counts toward completion.” If Java treats the dose as ignored for completion, Rust may need `Accepted` plus `OutsideRoutineSeries`.
 - If a compare case is still confusing, run the Rust binary directly on a one-off request JSON and inspect the raw `selected_series`, evaluations, and forecast output.
+- **`Invalid (Ignored)` annotation**: In `-v` mode the evaluation table now shows `Invalid (Ignored)` or `Invalid (Not Ignored)` for every `Invalid` dose. This makes it immediately clear whether a diverging dose is an OPV/bivalent shot (intentionally ignored for POLIO series completion) vs. a genuinely counting dose that should be reconciled.
+- **Use `--trace` early**: If the failure mode is not obvious from the comparison table alone, add `--trace` before reading Drools rules. The trace pinpoints exactly which rule branch, parameter override, or forecast hook produced the diverging date or status, cutting the read loop from O(N rules) to O(1).
 
 ### Formatting Scope
 

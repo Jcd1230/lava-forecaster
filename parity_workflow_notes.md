@@ -96,12 +96,18 @@ When a label and the actual dates disagree, trust the dates in the raw case file
 - Adult conditional or not-recommended policy rules may apply only when no relevant series history exists. Started series often remain `NotComplete` with real dates.
 - `Accepted` does not necessarily mean the dose should count toward completion. If Java treats the dose as ignored for completion, Rust often needs `Accepted` plus `OutsideRoutineSeries`.
 - If a failing case is ambiguous, run the Rust forecaster directly on a one-off request JSON and inspect raw `selected_series`, evaluations, and forecast output before patching.
+- **Ignored-shot annotation**: The comparison table (with `-v`) now shows `Invalid (Ignored)` or `Invalid (Not Ignored)` for `Invalid` evaluations. When Rust and Java agree on `Invalid` status but the shot is OPV/bivalent (POLIO group), the `(Ignored)` annotation confirms that both sides correctly treat it as ignored for series completion — a useful quick-check before diving into overrides.
 
 ## Tooling Notes
 
 - For existing buckets, prefer Cargo test runner commands (`cargo run --release --bin test_runner -- --run tests/cases --group <GROUP> --compare`) so compare logging stays explicit.
 - Use `cargo run --release --bin test_runner -- --record tests/cases` when you want to record Java ICE snapshots into test JSONs.
 - Keep compare-log postprocessing shell-simple. `rg`, `awk`, saved logs, and small one-liners are usually enough.
+- Use `--trace` or `--explain` on any single-case run to get a step-by-step decision log for that case without touching the code:
+  ```bash
+  cargo run --release --bin test_runner -- --run tests/cases --case <test_case_name> --trace
+  ```
+  The trace output shows each age check, interval check, parameter override trigger, forecast date calculation step, max-age clamp event, and custom hook mutation side-by-side with the source file and line number. Combine with `--compare` to trace live-comparison runs, or use standalone against recorded snapshots.
 
 ## Direct Rust Inspection
 

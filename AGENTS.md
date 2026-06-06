@@ -35,6 +35,7 @@ All major tasks are configured as `mise` commands or native Cargo binaries.
 | `cargo run --release --bin test_runner -- --run tests/cases --group <GROUP>` | Runs the Rust-native test runner for a specific vaccine group (e.g., `POLIO`, `DTP`, `MMR`). |
 | `cargo run --release --bin test_runner -- --run tests/cases --group <GROUP> --compare` | Runs the Rust test runner and compares dynamically against the live Java ICE server. |
 | `cargo run --release --bin test_runner -- --run tests/cases --case <CASE> -v` | Runs a single case with side-by-side verbose details. |
+| `cargo run --release --bin test_runner -- --run tests/cases --case <CASE> --trace` | Dumps a step-by-step engine decision trace (age checks, interval checks, overrides, forecast hook mutations) for a single case. |
 | `cargo run --release --bin test_runner -- --record tests/cases` | Connects to the live Java ICE server and records expected output snapshots directly into case JSONs. |
 
 ## Crucial Gotchas & Project Context
@@ -45,6 +46,8 @@ All major tasks are configured as `mise` commands or native Cargo binaries.
 - **Legacy Rule Definitions**: Legacy rules and support data YAML files are located under the [Series Directory](file:///home/jason/projects/ice/opencds-decision-support-service/src/main/resources/data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/Series/).
 - **Comparing Against Live Java**: When implementing or debugging a vaccine group, you can compare Rust behavior against Java in real time. First start the Java server using `mise run run`, then run `cargo run --release --bin test_runner -- --run tests/cases --group <name> --compare` in another shell.
 - **Test Runner Verbosity**: The test runner is quiet by default. Pass `--verbose` or `-v` to see full details of passing tests.
+- **Decision Trace**: Pass `--trace` or `--explain` on any `--run` invocation to get a step-by-step engine decision log (age checks, interval checks, parameter overrides, forecast hook mutations) for each case. Particularly useful when the side-by-side comparison table doesn't immediately explain a date or status mismatch.
+- **Invalid (Ignored) Annotation**: The evaluation comparison table now shows `Invalid (Ignored)` or `Invalid (Not Ignored)` for `Invalid` doses. Quickly confirms whether a mismatched shot is intentionally ignored for series completion (e.g., bivalent OPV in POLIO) or genuinely counts.
 - **Formatting Scope**: Avoid broad `cargo fmt` / `rustfmt` unless you intend to format the whole Rust module tree. Prefer formatting only files you intentionally changed; `rustfmt` can follow `mod.rs` declarations and touch sibling vaccine modules.
 
 ## Recommended Parity Workflow
@@ -81,6 +84,7 @@ For detailed mismatch-routing guidance, use [parity_workflow_notes.md](file:///h
 - Adult recommendation statuses may only apply when **no relevant dose history exists**. Once a series has started, Java often keeps the forecast `NotComplete` instead of switching to `ConditionallyRecommended`.
 - If Java marks a shot as effectively ignored for completion, Rust often needs `Accepted` plus `OutsideRoutineSeries` to avoid falsely completing the series.
 - When a failing case is ambiguous, run the Rust forecaster directly on a hand-built request JSON and inspect `selected_series`, evaluations, and forecasts before patching.
+- **Use `--trace` early**: Add `--trace` to any single-case run when the side-by-side table doesn't explain the mismatch. The trace names the exact engine step, source location, and decision that produced the wrong date or status — cutting rule-reading to the specific function that fired.
 - For existing parity buckets, prefer Cargo test runner commands so compare logging stays explicit.
 
 ## Version Control (Jujutsu / jj-vcs)
