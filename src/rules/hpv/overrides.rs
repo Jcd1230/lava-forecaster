@@ -1,9 +1,12 @@
+use crate::date_utils::{add_years_unchecked, SmallVec, TimePeriod};
 use crate::engine::CandidateForecastsExt;
-use lava_cvx_macro::cvx;
-use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
-use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
-use crate::date_utils::{SmallVec, TimePeriod, add_years_unchecked};
+use crate::models::{
+    Cvx, Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus,
+    VaccineGroupForecast,
+};
+use chrono::NaiveDate;
+use lava_cvx_macro::cvx;
 
 fn is_hpv_cvx(cvx: Cvx) -> bool {
     matches!(cvx.0, cvx!("62") | cvx!("118") | cvx!("137") | cvx!("165"))
@@ -44,7 +47,8 @@ fn simulate_hpv_evaluations(
             if valid_doses.is_empty() {
                 if dose.date < age_9y {
                     results.push((dose.date, SimStatus::Invalid));
-                } else if dose.cvx.0 == cvx!("118") && patient.gender == crate::models::Gender::Male {
+                } else if dose.cvx.0 == cvx!("118") && patient.gender == crate::models::Gender::Male
+                {
                     results.push((dose.date, SimStatus::Accepted));
                 } else if dose.date >= age_46 {
                     results.push((dose.date, SimStatus::Accepted));
@@ -88,7 +92,8 @@ fn simulate_hpv_evaluations(
             if target_dose_idx == 1 {
                 if dose.date < age_9y {
                     results.push((dose.date, SimStatus::Invalid));
-                } else if dose.cvx.0 == cvx!("118") && patient.gender == crate::models::Gender::Male {
+                } else if dose.cvx.0 == cvx!("118") && patient.gender == crate::models::Gender::Male
+                {
                     results.push((dose.date, SimStatus::Accepted));
                 } else if dose.date >= age_46 {
                     results.push((dose.date, SimStatus::Accepted));
@@ -118,7 +123,9 @@ fn simulate_hpv_evaluations(
             } else {
                 let last_shot_date = results
                     .iter()
-                    .filter(|(_, status)| *status == SimStatus::Valid || *status == SimStatus::Invalid)
+                    .filter(|(_, status)| {
+                        *status == SimStatus::Valid || *status == SimStatus::Invalid
+                    })
                     .map(|(date, _)| *date)
                     .max();
 
@@ -181,14 +188,14 @@ pub fn hpv_custom_evaluation_hook(
             }
         }
 
-        // 1. Gender-specific restriction: CVX 118 (bivalent) is not licensed for males
-        // Only override if the dose is not already Invalid due to age/interval.
-        // DuplicateShotSameDay should be overridden by the gender reason since the
-        // dose is not truly a duplicate — it's a non-competing vaccine for males.
+        // 1. Gender-specific restriction: CVX 118 (bivalent) is not licensed for males.
+        // Java accepts these as non-competing except for the HPV 2-dose dose-2 path,
+        // where a too-close male Cervarix shot remains invalid for interval.
         if dose.cvx.0 == cvx!("118") && ctx.patient.gender == crate::models::Gender::Male {
-            let is_age_or_interval_invalid = *status == DoseStatus::Invalid
-                && !reasons.contains(&EvaluationReason::DuplicateShotSameDay);
-            if !is_age_or_interval_invalid {
+            let invalid_2_dose_dose_2 = series_name == "HPV_2_DOSE_SERIES"
+                && target_dose_idx == 2
+                && *status == DoseStatus::Invalid;
+            if !invalid_2_dose_dose_2 && !reasons.contains(&EvaluationReason::BelowMinimumAge) {
                 *status = DoseStatus::Accepted;
                 reasons.clear();
                 reasons.push(EvaluationReason::VaccineNotLicensedForMales);
@@ -220,7 +227,7 @@ pub fn hpv_custom_evaluation_hook(
                 let abs_min_1_3 = if dose.date < cutoff_2016 {
                     crate::time_period!("16w-4d") // Pre-2016: 108 days
                 } else {
-                    crate::time_period!("5m-4d")  // Post-2016: ~147 days
+                    crate::time_period!("5m-4d") // Post-2016: ~147 days
                 };
                 let min_int_1_3 = abs_min_1_3.add_to(dose_1_date);
                 let min_int_2_3 = crate::time_period!("80d").add_to(dose_2_date);
@@ -273,7 +280,9 @@ pub fn hpv_custom_forecast_hook(
 
     if valid_doses.is_empty() {
         if eval_date >= age_15 {
-            forecast.status = forecast.status.with_overdue_date(Some(age_15 - chrono::Duration::days(1)));
+            forecast.status = forecast
+                .status
+                .with_overdue_date(Some(age_15 - chrono::Duration::days(1)));
         }
         return;
     }
@@ -302,11 +311,15 @@ pub fn hpv_custom_forecast_hook(
         hpv_history_after_first_valid > valid_doses_after_first_valid;
 
     if valid_doses.len() == 1 && started_at_or_after_15 {
-        forecast.status = forecast.status.with_overdue_date(Some(latest_boundary(latest_hpv_dose_date, crate::time_period!("16w"))));
+        forecast.status = forecast.status.with_overdue_date(Some(latest_boundary(
+            latest_hpv_dose_date,
+            crate::time_period!("16w"),
+        )));
         return;
     }
 
-    if valid_doses.len() == 1 && !started_at_or_after_15 && has_extra_hpv_history_after_first_valid {
+    if valid_doses.len() == 1 && !started_at_or_after_15 && has_extra_hpv_history_after_first_valid
+    {
         let earliest_from_dose_1 = add_interval(first_valid_date, crate::time_period!("5m"));
         let earliest_from_latest = add_interval(latest_hpv_dose_date, crate::time_period!("12w"));
         let earliest = earliest_from_dose_1.max(earliest_from_latest);
@@ -316,7 +329,10 @@ pub fn hpv_custom_forecast_hook(
 
         forecast.status = forecast.status.with_earliest_date(Some(earliest));
         forecast.status = forecast.status.with_recommended_date(Some(recommended));
-        forecast.status = forecast.status.with_overdue_date(Some(latest_boundary(first_valid_date, crate::time_period!("13m+4w"))));
+        forecast.status = forecast.status.with_overdue_date(Some(latest_boundary(
+            first_valid_date,
+            crate::time_period!("13m+4w"),
+        )));
         return;
     }
 
@@ -330,20 +346,26 @@ pub fn hpv_custom_forecast_hook(
             second_valid_date >= add_interval(first_valid_date, crate::time_period!("5m-4d"));
 
         forecast.status = forecast.status.with_earliest_date(Some(earliest));
-        forecast.status = forecast.status.with_recommended_date(Some(if has_extra_hpv_history_after_first_valid || dose_1_to_2_meets_late_series_threshold {
-            earliest
-        } else {
-            recommended_from_dose_1.max(earliest)
-        }));
-        forecast.status = forecast.status.with_overdue_date(Some(if started_at_or_after_15 {
-            if has_extra_hpv_history_after_first_valid || !dose_1_to_2_meets_late_series_threshold {
-                latest_boundary(first_valid_date, crate::time_period!("7m+4w"))
-            } else {
+        forecast.status = forecast.status.with_recommended_date(Some(
+            if has_extra_hpv_history_after_first_valid || dose_1_to_2_meets_late_series_threshold {
                 earliest
-            }
-        } else {
-            latest_boundary(first_valid_date, crate::time_period!("13m+4w"))
-        }));
+            } else {
+                recommended_from_dose_1.max(earliest)
+            },
+        ));
+        forecast.status = forecast
+            .status
+            .with_overdue_date(Some(if started_at_or_after_15 {
+                if has_extra_hpv_history_after_first_valid
+                    || !dose_1_to_2_meets_late_series_threshold
+                {
+                    latest_boundary(first_valid_date, crate::time_period!("7m+4w"))
+                } else {
+                    earliest
+                }
+            } else {
+                latest_boundary(first_valid_date, crate::time_period!("13m+4w"))
+            }));
     }
 }
 
@@ -353,11 +375,17 @@ pub fn hpv_group_selection(
     eval_date: NaiveDate,
     candidate_forecasts: &mut [(&'static str, VaccineGroupForecast)],
 ) -> &'static str {
-    let forecast_2 = candidate_forecasts.get_forecast("HPV_2_DOSE_SERIES").unwrap();
-    let forecast_3 = candidate_forecasts.get_forecast("HPV_3_DOSE_SERIES").unwrap();
+    let forecast_2 = candidate_forecasts
+        .get_forecast("HPV_2_DOSE_SERIES")
+        .unwrap();
+    let forecast_3 = candidate_forecasts
+        .get_forecast("HPV_3_DOSE_SERIES")
+        .unwrap();
 
     // Find the first valid dose date in either series (will be identical since dose 1 requirements are same)
-    let first_valid_dose_date = forecast_2.evaluations.iter()
+    let first_valid_dose_date = forecast_2
+        .evaluations
+        .iter()
         .filter(|e| e.status == DoseStatus::Valid)
         .map(|e| e.dose_date)
         .min();
@@ -376,20 +404,30 @@ pub fn hpv_group_selection(
             let age_15_at_d1 = add_years_unchecked(patient.birth_date, 15);
             if d1_date < age_15_at_d1 {
                 // Initiated before age 15 -> eligible for 2-dose series
-                let has_valid_d2_in_2_dose = forecast_2.evaluations.iter()
+                let has_valid_d2_in_2_dose = forecast_2
+                    .evaluations
+                    .iter()
                     .any(|e| e.status == DoseStatus::Valid && e.dose_number == Some(2));
-                
-                let has_valid_d2_in_3_dose = forecast_3.evaluations.iter()
+
+                let has_valid_d2_in_3_dose = forecast_3
+                    .evaluations
+                    .iter()
                     .any(|e| e.status == DoseStatus::Valid && e.dose_number == Some(2));
 
                 if has_valid_d2_in_2_dose {
                     // Check if there is a valid Dose 2 in 3-dose series that was administered earlier
-                    let d2_2dose_date = forecast_2.evaluations.iter()
+                    let d2_2dose_date = forecast_2
+                        .evaluations
+                        .iter()
                         .find(|e| e.status == DoseStatus::Valid && e.dose_number == Some(2))
-                        .unwrap().dose_date;
+                        .unwrap()
+                        .dose_date;
 
-                    let earlier_d2_3dose = forecast_3.evaluations.iter()
-                        .any(|e| e.status == DoseStatus::Valid && e.dose_number == Some(2) && e.dose_date < d2_2dose_date);
+                    let earlier_d2_3dose = forecast_3.evaluations.iter().any(|e| {
+                        e.status == DoseStatus::Valid
+                            && e.dose_number == Some(2)
+                            && e.dose_date < d2_2dose_date
+                    });
 
                     if earlier_d2_3dose {
                         "HPV_3_DOSE_SERIES"
