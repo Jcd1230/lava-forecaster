@@ -243,6 +243,20 @@ async fn evaluate_bulk_flatbuffers_handler(
     let mut builder = ::flatbuffers::FlatBufferBuilder::new();
     let mut response_offsets = Vec::with_capacity(num_responses);
 
+    let mut string_cache = std::collections::HashMap::<String, ::flatbuffers::WIPOffset<&str>>::new();
+    macro_rules! get_or_create_string {
+        ($val:expr) => {{
+            let s: &str = $val.as_ref();
+            if let Some(&offset) = string_cache.get(s) {
+                offset
+            } else {
+                let offset = builder.create_string(s);
+                string_cache.insert(s.to_string(), offset);
+                offset
+            }
+        }};
+    }
+
     for resp in evaluated_responses {
         let mut vg_offsets = Vec::with_capacity(resp.vaccine_groups.len());
 
@@ -251,19 +265,39 @@ async fn evaluate_bulk_flatbuffers_handler(
             let mut eval_offsets = Vec::with_capacity(vg.evaluations.len());
             for eval in vg.evaluations.iter() {
                 let dose_date = date_to_epoch_days(eval.dose_date);
-                let cvx = builder.create_string(&eval.cvx.to_string());
+
+                let cvx_owner;
+                let cvx_str = match eval.cvx.0 {
+                    10 => "10", 11 => "11", 15 => "15", 17 => "17", 20 => "20", 21 => "21", 22 => "22",
+                    28 => "28", 31 => "31", 33 => "33", 43 => "43", 45 => "45", 47 => "47", 48 => "48",
+                    49 => "49", 52 => "52", 62 => "62", 83 => "83", 85 => "85", 88 => "88", 94 => "94",
+                    100 => "100", 104 => "104", 106 => "106", 107 => "107", 109 => "109", 110 => "110",
+                    113 => "113", 114 => "114", 115 => "115", 116 => "116", 118 => "118", 119 => "119",
+                    120 => "120", 121 => "121", 122 => "122", 130 => "130", 133 => "133", 135 => "135",
+                    136 => "136", 137 => "137", 140 => "140", 141 => "141", 148 => "148", 150 => "150",
+                    152 => "152", 153 => "153", 155 => "155", 158 => "158", 161 => "161", 162 => "162",
+                    163 => "163", 168 => "168", 171 => "171", 178 => "178", 179 => "179", 185 => "185",
+                    186 => "186", 189 => "189", 197 => "197", 200 => "200", 207 => "207", 208 => "208",
+                    210 => "210", 212 => "212", 213 => "213", 221 => "221", 228 => "228",
+                    other => {
+                        cvx_owner = other.to_string();
+                        &cvx_owner
+                    }
+                };
+                let cvx = get_or_create_string!(cvx_str);
+
                 let status_str = match eval.status {
                     models::DoseStatus::Valid => "Valid",
                     models::DoseStatus::Invalid => "Invalid",
                     models::DoseStatus::Accepted => "Accepted",
                     models::DoseStatus::Ignored => "Ignored",
                 };
-                let status = builder.create_string(status_str);
+                let status = get_or_create_string!(status_str);
 
                 let mut reason_offsets = Vec::with_capacity(eval.reasons.len());
                 for r in eval.reasons.iter() {
-                    let r_str = format!("{:?}", r);
-                    reason_offsets.push(builder.create_string(&r_str));
+                    let r_str = r.as_str();
+                    reason_offsets.push(get_or_create_string!(r_str));
                 }
                 let reasons_vec = builder.create_vector(&reason_offsets);
 
@@ -283,7 +317,7 @@ async fn evaluate_bulk_flatbuffers_handler(
             // Build forecasts vector
             let mut forecast_offsets = Vec::with_capacity(vg.forecasts.len());
             for fc in vg.forecasts.iter() {
-                let series_name = builder.create_string(&fc.series_name);
+                let series_name = get_or_create_string!(&fc.series_name);
                 let earliest_date = fc.status.earliest_date().map(date_to_epoch_days).unwrap_or(0);
                 let recommended_date = fc.status.recommended_date().map(date_to_epoch_days).unwrap_or(0);
                 let overdue_date = fc.status.overdue_date().map(date_to_epoch_days).unwrap_or(0);
@@ -295,11 +329,11 @@ async fn evaluate_bulk_flatbuffers_handler(
                     models::SeriesStatus::NotRecommended => "NotRecommended",
                     models::SeriesStatus::ConditionallyRecommended => "ConditionallyRecommended",
                 };
-                let status = builder.create_string(status_str);
+                let status = get_or_create_string!(status_str);
 
                 let mut reason_offsets = Vec::with_capacity(fc.reasons.len());
                 for r in fc.reasons.iter() {
-                    reason_offsets.push(builder.create_string(r));
+                    reason_offsets.push(get_or_create_string!(r));
                 }
                 let reasons_vec = builder.create_vector(&reason_offsets);
 
@@ -316,8 +350,8 @@ async fn evaluate_bulk_flatbuffers_handler(
             }
             let forecasts_vec = builder.create_vector(&forecast_offsets);
 
-            let vaccine_group = builder.create_string(&vg.vaccine_group);
-            let selected_series = vg.selected_series.as_ref().map(|s| builder.create_string(s));
+            let vaccine_group = get_or_create_string!(&vg.vaccine_group);
+            let selected_series = vg.selected_series.as_ref().map(|s| get_or_create_string!(s));
 
             let vg_forecast_offset = fb::VaccineGroupForecast::create(&mut builder, &fb::VaccineGroupForecastArgs {
                 vaccine_group: Some(vaccine_group),
@@ -343,6 +377,7 @@ async fn evaluate_bulk_flatbuffers_handler(
 
     fb::finish_bulk_forecast_response_buffer(&mut builder, bulk_resp);
     let finished_data = builder.finished_data().to_vec();
+
 
     let elapsed = req_start.elapsed();
     println!(

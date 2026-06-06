@@ -168,6 +168,32 @@ pub enum EvaluationReason {
     ContraindicatedVaccine,
 }
 
+impl EvaluationReason {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::VaccineNotPartOfSeries => "VaccineNotPartOfSeries",
+            Self::PriorToDOB => "PriorToDOB",
+            Self::BelowMinimumAge => "BelowMinimumAge",
+            Self::BelowMinimumAgeFinalDose => "BelowMinimumAgeFinalDose",
+            Self::BelowMinimumInterval => "BelowMinimumInterval",
+            Self::TooEarlyLiveVirus => "TooEarlyLiveVirus",
+            Self::DuplicateShotSameDay => "DuplicateShotSameDay",
+            Self::MissingAntigen => "MissingAntigen",
+            Self::BoosterDose => "BoosterDose",
+            Self::VaccineNotCountedBasedOnMostRecentVaccineGiven => "VaccineNotCountedBasedOnMostRecentVaccineGiven",
+            Self::OutsideRoutineSeries => "OutsideRoutineSeries",
+            Self::InsufficientAntigen => "InsufficientAntigen",
+            Self::VaccineNotLicensedForMales => "VaccineNotLicensedForMales",
+            Self::AboveRecommendedAgeSeries => "AboveRecommendedAgeSeries",
+            Self::OutsideFluVacSeason => "OutsideFluVacSeason",
+            Self::VaccineNotAllowedInUs => "VaccineNotAllowedInUs",
+            Self::DoseOverrideValid => "DoseOverrideValid",
+            Self::DoseOverrideInvalid => "DoseOverrideInvalid",
+            Self::ContraindicatedVaccine => "ContraindicatedVaccine",
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DoseEvaluation {
     pub dose_date: NaiveDate,
