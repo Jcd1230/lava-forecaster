@@ -463,3 +463,20 @@ By default, the test DSL parser (`test_dsl.rs`) initializes `focus_code` to `"00
 
 ### ICD-9 Immunity Coding Requirement
 Always ensure that patient immunities sent in the XML payload query use **ICD-9-CM** codes (e.g. `070.30` for HepB, OID `2.16.840.1.113883.6.103`), which Java ICE expects in `observationFocus`. Avoid using SNOMED OIDs for immunities as Java ICE's `cdm.xml` might fail to map them to the correct internal concepts in certain execution flows. Correspondingly, `legacy_models.rs` will map returned ICD codes back to internal disease string representations (`"HepB"`, `"Varicella"`, etc.).
+
+---
+
+## 8. Rust-to-Java Code Navigation Map
+
+When tracking discrepancies, use this navigation map to trace logic from the Rust LAVA implementation to the corresponding legacy Java ICE implementation:
+
+| Component in LAVA (Rust) | Location in LAVA Codebase | Legacy Java ICE Equivalent | Location in Java Codebase |
+|---|---|---|---|
+| **Core Engine** | [src/engine.rs](file:///home/jason/projects/ice/src/engine.rs) | Standard evaluation loop & rule flow | `opencds-decision-support-rules/src/main/resources/drools/knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.drl` |
+| **Supporting Data** | [src/rules/](file:///home/jason/projects/ice/src/rules/) (schedules / models) | Series definition YAML files | `opencds-decision-support-service/src/main/resources/data/seriesPlanDefinitions/` |
+| **Custom Overrides** | `src/rules/<group>/overrides.rs` | Custom evaluation rules (.dslr) | `opencds-decision-support-rules/src/main/resources/drools/knowledgeModule/org.nyc.cir.ice/org.nyc.cir^ICE^1.0.0^Evaluation^<Group>.dslr` |
+| **Custom Recommendations** | `src/rules/<group>/overrides.rs` | Custom recommendation rules (.dslr) | `opencds-decision-support-rules/src/main/resources/drools/knowledgeModule/org.nyc.cir.ice/org.nyc.cir^ICE^1.0.0^Recommendation^<Group>.dslr` |
+| **Series Selection** | `src/rules/<group>/overrides.rs` | Series Selection rules (.drl) | `opencds-decision-support-rules/src/main/resources/drools/knowledgeModule/org.nyc.cir.ice/org.nyc.cir^ICE^1.0.0^SeriesSelection.drl` |
+| **Concept Mapping** | [src/models.rs](file:///home/jason/projects/ice/src/models.rs) | Central mapping config | `opencds-decision-support-service/src/main/resources/config/conceptDeterminationMethods/cdm.xml` |
+| **Target Series/Dose Rules** | [src/schedule.rs](file:///home/jason/projects/ice/src/schedule.rs) | `TargetSeries` / `DoseRule` Java classes | `opencds-decision-support-core/src/main/java/org/cdsframework/ice/service/TargetSeries.java` and `DoseRule.java` |
+
