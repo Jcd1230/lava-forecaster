@@ -176,20 +176,8 @@ pub fn polio_custom_forecast_hook(
 
     let aug_7_2009 = NaiveDate::from_ymd_opt(2009, 8, 7).unwrap();
     
-    // 2009 Forecast Date Reset Hook
-    if eval_date >= aug_7_2009 {
-        if let Some(Some(recommended)) = forecast.status.recommended_date_mut() {
-            if *recommended < aug_7_2009 {
-                *recommended = aug_7_2009;
-            }
-        }
-        if let Some(Some(earliest)) = forecast.status.earliest_date_mut() {
-            if *earliest < aug_7_2009 {
-                *earliest = aug_7_2009;
-            }
-        }
-    } else {
-        // Pre-2009 forecast override undo logic
+    // Pre-2009 forecast override undo logic
+    if eval_date < aug_7_2009 {
         if let Some(earliest) = forecast.status.earliest_date() {
             if earliest > aug_7_2009 {
                 let target_dose = valid_doses.len() + 1;
@@ -241,6 +229,15 @@ pub fn polio_custom_forecast_hook(
         return;
     }
 
+    // Interval calculation from last administered polio shot (excluding ignored ones)
+    let last_non_ignored_dose = history.iter()
+        .filter(|d| {
+            let is_cvx_178_179 = d.cvx.0 == cvx!("178") || d.cvx.0 == cvx!("179");
+            let is_cvx_182_after_2016 = d.cvx.0 == cvx!("182") && d.date >= NaiveDate::from_ymd_opt(2016, 4, 1).unwrap();
+            !(is_cvx_178_179 || is_cvx_182_after_2016)
+        })
+        .last();
+
     // >= 4y shift rule
     // If the next dose to recommend is the second-to-last dose (Dose 3 for 4-dose, Dose 4 for 5-dose)
     // and patient is >= 4 years of age (or will be at the recommended date), recommend next dose at 6 months interval from last shot.
@@ -253,12 +250,11 @@ pub fn polio_custom_forecast_hook(
         let is_at_least_4y = eval_date >= age_4y || forecast.status.recommended_date().map(|r| r >= age_4y).unwrap_or(false);
         
         if is_at_least_4y {
-            let (last_dose_date, _) = valid_doses.last().unwrap();
-            let min_interval_date = add_months_unchecked(*last_dose_date, 6);
+            let last_dose_date = last_non_ignored_dose.map(|d| d.date).unwrap_or_else(|| valid_doses.last().unwrap().0);
+            let min_interval_date = add_months_unchecked(last_dose_date, 6);
             
-            let mut earliest = forecast.status.earliest_date().unwrap_or(min_interval_date).max(min_interval_date);
+            let earliest = forecast.status.earliest_date().unwrap_or(min_interval_date).max(min_interval_date);
             let mut recommended = forecast.status.recommended_date().unwrap_or(min_interval_date).max(min_interval_date);
-            earliest = earliest.max(age_4y);
             recommended = recommended.max(age_4y);
             
             forecast.status = forecast.status.with_earliest_date(Some(earliest));
@@ -272,15 +268,6 @@ pub fn polio_custom_forecast_hook(
         }
     }
 
-    // Interval calculation from last administered polio shot (excluding ignored ones)
-    let last_non_ignored_dose = history.iter()
-        .filter(|d| {
-            let is_cvx_178_179 = d.cvx.0 == cvx!("178") || d.cvx.0 == cvx!("179");
-            let is_cvx_02_182_after_2016 = (d.cvx.0 == cvx!("02") || d.cvx.0 == cvx!("182")) && d.date >= NaiveDate::from_ymd_opt(2016, 4, 1).unwrap();
-            !(is_cvx_178_179 || is_cvx_02_182_after_2016)
-        })
-        .last();
-
     if let Some(last_dose) = last_non_ignored_dose {
         let target_dose = valid_doses.len() + 1;
         let should_apply_interval = if target_dose > 1 {
@@ -293,7 +280,11 @@ pub fn polio_custom_forecast_hook(
         if should_apply_interval {
             let min_interval = if (forecast.series_name == "POLIO_4_DOSE_SERIES" && target_dose == 4)
                 || (forecast.series_name == "POLIO_FRACTIONAL_IPV_SERIES" && target_dose == 5) {
-                crate::time_period!("6m")
+                if eval_date < aug_7_2009 {
+                    crate::time_period!("28d")
+                } else {
+                    crate::time_period!("6m")
+                }
             } else {
                 crate::time_period!("28d")
             };
@@ -341,6 +332,13 @@ pub fn polio_custom_evaluation_hook(
             return;
         }
 
+        if series_name == "POLIO_4_DOSE_SERIES" && dose.cvx.0 == cvx!("324") {
+            *status = DoseStatus::Invalid;
+            reasons.clear();
+            reasons.push(EvaluationReason::MissingAntigen);
+            return;
+        }
+
         // Drools rule: "Mark target dose 4 (or 5 for fIPV) administered >= 8/7/2009 and before
         // 4y-4d as VALID" — this also sets abs_min_interval from previous dose to 0d
         // and abs_min_age to the dose-3 (or dose-4 for fIPV) abs_min_age (94d).
@@ -379,6 +377,15 @@ pub fn polio_custom_extra_dose_hook(
     let is_cvx_02_182_after_2016 = (dose.cvx.0 == cvx!("02") || dose.cvx.0 == cvx!("182")) && dose.date >= NaiveDate::from_ymd_opt(2016, 4, 1).unwrap();
     
     if is_cvx_178_179 || is_cvx_02_182_after_2016 {
+        let age_18 = add_years_unchecked(ctx.patient.birth_date, 18);
+        if dose.date >= age_18 {
+            return Some((DoseStatus::Invalid, crate::reasons![EvaluationReason::MissingAntigen]));
+        } else {
+            return Some((DoseStatus::Accepted, crate::reasons![]));
+        }
+    }
+
+    if series_name == "POLIO_4_DOSE_SERIES" && dose.cvx.0 == cvx!("324") {
         return Some((DoseStatus::Invalid, crate::reasons![EvaluationReason::MissingAntigen]));
     }
 

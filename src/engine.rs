@@ -361,6 +361,8 @@ impl<'a> EvaluationEngine<'a> {
                         e.dose_date == dose.date
                             && !(e.status == DoseStatus::Accepted
                                 && e.reasons.contains(&EvaluationReason::VaccineNotLicensedForMales))
+                            && !e.reasons.contains(&EvaluationReason::MissingAntigen)
+                            && !e.reasons.contains(&EvaluationReason::VaccineNotPartOfSeries)
                     })
                 } else {
                     false
@@ -489,7 +491,19 @@ impl<'a> EvaluationEngine<'a> {
                     .cloned()
                     .collect()
             } else {
-                Vec::new()
+                let has_prev_non_ignored = evaluations.iter().any(|e| {
+                    !is_eval_ignored(active_series.vaccine_group, e.cvx, e.dose_date, e.status)
+                });
+                if has_prev_non_ignored {
+                    active_series
+                        .intervals
+                        .iter()
+                        .filter(|int| int.to_dose == 2)
+                        .cloned()
+                        .collect()
+                } else {
+                    Vec::new()
+                }
             };
 
             // Apply parameter overrides (pre-2009 overrides, etc.)
@@ -542,10 +556,11 @@ impl<'a> EvaluationEngine<'a> {
             // Check minimum interval
             for int_rule in &applicable_intervals {
                 if let Some(ref abs_min_int) = int_rule.absolute_minimum_interval {
-                    let prev_date = valid_doses
+                    let prev_date = evaluations
                         .iter()
-                        .find(|(_, num)| *num == int_rule.from_dose)
-                        .map(|(d, _)| *d);
+                        .rev()
+                        .find(|e| !is_eval_ignored(active_series.vaccine_group, e.cvx, e.dose_date, e.status))
+                        .map(|e| e.dose_date);
                     if let Some(prev_date) = prev_date {
                         if compare_elapsed(prev_date, dose.date, abs_min_int)
                             == std::cmp::Ordering::Less
@@ -1154,5 +1169,19 @@ fn is_dose_contraindicated(patient: &crate::models::Patient, cvx: Cvx, date: Nai
         }
         false
     })
+}
+
+fn is_eval_ignored(group: &str, cvx: Cvx, date: NaiveDate, status: DoseStatus) -> bool {
+    if status == DoseStatus::Ignored {
+        return true;
+    }
+    if group == "POLIO" {
+        let is_cvx_178_179 = cvx.0 == 178 || cvx.0 == 179;
+        let is_cvx_182_after_2016 = cvx.0 == 182 && date >= NaiveDate::from_ymd_opt(2016, 4, 1).unwrap();
+        if is_cvx_178_179 || is_cvx_182_after_2016 {
+            return true;
+        }
+    }
+    false
 }
 
