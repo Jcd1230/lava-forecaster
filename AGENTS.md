@@ -15,6 +15,7 @@ Welcome! This guide provides a quick-start reference for AI agents and developer
 - Parity workflow and debugging notes: [parity_workflow_notes.md](file:///home/jason/projects/ice/parity_workflow_notes.md)
 - Current Porting Progress & Task Checklist: [remaining_series_tasks.md](file:///home/jason/projects/ice/remaining_series_tasks.md)
 - Original Java Project Setup & Run Details: [README.md](file:///home/jason/projects/ice/README.md)
+- Test Runner Execution Modes Guide: [tests/README.md](file:///home/jason/projects/ice/tests/README.md)
 
 ## Essential Developer Commands
 
