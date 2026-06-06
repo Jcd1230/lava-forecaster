@@ -549,19 +549,7 @@ impl<'a> EvaluationEngine<'a> {
                     .cloned()
                     .collect()
             } else {
-                let has_prev_non_ignored = evaluations.iter().any(|e| {
-                    !is_eval_ignored(active_series.vaccine_group, e.cvx, e.dose_date, e.status)
-                });
-                if has_prev_non_ignored {
-                    active_series
-                        .intervals
-                        .iter()
-                        .filter(|int| int.to_dose == 2)
-                        .cloned()
-                        .collect()
-                } else {
-                    Vec::new()
-                }
+                Vec::new()
             };
 
             // Apply parameter overrides (pre-2009 overrides, etc.)
@@ -619,8 +607,8 @@ impl<'a> EvaluationEngine<'a> {
                 if let Some(ref abs_min_int) = int_rule.absolute_minimum_interval {
                     let prev_date = evaluations
                         .iter()
-                        .rev()
-                        .find(|e| !is_eval_ignored(active_series.vaccine_group, e.cvx, e.dose_date, e.status))
+                        .filter(|e| e.dose_number == Some(int_rule.from_dose) && !is_eval_ignored(active_series.vaccine_group, e.cvx, e.dose_date, e.status))
+                        .max_by_key(|e| (e.status == DoseStatus::Valid, e.dose_date))
                         .map(|e| e.dose_date);
                     if let Some(prev_date) = prev_date {
                         let interval_ok = compare_elapsed(prev_date, dose.date, abs_min_int)
@@ -1265,7 +1253,7 @@ fn is_dose_contraindicated(patient: &crate::models::Patient, cvx: Cvx, date: Nai
 }
 
 pub fn is_eval_ignored(group: &str, cvx: Cvx, date: NaiveDate, status: DoseStatus) -> bool {
-    if status == DoseStatus::Ignored {
+    if status == DoseStatus::Ignored || status == DoseStatus::Accepted {
         return true;
     }
     if group == "POLIO" {
