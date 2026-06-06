@@ -6,6 +6,7 @@ use csv::ReaderBuilder;
 use serde::Deserialize;
 use lava_forecaster::{
     evaluate_patient_all_groups,
+    engine::is_eval_ignored,
     models::{
         Dose, DoseEvaluation, DoseStatus, EvaluationReason, ExpectedResults,
         Gender, Patient, SeriesForecast, SeriesStatus, UnifiedTestCase, Cvx,
@@ -1517,6 +1518,7 @@ fn import_python_cases(input_file: &Path, output_dir: &Path) {
 
 fn print_comparison_table(
     tc_name: &str,
+    group: &str,
     rust_evals: &[DoseEvaluation],
     rust_fc: Option<&SeriesForecast>,
     exp_evals: &[DoseEvaluation],
@@ -1532,8 +1534,8 @@ fn print_comparison_table(
         println!("\nTest Case: \x1b[92m{}\x1b[0m (PASS)", tc_name);
     }
 
-    println!("{:<12} | {:<4} | {:<22} | {:<22} | Status", "Date", "CVX", "Rust Evaluation", "Expected Evaluation");
-    println!("{}", "-".repeat(78));
+    println!("{:<12} | {:<4} | {:<28} | {:<28} | Status", "Date", "CVX", "Rust Evaluation", "Expected Evaluation");
+    println!("{}", "-".repeat(90));
 
     let mut all_keys: Vec<(NaiveDate, Cvx)> = Vec::new();
     for e in rust_evals {
@@ -1550,12 +1552,23 @@ fn print_comparison_table(
         let r = rust_evals.iter().find(|e| e.dose_date == dt && e.cvx == cvx);
         let e = exp_evals.iter().find(|e| e.dose_date == dt && e.cvx == cvx);
 
+        let format_eval = |eval: &DoseEvaluation| -> String {
+            let dose_num = eval.dose_number.map(|n| n.to_string()).unwrap_or_else(|| "-".to_string());
+            if eval.status == DoseStatus::Invalid {
+                let ignored = is_eval_ignored(group, eval.cvx, eval.dose_date, eval.status);
+                let tag = if ignored { "Ignored" } else { "Not Ignored" };
+                format!("{:?} ({}) #{}", eval.status, tag, dose_num)
+            } else {
+                format!("{:?} #{}", eval.status, dose_num)
+            }
+        };
+
         let r_str = match r {
-            Some(re) => format!("{:?} #{}", re.status, re.dose_number.map(|n| n.to_string()).unwrap_or_else(|| "-".to_string())),
+            Some(re) => format_eval(re),
             None => "MISSING".to_string(),
         };
         let e_str = match e {
-            Some(ee) => format!("{:?} #{}", ee.status, ee.dose_number.map(|n| n.to_string()).unwrap_or_else(|| "-".to_string())),
+            Some(ee) => format_eval(ee),
             None => "MISSING".to_string(),
         };
 
@@ -1565,7 +1578,7 @@ fn print_comparison_table(
         };
 
         let status_indicator = if match_ok { "\x1b[92mOK\x1b[0m" } else { "\x1b[91mFAIL\x1b[0m" };
-        println!("{:<12} | {:<4} | {:<22} | {:<22} | {}", dt.format("%Y-%m-%d"), cvx, r_str, e_str, status_indicator);
+        println!("{:<12} | {:<4} | {:<28} | {:<28} | {}", dt.format("%Y-%m-%d"), cvx, r_str, e_str, status_indicator);
     }
 
     println!("\nForecasts:");
@@ -1735,6 +1748,7 @@ fn main() {
         println!("  --compare [java_url]    Compare outputs dynamically with a live Java ICE server (default: http://localhost:8080)");
         println!("  --rest-url <rust_url>   Query Rust server at rust_url (e.g. http://localhost:8081) instead of in-process execution");
         println!("  --verbose, -v           Show detailed side-by-side evaluation tables");
+        println!("  --trace, --explain      Dump a step-by-step decision trace log to stdout");
         println!("Options under --fuzz:");
         println!("  --group <group_name>    Generate cases only for group (e.g. POLIO)");
         println!("  --compare [java_url]    ICE server URL (default: http://localhost:8080)");
@@ -1844,6 +1858,7 @@ fn main() {
         let mut compare_java_url = None;
         let mut rest_url = None;
         let mut verbose = false;
+        let mut trace_mode = false;
         
         let mut idx = 3;
         while idx < args.len() {
@@ -1866,6 +1881,9 @@ fn main() {
                 idx += 2;
             } else if args[idx] == "--verbose" || args[idx] == "-v" {
                 verbose = true;
+                idx += 1;
+            } else if args[idx] == "--trace" || args[idx] == "--explain" {
+                trace_mode = true;
                 idx += 1;
             } else {
                 idx += 1;
@@ -1956,7 +1974,15 @@ fn main() {
                     }
                 }
             } else {
+                // Enable tracing if requested
+                if trace_mode {
+                    lava_forecaster::engine::clear_traces();
+                    lava_forecaster::engine::set_trace_enabled(true);
+                }
                 let rust_results = evaluate_patient_all_groups(&tc.patient, &tc.history, tc.execution_date);
+                if trace_mode {
+                    lava_forecaster::engine::set_trace_enabled(false);
+                }
                 let rust_group = rust_results.iter().find(|rg| rg.vaccine_group == tc.group);
                 match rust_group {
                     Some(rg) => (rg.evaluations.to_vec(), rg.forecasts.first().cloned()),
@@ -1991,6 +2017,21 @@ fn main() {
                 println!("DEBUG: rust_evals: {:#?}", rust_evals);
                 println!("DEBUG: rust_fc: {:#?}", rust_fc);
                 println!("DEBUG: expected: {:#?}", expected_results);
+            }
+
+            // Print trace decisions if trace mode is enabled
+            if trace_mode {
+                let traces = lava_forecaster::engine::get_traces();
+                if !traces.is_empty() {
+                    println!("\n=== Trace for: {} ===", tc.name);
+                    println!("{:<40} | {:<15} | {}", "Step", "Location", "Description");
+                    println!("{}", "-".repeat(100));
+                    for trace in &traces {
+                        let location = format!("{}:{}", trace.source_file, trace.line_number);
+                        println!("{:<40} | {:<15} | {}", trace.step, location, trace.description);
+                    }
+                    println!("=== End Trace ===");
+                }
             }
                     
                     let mut is_ok = true;
@@ -2090,6 +2131,7 @@ fn main() {
                     if verbose || !is_ok {
                         print_comparison_table(
                             &tc.name,
+                            &tc.group,
                             &rust_evals,
                             rust_fc.as_ref(),
                             expected_results.as_ref().map(|e| e.evaluations.as_slice()).unwrap_or(&[]),

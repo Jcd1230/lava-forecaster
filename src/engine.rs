@@ -7,6 +7,64 @@ use crate::schedule::{CompiledDoseInterval, CompiledSeries};
 use chrono::NaiveDate;
 use std::cmp::max;
 
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct DecisionTrace {
+    pub step: &'static str,
+    pub description: String,
+    pub source_file: &'static str,
+    pub line_number: u32,
+}
+
+thread_local! {
+    pub static TRACE_ENABLED: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+    pub static DECISION_TRACES: std::cell::RefCell<Vec<DecisionTrace>> = const { std::cell::RefCell::new(Vec::new()) };
+}
+
+pub fn is_trace_enabled() -> bool {
+    TRACE_ENABLED.with(|val| val.get())
+}
+
+pub fn set_trace_enabled(enabled: bool) {
+    TRACE_ENABLED.with(|val| val.set(enabled));
+}
+
+pub fn log_decision(step: &'static str, description: String, source_file: &'static str, line_number: u32) {
+    DECISION_TRACES.with(|traces| {
+        traces.borrow_mut().push(DecisionTrace {
+            step,
+            description,
+            source_file,
+            line_number,
+        });
+    });
+}
+
+pub fn clear_traces() {
+    DECISION_TRACES.with(|traces| {
+        traces.borrow_mut().clear();
+    });
+}
+
+pub fn get_traces() -> Vec<DecisionTrace> {
+    DECISION_TRACES.with(|traces| {
+        traces.borrow().clone()
+    })
+}
+
+#[macro_export]
+macro_rules! trace_decision {
+    ($step:expr, $($arg:tt)*) => {
+        if $crate::engine::is_trace_enabled() {
+            $crate::engine::log_decision($step, format!($($arg)*), file!(), line!());
+        }
+    };
+    ($ctx:expr, $step:expr, $($arg:tt)*) => {
+        if $crate::engine::is_trace_enabled() {
+            $crate::engine::log_decision($step, format!($($arg)*), file!(), line!());
+        }
+    };
+}
+
 #[allow(dead_code)]
 pub struct EvaluationContext<'a> {
     pub patient: &'a Patient,
@@ -519,6 +577,7 @@ impl<'a> EvaluationEngine<'a> {
 
             for rule in self.param_overrides {
                 if rule.target_dose_number == target_dose_idx && (rule.condition)(&ctx) {
+                    trace_decision!("parameter_override", "Dose {} parameter override applied: {}", target_dose_idx, rule.description);
                     if let Some(ref over_age) = rule.override_abs_min_age {
                         dose_rule.absolute_minimum_age = Some(over_age.clone());
                     }
@@ -545,9 +604,11 @@ impl<'a> EvaluationEngine<'a> {
 
             // Check minimum age
             if let Some(ref abs_min_age) = dose_rule.absolute_minimum_age {
-                if compare_elapsed(patient.birth_date, dose.date, abs_min_age)
-                    == std::cmp::Ordering::Less
-                {
+                let abs_min_age_date = abs_min_age.add_to(patient.birth_date);
+                let age_ok = compare_elapsed(patient.birth_date, dose.date, abs_min_age)
+                    != std::cmp::Ordering::Less;
+                trace_decision!("age_check", "Dose {} cvx {} age check: date={} birth={} abs_min_age={:?} (date={}) ok={}", target_dose_idx, dose.cvx, dose.date, patient.birth_date, abs_min_age, abs_min_age_date, age_ok);
+                if !age_ok {
                     is_valid = false;
                     reasons.push(EvaluationReason::BelowMinimumAge);
                 }
@@ -562,14 +623,17 @@ impl<'a> EvaluationEngine<'a> {
                         .find(|e| !is_eval_ignored(active_series.vaccine_group, e.cvx, e.dose_date, e.status))
                         .map(|e| e.dose_date);
                     if let Some(prev_date) = prev_date {
-                        if compare_elapsed(prev_date, dose.date, abs_min_int)
-                            == std::cmp::Ordering::Less
-                        {
+                        let interval_ok = compare_elapsed(prev_date, dose.date, abs_min_int)
+                            != std::cmp::Ordering::Less;
+                        trace_decision!("interval_check", "Dose {} cvx {} interval check from dose {}: date={} prev_date={} abs_min_interval={:?} ok={}", target_dose_idx, dose.cvx, int_rule.from_dose, dose.date, prev_date, abs_min_int, interval_ok);
+                        if !interval_ok {
                             is_valid = false;
                             if !reasons.contains(&EvaluationReason::BelowMinimumInterval) {
                                 reasons.push(EvaluationReason::BelowMinimumInterval);
                             }
                         }
+                    } else {
+                        trace_decision!("interval_check", "Dose {} cvx {} interval check from dose {}: no previous non-ignored dose found", target_dose_idx, dose.cvx, int_rule.from_dose);
                     }
                 }
             }
@@ -582,6 +646,8 @@ impl<'a> EvaluationEngine<'a> {
 
             // Invoke custom_evaluation_hook after checking standard requirements
             if let Some(policy) = self.policy {
+                let prev_status = status;
+                let prev_reasons_len = reasons.len();
                 policy.custom_evaluation_hook(
                     &active_series.name,
                     target_dose_idx,
@@ -589,6 +655,9 @@ impl<'a> EvaluationEngine<'a> {
                     &mut reasons,
                     &mut status,
                 );
+                if status != prev_status || reasons.len() != prev_reasons_len {
+                    trace_decision!("custom_evaluation_hook", "Custom evaluation hook triggered for series={}: mutated status from {:?} to {:?} (reasons count: {} -> {})", active_series.name, prev_status, status, prev_reasons_len, reasons.len());
+                }
             }
 
             let output_dose_number = std::cmp::min(target_dose_idx, valid_doses.len() + 1);
@@ -717,6 +786,7 @@ impl<'a> EvaluationEngine<'a> {
                 status: SeriesStatus::NotRecommended,
                 reasons: crate::reasons!["CONTRAINDICATION"],
             };
+            trace_decision!("forecast_contraindicated", "Group {} is contraindicated", active_series.vaccine_group);
             if let Some(policy) = self.policy {
                 policy.custom_forecast_hook(patient, valid_doses, history, eval_date, &mut f);
             }
@@ -730,6 +800,7 @@ impl<'a> EvaluationEngine<'a> {
                 status: SeriesStatus::Complete,
                 reasons: crate::reasons!["COMPLETE"],
             };
+            trace_decision!("forecast_complete", "Series {} is completed", active_series.name);
             if let Some(policy) = self.policy {
                 policy.custom_forecast_hook(patient, valid_doses, history, eval_date, &mut f);
             }
@@ -747,6 +818,7 @@ impl<'a> EvaluationEngine<'a> {
                     &active_series.name,
                 );
                 if let Some(num) = policy.custom_dose_number_hook(&active_series.name, &ctx) {
+                    trace_decision!("forecast_custom_dose_number_hook", "Custom dose number hook for series {} set next dose idx from {} to {}", active_series.name, next_dose_idx, num);
                     next_dose_idx = num;
                 }
             }
@@ -774,6 +846,7 @@ impl<'a> EvaluationEngine<'a> {
                         status: SeriesStatus::default(),
                         reasons: crate::reasons!["NOT_COMPLETE"],
                     };
+                    trace_decision!("forecast_not_completed_awaiting_custom_hook", "Next dose idx {} > num_doses {} but custom completion hook exists; delegating to custom forecast hook", next_dose_idx, active_series.num_doses);
                     if let Some(policy) = self.policy {
                         policy.custom_forecast_hook(patient, valid_doses, history, eval_date, &mut f);
                     }
@@ -785,6 +858,7 @@ impl<'a> EvaluationEngine<'a> {
                     status: SeriesStatus::Complete,
                     reasons: crate::reasons!["COMPLETE"],
                 };
+                trace_decision!("forecast_complete_extra_doses", "Next dose idx {} > num_doses {} without custom completion override", next_dose_idx, active_series.num_doses);
                 if let Some(policy) = self.policy {
                     policy.custom_forecast_hook(patient, valid_doses, history, eval_date, &mut f);
                 }
@@ -815,6 +889,7 @@ impl<'a> EvaluationEngine<'a> {
                 // Apply recommendation overrides
                 for rule in self.rec_overrides {
                     if rule.target_dose_number == next_dose_idx && (rule.condition)(&ctx) {
+                        trace_decision!("forecast_recommendation_override", "Dose {} recommendation override applied: {}", next_dose_idx, rule.description);
                         if let Some(ref over_age) = rule.override_min_age {
                             dose_rule.minimum_age = Some(over_age.clone());
                         }
@@ -848,6 +923,7 @@ impl<'a> EvaluationEngine<'a> {
                 // Calculate Earliest Date: max(minimum_age, minimum_interval)
                 let min_age_tp = dose_rule.minimum_age.as_ref();
                 let min_age_date = min_age_tp.map(|tp| tp.add_to(patient.birth_date));
+                trace_decision!("forecast_dates", "Dose {} minimum age: {:?} (date={:?})", next_dose_idx, min_age_tp, min_age_date);
 
                 let get_dose_date = |dose_num: usize| -> Option<NaiveDate> {
                     valid_doses
@@ -860,13 +936,15 @@ impl<'a> EvaluationEngine<'a> {
                     .iter()
                     .filter_map(|int_rule| {
                         int_rule.minimum_interval.as_ref().and_then(|tp| {
-                            if int_rule.from_dose == next_dose_idx - 1 {
+                            let date = if int_rule.from_dose == next_dose_idx - 1 {
                                 // Sequential interval: measured from the most recent dose (valid or invalid)
                                 last_shot_date.map(|d| tp.add_to(d))
                             } else {
                                 // Non-sequential interval: measured ONLY from the valid from_dose
                                 get_dose_date(int_rule.from_dose).map(|d| tp.add_to(d))
-                            }
+                            };
+                            trace_decision!("forecast_dates", "Dose {} minimum interval from dose {}: {:?} (anchor_date={:?}, date={:?})", next_dose_idx, int_rule.from_dose, tp, if int_rule.from_dose == next_dose_idx - 1 { last_shot_date } else { get_dose_date(int_rule.from_dose) }, date);
+                            date
                         })
                     })
                     .max();
@@ -877,12 +955,14 @@ impl<'a> EvaluationEngine<'a> {
                     (None, Some(i)) => Some(i),
                     (None, None) => None,
                 };
+                trace_decision!("forecast_dates", "Dose {} earliest date calculated: {:?}", next_dose_idx, earliest_date);
 
                 // Calculate Recommended Date
                 let rec_age_date = dose_rule
                     .earliest_recommended_age
                     .as_ref()
                     .map(|tp| tp.add_to(patient.birth_date));
+                trace_decision!("forecast_dates", "Dose {} earliest recommended age: {:?} (date={:?})", next_dose_idx, dose_rule.earliest_recommended_age, rec_age_date);
                 let rec_int_date = applicable_intervals
                     .iter()
                     .filter_map(|int_rule| {
@@ -890,11 +970,13 @@ impl<'a> EvaluationEngine<'a> {
                             .earliest_recommended_interval
                             .as_ref()
                             .and_then(|tp| {
-                                if int_rule.from_dose == next_dose_idx - 1 {
+                                let date = if int_rule.from_dose == next_dose_idx - 1 {
                                     last_shot_date.map(|d| tp.add_to(d))
                                 } else {
                                     get_dose_date(int_rule.from_dose).map(|d| tp.add_to(d))
-                                }
+                                };
+                                trace_decision!("forecast_dates", "Dose {} earliest recommended interval from dose {}: {:?} (anchor={:?}, date={:?})", next_dose_idx, int_rule.from_dose, tp, if int_rule.from_dose == next_dose_idx - 1 { last_shot_date } else { get_dose_date(int_rule.from_dose) }, date);
+                                date
                             })
                     })
                     .max();
@@ -905,12 +987,14 @@ impl<'a> EvaluationEngine<'a> {
                     (None, Some(i)) => Some(i),
                     (None, None) => None,
                 };
+                trace_decision!("forecast_dates", "Dose {} recommended date calculated: {:?}", next_dose_idx, recommended_date);
 
                 // Calculate Overdue Date
                 let overdue_age_date = dose_rule
                     .latest_recommended_age
                     .as_ref()
                     .map(|tp| tp.add_to(patient.birth_date));
+                trace_decision!("forecast_dates", "Dose {} latest recommended age: {:?} (date={:?})", next_dose_idx, dose_rule.latest_recommended_age, overdue_age_date);
                 let overdue_int_date = applicable_intervals
                     .iter()
                     .filter_map(|int_rule| {
@@ -918,11 +1002,13 @@ impl<'a> EvaluationEngine<'a> {
                             .latest_recommended_interval
                             .as_ref()
                             .and_then(|tp| {
-                                if int_rule.from_dose == next_dose_idx - 1 {
+                                let date = if int_rule.from_dose == next_dose_idx - 1 {
                                     last_shot_date.map(|d| tp.add_to(d))
                                 } else {
                                     get_dose_date(int_rule.from_dose).map(|d| tp.add_to(d))
-                                }
+                                };
+                                trace_decision!("forecast_dates", "Dose {} latest recommended interval from dose {}: {:?} (anchor={:?}, date={:?})", next_dose_idx, int_rule.from_dose, tp, if int_rule.from_dose == next_dose_idx - 1 { last_shot_date } else { get_dose_date(int_rule.from_dose) }, date);
+                                date
                             })
                     })
                     .max();
@@ -933,6 +1019,7 @@ impl<'a> EvaluationEngine<'a> {
                     overdue_int_date
                 };
                 let overdue_date = overdue_date.and_then(|d| d.pred_opt());
+                trace_decision!("forecast_dates", "Dose {} overdue date calculated (pred_opt): {:?}", next_dose_idx, overdue_date);
 
                 let mut f = SeriesForecast {
                     series_name: active_series.name.into(),
@@ -942,8 +1029,10 @@ impl<'a> EvaluationEngine<'a> {
 
                 // Apply max age clamp if configured
                 if let Some((max_age, status)) = &active_series.max_age_clamp {
-                    if eval_date >= max_age.add_to(patient.birth_date) {
+                    let clamp_date = max_age.add_to(patient.birth_date);
+                    if eval_date >= clamp_date {
                         if !matches!(f.status, SeriesStatus::Complete) {
+                            trace_decision!("forecast_max_age_clamp", "Max age clamp triggered: eval_date={:?} >= max_age_date={:?}, shifting status from {:?} to {:?}", eval_date, clamp_date, f.status, status);
                             f.status = status.clone();
                             f.status = f.status.with_earliest_date(None);
                             f.status = f.status.with_recommended_date(None);
@@ -956,7 +1045,11 @@ impl<'a> EvaluationEngine<'a> {
 
                 // Apply custom rules hook (like Polio 2009 reset) if present
                 if let Some(policy) = self.policy {
+                    let prev_status = f.status.clone();
                     policy.custom_forecast_hook(patient, valid_doses, history, eval_date, &mut f);
+                    if f.status != prev_status {
+                        trace_decision!("forecast_custom_forecast_hook", "Custom forecast hook mutated forecast status from {:?} to {:?}", prev_status, f.status);
+                    }
                 }
 
                 f
@@ -1171,7 +1264,7 @@ fn is_dose_contraindicated(patient: &crate::models::Patient, cvx: Cvx, date: Nai
     })
 }
 
-fn is_eval_ignored(group: &str, cvx: Cvx, date: NaiveDate, status: DoseStatus) -> bool {
+pub fn is_eval_ignored(group: &str, cvx: Cvx, date: NaiveDate, status: DoseStatus) -> bool {
     if status == DoseStatus::Ignored {
         return true;
     }
