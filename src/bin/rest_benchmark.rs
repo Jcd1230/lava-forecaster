@@ -14,7 +14,7 @@ use lava_forecaster::forecaster_generated::org::cdsframework::ice::flatbuf as fb
 
 const BULK_BENCHMARK_BATCH_SIZE: usize = 128;
 const SINGLE_JSON_CONCURRENCY: &[usize] = &[1, 10, 50];
-const BULK_CONCURRENCY: &[usize] = &[1, 4, 8];
+const BULK_CONCURRENCY: &[usize] = &[1, 2, 3, 4];
 
 struct ServerGuard(std::process::Child);
 
