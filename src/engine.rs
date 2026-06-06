@@ -333,6 +333,7 @@ impl<'a> EvaluationEngine<'a> {
         });
 
         let mut evaluations = SmallVec::<[DoseEvaluation; 8]>::new();
+        let mut eval_target_dose_numbers = SmallVec::<[usize; 8]>::new();
         let mut valid_doses = SmallVec::<[(NaiveDate, usize); 32]>::new();
         let mut is_completed = false;
         let mut active_series: &'a CompiledSeries = self.series;
@@ -360,6 +361,7 @@ impl<'a> EvaluationEngine<'a> {
                     reasons: crate::reasons![reason],
                     dose_number: Some(output_dose_number),
                 });
+                eval_target_dose_numbers.push(target_dose_idx);
 
                 if target_dose_idx >= active_series.num_doses && valid_override {
                     is_completed = true;
@@ -379,6 +381,7 @@ impl<'a> EvaluationEngine<'a> {
                     reasons: crate::reasons![EvaluationReason::ContraindicatedVaccine],
                     dose_number: Some(output_dose_number),
                 });
+                eval_target_dose_numbers.push(target_dose_idx);
                 i += 1;
                 continue;
             }
@@ -454,6 +457,7 @@ impl<'a> EvaluationEngine<'a> {
                     reasons: dup_reasons,
                     dose_number: Some(prev_dose_num),
                 });
+                eval_target_dose_numbers.push(target_dose_idx);
                 i += 1;
                 continue;
             }
@@ -468,6 +472,7 @@ impl<'a> EvaluationEngine<'a> {
                     reasons: crate::reasons![EvaluationReason::PriorToDOB],
                     dose_number: Some(output_dose_number),
                 });
+                eval_target_dose_numbers.push(target_dose_idx);
                 i += 1;
                 continue;
             }
@@ -522,6 +527,7 @@ impl<'a> EvaluationEngine<'a> {
                             reasons,
                             dose_number: Some(output_dose_number),
                         });
+                        eval_target_dose_numbers.push(target_dose_idx);
                         i += 1;
                         continue;
                     }
@@ -535,6 +541,7 @@ impl<'a> EvaluationEngine<'a> {
                     reasons: crate::reasons![EvaluationReason::BoosterDose],
                     dose_number: Some(output_dose_number),
                 });
+                eval_target_dose_numbers.push(target_dose_idx);
                 i += 1;
                 continue;
             }
@@ -607,9 +614,10 @@ impl<'a> EvaluationEngine<'a> {
                 if let Some(ref abs_min_int) = int_rule.absolute_minimum_interval {
                     let prev_date = evaluations
                         .iter()
-                        .filter(|e| e.dose_number == Some(int_rule.from_dose) && !is_eval_ignored(active_series.vaccine_group, e.cvx, e.dose_date, e.status))
-                        .max_by_key(|e| (e.status == DoseStatus::Valid, e.dose_date))
-                        .map(|e| e.dose_date);
+                        .zip(&eval_target_dose_numbers)
+                        .filter(|&(e, t_num)| *t_num == int_rule.from_dose && !is_eval_ignored(active_series.vaccine_group, e.cvx, e.dose_date, e.status))
+                        .max_by_key(|&(e, _)| (e.status == DoseStatus::Valid, e.dose_date))
+                        .map(|(e, _)| e.dose_date);
                     if let Some(prev_date) = prev_date {
                         let interval_ok = compare_elapsed(prev_date, dose.date, abs_min_int)
                             != std::cmp::Ordering::Less;
@@ -661,6 +669,7 @@ impl<'a> EvaluationEngine<'a> {
                 reasons,
                 dose_number: Some(output_dose_number),
             });
+            eval_target_dose_numbers.push(target_dose_idx);
 
             let ctx_complete = EvaluationContext::new(
                 patient,
