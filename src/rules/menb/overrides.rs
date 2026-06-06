@@ -113,9 +113,9 @@ pub fn menb_custom_evaluation_hook(
         return;
     };
 
-    let age_10 = add_years_unchecked(ctx.patient.birth_date, 10);
-    if matches!(dose.cvx.0, cvx!("162") | cvx!("163"))
-        && dose.date >= age_10
+    let age_10_4d = crate::time_period!("10y-4d").add_to(ctx.patient.birth_date);
+    if (is_fhbp(dose.cvx) || is_4c(dose.cvx))
+        && dose.date >= age_10_4d
         && reasons.contains(&EvaluationReason::BelowMinimumAge)
     {
         *status = DoseStatus::Accepted;
@@ -131,10 +131,17 @@ pub fn menb_custom_evaluation_hook(
     }
 
     if is_opposite_family(series_name, dose.cvx) {
-        *status = DoseStatus::Accepted;
-        reasons.clear();
-        reasons.push(EvaluationReason::VaccineNotCountedBasedOnMostRecentVaccineGiven);
-        reasons.push(EvaluationReason::OutsideRoutineSeries);
+        let age_10_4d = crate::time_period!("10y-4d").add_to(ctx.patient.birth_date);
+        if dose.date < age_10_4d {
+            *status = DoseStatus::Invalid;
+            reasons.clear();
+            reasons.push(EvaluationReason::BelowMinimumAge);
+        } else {
+            *status = DoseStatus::Accepted;
+            reasons.clear();
+            reasons.push(EvaluationReason::VaccineNotCountedBasedOnMostRecentVaccineGiven);
+            reasons.push(EvaluationReason::OutsideRoutineSeries);
+        }
         return;
     }
 

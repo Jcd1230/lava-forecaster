@@ -6,8 +6,8 @@ use crate::date_utils::{SmallVec, TimePeriod, add_years_unchecked};
 
 fn get_vaccine_min_age(cvx: Cvx) -> Option<TimePeriod> {
     match cvx.0 {
-        cvx!("114") | cvx!("147") => Some(crate::time_period!("9m-4d")),
-        cvx!("136") => Some(crate::time_period!("2m-4d")),
+        cvx!("114") | cvx!("147") | cvx!("316") => Some(crate::time_period!("9m-4d")),
+        cvx!("136") | cvx!("328") => Some(crate::time_period!("2m-4d")),
         cvx!("203") | cvx!("108") | cvx!("32") => Some(crate::time_period!("2y-4d")),
         _ => None,
     }
