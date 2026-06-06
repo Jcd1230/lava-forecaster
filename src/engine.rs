@@ -345,11 +345,26 @@ impl<'a> EvaluationEngine<'a> {
             }
 
             // Same-day duplicate check
+            // A dose is a same-day duplicate if another dose on the same day was
+            // already evaluated as a competing dose. Doses that were Accepted with
+            // VaccineNotLicensedForMales are non-competing (e.g., CVX 118 for males)
+            // and should not trigger duplicate detection for subsequent same-day doses.
             let is_duplicate = if i > 0 {
                 let history_subset = &sorted_history[0..i];
-                self.policy
+                let has_same_day = self.policy
                     .map(|p| p.is_same_day_duplicate(dose, history_subset))
-                    .unwrap_or_else(|| history_subset.iter().any(|prev| prev.date == dose.date))
+                    .unwrap_or_else(|| history_subset.iter().any(|prev| prev.date == dose.date));
+                if has_same_day {
+                    // Check if any same-day dose was a competing evaluation
+                    // (not just Accepted with VaccineNotLicensedForMales)
+                    evaluations.iter().any(|e| {
+                        e.dose_date == dose.date
+                            && !(e.status == DoseStatus::Accepted
+                                && e.reasons.contains(&EvaluationReason::VaccineNotLicensedForMales))
+                    })
+                } else {
+                    false
+                }
             } else {
                 false
             };
@@ -358,11 +373,25 @@ impl<'a> EvaluationEngine<'a> {
                     .last()
                     .and_then(|e| e.dose_number)
                     .unwrap_or(target_dose_idx);
+                let mut dup_status = DoseStatus::Invalid;
+                let mut dup_reasons = crate::reasons![EvaluationReason::DuplicateShotSameDay];
+                // Allow custom evaluation hook to override duplicate decision
+                // (e.g., HPV CVX 118 for males should be Accepted, not a duplicate)
+                if let Some(policy) = self.policy {
+                    let ctx = EvaluationContext::new(
+                        patient, history, &valid_doses, Some(dose),
+                        target_dose_idx, eval_date, &active_series.name,
+                    );
+                    policy.custom_evaluation_hook(
+                        &active_series.name, target_dose_idx, &ctx,
+                        &mut dup_reasons, &mut dup_status,
+                    );
+                }
                 evaluations.push(DoseEvaluation {
                     dose_date: dose.date,
                     cvx: dose.cvx,
-                    status: DoseStatus::Invalid,
-                    reasons: crate::reasons![EvaluationReason::DuplicateShotSameDay],
+                    status: dup_status,
+                    reasons: dup_reasons,
                     dose_number: Some(prev_dose_num),
                 });
                 i += 1;
@@ -1048,6 +1077,13 @@ fn get_same_day_priority(
             75 | 105 => 1,
             325 => 2,
             _ => 3,
+        },
+        "HPV" => match cvx_code {
+            118 => 0,   // Cervarix (female-only) — lowest priority
+            62 => 1,    // Gardasil
+            137 => 2,   // Gardasil (Shire)
+            165 => 3,   // Gardasil 9 — highest priority
+            _ => 0,
         },
         _ => 0,
     }

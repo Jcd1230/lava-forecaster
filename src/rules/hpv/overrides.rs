@@ -17,6 +17,149 @@ fn latest_boundary(date: NaiveDate, interval: TimePeriod) -> NaiveDate {
     add_interval(date, interval) - chrono::Duration::days(1)
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+enum SimStatus {
+    Valid,
+    Invalid,
+    Accepted,
+}
+
+fn simulate_hpv_evaluations(
+    patient: &Patient,
+    history: &[Dose],
+    series_name: &str,
+) -> Vec<(NaiveDate, SimStatus)> {
+    let mut results = Vec::new();
+    let mut valid_doses = Vec::new();
+    let mut invalid_dose_2_dates = Vec::new();
+
+    for dose in history {
+        if !is_hpv_cvx(dose.cvx) {
+            continue;
+        }
+        let age_9y = crate::time_period!("9y-4d").add_to(patient.birth_date);
+        let age_46 = add_years_unchecked(patient.birth_date, 46);
+
+        if series_name == "HPV_2_DOSE_SERIES" {
+            if valid_doses.is_empty() {
+                if dose.date < age_9y {
+                    results.push((dose.date, SimStatus::Invalid));
+                } else if dose.cvx.0 == cvx!("118") && patient.gender == crate::models::Gender::Male {
+                    results.push((dose.date, SimStatus::Accepted));
+                } else if dose.date >= age_46 {
+                    results.push((dose.date, SimStatus::Accepted));
+                } else {
+                    results.push((dose.date, SimStatus::Valid));
+                    valid_doses.push(dose.date);
+                }
+            } else {
+                let dose_1_date = valid_doses[0];
+                let min_interval = crate::time_period!("5m-4d").add_to(dose_1_date);
+                let mut is_valid = dose.date >= min_interval;
+
+                if let Some(&last_invalid) = invalid_dose_2_dates.last() {
+                    let min_int_from_invalid = crate::time_period!("12w-4d").add_to(last_invalid);
+                    if dose.date < min_int_from_invalid {
+                        is_valid = false;
+                    }
+                }
+
+                if dose.cvx.0 == cvx!("118") && patient.gender == crate::models::Gender::Male {
+                    if is_valid {
+                        results.push((dose.date, SimStatus::Accepted));
+                    } else {
+                        results.push((dose.date, SimStatus::Invalid));
+                        invalid_dose_2_dates.push(dose.date);
+                    }
+                } else if dose.date >= age_46 {
+                    results.push((dose.date, SimStatus::Accepted));
+                } else if is_valid {
+                    results.push((dose.date, SimStatus::Valid));
+                    valid_doses.push(dose.date);
+                } else {
+                    results.push((dose.date, SimStatus::Invalid));
+                    invalid_dose_2_dates.push(dose.date);
+                }
+            }
+        } else {
+            // HPV_3_DOSE_SERIES
+            let target_dose_idx = valid_doses.len() + 1;
+
+            if target_dose_idx == 1 {
+                if dose.date < age_9y {
+                    results.push((dose.date, SimStatus::Invalid));
+                } else if dose.cvx.0 == cvx!("118") && patient.gender == crate::models::Gender::Male {
+                    results.push((dose.date, SimStatus::Accepted));
+                } else if dose.date >= age_46 {
+                    results.push((dose.date, SimStatus::Accepted));
+                } else {
+                    results.push((dose.date, SimStatus::Valid));
+                    valid_doses.push(dose.date);
+                }
+            } else if target_dose_idx == 2 {
+                let dose_1_date = valid_doses[0];
+                let min_interval = crate::time_period!("24d").add_to(dose_1_date);
+                let is_valid = dose.date >= min_interval;
+
+                if dose.cvx.0 == cvx!("118") && patient.gender == crate::models::Gender::Male {
+                    if is_valid {
+                        results.push((dose.date, SimStatus::Accepted));
+                    } else {
+                        results.push((dose.date, SimStatus::Invalid));
+                    }
+                } else if dose.date >= age_46 {
+                    results.push((dose.date, SimStatus::Accepted));
+                } else if is_valid {
+                    results.push((dose.date, SimStatus::Valid));
+                    valid_doses.push(dose.date);
+                } else {
+                    results.push((dose.date, SimStatus::Invalid));
+                }
+            } else {
+                let last_shot_date = results
+                    .iter()
+                    .filter(|(_, status)| *status == SimStatus::Valid || *status == SimStatus::Invalid)
+                    .map(|(date, _)| *date)
+                    .max();
+
+                let sequential_ok = if let Some(last_date) = last_shot_date {
+                    let min_seq_interval = crate::time_period!("80d").add_to(last_date);
+                    dose.date >= min_seq_interval
+                } else {
+                    true
+                };
+
+                let dose_1_date = valid_doses[0];
+                let cutoff_2016 = NaiveDate::from_ymd_opt(2016, 12, 16).unwrap();
+                let abs_min_1_3 = if dose.date < cutoff_2016 {
+                    crate::time_period!("16w-4d")
+                } else {
+                    crate::time_period!("5m-4d")
+                };
+                let min_int_1_3 = abs_min_1_3.add_to(dose_1_date);
+
+                let is_valid = sequential_ok && dose.date >= min_int_1_3;
+
+                if dose.cvx.0 == cvx!("118") && patient.gender == crate::models::Gender::Male {
+                    if is_valid {
+                        results.push((dose.date, SimStatus::Accepted));
+                    } else {
+                        results.push((dose.date, SimStatus::Invalid));
+                    }
+                } else if dose.date >= age_46 {
+                    results.push((dose.date, SimStatus::Accepted));
+                } else if is_valid {
+                    results.push((dose.date, SimStatus::Valid));
+                    valid_doses.push(dose.date);
+                } else {
+                    results.push((dose.date, SimStatus::Invalid));
+                }
+            }
+        }
+    }
+    results
+}
+
 pub fn hpv_custom_evaluation_hook(
     series_name: &str,
     target_dose_idx: usize,
@@ -25,11 +168,31 @@ pub fn hpv_custom_evaluation_hook(
     status: &mut DoseStatus,
 ) {
     if let Some(dose) = ctx.current_dose {
+        // 0. Mark current Target Dose 2 as Invalid in 2-Dose Series if Interval from most recent Invalid Dose 2 < 12w-4 days
+        if series_name == "HPV_2_DOSE_SERIES" && target_dose_idx == 2 {
+            let sim_results = simulate_hpv_evaluations(ctx.patient, ctx.history, series_name);
+            if let Some((_, sim_status)) = sim_results.iter().find(|(d, _)| *d == dose.date) {
+                if *sim_status == SimStatus::Invalid {
+                    *status = DoseStatus::Invalid;
+                    if !reasons.contains(&EvaluationReason::BelowMinimumInterval) {
+                        reasons.push(EvaluationReason::BelowMinimumInterval);
+                    }
+                }
+            }
+        }
+
         // 1. Gender-specific restriction: CVX 118 (bivalent) is not licensed for males
+        // Only override if the dose is not already Invalid due to age/interval.
+        // DuplicateShotSameDay should be overridden by the gender reason since the
+        // dose is not truly a duplicate — it's a non-competing vaccine for males.
         if dose.cvx.0 == cvx!("118") && ctx.patient.gender == crate::models::Gender::Male {
-            *status = DoseStatus::Accepted;
-            reasons.clear();
-            reasons.push(EvaluationReason::VaccineNotLicensedForMales);
+            let is_age_or_interval_invalid = *status == DoseStatus::Invalid
+                && !reasons.contains(&EvaluationReason::DuplicateShotSameDay);
+            if !is_age_or_interval_invalid {
+                *status = DoseStatus::Accepted;
+                reasons.clear();
+                reasons.push(EvaluationReason::VaccineNotLicensedForMales);
+            }
             return;
         }
 
@@ -117,11 +280,14 @@ pub fn hpv_custom_forecast_hook(
 
     let first_valid_date = valid_doses[0].0;
     let started_at_or_after_15 = first_valid_date >= age_15;
-    let hpv_history_dates: Vec<NaiveDate> = _history
+
+    let sim_results = simulate_hpv_evaluations(patient, _history, &forecast.series_name);
+    let hpv_history_dates: Vec<NaiveDate> = sim_results
         .iter()
-        .filter(|dose| is_hpv_cvx(dose.cvx))
-        .map(|dose| dose.date)
+        .filter(|(_, status)| *status != SimStatus::Accepted)
+        .map(|(date, _)| *date)
         .collect();
+
     let latest_hpv_dose_date = hpv_history_dates
         .iter()
         .copied()
@@ -141,8 +307,15 @@ pub fn hpv_custom_forecast_hook(
     }
 
     if valid_doses.len() == 1 && !started_at_or_after_15 && has_extra_hpv_history_after_first_valid {
-        forecast.status = forecast.status.with_earliest_date(Some(add_interval(first_valid_date, crate::time_period!("5m"))));
-        forecast.status = forecast.status.with_recommended_date(Some(add_interval(first_valid_date, crate::time_period!("6m"))));
+        let earliest_from_dose_1 = add_interval(first_valid_date, crate::time_period!("5m"));
+        let earliest_from_latest = add_interval(latest_hpv_dose_date, crate::time_period!("12w"));
+        let earliest = earliest_from_dose_1.max(earliest_from_latest);
+
+        let recommended_from_dose_1 = add_interval(first_valid_date, crate::time_period!("6m"));
+        let recommended = recommended_from_dose_1.max(earliest);
+
+        forecast.status = forecast.status.with_earliest_date(Some(earliest));
+        forecast.status = forecast.status.with_recommended_date(Some(recommended));
         forecast.status = forecast.status.with_overdue_date(Some(latest_boundary(first_valid_date, crate::time_period!("13m+4w"))));
         return;
     }
