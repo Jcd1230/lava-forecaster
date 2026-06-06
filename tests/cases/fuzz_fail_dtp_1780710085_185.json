@@ -1,0 +1,95 @@
+{
+  "name": "fuzz_fail_dtp_1780710085_185",
+  "group": "DTP",
+  "focus_code": "200",
+  "patient": {
+    "birth_date": "2011-10-26",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2012-06-01",
+      "cvx": "198"
+    },
+    {
+      "date": "2012-09-08",
+      "cvx": "146"
+    },
+    {
+      "date": "2012-09-09",
+      "cvx": "139"
+    },
+    {
+      "date": "2012-10-17",
+      "cvx": "20"
+    },
+    {
+      "date": "2012-11-14",
+      "cvx": "139"
+    },
+    {
+      "date": "2013-10-25",
+      "cvx": "195"
+    }
+  ],
+  "execution_date": "2018-10-20",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2012-06-01",
+        "cvx": "198",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2012-09-08",
+        "cvx": "146",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2012-09-09",
+        "cvx": "139",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2012-10-17",
+        "cvx": "20",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2012-11-14",
+        "cvx": "139",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 4
+      },
+      {
+        "dose_date": "2013-10-25",
+        "cvx": "195",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 4
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "DTP",
+        "earliest_date": "2018-10-26",
+        "recommended_date": "2018-10-26",
+        "overdue_date": "2018-10-26",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

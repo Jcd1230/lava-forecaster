@@ -1,0 +1,85 @@
+{
+  "name": "fuzz_fail_covid19_1780710085_1089",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "2004-03-10",
+    "gender": "Unknown"
+  },
+  "history": [
+    {
+      "date": "2025-08-26",
+      "cvx": "502"
+    },
+    {
+      "date": "2025-10-18",
+      "cvx": "308"
+    },
+    {
+      "date": "2026-06-05",
+      "cvx": "221"
+    },
+    {
+      "date": "2026-12-28",
+      "cvx": "221"
+    },
+    {
+      "date": "2027-07-13",
+      "cvx": "212"
+    }
+  ],
+  "execution_date": "2027-07-20",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2025-08-26",
+        "cvx": "502",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-10-18",
+        "cvx": "308",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2026-06-05",
+        "cvx": "221",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2026-12-28",
+        "cvx": "221",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2027-07-13",
+        "cvx": "212",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": "2027-09-07",
+        "recommended_date": "2027-09-07",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

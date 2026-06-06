@@ -1,0 +1,51 @@
+{
+  "name": "fuzz_fail_mmr_1780710085_1933",
+  "group": "MMR",
+  "focus_code": "500",
+  "patient": {
+    "birth_date": "2021-01-01",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2021-12-31",
+      "cvx": "04"
+    },
+    {
+      "date": "2022-01-27",
+      "cvx": "04"
+    }
+  ],
+  "execution_date": "2024-02-24",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2021-12-31",
+        "cvx": "04",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2022-01-27",
+        "cvx": "04",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MMR",
+        "earliest_date": "2022-02-24",
+        "recommended_date": "2022-02-24",
+        "overdue_date": "2022-05-28",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

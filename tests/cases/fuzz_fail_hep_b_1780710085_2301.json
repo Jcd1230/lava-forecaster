@@ -1,0 +1,73 @@
+{
+  "name": "fuzz_fail_hep_b_1780710085_2301",
+  "group": "HEP_B",
+  "focus_code": "100",
+  "patient": {
+    "birth_date": "2002-06-16",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2002-10-21",
+      "cvx": "146"
+    },
+    {
+      "date": "2002-11-18",
+      "cvx": "198"
+    },
+    {
+      "date": "2003-02-02",
+      "cvx": "132"
+    },
+    {
+      "date": "2003-02-09",
+      "cvx": "220"
+    }
+  ],
+  "execution_date": "2003-04-09",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2002-10-21",
+        "cvx": "146",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2002-11-18",
+        "cvx": "198",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2003-02-02",
+        "cvx": "132",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2003-02-09",
+        "cvx": "220",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 4
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HEP_B",
+        "earliest_date": "2003-02-10",
+        "recommended_date": "2003-02-10",
+        "overdue_date": "2004-06-14",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

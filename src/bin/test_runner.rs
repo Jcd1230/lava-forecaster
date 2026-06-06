@@ -1758,6 +1758,7 @@ fn main() {
         let mut compare_java_url = "http://localhost:8080".to_string();
         let mut fuzz_seed = None;
         let mut shrink = false;
+        let mut bulk = false;
 
         let mut idx = 3;
         while idx < args.len() {
@@ -1778,12 +1779,15 @@ fn main() {
             } else if args[idx] == "--shrink" {
                 shrink = true;
                 idx += 1;
+            } else if args[idx] == "--bulk" {
+                bulk = true;
+                idx += 1;
             } else {
                 idx += 1;
             }
         }
 
-        match fuzzer::run_fuzz(&client, fuzz_count, fuzz_seed, filter_group, &compare_java_url, shrink) {
+        match fuzzer::run_fuzz(&client, fuzz_count, fuzz_seed, filter_group, &compare_java_url, shrink, bulk) {
             Ok(_) => std::process::exit(0),
             Err(e) => {
                 println!("Fuzz execution failed: {}", e);

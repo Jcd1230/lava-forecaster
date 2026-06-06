@@ -1,0 +1,51 @@
+{
+  "name": "fuzz_fail_hep_b_1780710085_3893",
+  "group": "HEP_B",
+  "focus_code": "100",
+  "patient": {
+    "birth_date": "2011-08-10",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2011-09-06",
+      "cvx": "146"
+    },
+    {
+      "date": "2011-10-04",
+      "cvx": "102"
+    }
+  ],
+  "execution_date": "2015-09-19",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2011-09-06",
+        "cvx": "146",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2011-10-04",
+        "cvx": "102",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HEP_B",
+        "earliest_date": "2012-01-25",
+        "recommended_date": "2012-02-10",
+        "overdue_date": "2013-04-06",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

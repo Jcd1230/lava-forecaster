@@ -1,0 +1,73 @@
+{
+  "name": "fuzz_fail_dtp_1780710085_1899",
+  "group": "DTP",
+  "focus_code": "200",
+  "patient": {
+    "birth_date": "2016-04-09",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2016-08-02",
+      "cvx": "132"
+    },
+    {
+      "date": "2017-01-14",
+      "cvx": "132"
+    },
+    {
+      "date": "2017-02-11",
+      "cvx": "120"
+    },
+    {
+      "date": "2017-08-11",
+      "cvx": "139"
+    }
+  ],
+  "execution_date": "2018-03-18",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2016-08-02",
+        "cvx": "132",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2017-01-14",
+        "cvx": "132",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2017-02-11",
+        "cvx": "120",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2017-08-11",
+        "cvx": "139",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 4
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "DTP",
+        "earliest_date": "2017-08-11",
+        "recommended_date": "2017-08-11",
+        "overdue_date": "2017-12-06",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

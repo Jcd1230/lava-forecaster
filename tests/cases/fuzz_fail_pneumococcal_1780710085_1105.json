@@ -1,0 +1,73 @@
+{
+  "name": "fuzz_fail_pneumococcal_1780710085_1105",
+  "group": "PNEUMOCOCCAL",
+  "focus_code": "750",
+  "patient": {
+    "birth_date": "2009-01-16",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2009-06-25",
+      "cvx": "327"
+    },
+    {
+      "date": "2010-04-15",
+      "cvx": "327"
+    },
+    {
+      "date": "2010-09-29",
+      "cvx": "215"
+    },
+    {
+      "date": "2011-08-21",
+      "cvx": "215"
+    }
+  ],
+  "execution_date": "2016-07-11",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2009-06-25",
+        "cvx": "327",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2010-04-15",
+        "cvx": "327",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2010-09-29",
+        "cvx": "215",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2011-08-21",
+        "cvx": "215",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 4
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "PNEUMOCOCCAL",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "name": "fuzz_fail_polio_1780710085_231",
+  "group": "POLIO",
+  "focus_code": "400",
+  "patient": {
+    "birth_date": "2013-02-01",
+    "gender": "Unknown"
+  },
+  "history": [
+    {
+      "date": "2013-03-16",
+      "cvx": "130"
+    },
+    {
+      "date": "2013-04-13",
+      "cvx": "195"
+    }
+  ],
+  "execution_date": "2017-08-14",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2013-03-16",
+        "cvx": "130",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2013-04-13",
+        "cvx": "195",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "POLIO",
+        "earliest_date": "2013-10-13",
+        "recommended_date": "2017-02-01",
+        "overdue_date": "2017-02-01",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "name": "fuzz_fail_influenza_1780710085_4195",
+  "group": "INFLUENZA",
+  "focus_code": "800",
+  "patient": {
+    "birth_date": "2012-08-19",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2013-02-20",
+      "cvx": "151"
+    },
+    {
+      "date": "2013-03-21",
+      "cvx": "200"
+    },
+    {
+      "date": "2013-03-22",
+      "cvx": "200"
+    },
+    {
+      "date": "2013-03-22",
+      "cvx": "331"
+    }
+  ],
+  "execution_date": "2013-05-09",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2013-02-20",
+        "cvx": "151",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2013-03-21",
+        "cvx": "200",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2013-03-22",
+        "cvx": "200",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2013-03-22",
+        "cvx": "331",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "INFLUENZA",
+        "earliest_date": "2013-04-19",
+        "recommended_date": "2013-04-19",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

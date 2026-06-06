@@ -1,0 +1,51 @@
+{
+  "name": "fuzz_fail_hib_1780710085_4967",
+  "group": "HIB",
+  "focus_code": "300",
+  "patient": {
+    "birth_date": "2001-12-20",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2002-03-14",
+      "cvx": "51"
+    },
+    {
+      "date": "2002-04-20",
+      "cvx": "198"
+    }
+  ],
+  "execution_date": "2004-06-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2002-03-14",
+        "cvx": "51",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2002-04-20",
+        "cvx": "198",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HIB",
+        "earliest_date": "2002-12-20",
+        "recommended_date": "2003-03-20",
+        "overdue_date": "2003-05-17",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

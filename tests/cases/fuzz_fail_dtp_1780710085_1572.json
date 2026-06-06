@@ -1,0 +1,62 @@
+{
+  "name": "fuzz_fail_dtp_1780710085_1572",
+  "group": "DTP",
+  "focus_code": "200",
+  "patient": {
+    "birth_date": "2024-05-06",
+    "gender": "Unknown"
+  },
+  "history": [
+    {
+      "date": "2024-06-18",
+      "cvx": "120"
+    },
+    {
+      "date": "2024-07-16",
+      "cvx": "198"
+    },
+    {
+      "date": "2024-09-06",
+      "cvx": "102"
+    }
+  ],
+  "execution_date": "2026-10-13",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2024-06-18",
+        "cvx": "120",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2024-07-16",
+        "cvx": "198",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2024-09-06",
+        "cvx": "102",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "DTP",
+        "earliest_date": "2025-08-06",
+        "recommended_date": "2025-08-06",
+        "overdue_date": "2026-01-02",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

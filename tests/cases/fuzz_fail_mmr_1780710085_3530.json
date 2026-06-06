@@ -1,0 +1,84 @@
+{
+  "name": "fuzz_fail_mmr_1780710085_3530",
+  "group": "MMR",
+  "focus_code": "500",
+  "patient": {
+    "birth_date": "2025-12-10",
+    "gender": "Unknown"
+  },
+  "history": [
+    {
+      "date": "2026-12-11",
+      "cvx": "05"
+    },
+    {
+      "date": "2027-08-15",
+      "cvx": "05"
+    },
+    {
+      "date": "2027-09-12",
+      "cvx": "07"
+    },
+    {
+      "date": "2027-10-10",
+      "cvx": "94"
+    },
+    {
+      "date": "2027-11-07",
+      "cvx": "06"
+    }
+  ],
+  "execution_date": "2031-04-12",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2026-12-11",
+        "cvx": "05",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2027-08-15",
+        "cvx": "05",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2027-09-12",
+        "cvx": "07",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2027-10-10",
+        "cvx": "94",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2027-11-07",
+        "cvx": "06",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MMR",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

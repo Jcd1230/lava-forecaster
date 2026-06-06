@@ -1,0 +1,51 @@
+{
+  "name": "fuzz_fail_mmr_1780710085_4859",
+  "group": "MMR",
+  "focus_code": "500",
+  "patient": {
+    "birth_date": "2006-03-04",
+    "gender": "Unknown"
+  },
+  "history": [
+    {
+      "date": "2007-03-03",
+      "cvx": "05"
+    },
+    {
+      "date": "2007-03-30",
+      "cvx": "05"
+    }
+  ],
+  "execution_date": "2009-09-15",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2007-03-03",
+        "cvx": "05",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2007-03-30",
+        "cvx": "05",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MMR",
+        "earliest_date": "2007-04-27",
+        "recommended_date": "2007-04-27",
+        "overdue_date": "2007-07-31",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

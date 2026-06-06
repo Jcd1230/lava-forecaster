@@ -1,0 +1,28 @@
+{
+  "name": "fuzz_fail_pneumococcal_1780710085_43",
+  "group": "PNEUMOCOCCAL",
+  "focus_code": "750",
+  "patient": {
+    "birth_date": "2022-11-18",
+    "gender": "Unknown"
+  },
+  "history": [],
+  "execution_date": "2025-09-03",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "PNEUMOCOCCAL",
+        "earliest_date": "2024-11-18",
+        "recommended_date": "2024-11-18",
+        "overdue_date": "2024-11-18",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

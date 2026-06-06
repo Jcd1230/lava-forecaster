@@ -1,0 +1,62 @@
+{
+  "name": "fuzz_fail_dtp_1780710085_4087",
+  "group": "DTP",
+  "focus_code": "200",
+  "patient": {
+    "birth_date": "2007-10-12",
+    "gender": "Unknown"
+  },
+  "history": [
+    {
+      "date": "2007-11-22",
+      "cvx": "198"
+    },
+    {
+      "date": "2008-02-08",
+      "cvx": "139"
+    },
+    {
+      "date": "2008-02-08",
+      "cvx": "01"
+    }
+  ],
+  "execution_date": "2008-12-19",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2007-11-22",
+        "cvx": "198",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2008-02-08",
+        "cvx": "139",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2008-02-08",
+        "cvx": "01",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "DTP",
+        "earliest_date": "2008-03-07",
+        "recommended_date": "2008-04-12",
+        "overdue_date": "2008-06-08",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

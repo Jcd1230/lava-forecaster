@@ -1,0 +1,40 @@
+{
+  "name": "fuzz_fail_covid19_1780710085_494",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "2012-06-14",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2013-05-07",
+      "cvx": "213"
+    }
+  ],
+  "execution_date": "2018-08-26",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2013-05-07",
+        "cvx": "213",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": "2013-06-04",
+        "recommended_date": "2013-06-04",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

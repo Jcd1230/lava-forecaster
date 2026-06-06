@@ -1,0 +1,95 @@
+{
+  "name": "fuzz_fail_menb_1780710085_3861",
+  "group": "MENB",
+  "focus_code": "835",
+  "patient": {
+    "birth_date": "2016-12-16",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2017-01-27",
+      "cvx": "316"
+    },
+    {
+      "date": "2017-06-13",
+      "cvx": "163"
+    },
+    {
+      "date": "2018-02-13",
+      "cvx": "316"
+    },
+    {
+      "date": "2019-01-26",
+      "cvx": "162"
+    },
+    {
+      "date": "2019-08-18",
+      "cvx": "316"
+    },
+    {
+      "date": "2019-12-26",
+      "cvx": "163"
+    }
+  ],
+  "execution_date": "2025-06-19",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2017-01-27",
+        "cvx": "316",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2017-06-13",
+        "cvx": "163",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2018-02-13",
+        "cvx": "316",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2019-01-26",
+        "cvx": "162",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2019-08-18",
+        "cvx": "316",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2019-12-26",
+        "cvx": "163",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MENB",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotRecommended",
+        "reasons": [
+          "BELOW_MINIMUM_AGE_HIGH_RISK_SERIES"
+        ]
+      }
+    ]
+  }
+}

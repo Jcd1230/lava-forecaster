@@ -1,0 +1,73 @@
+{
+  "name": "fuzz_fail_rsv_1780710085_3289",
+  "group": "RSV",
+  "focus_code": "875",
+  "patient": {
+    "birth_date": "2009-04-24",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2009-10-03",
+      "cvx": "315"
+    },
+    {
+      "date": "2010-04-08",
+      "cvx": "314"
+    },
+    {
+      "date": "2010-07-15",
+      "cvx": "326"
+    },
+    {
+      "date": "2010-09-25",
+      "cvx": "314"
+    }
+  ],
+  "execution_date": "2011-04-02",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2009-10-03",
+        "cvx": "315",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2010-04-08",
+        "cvx": "314",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2010-07-15",
+        "cvx": "326",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2010-09-25",
+        "cvx": "314",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "RSV",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotRecommended",
+        "reasons": [
+          "NOT_SUPPORTED"
+        ]
+      }
+    ]
+  }
+}

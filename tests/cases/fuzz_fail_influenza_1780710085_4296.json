@@ -1,0 +1,51 @@
+{
+  "name": "fuzz_fail_influenza_1780710085_4296",
+  "group": "INFLUENZA",
+  "focus_code": "800",
+  "patient": {
+    "birth_date": "2008-10-25",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2009-06-30",
+      "cvx": "141"
+    },
+    {
+      "date": "2009-06-30",
+      "cvx": "153"
+    }
+  ],
+  "execution_date": "2010-02-21",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2009-06-30",
+        "cvx": "141",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2009-06-30",
+        "cvx": "153",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "INFLUENZA",
+        "earliest_date": "2009-07-01",
+        "recommended_date": "2009-07-28",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

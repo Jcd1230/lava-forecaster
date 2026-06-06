@@ -1,0 +1,74 @@
+{
+  "name": "fuzz_fail_covid19_1780710085_2922",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "2021-09-26",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2022-08-13",
+      "cvx": "218"
+    },
+    {
+      "date": "2023-01-10",
+      "cvx": "212"
+    },
+    {
+      "date": "2023-12-28",
+      "cvx": "308"
+    },
+    {
+      "date": "2024-01-26",
+      "cvx": "312"
+    }
+  ],
+  "execution_date": "2029-10-03",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2022-08-13",
+        "cvx": "218",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2023-01-10",
+        "cvx": "212",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2023-12-28",
+        "cvx": "308",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2024-01-26",
+        "cvx": "312",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "ConditionallyRecommended",
+        "reasons": [
+          "HIGH_RISK",
+          "CLINICAL_PATIENT_DISCRETION"
+        ]
+      }
+    ]
+  }
+}

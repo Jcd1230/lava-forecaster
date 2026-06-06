@@ -1,0 +1,84 @@
+{
+  "name": "fuzz_fail_influenza_1780710085_1220",
+  "group": "INFLUENZA",
+  "focus_code": "800",
+  "patient": {
+    "birth_date": "2003-05-19",
+    "gender": "Unknown"
+  },
+  "history": [
+    {
+      "date": "2005-06-30",
+      "cvx": "166"
+    },
+    {
+      "date": "2005-07-02",
+      "cvx": "186"
+    },
+    {
+      "date": "2005-08-08",
+      "cvx": "150"
+    },
+    {
+      "date": "2005-09-26",
+      "cvx": "166"
+    },
+    {
+      "date": "2006-07-01",
+      "cvx": "197"
+    }
+  ],
+  "execution_date": "2006-12-19",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2005-06-30",
+        "cvx": "166",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2005-07-02",
+        "cvx": "186",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2005-08-08",
+        "cvx": "150",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2005-09-26",
+        "cvx": "166",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2006-07-01",
+        "cvx": "197",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "INFLUENZA",
+        "earliest_date": "2006-07-29",
+        "recommended_date": "2006-07-29",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

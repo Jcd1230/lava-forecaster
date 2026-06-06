@@ -1,0 +1,95 @@
+{
+  "name": "fuzz_fail_hep_b_1780710085_2370",
+  "group": "HEP_B",
+  "focus_code": "100",
+  "patient": {
+    "birth_date": "2020-10-01",
+    "gender": "Unknown"
+  },
+  "history": [
+    {
+      "date": "2020-10-01",
+      "cvx": "51"
+    },
+    {
+      "date": "2021-05-04",
+      "cvx": "220"
+    },
+    {
+      "date": "2022-09-05",
+      "cvx": "189"
+    },
+    {
+      "date": "2023-06-28",
+      "cvx": "08"
+    },
+    {
+      "date": "2024-06-02",
+      "cvx": "08"
+    },
+    {
+      "date": "2024-12-11",
+      "cvx": "42"
+    }
+  ],
+  "execution_date": "2028-06-09",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2020-10-01",
+        "cvx": "51",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2021-05-04",
+        "cvx": "220",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2022-09-05",
+        "cvx": "189",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2023-06-28",
+        "cvx": "08",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2024-06-02",
+        "cvx": "08",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2024-12-11",
+        "cvx": "42",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 4
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HEP_B",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

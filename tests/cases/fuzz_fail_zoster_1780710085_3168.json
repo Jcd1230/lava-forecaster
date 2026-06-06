@@ -1,0 +1,62 @@
+{
+  "name": "fuzz_fail_zoster_1780710085_3168",
+  "group": "ZOSTER",
+  "focus_code": "620",
+  "patient": {
+    "birth_date": "2021-04-15",
+    "gender": "Unknown"
+  },
+  "history": [
+    {
+      "date": "2022-01-20",
+      "cvx": "188"
+    },
+    {
+      "date": "2022-05-12",
+      "cvx": "187"
+    },
+    {
+      "date": "2022-07-11",
+      "cvx": "121"
+    }
+  ],
+  "execution_date": "2026-07-11",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2022-01-20",
+        "cvx": "188",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2022-05-12",
+        "cvx": "187",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2022-07-11",
+        "cvx": "121",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "ZOSTER",
+        "earliest_date": "2071-04-15",
+        "recommended_date": "2071-04-15",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

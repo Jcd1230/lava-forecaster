@@ -1,0 +1,20 @@
+{
+  "name": "fuzz_fail_h1n1_1780710085_4653",
+  "group": "H1N1",
+  "focus_code": "000",
+  "patient": {
+    "birth_date": "2000-05-17",
+    "gender": "Unknown"
+  },
+  "history": [
+    {
+      "date": "2000-11-18",
+      "cvx": "125"
+    }
+  ],
+  "execution_date": "2008-11-09",
+  "expected": {
+    "evaluations": [],
+    "forecasts": []
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "name": "fuzz_fail_covid19_1780710085_1430",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "2005-10-15",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2006-06-10",
+      "cvx": "229"
+    },
+    {
+      "date": "2007-04-22",
+      "cvx": "219"
+    },
+    {
+      "date": "2007-08-16",
+      "cvx": "334"
+    }
+  ],
+  "execution_date": "2013-04-21",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2006-06-10",
+        "cvx": "229",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2007-04-22",
+        "cvx": "219",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2007-08-16",
+        "cvx": "334",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": "2007-09-06",
+        "recommended_date": "2007-09-06",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

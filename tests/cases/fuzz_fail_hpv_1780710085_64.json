@@ -1,0 +1,62 @@
+{
+  "name": "fuzz_fail_hpv_1780710085_64",
+  "group": "HPV",
+  "focus_code": "840",
+  "patient": {
+    "birth_date": "2001-05-03",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2001-12-19",
+      "cvx": "118"
+    },
+    {
+      "date": "2010-05-02",
+      "cvx": "118"
+    },
+    {
+      "date": "2014-09-07",
+      "cvx": "62"
+    }
+  ],
+  "execution_date": "2014-12-18",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2001-12-19",
+        "cvx": "118",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2010-05-02",
+        "cvx": "118",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2014-09-07",
+        "cvx": "62",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HPV",
+        "earliest_date": "2015-02-07",
+        "recommended_date": "2015-03-07",
+        "overdue_date": "2015-11-03",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

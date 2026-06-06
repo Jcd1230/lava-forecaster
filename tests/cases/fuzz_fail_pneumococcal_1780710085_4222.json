@@ -1,0 +1,62 @@
+{
+  "name": "fuzz_fail_pneumococcal_1780710085_4222",
+  "group": "PNEUMOCOCCAL",
+  "focus_code": "750",
+  "patient": {
+    "birth_date": "2014-12-25",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2015-07-20",
+      "cvx": "33"
+    },
+    {
+      "date": "2015-12-13",
+      "cvx": "177"
+    },
+    {
+      "date": "2016-02-08",
+      "cvx": "327"
+    }
+  ],
+  "execution_date": "2022-08-25",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2015-07-20",
+        "cvx": "33",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2015-12-13",
+        "cvx": "177",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2016-02-08",
+        "cvx": "327",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "PNEUMOCOCCAL",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "ConditionallyRecommended",
+        "reasons": [
+          "HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

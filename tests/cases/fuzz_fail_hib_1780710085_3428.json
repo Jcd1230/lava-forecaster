@@ -1,0 +1,40 @@
+{
+  "name": "fuzz_fail_hib_1780710085_3428",
+  "group": "HIB",
+  "focus_code": "300",
+  "patient": {
+    "birth_date": "2008-10-01",
+    "gender": "Unknown"
+  },
+  "history": [
+    {
+      "date": "2009-01-21",
+      "cvx": "17"
+    }
+  ],
+  "execution_date": "2010-05-14",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2009-01-21",
+        "cvx": "17",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HIB",
+        "earliest_date": "2009-10-01",
+        "recommended_date": "2010-01-01",
+        "overdue_date": "2010-02-28",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

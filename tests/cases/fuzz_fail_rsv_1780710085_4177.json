@@ -1,0 +1,62 @@
+{
+  "name": "fuzz_fail_rsv_1780710085_4177",
+  "group": "RSV",
+  "focus_code": "875",
+  "patient": {
+    "birth_date": "2000-11-25",
+    "gender": "Unknown"
+  },
+  "history": [
+    {
+      "date": "2001-03-17",
+      "cvx": "326"
+    },
+    {
+      "date": "2002-01-08",
+      "cvx": "314"
+    },
+    {
+      "date": "2002-02-13",
+      "cvx": "314"
+    }
+  ],
+  "execution_date": "2007-06-21",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2001-03-17",
+        "cvx": "326",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2002-01-08",
+        "cvx": "314",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2002-02-13",
+        "cvx": "314",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "RSV",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotRecommended",
+        "reasons": [
+          "NOT_SUPPORTED"
+        ]
+      }
+    ]
+  }
+}

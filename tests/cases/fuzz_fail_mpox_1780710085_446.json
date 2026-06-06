@@ -1,0 +1,40 @@
+{
+  "name": "fuzz_fail_mpox_1780710085_446",
+  "group": "MPOX",
+  "focus_code": "000",
+  "patient": {
+    "birth_date": "2023-02-20",
+    "gender": "Unknown"
+  },
+  "history": [
+    {
+      "date": "2023-05-27",
+      "cvx": "206"
+    },
+    {
+      "date": "2023-10-19",
+      "cvx": "325"
+    },
+    {
+      "date": "2024-01-29",
+      "cvx": "325"
+    },
+    {
+      "date": "2025-01-05",
+      "cvx": "325"
+    },
+    {
+      "date": "2025-02-18",
+      "cvx": "105"
+    },
+    {
+      "date": "2025-07-16",
+      "cvx": "325"
+    }
+  ],
+  "execution_date": "2025-10-05",
+  "expected": {
+    "evaluations": [],
+    "forecasts": []
+  }
+}

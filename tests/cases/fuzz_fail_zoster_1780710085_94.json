@@ -1,0 +1,51 @@
+{
+  "name": "fuzz_fail_zoster_1780710085_94",
+  "group": "ZOSTER",
+  "focus_code": "620",
+  "patient": {
+    "birth_date": "2006-10-18",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2007-06-12",
+      "cvx": "188"
+    },
+    {
+      "date": "2056-10-17",
+      "cvx": "121"
+    }
+  ],
+  "execution_date": "2057-04-01",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2007-06-12",
+        "cvx": "188",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2056-10-17",
+        "cvx": "121",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "ZOSTER",
+        "earliest_date": "2056-12-12",
+        "recommended_date": "2056-12-12",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

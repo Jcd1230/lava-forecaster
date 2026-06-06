@@ -1,0 +1,51 @@
+{
+  "name": "fuzz_fail_zoster_1780710085_163",
+  "group": "ZOSTER",
+  "focus_code": "620",
+  "patient": {
+    "birth_date": "2004-12-06",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2054-12-07",
+      "cvx": "187"
+    },
+    {
+      "date": "2055-01-05",
+      "cvx": "188"
+    }
+  ],
+  "execution_date": "2055-03-24",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2054-12-07",
+        "cvx": "187",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2055-01-05",
+        "cvx": "188",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "ZOSTER",
+        "earliest_date": "2055-03-02",
+        "recommended_date": "2055-03-02",
+        "overdue_date": "2055-09-01",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

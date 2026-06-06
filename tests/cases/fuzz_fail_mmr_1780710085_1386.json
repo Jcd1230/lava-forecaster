@@ -1,0 +1,73 @@
+{
+  "name": "fuzz_fail_mmr_1780710085_1386",
+  "group": "MMR",
+  "focus_code": "500",
+  "patient": {
+    "birth_date": "2005-11-28",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2006-11-28",
+      "cvx": "38"
+    },
+    {
+      "date": "2006-12-27",
+      "cvx": "94"
+    },
+    {
+      "date": "2007-01-23",
+      "cvx": "07"
+    },
+    {
+      "date": "2013-04-04",
+      "cvx": "38"
+    }
+  ],
+  "execution_date": "2013-07-27",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2006-11-28",
+        "cvx": "38",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2006-12-27",
+        "cvx": "94",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2007-01-23",
+        "cvx": "07",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2013-04-04",
+        "cvx": "38",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MMR",
+        "earliest_date": "2013-05-02",
+        "recommended_date": "2013-05-02",
+        "overdue_date": "2013-05-02",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

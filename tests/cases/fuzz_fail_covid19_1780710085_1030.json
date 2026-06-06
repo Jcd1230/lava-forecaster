@@ -1,0 +1,51 @@
+{
+  "name": "fuzz_fail_covid19_1780710085_1030",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "2007-05-28",
+    "gender": "Unknown"
+  },
+  "history": [
+    {
+      "date": "2008-03-28",
+      "cvx": "334"
+    },
+    {
+      "date": "2025-08-28",
+      "cvx": "301"
+    }
+  ],
+  "execution_date": "2025-09-12",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2008-03-28",
+        "cvx": "334",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2025-08-28",
+        "cvx": "301",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": "2025-08-28",
+        "recommended_date": "2025-08-28",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

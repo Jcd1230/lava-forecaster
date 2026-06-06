@@ -1,0 +1,36 @@
+{
+  "name": "fuzz_fail_mpox_1780710085_31",
+  "group": "MPOX",
+  "focus_code": "000",
+  "patient": {
+    "birth_date": "2006-10-07",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2007-10-04",
+      "cvx": "325"
+    },
+    {
+      "date": "2007-11-01",
+      "cvx": "206"
+    },
+    {
+      "date": "2008-01-24",
+      "cvx": "206"
+    },
+    {
+      "date": "2008-07-20",
+      "cvx": "206"
+    },
+    {
+      "date": "2009-04-05",
+      "cvx": "105"
+    }
+  ],
+  "execution_date": "2011-05-24",
+  "expected": {
+    "evaluations": [],
+    "forecasts": []
+  }
+}

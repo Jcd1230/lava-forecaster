@@ -1,0 +1,74 @@
+{
+  "name": "fuzz_fail_covid19_1780710085_160",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "2010-06-26",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2010-11-13",
+      "cvx": "217"
+    },
+    {
+      "date": "2011-11-12",
+      "cvx": "218"
+    },
+    {
+      "date": "2012-08-23",
+      "cvx": "207"
+    },
+    {
+      "date": "2012-12-29",
+      "cvx": "313"
+    }
+  ],
+  "execution_date": "2017-03-02",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2010-11-13",
+        "cvx": "217",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2011-11-12",
+        "cvx": "218",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2012-08-23",
+        "cvx": "207",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2012-12-29",
+        "cvx": "313",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": "2015-06-26",
+        "recommended_date": "2015-06-26",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW",
+          "BOOSTER_DOSE"
+        ]
+      }
+    ]
+  }
+}

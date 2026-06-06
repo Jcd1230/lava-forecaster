@@ -1,0 +1,51 @@
+{
+  "name": "fuzz_fail_influenza_1780710085_1510",
+  "group": "INFLUENZA",
+  "focus_code": "800",
+  "patient": {
+    "birth_date": "2017-08-03",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2024-06-30",
+      "cvx": "168"
+    },
+    {
+      "date": "2024-07-01",
+      "cvx": "231"
+    }
+  ],
+  "execution_date": "2024-11-30",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2024-06-30",
+        "cvx": "168",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2024-07-01",
+        "cvx": "231",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "INFLUENZA",
+        "earliest_date": "2024-07-29",
+        "recommended_date": "2024-07-29",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

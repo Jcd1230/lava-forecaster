@@ -1,0 +1,84 @@
+{
+  "name": "fuzz_fail_hep_b_1780710085_3943",
+  "group": "HEP_B",
+  "focus_code": "100",
+  "patient": {
+    "birth_date": "2013-11-15",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2014-01-29",
+      "cvx": "102"
+    },
+    {
+      "date": "2014-09-15",
+      "cvx": "220"
+    },
+    {
+      "date": "2015-04-26",
+      "cvx": "104"
+    },
+    {
+      "date": "2016-02-18",
+      "cvx": "104"
+    },
+    {
+      "date": "2016-07-28",
+      "cvx": "110"
+    }
+  ],
+  "execution_date": "2022-04-13",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2014-01-29",
+        "cvx": "102",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2014-09-15",
+        "cvx": "220",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2015-04-26",
+        "cvx": "104",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2016-02-18",
+        "cvx": "104",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2016-07-28",
+        "cvx": "110",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 4
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HEP_B",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

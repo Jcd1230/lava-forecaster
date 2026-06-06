@@ -1,0 +1,27 @@
+{
+  "name": "fuzz_fail_covid19_1780710085_2530",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "2000-03-17",
+    "gender": "Female"
+  },
+  "history": [],
+  "execution_date": "2010-02-09",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": "2000-09-17",
+        "recommended_date": "2010-02-09",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

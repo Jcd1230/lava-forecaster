@@ -1,0 +1,27 @@
+{
+  "name": "fuzz_fail_polio_1780710085_1493",
+  "group": "POLIO",
+  "focus_code": "400",
+  "patient": {
+    "birth_date": "2007-01-12",
+    "gender": "Male"
+  },
+  "history": [],
+  "execution_date": "2011-04-12",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "POLIO",
+        "earliest_date": "2007-02-23",
+        "recommended_date": "2007-03-12",
+        "overdue_date": "2007-05-09",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

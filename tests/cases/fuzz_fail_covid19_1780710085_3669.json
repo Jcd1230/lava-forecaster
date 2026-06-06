@@ -1,0 +1,73 @@
+{
+  "name": "fuzz_fail_covid19_1780710085_3669",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "2011-12-13",
+    "gender": "Unknown"
+  },
+  "history": [
+    {
+      "date": "2012-07-25",
+      "cvx": "228"
+    },
+    {
+      "date": "2013-01-08",
+      "cvx": "213"
+    },
+    {
+      "date": "2013-08-19",
+      "cvx": "309"
+    },
+    {
+      "date": "2013-11-12",
+      "cvx": "208"
+    }
+  ],
+  "execution_date": "2019-11-07",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2012-07-25",
+        "cvx": "228",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2013-01-08",
+        "cvx": "213",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2013-08-19",
+        "cvx": "309",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2013-11-12",
+        "cvx": "208",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": "2014-01-07",
+        "recommended_date": "2014-01-07",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

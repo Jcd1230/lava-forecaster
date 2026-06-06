@@ -1,0 +1,84 @@
+{
+  "name": "fuzz_fail_polio_1780710085_297",
+  "group": "POLIO",
+  "focus_code": "400",
+  "patient": {
+    "birth_date": "2021-02-07",
+    "gender": "Unknown"
+  },
+  "history": [
+    {
+      "date": "2021-11-12",
+      "cvx": "146"
+    },
+    {
+      "date": "2021-12-10",
+      "cvx": "170"
+    },
+    {
+      "date": "2022-05-10",
+      "cvx": "146"
+    },
+    {
+      "date": "2028-06-13",
+      "cvx": "146"
+    },
+    {
+      "date": "2028-10-10",
+      "cvx": "02"
+    }
+  ],
+  "execution_date": "2028-10-28",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2021-11-12",
+        "cvx": "146",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2021-12-10",
+        "cvx": "170",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2022-05-10",
+        "cvx": "146",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2028-06-13",
+        "cvx": "146",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 4
+      },
+      {
+        "dose_date": "2028-10-10",
+        "cvx": "02",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 5
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "POLIO",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

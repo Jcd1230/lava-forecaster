@@ -1,0 +1,73 @@
+{
+  "name": "fuzz_fail_hep_b_1780710085_4954",
+  "group": "HEP_B",
+  "focus_code": "100",
+  "patient": {
+    "birth_date": "2012-06-02",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2012-06-29",
+      "cvx": "45"
+    },
+    {
+      "date": "2012-07-27",
+      "cvx": "189"
+    },
+    {
+      "date": "2012-07-27",
+      "cvx": "189"
+    },
+    {
+      "date": "2012-07-27",
+      "cvx": "189"
+    }
+  ],
+  "execution_date": "2016-04-05",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2012-06-29",
+        "cvx": "45",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2012-07-27",
+        "cvx": "189",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2012-07-27",
+        "cvx": "189",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2012-07-27",
+        "cvx": "189",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HEP_B",
+        "earliest_date": "2012-08-24",
+        "recommended_date": "2012-08-24",
+        "overdue_date": "2012-09-29",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

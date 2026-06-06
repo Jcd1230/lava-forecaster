@@ -1,0 +1,40 @@
+{
+  "name": "fuzz_fail_hep_b_1780710085_4113",
+  "group": "HEP_B",
+  "focus_code": "100",
+  "patient": {
+    "birth_date": "2000-04-16",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2000-04-16",
+      "cvx": "146"
+    }
+  ],
+  "execution_date": "2008-07-03",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2000-04-16",
+        "cvx": "146",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HEP_B",
+        "earliest_date": "2000-05-14",
+        "recommended_date": "2000-05-16",
+        "overdue_date": "2000-08-12",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

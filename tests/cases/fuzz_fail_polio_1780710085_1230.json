@@ -1,0 +1,73 @@
+{
+  "name": "fuzz_fail_polio_1780710085_1230",
+  "group": "POLIO",
+  "focus_code": "400",
+  "patient": {
+    "birth_date": "2018-06-06",
+    "gender": "Unknown"
+  },
+  "history": [
+    {
+      "date": "2018-07-18",
+      "cvx": "110"
+    },
+    {
+      "date": "2018-10-06",
+      "cvx": "178"
+    },
+    {
+      "date": "2019-03-13",
+      "cvx": "182"
+    },
+    {
+      "date": "2019-05-31",
+      "cvx": "02"
+    }
+  ],
+  "execution_date": "2024-05-28",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2018-07-18",
+        "cvx": "110",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2018-10-06",
+        "cvx": "178",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2019-03-13",
+        "cvx": "182",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2019-05-31",
+        "cvx": "02",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "POLIO",
+        "earliest_date": "2019-06-28",
+        "recommended_date": "2019-06-28",
+        "overdue_date": "2019-06-28",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

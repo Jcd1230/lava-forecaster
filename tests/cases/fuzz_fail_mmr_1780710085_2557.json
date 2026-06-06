@@ -1,0 +1,95 @@
+{
+  "name": "fuzz_fail_mmr_1780710085_2557",
+  "group": "MMR",
+  "focus_code": "500",
+  "patient": {
+    "birth_date": "2007-02-23",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2008-02-23",
+      "cvx": "07"
+    },
+    {
+      "date": "2008-05-22",
+      "cvx": "94"
+    },
+    {
+      "date": "2008-06-19",
+      "cvx": "05"
+    },
+    {
+      "date": "2009-05-22",
+      "cvx": "05"
+    },
+    {
+      "date": "2009-06-19",
+      "cvx": "06"
+    },
+    {
+      "date": "2010-04-04",
+      "cvx": "05"
+    }
+  ],
+  "execution_date": "2015-03-18",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2008-02-23",
+        "cvx": "07",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2008-05-22",
+        "cvx": "94",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2008-06-19",
+        "cvx": "05",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2009-05-22",
+        "cvx": "05",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2009-06-19",
+        "cvx": "06",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2010-04-04",
+        "cvx": "05",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MMR",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

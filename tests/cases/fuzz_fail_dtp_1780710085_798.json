@@ -1,0 +1,73 @@
+{
+  "name": "fuzz_fail_dtp_1780710085_798",
+  "group": "DTP",
+  "focus_code": "200",
+  "patient": {
+    "birth_date": "2000-06-08",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2000-07-21",
+      "cvx": "120"
+    },
+    {
+      "date": "2001-07-08",
+      "cvx": "09"
+    },
+    {
+      "date": "2001-07-08",
+      "cvx": "195"
+    },
+    {
+      "date": "2001-08-04",
+      "cvx": "50"
+    }
+  ],
+  "execution_date": "2004-04-03",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2000-07-21",
+        "cvx": "120",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2001-07-08",
+        "cvx": "09",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2001-07-08",
+        "cvx": "195",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2001-08-04",
+        "cvx": "50",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "DTP",
+        "earliest_date": "2002-02-04",
+        "recommended_date": "2002-02-04",
+        "overdue_date": "2002-02-04",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

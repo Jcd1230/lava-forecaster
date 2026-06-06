@@ -1,0 +1,73 @@
+{
+  "name": "fuzz_fail_hib_1780710085_1517",
+  "group": "HIB",
+  "focus_code": "300",
+  "patient": {
+    "birth_date": "2000-02-08",
+    "gender": "Unknown"
+  },
+  "history": [
+    {
+      "date": "2000-03-21",
+      "cvx": "49"
+    },
+    {
+      "date": "2000-10-23",
+      "cvx": "170"
+    },
+    {
+      "date": "2000-11-20",
+      "cvx": "198"
+    },
+    {
+      "date": "2000-12-18",
+      "cvx": "102"
+    }
+  ],
+  "execution_date": "2001-04-24",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2000-03-21",
+        "cvx": "49",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2000-10-23",
+        "cvx": "170",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2000-11-20",
+        "cvx": "198",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2000-12-18",
+        "cvx": "102",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 4
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HIB",
+        "earliest_date": "2001-02-12",
+        "recommended_date": "2001-02-12",
+        "overdue_date": "2001-07-05",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

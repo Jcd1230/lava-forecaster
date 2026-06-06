@@ -1,0 +1,40 @@
+{
+  "name": "fuzz_fail_mpox_1780710085_1496",
+  "group": "MPOX",
+  "focus_code": "000",
+  "patient": {
+    "birth_date": "2006-10-20",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2007-08-17",
+      "cvx": "325"
+    },
+    {
+      "date": "2007-09-14",
+      "cvx": "325"
+    },
+    {
+      "date": "2008-01-14",
+      "cvx": "75"
+    },
+    {
+      "date": "2008-03-20",
+      "cvx": "206"
+    },
+    {
+      "date": "2008-07-16",
+      "cvx": "325"
+    },
+    {
+      "date": "2009-05-26",
+      "cvx": "75"
+    }
+  ],
+  "execution_date": "2014-08-30",
+  "expected": {
+    "evaluations": [],
+    "forecasts": []
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "name": "fuzz_fail_dtp_1780710085_1638",
+  "group": "DTP",
+  "focus_code": "200",
+  "patient": {
+    "birth_date": "2020-09-19",
+    "gender": "Unknown"
+  },
+  "history": [
+    {
+      "date": "2020-10-31",
+      "cvx": "198"
+    },
+    {
+      "date": "2020-11-01",
+      "cvx": "139"
+    },
+    {
+      "date": "2021-05-23",
+      "cvx": "102"
+    },
+    {
+      "date": "2021-06-19",
+      "cvx": "198"
+    },
+    {
+      "date": "2021-06-21",
+      "cvx": "146"
+    }
+  ],
+  "execution_date": "2025-01-21",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2020-10-31",
+        "cvx": "198",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2020-11-01",
+        "cvx": "139",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2021-05-23",
+        "cvx": "102",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2021-06-19",
+        "cvx": "198",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2021-06-21",
+        "cvx": "146",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 4
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "DTP",
+        "earliest_date": "2021-12-21",
+        "recommended_date": "2021-12-21",
+        "overdue_date": "2022-05-16",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

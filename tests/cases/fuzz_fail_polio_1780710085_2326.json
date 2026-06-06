@@ -1,0 +1,84 @@
+{
+  "name": "fuzz_fail_polio_1780710085_2326",
+  "group": "POLIO",
+  "focus_code": "400",
+  "patient": {
+    "birth_date": "2023-09-19",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2024-01-15",
+      "cvx": "170"
+    },
+    {
+      "date": "2024-07-22",
+      "cvx": "110"
+    },
+    {
+      "date": "2025-08-24",
+      "cvx": "178"
+    },
+    {
+      "date": "2025-08-24",
+      "cvx": "182"
+    },
+    {
+      "date": "2025-08-24",
+      "cvx": "195"
+    }
+  ],
+  "execution_date": "2025-08-31",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2024-01-15",
+        "cvx": "170",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2024-07-22",
+        "cvx": "110",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2025-08-24",
+        "cvx": "178",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2025-08-24",
+        "cvx": "182",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2025-08-24",
+        "cvx": "195",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "POLIO",
+        "earliest_date": "2027-09-19",
+        "recommended_date": "2027-09-19",
+        "overdue_date": "2030-10-16",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

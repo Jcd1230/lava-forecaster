@@ -1,0 +1,62 @@
+{
+  "name": "fuzz_fail_hib_1780710085_4316",
+  "group": "HIB",
+  "focus_code": "300",
+  "patient": {
+    "birth_date": "2019-02-12",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2019-03-30",
+      "cvx": "51"
+    },
+    {
+      "date": "2020-02-19",
+      "cvx": "132"
+    },
+    {
+      "date": "2020-11-22",
+      "cvx": "49"
+    }
+  ],
+  "execution_date": "2025-11-30",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2019-03-30",
+        "cvx": "51",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2020-02-19",
+        "cvx": "132",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2020-11-22",
+        "cvx": "49",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HIB",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

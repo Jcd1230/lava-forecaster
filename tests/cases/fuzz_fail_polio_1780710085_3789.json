@@ -1,0 +1,95 @@
+{
+  "name": "fuzz_fail_polio_1780710085_3789",
+  "group": "POLIO",
+  "focus_code": "400",
+  "patient": {
+    "birth_date": "2008-08-27",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2009-08-07",
+      "cvx": "120"
+    },
+    {
+      "date": "2009-09-03",
+      "cvx": "132"
+    },
+    {
+      "date": "2012-08-27",
+      "cvx": "120"
+    },
+    {
+      "date": "2013-05-20",
+      "cvx": "179"
+    },
+    {
+      "date": "2013-07-19",
+      "cvx": "10"
+    },
+    {
+      "date": "2014-07-18",
+      "cvx": "170"
+    }
+  ],
+  "execution_date": "2016-01-28",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2009-08-07",
+        "cvx": "120",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2009-09-03",
+        "cvx": "132",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2012-08-27",
+        "cvx": "120",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2013-05-20",
+        "cvx": "179",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 4
+      },
+      {
+        "dose_date": "2013-07-19",
+        "cvx": "10",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 4
+      },
+      {
+        "dose_date": "2014-07-18",
+        "cvx": "170",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 4
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "POLIO",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "name": "fuzz_fail_rotavirus_1780710085_2110",
+  "group": "ROTAVIRUS",
+  "focus_code": "820",
+  "patient": {
+    "birth_date": "2020-08-04",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2021-02-24",
+      "cvx": "119"
+    },
+    {
+      "date": "2021-09-18",
+      "cvx": "122"
+    },
+    {
+      "date": "2022-01-19",
+      "cvx": "122"
+    }
+  ],
+  "execution_date": "2022-06-09",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2021-02-24",
+        "cvx": "119",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2021-09-18",
+        "cvx": "122",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2022-01-19",
+        "cvx": "122",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "ROTAVIRUS",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotRecommended",
+        "reasons": [
+          "TOO_OLD"
+        ]
+      }
+    ]
+  }
+}

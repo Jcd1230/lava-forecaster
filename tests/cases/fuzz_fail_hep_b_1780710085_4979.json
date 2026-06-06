@@ -1,0 +1,84 @@
+{
+  "name": "fuzz_fail_hep_b_1780710085_4979",
+  "group": "HEP_B",
+  "focus_code": "100",
+  "patient": {
+    "birth_date": "2005-03-13",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2005-03-13",
+      "cvx": "146"
+    },
+    {
+      "date": "2005-04-11",
+      "cvx": "220"
+    },
+    {
+      "date": "2006-03-16",
+      "cvx": "104"
+    },
+    {
+      "date": "2006-09-13",
+      "cvx": "51"
+    },
+    {
+      "date": "2007-03-01",
+      "cvx": "102"
+    }
+  ],
+  "execution_date": "2007-04-09",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2005-03-13",
+        "cvx": "146",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2005-04-11",
+        "cvx": "220",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2006-03-16",
+        "cvx": "104",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2006-09-13",
+        "cvx": "51",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2007-03-01",
+        "cvx": "102",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 4
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HEP_B",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

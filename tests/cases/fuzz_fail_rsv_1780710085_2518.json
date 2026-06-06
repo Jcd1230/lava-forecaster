@@ -1,0 +1,95 @@
+{
+  "name": "fuzz_fail_rsv_1780710085_2518",
+  "group": "RSV",
+  "focus_code": "875",
+  "patient": {
+    "birth_date": "2013-07-06",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2014-03-12",
+      "cvx": "303"
+    },
+    {
+      "date": "2015-01-25",
+      "cvx": "307"
+    },
+    {
+      "date": "2015-10-05",
+      "cvx": "315"
+    },
+    {
+      "date": "2016-06-15",
+      "cvx": "326"
+    },
+    {
+      "date": "2016-11-02",
+      "cvx": "306"
+    },
+    {
+      "date": "2017-02-07",
+      "cvx": "304"
+    }
+  ],
+  "execution_date": "2019-03-12",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2014-03-12",
+        "cvx": "303",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2015-01-25",
+        "cvx": "307",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2015-10-05",
+        "cvx": "315",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2016-06-15",
+        "cvx": "326",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2016-11-02",
+        "cvx": "306",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2017-02-07",
+        "cvx": "304",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "RSV",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotRecommended",
+        "reasons": [
+          "NOT_SUPPORTED"
+        ]
+      }
+    ]
+  }
+}

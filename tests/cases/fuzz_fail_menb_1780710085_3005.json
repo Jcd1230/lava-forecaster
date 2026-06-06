@@ -1,0 +1,62 @@
+{
+  "name": "fuzz_fail_menb_1780710085_3005",
+  "group": "MENB",
+  "focus_code": "835",
+  "patient": {
+    "birth_date": "2020-11-26",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2021-09-22",
+      "cvx": "328"
+    },
+    {
+      "date": "2022-08-26",
+      "cvx": "316"
+    },
+    {
+      "date": "2022-11-22",
+      "cvx": "316"
+    }
+  ],
+  "execution_date": "2027-05-21",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2021-09-22",
+        "cvx": "328",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2022-08-26",
+        "cvx": "316",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2022-11-22",
+        "cvx": "316",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MENB",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotRecommended",
+        "reasons": [
+          "BELOW_MINIMUM_AGE_HIGH_RISK_SERIES"
+        ]
+      }
+    ]
+  }
+}

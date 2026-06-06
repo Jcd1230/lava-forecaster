@@ -1,0 +1,84 @@
+{
+  "name": "fuzz_fail_menb_1780710085_789",
+  "group": "MENB",
+  "focus_code": "835",
+  "patient": {
+    "birth_date": "2013-11-04",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2014-02-17",
+      "cvx": "328"
+    },
+    {
+      "date": "2014-04-17",
+      "cvx": "163"
+    },
+    {
+      "date": "2014-12-02",
+      "cvx": "162"
+    },
+    {
+      "date": "2015-01-19",
+      "cvx": "162"
+    },
+    {
+      "date": "2015-07-20",
+      "cvx": "163"
+    }
+  ],
+  "execution_date": "2020-07-01",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2014-02-17",
+        "cvx": "328",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2014-04-17",
+        "cvx": "163",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2014-12-02",
+        "cvx": "162",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2015-01-19",
+        "cvx": "162",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2015-07-20",
+        "cvx": "163",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MENB",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotRecommended",
+        "reasons": [
+          "BELOW_MINIMUM_AGE_HIGH_RISK_SERIES"
+        ]
+      }
+    ]
+  }
+}

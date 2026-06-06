@@ -1,0 +1,51 @@
+{
+  "name": "fuzz_fail_hep_b_1780710085_2747",
+  "group": "HEP_B",
+  "focus_code": "100",
+  "patient": {
+    "birth_date": "2021-11-16",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2022-03-23",
+      "cvx": "132"
+    },
+    {
+      "date": "2022-04-20",
+      "cvx": "110"
+    }
+  ],
+  "execution_date": "2022-07-12",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2022-03-23",
+        "cvx": "132",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2022-04-20",
+        "cvx": "110",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HEP_B",
+        "earliest_date": "2022-07-13",
+        "recommended_date": "2022-07-13",
+        "overdue_date": "2023-07-13",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "name": "fuzz_fail_pneumococcal_1780710085_1501",
+  "group": "PNEUMOCOCCAL",
+  "focus_code": "750",
+  "patient": {
+    "birth_date": "2022-07-08",
+    "gender": "Unknown"
+  },
+  "history": [
+    {
+      "date": "2023-07-07",
+      "cvx": "109"
+    },
+    {
+      "date": "2023-09-01",
+      "cvx": "100"
+    },
+    {
+      "date": "2023-12-05",
+      "cvx": "177"
+    },
+    {
+      "date": "2024-07-29",
+      "cvx": "215"
+    },
+    {
+      "date": "2025-06-14",
+      "cvx": "33"
+    }
+  ],
+  "execution_date": "2025-11-22",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2023-07-07",
+        "cvx": "109",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2023-09-01",
+        "cvx": "100",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2023-12-05",
+        "cvx": "177",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2024-07-29",
+        "cvx": "215",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 4
+      },
+      {
+        "dose_date": "2025-06-14",
+        "cvx": "33",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 5
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "PNEUMOCOCCAL",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

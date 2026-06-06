@@ -1,0 +1,84 @@
+{
+  "name": "fuzz_fail_zoster_1780710085_3836",
+  "group": "ZOSTER",
+  "focus_code": "620",
+  "patient": {
+    "birth_date": "2023-06-01",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2023-10-02",
+      "cvx": "121"
+    },
+    {
+      "date": "2073-05-31",
+      "cvx": "121"
+    },
+    {
+      "date": "2073-07-26",
+      "cvx": "188"
+    },
+    {
+      "date": "2073-09-20",
+      "cvx": "187"
+    },
+    {
+      "date": "2074-01-29",
+      "cvx": "188"
+    }
+  ],
+  "execution_date": "2074-04-21",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2023-10-02",
+        "cvx": "121",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2073-05-31",
+        "cvx": "121",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2073-07-26",
+        "cvx": "188",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2073-09-20",
+        "cvx": "187",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2074-01-29",
+        "cvx": "188",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "ZOSTER",
+        "earliest_date": "2074-03-26",
+        "recommended_date": "2074-03-26",
+        "overdue_date": "2074-09-25",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

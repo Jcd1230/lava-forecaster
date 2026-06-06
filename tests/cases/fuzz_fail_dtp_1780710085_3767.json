@@ -1,0 +1,86 @@
+{
+  "name": "fuzz_fail_dtp_1780710085_3767",
+  "group": "DTP",
+  "focus_code": "200",
+  "patient": {
+    "birth_date": "2003-10-20",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2010-10-20",
+      "cvx": "139"
+    },
+    {
+      "date": "2010-11-17",
+      "cvx": "115"
+    },
+    {
+      "date": "2011-04-14",
+      "cvx": "22"
+    },
+    {
+      "date": "2011-10-14",
+      "cvx": "50"
+    },
+    {
+      "date": "2016-11-16",
+      "cvx": "50"
+    }
+  ],
+  "execution_date": "2017-03-28",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2010-10-20",
+        "cvx": "139",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2010-11-17",
+        "cvx": "115",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2011-04-14",
+        "cvx": "22",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2011-10-14",
+        "cvx": "50",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2016-11-16",
+        "cvx": "50",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 4
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "DTP",
+        "earliest_date": "2021-11-16",
+        "recommended_date": "2026-11-16",
+        "overdue_date": "2026-12-13",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE",
+          "ADMINISTER_TDAP_OR_TD",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

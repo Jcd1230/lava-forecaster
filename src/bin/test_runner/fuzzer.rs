@@ -291,6 +291,7 @@ pub fn run_fuzz(
     group_opt: Option<String>,
     java_url: &str,
     shrink: bool,
+    bulk: bool,
 ) -> Result<(), String> {
     let seed = seed_opt.unwrap_or_else(|| {
         use std::time::{SystemTime, UNIX_EPOCH};
@@ -307,6 +308,7 @@ pub fn run_fuzz(
     }
     println!("ICE Url: {}", java_url);
     println!("Shrink enabled: {}", shrink);
+    println!("Bulk mode enabled: {}", bulk);
     println!("---------------------------------");
 
     let mut rng = SimpleRng::new(seed);
@@ -324,60 +326,99 @@ pub fn run_fuzz(
     let mut passed = 0;
     let mut failed = 0;
 
-    for i in 0..count {
-        let target_group = match &group_opt {
-            Some(g) => g.clone(),
-            None => rng.choose(&supported_groups).clone(),
-        };
+    let chunk_size = 500;
+    let mut i = 0;
+    while i < count {
+        let current_chunk_size = (count - i).min(chunk_size);
+        let mut chunk_cases = Vec::new();
+        
+        for j in 0..current_chunk_size {
+            let target_group = match &group_opt {
+                Some(g) => g.clone(),
+                None => rng.choose(&supported_groups).clone(),
+            };
+            let tc = generate_guided_case(&mut rng, &target_group, i + j, seed);
+            chunk_cases.push(tc);
+        }
 
-        let tc = generate_guided_case(&mut rng, &target_group, i, seed);
+        let mut rust_results = Vec::new();
+        for tc in &chunk_cases {
+            let res = evaluate_patient_all_groups(&tc.patient, &tc.history, tc.execution_date);
+            let rust_group = res.iter().find(|rg| rg.vaccine_group.to_uppercase() == tc.group.to_uppercase());
+            let (rust_evals, rust_fc) = match rust_group {
+                Some(rg) => (rg.evaluations.to_vec(), rg.forecasts.first().cloned()),
+                None => (Vec::new(), None),
+            };
+            rust_results.push((rust_evals, rust_fc));
+        }
 
-        let rust_results = evaluate_patient_all_groups(&tc.patient, &tc.history, tc.execution_date);
-        let rust_group = rust_results.iter().find(|rg| rg.vaccine_group.to_uppercase() == tc.group.to_uppercase());
-        let (rust_evals, rust_fc) = match rust_group {
-            Some(rg) => (rg.evaluations.to_vec(), rg.forecasts.first().cloned()),
-            None => (Vec::new(), None),
-        };
-
-        let java_res = match super::get_java_expected_results(client, java_url, &tc) {
-            Ok(res) => res,
-            Err(e) => {
-                println!("Fuzz #{} ({}): Java ICE Query Error: {}", i, target_group, e);
-                failed += 1;
-                continue;
-            }
-        };
-
-        let errors = compare_results(&tc, &rust_evals, rust_fc.as_ref(), &java_res);
-        if errors.is_empty() {
-            passed += 1;
-            if count <= 100 || i % (count / 10).max(1) == 0 {
-                println!("Fuzz #{} ({}): PASS", i, target_group);
+        let java_results = if bulk {
+            let tc_refs: Vec<&UnifiedTestCase> = chunk_cases.iter().collect();
+            match super::get_java_expected_results_bulk(client, java_url, &tc_refs) {
+                Ok(res) => res,
+                Err(e) => {
+                    println!("Java bulk query failed: {}. Falling back to individual queries.", e);
+                    let mut fallback_results = Vec::new();
+                    for tc in &chunk_cases {
+                        fallback_results.push(super::get_java_expected_results(client, java_url, tc));
+                    }
+                    fallback_results
+                }
             }
         } else {
-            failed += 1;
-            println!("Fuzz #{} ({}): FAIL", i, target_group);
-            for err in &errors {
-                println!("  - {}", err);
+            let mut res = Vec::new();
+            for tc in &chunk_cases {
+                res.push(super::get_java_expected_results(client, java_url, tc));
             }
+            res
+        };
 
-            let mut final_case = tc.clone();
-            final_case.expected = Some(java_res);
+        for j in 0..current_chunk_size {
+            let tc = &chunk_cases[j];
+            let (rust_evals, rust_fc) = &rust_results[j];
+            let case_index = i + j;
 
-            if shrink {
-                final_case = shrink_case(client, java_url, final_case);
-            }
+            match &java_results[j] {
+                Ok(java_res) => {
+                    let errors = compare_results(tc, rust_evals, rust_fc.as_ref(), java_res);
+                    if errors.is_empty() {
+                        passed += 1;
+                        if count <= 100 || case_index % (count / 10).max(1) == 0 {
+                            println!("Fuzz #{} ({}): PASS", case_index, tc.group);
+                        }
+                    } else {
+                        failed += 1;
+                        println!("Fuzz #{} ({}): FAIL", case_index, tc.group);
+                        for err in &errors {
+                            println!("  - {}", err);
+                        }
 
-            let out_dir = Path::new("tests/cases");
-            let out_path = out_dir.join(format!("{}.json", final_case.name));
-            if let Ok(out_json) = serde_json::to_string_pretty(&final_case) {
-                if fs::write(&out_path, out_json).is_ok() {
-                    println!("Saved minimal failing case to {:?}", out_path);
-                } else {
-                    println!("Failed to write failing case to {:?}", out_path);
+                        let mut final_case = tc.clone();
+                        final_case.expected = Some(java_res.clone());
+
+                        if shrink {
+                            final_case = shrink_case(client, java_url, final_case);
+                        }
+
+                        let out_dir = Path::new("tests/cases");
+                        let out_path = out_dir.join(format!("{}.json", final_case.name));
+                        if let Ok(out_json) = serde_json::to_string_pretty(&final_case) {
+                            if fs::write(&out_path, out_json).is_ok() {
+                                println!("Saved minimal failing case to {:?}", out_path);
+                            } else {
+                                println!("Failed to write failing case to {:?}", out_path);
+                            }
+                        }
+                    }
+                }
+                Err(e) => {
+                    println!("Fuzz #{} ({}): Java ICE Query Error: {}", case_index, tc.group, e);
+                    failed += 1;
                 }
             }
         }
+
+        i += current_chunk_size;
     }
 
     println!("\n=== Fuzz Run Complete ===");

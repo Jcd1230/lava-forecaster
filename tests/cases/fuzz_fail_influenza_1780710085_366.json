@@ -1,0 +1,62 @@
+{
+  "name": "fuzz_fail_influenza_1780710085_366",
+  "group": "INFLUENZA",
+  "focus_code": "800",
+  "patient": {
+    "birth_date": "2020-05-14",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2027-07-01",
+      "cvx": "88"
+    },
+    {
+      "date": "2028-04-15",
+      "cvx": "194"
+    },
+    {
+      "date": "2028-04-15",
+      "cvx": "88"
+    }
+  ],
+  "execution_date": "2028-09-11",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2027-07-01",
+        "cvx": "88",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2028-04-15",
+        "cvx": "194",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2028-04-15",
+        "cvx": "88",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "INFLUENZA",
+        "earliest_date": "2028-07-01",
+        "recommended_date": "2028-07-01",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

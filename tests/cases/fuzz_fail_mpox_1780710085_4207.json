@@ -1,0 +1,15 @@
+{
+  "name": "fuzz_fail_mpox_1780710085_4207",
+  "group": "MPOX",
+  "focus_code": "000",
+  "patient": {
+    "birth_date": "2018-11-27",
+    "gender": "Female"
+  },
+  "history": [],
+  "execution_date": "2023-02-10",
+  "expected": {
+    "evaluations": [],
+    "forecasts": []
+  }
+}

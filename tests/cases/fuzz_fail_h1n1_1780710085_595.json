@@ -1,0 +1,36 @@
+{
+  "name": "fuzz_fail_h1n1_1780710085_595",
+  "group": "H1N1",
+  "focus_code": "000",
+  "patient": {
+    "birth_date": "2023-11-22",
+    "gender": "Unknown"
+  },
+  "history": [
+    {
+      "date": "2024-04-29",
+      "cvx": "128"
+    },
+    {
+      "date": "2025-03-17",
+      "cvx": "127"
+    },
+    {
+      "date": "2025-08-10",
+      "cvx": "126"
+    },
+    {
+      "date": "2026-03-06",
+      "cvx": "126"
+    },
+    {
+      "date": "2027-03-02",
+      "cvx": "127"
+    }
+  ],
+  "execution_date": "2029-07-08",
+  "expected": {
+    "evaluations": [],
+    "forecasts": []
+  }
+}

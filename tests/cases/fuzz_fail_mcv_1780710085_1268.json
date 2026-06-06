@@ -1,0 +1,95 @@
+{
+  "name": "fuzz_fail_mcv_1780710085_1268",
+  "group": "MCV",
+  "focus_code": "830",
+  "patient": {
+    "birth_date": "2020-04-11",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2021-02-20",
+      "cvx": "316"
+    },
+    {
+      "date": "2031-04-10",
+      "cvx": "203"
+    },
+    {
+      "date": "2036-04-12",
+      "cvx": "147"
+    },
+    {
+      "date": "2036-06-03",
+      "cvx": "114"
+    },
+    {
+      "date": "2036-11-17",
+      "cvx": "136"
+    },
+    {
+      "date": "2037-04-23",
+      "cvx": "328"
+    }
+  ],
+  "execution_date": "2037-06-09",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2021-02-20",
+        "cvx": "316",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2031-04-10",
+        "cvx": "203",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2036-04-12",
+        "cvx": "147",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2036-06-03",
+        "cvx": "114",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2036-11-17",
+        "cvx": "136",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2037-04-23",
+        "cvx": "328",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MCV",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

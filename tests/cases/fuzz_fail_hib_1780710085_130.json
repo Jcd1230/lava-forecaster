@@ -1,0 +1,27 @@
+{
+  "name": "fuzz_fail_hib_1780710085_130",
+  "group": "HIB",
+  "focus_code": "300",
+  "patient": {
+    "birth_date": "2022-12-15",
+    "gender": "Unknown"
+  },
+  "history": [],
+  "execution_date": "2026-12-15",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "HIB",
+        "earliest_date": "2023-12-15",
+        "recommended_date": "2024-03-15",
+        "overdue_date": "2024-05-12",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "fuzz_fail_pneumococcal_1780710085_1787",
+  "group": "PNEUMOCOCCAL",
+  "focus_code": "750",
+  "patient": {
+    "birth_date": "2002-12-14",
+    "gender": "Female"
+  },
+  "history": [],
+  "execution_date": "2006-02-04",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "PNEUMOCOCCAL",
+        "earliest_date": "2004-12-14",
+        "recommended_date": "2004-12-14",
+        "overdue_date": "2004-12-14",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW",
+          "SUPPLEMENTAL_TEXT"
+        ]
+      }
+    ]
+  }
+}

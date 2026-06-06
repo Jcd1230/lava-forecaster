@@ -1,0 +1,27 @@
+{
+  "name": "fuzz_fail_covid19_1780710085_4308",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "2022-11-23",
+    "gender": "Unknown"
+  },
+  "history": [],
+  "execution_date": "2023-09-21",
+  "expected": {
+    "evaluations": [],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": "2023-09-12",
+        "recommended_date": "2023-09-12",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

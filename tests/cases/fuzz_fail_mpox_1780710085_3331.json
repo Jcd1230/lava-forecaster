@@ -1,0 +1,24 @@
+{
+  "name": "fuzz_fail_mpox_1780710085_3331",
+  "group": "MPOX",
+  "focus_code": "000",
+  "patient": {
+    "birth_date": "2017-04-01",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2017-06-05",
+      "cvx": "325"
+    },
+    {
+      "date": "2018-04-18",
+      "cvx": "105"
+    }
+  ],
+  "execution_date": "2025-05-08",
+  "expected": {
+    "evaluations": [],
+    "forecasts": []
+  }
+}

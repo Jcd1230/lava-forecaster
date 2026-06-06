@@ -1,0 +1,73 @@
+{
+  "name": "fuzz_fail_rotavirus_1780710085_1292",
+  "group": "ROTAVIRUS",
+  "focus_code": "820",
+  "patient": {
+    "birth_date": "2014-03-02",
+    "gender": "Unknown"
+  },
+  "history": [
+    {
+      "date": "2014-07-19",
+      "cvx": "74"
+    },
+    {
+      "date": "2014-09-28",
+      "cvx": "119"
+    },
+    {
+      "date": "2015-03-09",
+      "cvx": "119"
+    },
+    {
+      "date": "2015-09-18",
+      "cvx": "122"
+    }
+  ],
+  "execution_date": "2017-09-15",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2014-07-19",
+        "cvx": "74",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2014-09-28",
+        "cvx": "119",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2015-03-09",
+        "cvx": "119",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 3
+      },
+      {
+        "dose_date": "2015-09-18",
+        "cvx": "122",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "ROTAVIRUS",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotRecommended",
+        "reasons": [
+          "TOO_OLD"
+        ]
+      }
+    ]
+  }
+}

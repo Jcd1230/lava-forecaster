@@ -1,0 +1,73 @@
+{
+  "name": "fuzz_fail_influenza_1780710085_1991",
+  "group": "INFLUENZA",
+  "focus_code": "800",
+  "patient": {
+    "birth_date": "2005-07-06",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2012-06-30",
+      "cvx": "186"
+    },
+    {
+      "date": "2012-07-01",
+      "cvx": "161"
+    },
+    {
+      "date": "2013-05-13",
+      "cvx": "155"
+    },
+    {
+      "date": "2013-06-11",
+      "cvx": "141"
+    }
+  ],
+  "execution_date": "2013-10-03",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2012-06-30",
+        "cvx": "186",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2012-07-01",
+        "cvx": "161",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2013-05-13",
+        "cvx": "155",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2013-06-11",
+        "cvx": "141",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "INFLUENZA",
+        "earliest_date": "2013-07-01",
+        "recommended_date": "2013-07-09",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

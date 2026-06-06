@@ -1,0 +1,73 @@
+{
+  "name": "fuzz_fail_polio_1780710085_2806",
+  "group": "POLIO",
+  "focus_code": "400",
+  "patient": {
+    "birth_date": "2002-09-07",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2003-03-07",
+      "cvx": "120"
+    },
+    {
+      "date": "2003-10-27",
+      "cvx": "179"
+    },
+    {
+      "date": "2003-10-27",
+      "cvx": "195"
+    },
+    {
+      "date": "2003-12-15",
+      "cvx": "10"
+    }
+  ],
+  "execution_date": "2007-07-20",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2003-03-07",
+        "cvx": "120",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2003-10-27",
+        "cvx": "179",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2003-10-27",
+        "cvx": "195",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2003-12-15",
+        "cvx": "10",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 3
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "POLIO",
+        "earliest_date": "2004-01-12",
+        "recommended_date": "2006-09-07",
+        "overdue_date": "2009-10-04",
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW"
+        ]
+      }
+    ]
+  }
+}

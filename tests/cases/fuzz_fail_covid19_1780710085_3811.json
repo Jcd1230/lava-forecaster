@@ -1,0 +1,95 @@
+{
+  "name": "fuzz_fail_covid19_1780710085_3811",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "2005-04-28",
+    "gender": "Male"
+  },
+  "history": [
+    {
+      "date": "2006-03-19",
+      "cvx": "219"
+    },
+    {
+      "date": "2006-08-23",
+      "cvx": "310"
+    },
+    {
+      "date": "2006-11-09",
+      "cvx": "219"
+    },
+    {
+      "date": "2007-10-20",
+      "cvx": "313"
+    },
+    {
+      "date": "2007-12-09",
+      "cvx": "208"
+    },
+    {
+      "date": "2008-06-05",
+      "cvx": "212"
+    }
+  ],
+  "execution_date": "2011-01-10",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2006-03-19",
+        "cvx": "219",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2006-08-23",
+        "cvx": "310",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2006-11-09",
+        "cvx": "219",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2007-10-20",
+        "cvx": "313",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2007-12-09",
+        "cvx": "208",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2008-06-05",
+        "cvx": "212",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE_HIGH_RISK"
+        ]
+      }
+    ]
+  }
+}

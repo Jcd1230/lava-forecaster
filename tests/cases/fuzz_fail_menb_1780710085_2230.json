@@ -1,0 +1,73 @@
+{
+  "name": "fuzz_fail_menb_1780710085_2230",
+  "group": "MENB",
+  "focus_code": "835",
+  "patient": {
+    "birth_date": "2003-12-22",
+    "gender": "Unknown"
+  },
+  "history": [
+    {
+      "date": "2004-04-20",
+      "cvx": "316"
+    },
+    {
+      "date": "2004-06-20",
+      "cvx": "328"
+    },
+    {
+      "date": "2005-04-26",
+      "cvx": "162"
+    },
+    {
+      "date": "2005-12-24",
+      "cvx": "162"
+    }
+  ],
+  "execution_date": "2006-05-25",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2004-04-20",
+        "cvx": "316",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2004-06-20",
+        "cvx": "328",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2005-04-26",
+        "cvx": "162",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2005-12-24",
+        "cvx": "162",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "MENB",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotRecommended",
+        "reasons": [
+          "BELOW_MINIMUM_AGE_HIGH_RISK_SERIES"
+        ]
+      }
+    ]
+  }
+}

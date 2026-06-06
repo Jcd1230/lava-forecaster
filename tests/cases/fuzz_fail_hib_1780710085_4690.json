@@ -1,0 +1,73 @@
+{
+  "name": "fuzz_fail_hib_1780710085_4690",
+  "group": "HIB",
+  "focus_code": "300",
+  "patient": {
+    "birth_date": "2018-03-27",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2019-08-23",
+      "cvx": "50"
+    },
+    {
+      "date": "2019-09-20",
+      "cvx": "47"
+    },
+    {
+      "date": "2020-05-13",
+      "cvx": "146"
+    },
+    {
+      "date": "2020-11-14",
+      "cvx": "132"
+    }
+  ],
+  "execution_date": "2021-08-09",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2019-08-23",
+        "cvx": "50",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2019-09-20",
+        "cvx": "47",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2020-05-13",
+        "cvx": "146",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2020-11-14",
+        "cvx": "132",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "HIB",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "Complete",
+        "reasons": [
+          "COMPLETE"
+        ]
+      }
+    ]
+  }
+}

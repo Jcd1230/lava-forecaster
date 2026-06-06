@@ -1,0 +1,84 @@
+{
+  "name": "fuzz_fail_influenza_1780710085_680",
+  "group": "INFLUENZA",
+  "focus_code": "800",
+  "patient": {
+    "birth_date": "2016-05-09",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2023-07-02",
+      "cvx": "166"
+    },
+    {
+      "date": "2023-07-30",
+      "cvx": "144"
+    },
+    {
+      "date": "2024-03-08",
+      "cvx": "158"
+    },
+    {
+      "date": "2024-07-01",
+      "cvx": "205"
+    },
+    {
+      "date": "2024-10-24",
+      "cvx": "205"
+    }
+  ],
+  "execution_date": "2025-02-03",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2023-07-02",
+        "cvx": "166",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2023-07-30",
+        "cvx": "144",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2024-03-08",
+        "cvx": "158",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2024-07-01",
+        "cvx": "205",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2024-10-24",
+        "cvx": "205",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "INFLUENZA",
+        "earliest_date": null,
+        "recommended_date": "2025-07-01",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_IN_FUTURE"
+        ]
+      }
+    ]
+  }
+}

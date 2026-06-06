@@ -1,0 +1,63 @@
+{
+  "name": "fuzz_fail_covid19_1780710085_2612",
+  "group": "COVID19",
+  "focus_code": "850",
+  "patient": {
+    "birth_date": "2020-03-28",
+    "gender": "Unknown"
+  },
+  "history": [
+    {
+      "date": "2020-08-16",
+      "cvx": "219"
+    },
+    {
+      "date": "2021-02-20",
+      "cvx": "229"
+    },
+    {
+      "date": "2021-04-02",
+      "cvx": "212"
+    }
+  ],
+  "execution_date": "2023-09-04",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2020-08-16",
+        "cvx": "219",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2021-02-20",
+        "cvx": "229",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2021-04-02",
+        "cvx": "212",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "COVID19",
+        "earliest_date": null,
+        "recommended_date": "2023-04-19",
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotComplete",
+        "reasons": [
+          "DUE_NOW",
+          "ADMINISTER_COVID19_BIVALENT_VACCINE"
+        ]
+      }
+    ]
+  }
+}
