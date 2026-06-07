@@ -14,6 +14,8 @@ use lava_forecaster::{
     },
     rules::get_all_groups,
 };
+use crate::db::{read_test_pack, write_test_pack};
+use crate::java_client::{get_java_expected_results, get_java_expected_results_bulk, is_group_supported_by_java};
 
 pub struct SimpleRng {
     state: u64,
@@ -273,7 +275,7 @@ pub fn shrink_case(
             None => (Vec::new(), None),
         };
 
-        if let Ok(java_res) = super::get_java_expected_results(client, java_url, &shrunked_tc) {
+        if let Ok(java_res) = get_java_expected_results(client, java_url, &shrunked_tc) {
             let errors = compare_results(&shrunked_tc, &rust_evals, rust_fc.as_ref(), &java_res);
             if !errors.is_empty() {
                 tc = shrunked_tc;
@@ -287,27 +289,7 @@ pub fn shrink_case(
     tc
 }
 
-const LTP_MAGIC: &[u8; 4] = b"LTP\x01";
-
-fn read_test_pack(path: &Path) -> Result<Vec<UnifiedTestCase>, String> {
-    if !path.exists() {
-        return Ok(Vec::new());
-    }
-    let bytes = fs::read(path).map_err(|e| format!("Failed to read test pack {:?}: {}", path, e))?;
-    if bytes.len() < 4 || &bytes[0..4] != LTP_MAGIC {
-        return Err(format!("Invalid test pack format: missing LTP magic header"));
-    }
-    rmp_serde::from_slice(&bytes[4..]).map_err(|e| format!("Failed to deserialize test pack: {}", e))
-}
-
-fn write_test_pack(path: &Path, cases: &[UnifiedTestCase]) -> Result<(), String> {
-    let mut bytes = LTP_MAGIC.to_vec();
-    let mut buf = Vec::new();
-    let mut serializer = rmp_serde::Serializer::new(&mut buf).with_struct_map();
-    serde::Serialize::serialize(cases, &mut serializer).map_err(|e| format!("Failed to serialize test pack: {}", e))?;
-    bytes.extend_from_slice(&buf);
-    fs::write(path, bytes).map_err(|e| format!("Failed to write test pack {:?}: {}", path, e))
-}
+// LTP database read/write helpers are now imported from crate::db
 
 #[derive(Debug, Clone, Default)]
 struct FuzzGroupStats {
@@ -362,7 +344,7 @@ pub fn run_fuzz(
     let supported_groups: Vec<String> = get_all_groups()
         .iter()
         .map(|g| g.group_name.to_string())
-        .filter(|g| super::is_group_supported_by_java(g))
+        .filter(|g| is_group_supported_by_java(g))
         .collect();
 
     if supported_groups.is_empty() {
@@ -401,13 +383,13 @@ pub fn run_fuzz(
 
         let java_results = if bulk {
             let tc_refs: Vec<&UnifiedTestCase> = chunk_cases.iter().collect();
-            match super::get_java_expected_results_bulk(client, java_url, &tc_refs) {
+            match get_java_expected_results_bulk(client, java_url, &tc_refs) {
                 Ok(res) => res,
                 Err(e) => {
                     println!("Java bulk query failed: {}. Falling back to individual queries.", e);
                     let mut fallback_results = Vec::new();
                     for tc in &chunk_cases {
-                        fallback_results.push(super::get_java_expected_results(client, java_url, tc));
+                        fallback_results.push(get_java_expected_results(client, java_url, tc));
                     }
                     fallback_results
                 }
@@ -415,7 +397,7 @@ pub fn run_fuzz(
         } else {
             let mut res = Vec::new();
             for tc in &chunk_cases {
-                res.push(super::get_java_expected_results(client, java_url, tc));
+                res.push(get_java_expected_results(client, java_url, tc));
             }
             res
         };

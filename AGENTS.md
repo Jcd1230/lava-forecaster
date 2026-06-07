@@ -19,8 +19,6 @@ Welcome! This guide provides a quick-start reference for AI agents and developer
 
 ## Essential Developer Commands
 
-## Essential Developer Commands
-
 All major tasks are configured as `mise` commands or native Cargo binaries. 
 
 > [!TIP]
@@ -31,12 +29,15 @@ All major tasks are configured as `mise` commands or native Cargo binaries.
 | `mise run build` | Builds the Java ICE Maven project (`mvn clean install`). |
 | `mise run run` | Runs the Java ICE server (exploded WAR) on `http://localhost:8080`. |
 | `mise run scaffold <group_lower> [GROUP_UPPER]` | Scaffolds a new vaccine group module (directory structure, files, mod.rs registration, test JSON). |
-| `cargo run --release --bin test_runner -- --run tests/cases` | **(Preferred)** Runs the Rust-native test runner to verify LAVA logic against expected snapshots (offline). |
-| `cargo run --release --bin test_runner -- --run tests/cases --group <GROUP>` | Runs the Rust-native test runner for a specific vaccine group (e.g., `POLIO`, `DTP`, `MMR`). |
-| `cargo run --release --bin test_runner -- --run tests/cases --group <GROUP> --compare` | Runs the Rust test runner and compares dynamically against the live Java ICE server. |
-| `cargo run --release --bin test_runner -- --run tests/cases --case <CASE> -v` | Runs a single case with side-by-side verbose details. |
-| `cargo run --release --bin test_runner -- --run tests/cases --case <CASE> --trace` | Dumps a step-by-step engine decision trace (age checks, interval checks, overrides, forecast hook mutations) for a single case. |
-| `cargo run --release --bin test_runner -- --record tests/cases` | Connects to the live Java ICE server and records expected output snapshots directly into case JSONs. |
+| `cargo run --release --bin test_runner -- --run tests/cases` | **(Preferred)** Runs the Rust-native test runner to verify LAVA logic against expected snapshots (offline) from a directory. |
+| `cargo run --release --bin test_runner -- --run tests/suite.ltp` | Runs the test runner to verify LAVA logic against expected snapshots (offline) stored in a compact `.ltp` database file. |
+| `cargo run --release --bin test_runner -- --run tests/suite.ltp --group <GROUP> --compare` | Runs the Rust test runner on a database file, comparing dynamically against the live Java ICE server. |
+| `cargo run --release --bin test_runner -- --run tests/suite.ltp --case <CASE> -v` | Runs a single case from a database file with side-by-side verbose details. |
+| `cargo run --release --bin test_runner -- --reorganize tests/cases tests/cases` | Regression tests all JSON files under `tests/cases/` and re-categorizes them into `passed/<GROUP>/` and `failed/<GROUP>/`. |
+| `cargo run --release --bin test_runner -- --reorganize tests/cases tests/suite.ltp` | Re-evaluates test cases in the directory and packs them into a single compact `.ltp` database file. |
+| `cargo run --release --bin test_runner -- --record tests/suite.ltp` | Connects to the live Java ICE server and records expected output snapshots directly into the `.ltp` database file. |
+| `cargo run --release --bin test_runner -- --fuzz 1000 --group <GROUP> --compare --output-db tests/suite.ltp` | Guided fuzzing of a group comparing against Java ICE, appending any minimal reproducing failures to the `.ltp` database. |
+| `cargo run --release --bin test_runner -- -h` | Displays the colorized, structured CLI help documentation. |
 
 ## Crucial Gotchas & Project Context
 
@@ -44,9 +45,9 @@ All major tasks are configured as `mise` commands or native Cargo binaries.
 - **Scaffolding New Modules**: When implementing a new vaccine group, always run `mise run scaffold <group_lower>` first to generate boilerplate and register the module in `rules/mod.rs`.
 - **Drools Output Mapping**: Do not trust the Drools rules literally. `Mark the shot as Ignored` in Drools maps to `DoseStatus::Accepted` in the output XML. `COMPLETE_HIGH_RISK` combined recommendation status maps to `SeriesStatus::Complete` in the final output. Always verify against recorded Java output.
 - **Legacy Rule Definitions**: Legacy rules and support data YAML files are located under the [Series Directory](file:///home/jason/projects/ice/opencds-decision-support-service/src/main/resources/data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/Series/).
-- **Comparing Against Live Java**: When implementing or debugging a vaccine group, you can compare Rust behavior against Java in real time. First start the Java server using `mise run run`, then run `cargo run --release --bin test_runner -- --run tests/cases --group <name> --compare` in another shell.
-- **Test Runner Verbosity**: The test runner is quiet by default. Pass `--verbose` or `-v` to see full details of passing tests.
-- **Decision Trace**: Pass `--trace` or `--explain` on any `--run` invocation to get a step-by-step engine decision log (age checks, interval checks, parameter overrides, forecast hook mutations) for each case. Particularly useful when the side-by-side comparison table doesn't immediately explain a date or status mismatch.
+- **Comparing Against Live Java**: When implementing or debugging a vaccine group, you can compare Rust behavior against Java in real time. First start the Java server using `mise run run`, then run `cargo run --release --bin test_runner -- --run tests/suite.ltp --group <name> --compare` in another shell.
+- **Test Runner Verbosity**: The test runner is quiet by default, printing only concise error summaries on failure. Pass `--verbose` or `-v` to see full side-by-side comparison tables.
+- **Decision Trace**: Pass `--trace` or `--explain` on any `--run` or `--reorganize` invocation to get a step-by-step engine decision log (age checks, interval checks, parameter overrides, forecast hook mutations) for each case. Particularly useful when the side-by-side comparison table doesn't immediately explain a date or status mismatch.
 - **Invalid (Ignored) Annotation**: The evaluation comparison table now shows `Invalid (Ignored)` or `Invalid (Not Ignored)` for `Invalid` doses. Quickly confirms whether a mismatched shot is intentionally ignored for series completion (e.g., bivalent OPV in POLIO) or genuinely counts.
 - **Formatting Scope**: Avoid broad `cargo fmt` / `rustfmt` unless you intend to format the whole Rust module tree. Prefer formatting only files you intentionally changed; `rustfmt` can follow `mod.rs` declarations and touch sibling vaccine modules.
 
