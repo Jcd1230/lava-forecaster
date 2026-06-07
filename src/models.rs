@@ -117,7 +117,7 @@ pub struct Patient {
     pub contraindications: Vec<Contraindication>,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Dose {
     pub date: NaiveDate,
     pub cvx: Cvx,

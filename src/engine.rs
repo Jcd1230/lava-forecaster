@@ -328,7 +328,15 @@ impl<'a> EvaluationEngine<'a> {
                 let group = &self.series.vaccine_group;
                 let prio_a = get_same_day_priority(group, a.cvx, patient.birth_date, a.date);
                 let prio_b = get_same_day_priority(group, b.cvx, patient.birth_date, b.date);
-                prio_a.cmp(&prio_b)
+                if prio_a != prio_b {
+                    prio_a.cmp(&prio_b)
+                } else if *group == "INFLUENZA" {
+                    let idx_a = history.iter().position(|x| x == a).unwrap_or(0);
+                    let idx_b = history.iter().position(|x| x == b).unwrap_or(0);
+                    idx_b.cmp(&idx_a) // Later original index comes first
+                } else {
+                    std::cmp::Ordering::Equal
+                }
             }
         });
 
@@ -1190,6 +1198,17 @@ fn get_same_day_priority(
             165 => 3,   // Gardasil 9 — highest priority
             _ => 0,
         },
+        "INFLUENZA" => {
+            let is_disallowed = matches!(cvx_code, 194 | 200 | 201 | 202 | 231 | 331 | 337);
+            let is_nos = matches!(cvx_code, 88 | 151);
+            if is_disallowed {
+                100
+            } else if is_nos {
+                90
+            } else {
+                20
+            }
+        }
         _ => 0,
     }
 }

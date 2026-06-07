@@ -64,7 +64,10 @@ cargo run --release --bin test_runner -- --fuzz <count> [options]
 *   `--compare [java_url]`: Live Java ICE server URL (default: `http://localhost:8080`).
 *   `--fuzz-seed <seed>`: Specify a seed for reproducibility.
 *   `--shrink`: Attempt to shrink failing history into a minimal reproducing case.
-*   `--bulk`: Execute queries to the Java server in bulk.
+*   `--bulk`: Send fuzz cases to Java ICE in bulk batches (faster; requires the bulk endpoint). Use this when fuzzing large counts against a running Java server to avoid per-request overhead.
+
+> [!NOTE]
+> **`--run --compare` always bulk-queries automatically** (in chunks of 500). The `--bulk` flag is only needed for `--fuzz` mode.
 
 ---
 

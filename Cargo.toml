@@ -23,6 +23,10 @@ csv = "1.3"
 lava-cvx-macro = { path = "./lava-cvx-macro" }
 flatbuffers = "25.2.10"
 smallvec = { version = "1.13", features = ["serde", "union"] }
+bincode = "1.3"
+rmp-serde = "1.3"
+ctrlc = "3.4"
+
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 axum = "0.7"

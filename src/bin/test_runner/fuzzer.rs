@@ -1,5 +1,8 @@
 use std::fs;
 use std::path::Path;
+use std::collections::BTreeMap;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use chrono::{NaiveDate, Duration};
 use reqwest::blocking::Client;
 use serde_json;
@@ -284,6 +287,34 @@ pub fn shrink_case(
     tc
 }
 
+const LTP_MAGIC: &[u8; 4] = b"LTP\x01";
+
+fn read_test_pack(path: &Path) -> Result<Vec<UnifiedTestCase>, String> {
+    if !path.exists() {
+        return Ok(Vec::new());
+    }
+    let bytes = fs::read(path).map_err(|e| format!("Failed to read test pack {:?}: {}", path, e))?;
+    if bytes.len() < 4 || &bytes[0..4] != LTP_MAGIC {
+        return Err(format!("Invalid test pack format: missing LTP magic header"));
+    }
+    rmp_serde::from_slice(&bytes[4..]).map_err(|e| format!("Failed to deserialize test pack: {}", e))
+}
+
+fn write_test_pack(path: &Path, cases: &[UnifiedTestCase]) -> Result<(), String> {
+    let mut bytes = LTP_MAGIC.to_vec();
+    let mut buf = Vec::new();
+    let mut serializer = rmp_serde::Serializer::new(&mut buf).with_struct_map();
+    serde::Serialize::serialize(cases, &mut serializer).map_err(|e| format!("Failed to serialize test pack: {}", e))?;
+    bytes.extend_from_slice(&buf);
+    fs::write(path, bytes).map_err(|e| format!("Failed to write test pack {:?}: {}", path, e))
+}
+
+#[derive(Debug, Clone, Default)]
+struct FuzzGroupStats {
+    passed: usize,
+    failed: usize,
+}
+
 pub fn run_fuzz(
     client: &Client,
     count: usize,
@@ -292,6 +323,7 @@ pub fn run_fuzz(
     java_url: &str,
     shrink: bool,
     bulk: bool,
+    output_db: Option<String>,
 ) -> Result<(), String> {
     let seed = seed_opt.unwrap_or_else(|| {
         use std::time::{SystemTime, UNIX_EPOCH};
@@ -309,7 +341,21 @@ pub fn run_fuzz(
     println!("ICE Url: {}", java_url);
     println!("Shrink enabled: {}", shrink);
     println!("Bulk mode enabled: {}", bulk);
+    if let Some(ref db_path) = output_db {
+        println!("Failing output database: {:?}", db_path);
+    } else {
+        println!("Failing output directory: tests/cases/failed/");
+    }
     println!("---------------------------------");
+
+    let running = Arc::new(AtomicBool::new(true));
+    let r = running.clone();
+    if let Err(e) = ctrlc::set_handler(move || {
+        println!("\n[Ctrl+C] Intercepted termination signal. Exiting gracefully after this batch...");
+        r.store(false, Ordering::SeqCst);
+    }) {
+        println!("Warning: Failed to set Ctrl-C handler: {}", e);
+    }
 
     let mut rng = SimpleRng::new(seed);
 
@@ -325,10 +371,11 @@ pub fn run_fuzz(
 
     let mut passed = 0;
     let mut failed = 0;
+    let mut stats_map: BTreeMap<String, FuzzGroupStats> = BTreeMap::new();
 
     let chunk_size = 500;
     let mut i = 0;
-    while i < count {
+    while i < count && running.load(Ordering::SeqCst) {
         let current_chunk_size = (count - i).min(chunk_size);
         let mut chunk_cases = Vec::new();
         
@@ -383,11 +430,10 @@ pub fn run_fuzz(
                     let errors = compare_results(tc, rust_evals, rust_fc.as_ref(), java_res);
                     if errors.is_empty() {
                         passed += 1;
-                        if count <= 100 || case_index % (count / 10).max(1) == 0 {
-                            println!("Fuzz #{} ({}): PASS", case_index, tc.group);
-                        }
+                        stats_map.entry(tc.group.clone()).or_default().passed += 1;
                     } else {
                         failed += 1;
+                        stats_map.entry(tc.group.clone()).or_default().failed += 1;
                         println!("Fuzz #{} ({}): FAIL", case_index, tc.group);
                         for err in &errors {
                             println!("  - {}", err);
@@ -400,13 +446,26 @@ pub fn run_fuzz(
                             final_case = shrink_case(client, java_url, final_case);
                         }
 
-                        let out_dir = Path::new("tests/cases");
-                        let out_path = out_dir.join(format!("{}.json", final_case.name));
-                        if let Ok(out_json) = serde_json::to_string_pretty(&final_case) {
-                            if fs::write(&out_path, out_json).is_ok() {
-                                println!("Saved minimal failing case to {:?}", out_path);
+                        if let Some(ref db_path) = output_db {
+                            let mut cases = read_test_pack(Path::new(db_path)).unwrap_or_default();
+                            cases.push(final_case);
+                            if let Err(e) = write_test_pack(Path::new(db_path), &cases) {
+                                println!("Failed to save failing case to database {:?}: {}", db_path, e);
                             } else {
-                                println!("Failed to write failing case to {:?}", out_path);
+                                println!("Saved minimal failing case to database {:?}", db_path);
+                            }
+                        } else {
+                            let out_dir = Path::new("tests/cases/failed").join(tc.group.to_uppercase());
+                            if let Err(e) = fs::create_dir_all(&out_dir) {
+                                println!("Failed to create folder {:?}: {}", out_dir, e);
+                            }
+                            let out_path = out_dir.join(format!("{}.json", final_case.name));
+                            if let Ok(out_json) = serde_json::to_string_pretty(&final_case) {
+                                if fs::write(&out_path, out_json).is_ok() {
+                                    println!("Saved minimal failing case to {:?}", out_path);
+                                } else {
+                                    println!("Failed to write failing case to {:?}", out_path);
+                                }
                             }
                         }
                     }
@@ -414,17 +473,46 @@ pub fn run_fuzz(
                 Err(e) => {
                     println!("Fuzz #{} ({}): Java ICE Query Error: {}", case_index, tc.group, e);
                     failed += 1;
+                    stats_map.entry(tc.group.clone()).or_default().failed += 1;
                 }
             }
         }
 
         i += current_chunk_size;
+        println!("Fuzzing progress: {}/{} completed (passed: {}, failed: {})", i, count, passed, failed);
     }
 
-    println!("\n=== Fuzz Run Complete ===");
-    println!("Executed: {}", count);
+    println!("\n=== Fuzz Run Statistics ===");
+    let total_executed = passed + failed;
+    println!("Executed: {}", total_executed);
     println!("Passed  : {}", passed);
     println!("Failed  : {}", failed);
+    if total_executed > 0 {
+        println!("Pass %  : {:.2}%", (passed as f64 / total_executed as f64) * 100.0);
+    }
+    
+    if !stats_map.is_empty() {
+        println!("\nPer-Group Statistics:");
+        println!("{:<16} | {:>8} | {:>8} | {:>8} | {:>8}", "Group", "Executed", "Passed", "Failed", "Pass %");
+        println!("{}", "-".repeat(62));
+        for (group, gstats) in &stats_map {
+            let total_g = gstats.passed + gstats.failed;
+            let pass_pct = if total_g > 0 {
+                (gstats.passed as f64 / total_g as f64) * 100.0
+            } else {
+                0.0
+            };
+            println!(
+                "{:<16} | {:>8} | {:>8} | {:>8} | {:>7.2}%",
+                group,
+                total_g,
+                gstats.passed,
+                gstats.failed,
+                pass_pct,
+            );
+        }
+    }
+    println!("===========================");
 
     if failed > 0 {
         Err(format!("{} fuzz tests failed comparison with Java ICE.", failed))

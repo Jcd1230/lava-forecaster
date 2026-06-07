@@ -655,7 +655,7 @@ fn run_cdc_csv_mode(client: &reqwest::blocking::Client, args: &[String]) {
             ));
         }
 
-        if verbose || !is_ok {
+        if verbose {
             print_cdc_comparison_table(
                 &tc.name,
                 &cdc_rust_evals,
@@ -664,6 +664,11 @@ fn run_cdc_csv_mode(client: &reqwest::blocking::Client, args: &[String]) {
                 &cdc_case.expected.forecast,
                 &errors,
             );
+        } else if !is_ok {
+            println!("\nTest Case: \x1b[91m{}\x1b[0m (FAIL)", tc.name);
+            for err in &errors {
+                println!("  - \x1b[91m{}\x1b[0m", err);
+            }
         }
 
         if is_ok {
@@ -1731,29 +1736,128 @@ fn is_group_supported_by_java(group: &str) -> bool {
     g != "CHOLERA" && g != "JEV" && g != "TYPHOID" && g != "YELLOW_FEVER" && g != "YELLOWFEVER"
 }
 
+const LTP_MAGIC: &[u8; 4] = b"LTP\x01";
+
+fn read_test_pack(path: &Path) -> Result<Vec<UnifiedTestCase>, String> {
+    let bytes = fs::read(path).map_err(|e| format!("Failed to read test pack {:?}: {}", path, e))?;
+    if bytes.len() < 4 || &bytes[0..4] != LTP_MAGIC {
+        return Err(format!("Invalid test pack format: missing LTP magic header"));
+    }
+    rmp_serde::from_slice(&bytes[4..]).map_err(|e| format!("Failed to deserialize test pack: {}", e))
+}
+
+fn write_test_pack(path: &Path, cases: &[UnifiedTestCase]) -> Result<(), String> {
+    let mut bytes = LTP_MAGIC.to_vec();
+    let mut buf = Vec::new();
+    let mut serializer = rmp_serde::Serializer::new(&mut buf).with_struct_map();
+    serde::Serialize::serialize(cases, &mut serializer).map_err(|e| format!("Failed to serialize test pack: {}", e))?;
+    bytes.extend_from_slice(&buf);
+    fs::write(path, bytes).map_err(|e| format!("Failed to write test pack {:?}: {}", path, e))
+}
+
+fn load_cases_from_source(source: &Path) -> Result<Vec<UnifiedTestCase>, String> {
+    if source.is_dir() {
+        let entries = fs::read_dir(source).map_err(|e| format!("Failed to read directory {:?}: {}", source, e))?;
+        let mut test_cases = Vec::new();
+        for entry in entries {
+            let entry = entry.map_err(|e| format!("Failed to read directory entry: {}", e))?;
+            let path = entry.path();
+            let extension = path.extension().map_or("", |e| e.to_str().unwrap_or(""));
+            if extension == "json" || extension == "test" {
+                let content = fs::read_to_string(&path).map_err(|e| format!("Failed to read file {:?}: {}", path, e))?;
+                let tc_opt = if extension == "json" {
+                    serde_json::from_str::<UnifiedTestCase>(&content).ok()
+                } else {
+                    lava_forecaster::test_dsl::parse_test_case_dsl(&content).ok()
+                };
+                if let Some(tc) = tc_opt {
+                    test_cases.push(tc);
+                }
+            }
+        }
+        Ok(test_cases)
+    } else if source.is_file() {
+        read_test_pack(source)
+    } else {
+        Err(format!("Source path {:?} does not exist or is not a file/directory", source))
+    }
+}
+
+fn cleanup_empty_dirs(dir: &Path) {
+    if let Ok(entries) = fs::read_dir(dir) {
+        let mut is_empty = true;
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_dir() {
+                cleanup_empty_dirs(&path);
+            }
+            if path.exists() {
+                is_empty = false;
+            }
+        }
+        if is_empty && dir.to_str().map_or(false, |s| s.contains("cases")) {
+            let _ = fs::remove_dir(dir);
+        }
+    }
+}
+
+fn print_help() {
+    use std::io::IsTerminal;
+    let use_color = std::io::stdout().is_terminal();
+
+    let bold_cyan = if use_color { "\x1b[1;36m" } else { "" };
+    let bold_yellow = if use_color { "\x1b[1;33m" } else { "" };
+    let bold_green = if use_color { "\x1b[1;32m" } else { "" };
+    let reset = if use_color { "\x1b[0m" } else { "" };
+
+    println!("{}=== LAVA Forecaster Test Runner ==={}", bold_cyan, reset);
+    println!();
+    println!("{}Usage:{}", bold_yellow, reset);
+    println!("  cargo run --release --bin test_runner -- [mode] [options]");
+    println!();
+    println!("{}Modes:{}", bold_yellow, reset);
+    println!("  {}--run <cases_path_or_db> [options]{}", bold_green, reset);
+    println!("      Runs tests from a directory containing JSON test cases or a single `.ltp` database file.");
+    println!();
+    println!("  {}--fuzz <count> [options]{}", bold_green, reset);
+    println!("      Runs fuzzer with CDSi guided case generator comparing Rust against live Java ICE.");
+    println!();
+    println!("  {}--reorganize <source> <target> [options]{}", bold_green, reset);
+    println!("      Runs regression check and re-categorizes test cases. Source and target can be directories or `.ltp` files.");
+    println!("      Organizes files into nested directories: `passed/<GROUP>/` and `failed/<GROUP>/`.");
+    println!();
+    println!("  {}--record <cases_path_or_db> [java_url]{}", bold_green, reset);
+    println!("      Queries a live Java ICE server and records expected output snapshots into JSON or `.ltp` database.");
+    println!();
+    println!("  {}--run-cdc-csv <csv_path> [options]{}", bold_green, reset);
+    println!("      Runs compliance testing against a CDC-formatted CSV sheet.");
+    println!();
+    println!("  {}--import-cdsi <raw_json_suite> <output_dir>{}", bold_green, reset);
+    println!("      Imports Python JSON suites into individual test files.");
+    println!();
+    println!("{}Options under --run / --reorganize:{}", bold_yellow, reset);
+    println!("  {}--group <name>{}       Filter / reorganize cases only for specific group (e.g. POLIO)", bold_green, reset);
+    println!("  {}--case <name>{}        Filter / reorganize a single case by name or test ID", bold_green, reset);
+    println!("  {}--compare [java_url]{} Compare outputs dynamically against a live Java ICE server (default: http://localhost:8080)", bold_green, reset);
+    println!("  {}--rest-url <url>{}     Query a remote Rust forecaster REST service instead of native library calls", bold_green, reset);
+    println!("  {}--verbose, -v{}        Print detailed side-by-side evaluation tables for all cases", bold_green, reset);
+    println!("  {}--trace, --explain{}   Print a step-by-step decision trace to stdout for ran cases", bold_green, reset);
+    println!();
+    println!("{}Options under --fuzz:{}", bold_yellow, reset);
+    println!("  {}--group <name>{}       Fuzz only a specific vaccine group", bold_green, reset);
+    println!("  {}--compare [java_url]{} Java ICE server URL (default: http://localhost:8080)", bold_green, reset);
+    println!("  {}--fuzz-seed <seed>{}   Set a specific random seed for deterministic reproducibility", bold_green, reset);
+    println!("  {}--shrink{}             Shrink failing fuzzer history to minimal reproducing case", bold_green, reset);
+    println!("  {}--bulk{}               Batch requests to Java ICE in bulk (requires bulk ICE endpoint)", bold_green, reset);
+    println!("  {}--output-db <path>{}   Save fuzzer failing cases directly into a compact `.ltp` file", bold_green, reset);
+    println!();
+}
+
 fn main() {
     let client = reqwest::blocking::Client::new();
     let args: Vec<String> = std::env::args().collect();
-    if args.len() < 2 {
-        println!("=== Rust-Native Centralized Test Runner ===");
-        println!("Usage:");
-        println!("  test-runner --import-cdsi <raw_json_suite> <output_dir>");
-        println!("  test-runner --record <cases_dir> [java_url]");
-        println!("  test-runner --run <cases_dir> [options]");
-        println!("  test-runner --run-cdc-csv <csv_path> [options]");
-        println!("  test-runner --fuzz <count> [options]");
-        println!("Options under --run:");
-        println!("  --group <group_name>    Filter cases by group (e.g. POLIO)");
-        println!("  --case <case_name>      Filter cases by name");
-        println!("  --compare [java_url]    Compare outputs dynamically with a live Java ICE server (default: http://localhost:8080)");
-        println!("  --rest-url <rust_url>   Query Rust server at rust_url (e.g. http://localhost:8081) instead of in-process execution");
-        println!("  --verbose, -v           Show detailed side-by-side evaluation tables");
-        println!("  --trace, --explain      Dump a step-by-step decision trace log to stdout");
-        println!("Options under --fuzz:");
-        println!("  --group <group_name>    Generate cases only for group (e.g. POLIO)");
-        println!("  --compare [java_url]    ICE server URL (default: http://localhost:8080)");
-        println!("  --fuzz-seed <seed>      Deterministic seed for reproducibility");
-        println!("  --shrink                Shrink failing cases to minimal reproducing history");
+    if args.len() < 2 || args.contains(&"-h".to_string()) || args.contains(&"--help".to_string()) {
+        print_help();
         return;
     }
 
@@ -1773,6 +1877,7 @@ fn main() {
         let mut fuzz_seed = None;
         let mut shrink = false;
         let mut bulk = false;
+        let mut output_db = None;
 
         let mut idx = 3;
         while idx < args.len() {
@@ -1796,12 +1901,15 @@ fn main() {
             } else if args[idx] == "--bulk" {
                 bulk = true;
                 idx += 1;
+            } else if args[idx] == "--output-db" {
+                output_db = Some(args[idx + 1].clone());
+                idx += 2;
             } else {
                 idx += 1;
             }
         }
 
-        match fuzzer::run_fuzz(&client, fuzz_count, fuzz_seed, filter_group, &compare_java_url, shrink, bulk) {
+        match fuzzer::run_fuzz(&client, fuzz_count, fuzz_seed, filter_group, &compare_java_url, shrink, bulk, output_db) {
             Ok(_) => std::process::exit(0),
             Err(e) => {
                 println!("Fuzz execution failed: {}", e);
@@ -1809,47 +1917,71 @@ fn main() {
             }
         }
     } else if mode == "--record" {
-        let cases_dir = Path::new(&args[2]);
+        let cases_source = Path::new(&args[2]);
         let java_uri = args.get(3).map(|s| s.as_str()).unwrap_or("http://localhost:8080");
         let java_endpoint = format!("{}/opencds-decision-support-service/api/resources/evaluateAtSpecifiedTime", java_uri);
 
-        let entries = fs::read_dir(cases_dir).expect("Failed to read cases dir");
-        let mut count = 0;
-        for entry in entries {
-            let entry = entry.unwrap();
-            let path = entry.path();
-            let extension = path.extension().map_or("", |e| e.to_str().unwrap_or(""));
-            if extension == "json" || extension == "test" {
-                let content = fs::read_to_string(&path).unwrap();
-                let tc_opt = if extension == "json" {
-                    serde_json::from_str::<UnifiedTestCase>(&content).ok()
-                } else {
-                    lava_forecaster::test_dsl::parse_test_case_dsl(&content).ok()
-                };
-                if let Some(mut tc) = tc_opt {
-                    println!("Recording Java snapshot for: {}", tc.name);
-                    let payload = build_evaluate_payload(
-                        &tc.patient,
-                        &tc.history,
-                        tc.execution_date,
-                    );
-                    let xml_out = query_java_service(&client, &java_endpoint, payload);
-                    let mut java_res = parse_legacy_xml(&xml_out, &tc.focus_code);
-                    
-                    // Fill in series names for expected forecasts to match Rust
-                    for f in &mut java_res.forecasts {
-                        f.series_name = tc.group.clone().into(); // Fallback focus series
+        if cases_source.is_file() {
+            let mut test_cases = read_test_pack(cases_source).unwrap_or_else(|err| panic!("{}", err));
+            let total_cases = test_cases.len();
+            println!("Recording Java snapshots for {} cases in database...", total_cases);
+            for (i, tc) in test_cases.iter_mut().enumerate() {
+                if i % 10 == 0 || i == total_cases - 1 {
+                    println!("Recording progress: {}/{}", i + 1, total_cases);
+                }
+                let payload = build_evaluate_payload(
+                    &tc.patient,
+                    &tc.history,
+                    tc.execution_date,
+                );
+                let xml_out = query_java_service(&client, &java_endpoint, payload);
+                let mut java_res = parse_legacy_xml(&xml_out, &tc.focus_code);
+                for f in &mut java_res.forecasts {
+                    f.series_name = tc.group.clone().into();
+                }
+                tc.expected = Some(java_res);
+            }
+            write_test_pack(cases_source, &test_cases).unwrap_or_else(|err| panic!("{}", err));
+            println!("Successfully recorded snapshots for {} cases in database.", total_cases);
+        } else {
+            let entries = fs::read_dir(cases_source).expect("Failed to read cases dir");
+            let mut count = 0;
+            for entry in entries {
+                let entry = entry.unwrap();
+                let path = entry.path();
+                let extension = path.extension().map_or("", |e| e.to_str().unwrap_or(""));
+                if extension == "json" || extension == "test" {
+                    let content = fs::read_to_string(&path).unwrap();
+                    let tc_opt = if extension == "json" {
+                        serde_json::from_str::<UnifiedTestCase>(&content).ok()
+                    } else {
+                        lava_forecaster::test_dsl::parse_test_case_dsl(&content).ok()
+                    };
+                    if let Some(mut tc) = tc_opt {
+                        println!("Recording Java snapshot for: {}", tc.name);
+                        let payload = build_evaluate_payload(
+                            &tc.patient,
+                            &tc.history,
+                            tc.execution_date,
+                        );
+                        let xml_out = query_java_service(&client, &java_endpoint, payload);
+                        let mut java_res = parse_legacy_xml(&xml_out, &tc.focus_code);
+                        
+                        // Fill in series names for expected forecasts to match Rust
+                        for f in &mut java_res.forecasts {
+                            f.series_name = tc.group.clone().into(); // Fallback focus series
+                        }
+
+                        tc.expected = Some(java_res);
+
+                        let out_json = serde_json::to_string_pretty(&tc).unwrap();
+                        fs::write(&path, out_json).unwrap();
+                        count += 1;
                     }
-
-                    tc.expected = Some(java_res);
-
-                    let out_json = serde_json::to_string_pretty(&tc).unwrap();
-                    fs::write(&path, out_json).unwrap();
-                    count += 1;
                 }
             }
+            println!("Successfully recorded snapshots for {} cases.", count);
         }
-        println!("Successfully recorded snapshots for {} cases.", count);
     } else if mode == "--run" {
         let cases_dir = Path::new(&args[2]);
         
@@ -1890,33 +2022,20 @@ fn main() {
             }
         }
 
-        let entries = fs::read_dir(cases_dir).expect("Failed to read cases dir");
+        let all_loaded_cases = load_cases_from_source(cases_dir).unwrap_or_else(|err| panic!("{}", err));
         let mut test_cases = Vec::new();
-        for entry in entries {
-            let entry = entry.unwrap();
-            let path = entry.path();
-            let extension = path.extension().map_or("", |e| e.to_str().unwrap_or(""));
-            if extension == "json" || extension == "test" {
-                let content = fs::read_to_string(&path).unwrap();
-                let tc_opt = if extension == "json" {
-                    serde_json::from_str::<UnifiedTestCase>(&content).ok()
-                } else {
-                    lava_forecaster::test_dsl::parse_test_case_dsl(&content).ok()
-                };
-                if let Some(tc) = tc_opt {
-                    if let Some(ref fg) = filter_group {
-                        if tc.group.to_uppercase() != *fg {
-                            continue;
-                        }
-                    }
-                    if let Some(ref fc) = filter_case {
-                        if tc.name != *fc {
-                            continue;
-                        }
-                    }
-                    test_cases.push(tc);
+        for tc in all_loaded_cases {
+            if let Some(ref fg) = filter_group {
+                if tc.group.to_uppercase() != *fg {
+                    continue;
                 }
             }
+            if let Some(ref fc) = filter_case {
+                if tc.name != *fc {
+                    continue;
+                }
+            }
+            test_cases.push(tc);
         }
 
         let mut java_expected_map = HashMap::new();
@@ -2128,7 +2247,7 @@ fn main() {
                         errors.push("No expected snapshots recorded in test case file. Run with --record first or use --compare.".to_string());
                     }
 
-                    if verbose || !is_ok {
+                    if verbose {
                         print_comparison_table(
                             &tc.name,
                             &tc.group,
@@ -2138,6 +2257,11 @@ fn main() {
                             expected_results.as_ref().and_then(|e| e.forecasts.first()),
                             &errors,
                         );
+                    } else if !is_ok {
+                        println!("\nTest Case: \x1b[91m{}\x1b[0m (FAIL)", tc.name);
+                        for err in &errors {
+                            println!("  - \x1b[91m{}\x1b[0m", err);
+                        }
                     }
 
                     if is_ok {
@@ -2164,6 +2288,374 @@ fn main() {
         } else {
             println!("All checked tests passed successfully!");
             std::process::exit(0);
+        }
+    } else if mode == "--reorganize" {
+        let source_path = Path::new(&args[2]);
+        let target_path = Path::new(&args[3]);
+        
+        let mut filter_group = None;
+        let mut filter_case = None;
+        let mut compare_java_url = None;
+        let mut rest_url = None;
+        let mut verbose = false;
+        let mut trace_mode = false;
+        
+        let mut idx = 4;
+        while idx < args.len() {
+            if args[idx] == "--group" {
+                filter_group = Some(args[idx + 1].to_uppercase());
+                idx += 2;
+            } else if args[idx] == "--case" {
+                filter_case = Some(args[idx + 1].clone());
+                idx += 2;
+            } else if args[idx] == "--compare" {
+                if idx + 1 < args.len() && !args[idx + 1].starts_with('-') {
+                    compare_java_url = Some(args[idx + 1].clone());
+                    idx += 2;
+                } else {
+                    compare_java_url = Some("http://localhost:8080".to_string());
+                    idx += 1;
+                }
+            } else if args[idx] == "--rest-url" {
+                rest_url = Some(args[idx + 1].clone());
+                idx += 2;
+            } else if args[idx] == "--verbose" || args[idx] == "-v" {
+                verbose = true;
+                idx += 1;
+            } else if args[idx] == "--trace" || args[idx] == "--explain" {
+                trace_mode = true;
+                idx += 1;
+            } else {
+                idx += 1;
+            }
+        }
+
+        let mut loaded_cases_with_paths = Vec::new();
+        if source_path.is_dir() {
+            fn walk_and_load(dir: &Path, list: &mut Vec<(UnifiedTestCase, std::path::PathBuf)>) {
+                if let Ok(entries) = fs::read_dir(dir) {
+                    for entry in entries.flatten() {
+                        let path = entry.path();
+                        if path.is_dir() {
+                            walk_and_load(&path, list);
+                        } else {
+                            let extension = path.extension().map_or("", |e| e.to_str().unwrap_or(""));
+                            if extension == "json" || extension == "test" {
+                                if let Ok(content) = fs::read_to_string(&path) {
+                                    let tc_opt = if extension == "json" {
+                                        serde_json::from_str::<UnifiedTestCase>(&content).ok()
+                                    } else {
+                                        lava_forecaster::test_dsl::parse_test_case_dsl(&content).ok()
+                                    };
+                                    if let Some(tc) = tc_opt {
+                                        list.push((tc, path));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            walk_and_load(source_path, &mut loaded_cases_with_paths);
+        } else if source_path.is_file() {
+            let cases = read_test_pack(source_path).unwrap_or_else(|err| panic!("{}", err));
+            for tc in cases {
+                loaded_cases_with_paths.push((tc, source_path.to_path_buf()));
+            }
+        } else {
+            panic!("Source path {:?} does not exist or is not a file/directory", source_path);
+        }
+
+        let mut test_cases = Vec::new();
+        for (tc, path) in loaded_cases_with_paths {
+            if let Some(ref fg) = filter_group {
+                if tc.group.to_uppercase() != *fg {
+                    continue;
+                }
+            }
+            if let Some(ref fc) = filter_case {
+                if tc.name != *fc {
+                    continue;
+                }
+            }
+            test_cases.push((tc, path));
+        }
+
+        let mut java_expected_map = HashMap::new();
+        if let Some(ref j_url) = compare_java_url {
+            let java_test_cases: Vec<&UnifiedTestCase> = test_cases.iter()
+                .map(|(tc, _)| tc)
+                .filter(|tc| is_group_supported_by_java(&tc.group))
+                .collect();
+            if !java_test_cases.is_empty() {
+                println!("Querying {} cases in bulk from Java ICE at {}...", java_test_cases.len(), j_url);
+                for chunk in java_test_cases.chunks(500) {
+                    match get_java_expected_results_bulk(&client, j_url, chunk) {
+                        Ok(results) => {
+                            for (i, res) in results.into_iter().enumerate() {
+                                let name = chunk[i].name.clone();
+                                java_expected_map.insert(name, res);
+                            }
+                        }
+                        Err(e) => {
+                            println!("Java bulk query failed: {}. Falling back to individual requests.", e);
+                            for &tc in chunk {
+                                let name = tc.name.clone();
+                                let ind_res = get_java_expected_results(&client, j_url, tc);
+                                java_expected_map.insert(name, ind_res);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        let mut total = 0;
+        let mut passed = 0;
+        let mut failed = 0;
+        let mut group_summary: BTreeMap<String, SummaryCounts> = BTreeMap::new();
+        let mut failed_details = Vec::new();
+
+        let mut passed_cases_out = Vec::new();
+        let mut failed_cases_out = Vec::new();
+
+        for (mut tc, old_path) in test_cases {
+            total += 1;
+            
+            let (rust_evals, rust_fc) = if let Some(ref r_url) = rest_url {
+                match query_rust_rest_service(&client, r_url, &tc) {
+                    Ok(resp) => {
+                        let rust_group = resp.vaccine_groups.iter().find(|rg| rg.vaccine_group == tc.group).cloned();
+                        match rust_group {
+                            Some(rg) => (rg.evaluations.to_vec(), rg.forecasts.first().cloned()),
+                            None => (Vec::new(), None),
+                        }
+                    }
+                    Err(e) => {
+                        failed += 1;
+                        record_summary_result(&mut group_summary, &tc.group, false);
+                        failed_details.push((tc.name.clone(), vec![format!("Rust REST Error: {}", e)]));
+                        failed_cases_out.push((tc, old_path));
+                        continue;
+                    }
+                }
+            } else {
+                if trace_mode {
+                    lava_forecaster::engine::clear_traces();
+                    lava_forecaster::engine::set_trace_enabled(true);
+                }
+                let rust_results = evaluate_patient_all_groups(&tc.patient, &tc.history, tc.execution_date);
+                if trace_mode {
+                    lava_forecaster::engine::set_trace_enabled(false);
+                }
+                let rust_group = rust_results.iter().find(|rg| rg.vaccine_group == tc.group);
+                match rust_group {
+                    Some(rg) => (rg.evaluations.to_vec(), rg.forecasts.first().cloned()),
+                    None => (Vec::new(), None),
+                }
+            };
+
+            let expected_results = if compare_java_url.is_some() && is_group_supported_by_java(&tc.group) {
+                match java_expected_map.remove(&tc.name) {
+                    Some(Ok(res)) => Some(res),
+                    Some(Err(e)) => {
+                        failed += 1;
+                        record_summary_result(&mut group_summary, &tc.group, false);
+                        failed_details.push((tc.name.clone(), vec![format!("Java Query Error: {}", e)]));
+                        failed_cases_out.push((tc, old_path));
+                        continue;
+                    }
+                    None => {
+                        failed += 1;
+                        record_summary_result(&mut group_summary, &tc.group, false);
+                        failed_details.push((tc.name.clone(), vec!["Java expected results missing from bulk results".to_string()]));
+                        failed_cases_out.push((tc, old_path));
+                        continue;
+                    }
+                }
+            } else {
+                tc.expected.clone()
+            };
+
+            if trace_mode {
+                let traces = lava_forecaster::engine::get_traces();
+                if !traces.is_empty() {
+                    println!("\n=== Trace for: {} ===", tc.name);
+                    for trace in &traces {
+                        let location = format!("{}:{}", trace.source_file, trace.line_number);
+                        println!("{:<40} | {:<15} | {}", trace.step, location, trace.description);
+                    }
+                }
+            }
+                    
+            let mut is_ok = true;
+            let mut errors = Vec::new();
+
+            if let Some(expected) = &expected_results {
+                for ee in &expected.evaluations {
+                    let re = rust_evals.iter().find(|r| r.dose_date == ee.dose_date && r.cvx == ee.cvx);
+                    match re {
+                        Some(re) => {
+                             let mut status_matches = re.status == ee.status;
+                             if !status_matches {
+                                 if re.status == DoseStatus::Valid && ee.status == DoseStatus::Accepted && is_immune(&tc.patient, &tc.group, tc.execution_date) {
+                                     status_matches = true;
+                                 } else if compare_java_url.is_some() && !tc.patient.contraindications.is_empty() {
+                                     status_matches = true;
+                                 }
+                             }
+                             if !status_matches {
+                                is_ok = false;
+                                errors.push(format!(
+                                    "Evaluation status mismatch for dose ({:?}, {}): Rust={:?} (reasons={:?}), Expected={:?}",
+                                    re.dose_date, re.cvx, re.status, re.reasons, ee.status
+                                ));
+                            }
+                        }
+                        None => {
+                            is_ok = false;
+                            errors.push(format!(
+                                "Evaluation missing in Rust for dose ({:?}, {})",
+                                ee.dose_date, ee.cvx
+                            ));
+                        }
+                    }
+                }
+                for re in &rust_evals {
+                    let ee = expected.evaluations.iter().find(|e| e.dose_date == re.dose_date && e.cvx == re.cvx);
+                    if ee.is_none() {
+                        is_ok = false;
+                        errors.push(format!(
+                            "Evaluation missing in Expected for dose ({:?}, {})",
+                            re.dose_date, re.cvx
+                        ));
+                    }
+                }
+
+                let exp_fc = expected.forecasts.first();
+                match (rust_fc.as_ref(), exp_fc) {
+                    (Some(rf), Some(ef)) => {
+                         let is_comp = compare_java_url.is_some();
+                         let is_contra = is_contraindicated(&tc.patient, &tc.group, tc.execution_date) || !tc.patient.contraindications.is_empty();
+                         if !(is_comp && is_contra) {
+                            if rf.status != ef.status {
+                                is_ok = false;
+                                errors.push(format!("Forecast status mismatch: Rust={:?}, Expected={:?}", rf.status, ef.status));
+                            }
+                            if rf.status.earliest_date() != ef.status.earliest_date() {
+                                is_ok = false;
+                                errors.push(format!("Forecast earliest date mismatch: Rust={:?}, Expected={:?}", rf.status.earliest_date(), ef.status.earliest_date()));
+                            }
+                            if rf.status.recommended_date() != ef.status.recommended_date() {
+                                is_ok = false;
+                                errors.push(format!("Forecast recommended date mismatch: Rust={:?}, Expected={:?}", rf.status.recommended_date(), ef.status.recommended_date()));
+                            }
+                            if rf.status.overdue_date() != ef.status.overdue_date() {
+                                is_ok = false;
+                                errors.push(format!("Forecast overdue date mismatch: Rust={:?}, Expected={:?}", rf.status.overdue_date(), ef.status.overdue_date()));
+                            }
+                        }
+                    }
+                    (None, None) => {}
+                    _ => {
+                        is_ok = false;
+                        errors.push("Forecast availability mismatch (one is missing)".to_string());
+                    }
+                }
+            } else {
+                is_ok = false;
+                errors.push("No expected snapshots recorded.".to_string());
+            }
+
+            if verbose {
+                print_comparison_table(
+                    &tc.name,
+                    &tc.group,
+                    &rust_evals,
+                    rust_fc.as_ref(),
+                    expected_results.as_ref().map(|e| e.evaluations.as_slice()).unwrap_or(&[]),
+                    expected_results.as_ref().and_then(|e| e.forecasts.first()),
+                    &errors,
+                );
+            } else if !is_ok {
+                println!("\nTest Case: \x1b[91m{}\x1b[0m (FAIL)", tc.name);
+                for err in &errors {
+                    println!("  - \x1b[91m{}\x1b[0m", err);
+                }
+            }
+
+            if let Some(expected) = expected_results {
+                tc.expected = Some(expected);
+            }
+
+            if is_ok {
+                passed += 1;
+                record_summary_result(&mut group_summary, &tc.group, true);
+                passed_cases_out.push((tc, old_path));
+            } else {
+                failed += 1;
+                record_summary_result(&mut group_summary, &tc.group, false);
+                failed_details.push((tc.name.clone(), errors));
+                failed_cases_out.push((tc, old_path));
+            }
+        }
+
+        print_summary("Reorganization Regression Summary", total, passed, failed, &group_summary);
+
+        let target_is_db = target_path.extension().map_or(false, |ext| ext == "ltp" || ext == "bin" || ext == "db");
+        if target_is_db || (!target_path.exists() && target_path.to_str().map_or(false, |s| s.ends_with(".ltp") || s.ends_with(".bin") || s.ends_with(".db"))) {
+            let mut all_cases_out = Vec::new();
+            for (tc, _) in passed_cases_out {
+                all_cases_out.push(tc);
+            }
+            for (tc, _) in failed_cases_out {
+                all_cases_out.push(tc);
+            }
+            write_test_pack(target_path, &all_cases_out).unwrap_or_else(|err| panic!("{}", err));
+            println!("Successfully reorganized: packed all {} cases into database file {:?}", all_cases_out.len(), target_path);
+        } else {
+            let mut files_to_keep = std::collections::HashSet::new();
+
+            for (tc, old_path) in passed_cases_out {
+                let group_dir = target_path.join("passed").join(tc.group.to_uppercase());
+                fs::create_dir_all(&group_dir).unwrap();
+                let new_path = group_dir.join(format!("{}.json", tc.name));
+                
+                let out_json = serde_json::to_string_pretty(&tc).unwrap();
+                fs::write(&new_path, out_json).unwrap();
+                files_to_keep.insert(new_path.canonicalize().unwrap_or(new_path.clone()));
+
+                let path = &old_path;
+                let canon_old = path.canonicalize().ok();
+                let canon_new = new_path.canonicalize().ok();
+                if canon_old.is_some() && canon_old != canon_new {
+                    if path.exists() && path.is_file() {
+                        let _ = fs::remove_file(path);
+                    }
+                }
+            }
+
+            for (tc, old_path) in failed_cases_out {
+                let group_dir = target_path.join("failed").join(tc.group.to_uppercase());
+                fs::create_dir_all(&group_dir).unwrap();
+                let new_path = group_dir.join(format!("{}.json", tc.name));
+                
+                let out_json = serde_json::to_string_pretty(&tc).unwrap();
+                fs::write(&new_path, out_json).unwrap();
+                files_to_keep.insert(new_path.canonicalize().unwrap_or(new_path.clone()));
+
+                let path = &old_path;
+                let canon_old = path.canonicalize().ok();
+                let canon_new = new_path.canonicalize().ok();
+                if canon_old.is_some() && canon_old != canon_new {
+                    if path.exists() && path.is_file() {
+                        let _ = fs::remove_file(path);
+                    }
+                }
+            }
+
+            cleanup_empty_dirs(target_path);
+            println!("Successfully reorganized test cases under directory {:?}", target_path);
         }
     }
 }

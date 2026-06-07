@@ -17,6 +17,7 @@ planning/
 
 tmp/
 tests/relative/tmp/
+tests/cases/
 
 # Local VCS & Agent Directories
 .jj/

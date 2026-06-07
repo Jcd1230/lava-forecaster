@@ -75,7 +75,7 @@ pub fn get_active_season_name(eval_date: NaiveDate) -> &'static str {
 
 pub fn influenza_custom_evaluation_hook(
     _series_name: &str,
-    target_dose_idx: usize,
+    _target_dose_idx: usize,
     ctx: &EvaluationContext,
     reasons: &mut SmallVec<[EvaluationReason; 4]>,
     status: &mut DoseStatus,
@@ -94,23 +94,7 @@ pub fn influenza_custom_evaluation_hook(
         }
     }
 
-    // 2. 24-day absolute minimum interval between seasons
-    if target_dose_idx == 1 {
-        let prior_dose = ctx.history.iter()
-            .filter(|d| d.date < active_season.start)
-            .max_by_key(|d| d.date);
-        
-        if let Some(prior) = prior_dose {
-            if (dose.date - prior.date).num_days() < 24 {
-                *status = DoseStatus::Invalid;
-                if !reasons.contains(&EvaluationReason::BelowMinimumInterval) {
-                    reasons.push(EvaluationReason::BelowMinimumInterval);
-                }
-            }
-        }
-    }
-
-    // 3. Vaccine Not Allowed In US
+    // 2. Vaccine Not Allowed In US
     if matches!(dose.cvx.0, cvx!("194") | cvx!("200") | cvx!("201") | cvx!("202") | cvx!("231") | cvx!("331") | cvx!("337")) {
         *status = DoseStatus::Invalid;
         reasons.retain(|r| *r != EvaluationReason::VaccineNotPartOfSeries);
@@ -119,8 +103,15 @@ pub fn influenza_custom_evaluation_hook(
         }
     }
 
-    // 4. CVX 161 Age Limit and Suppression
-    if dose.cvx.0 == cvx!("161") {
+    // 3. Vaccine-specific age limits
+    if matches!(dose.cvx.0, cvx!("144") | cvx!("166")) {
+        let min_limit = crate::time_period!("12y-4d").add_to(ctx.patient.birth_date);
+        let max_limit = crate::time_period!("65y-1d").add_to(ctx.patient.birth_date);
+        if dose.date < min_limit || dose.date > max_limit {
+            *status = DoseStatus::Invalid;
+            reasons.retain(|r| *r != EvaluationReason::VaccineNotPartOfSeries);
+        }
+    } else if dose.cvx.0 == cvx!("161") {
         let tp_3y = crate::time_period!("3y-1d");
         let limit = tp_3y.add_to(ctx.patient.birth_date);
         if dose.date > limit {
@@ -138,6 +129,12 @@ pub fn influenza_custom_evaluation_hook(
             } else {
                 reasons.retain(|r| *r != EvaluationReason::InsufficientAntigen);
             }
+        }
+    } else if matches!(dose.cvx.0, cvx!("111") | cvx!("149") | cvx!("151") | cvx!("333")) {
+        let max_limit = crate::time_period!("50y-1d").add_to(ctx.patient.birth_date);
+        if dose.date > max_limit {
+            *status = DoseStatus::Invalid;
+            reasons.retain(|r| *r != EvaluationReason::VaccineNotPartOfSeries);
         }
     }
 }
@@ -194,7 +191,9 @@ pub fn influenza_custom_forecast_hook(
     // Spacing check from invalid doses
     let last_dose = history.iter().max_by_key(|d| d.date);
     if let Some(last) = last_dose {
-        let is_valid = _valid_doses.iter().any(|(date, _)| *date == last.date);
+        let evals = evaluate_history_seasonally(patient, history);
+        let last_eval = evals.iter().find(|e| e.dose_date == last.date && e.cvx.0 == last.cvx.0);
+        let is_valid = last_eval.map_or(false, |e| e.status == DoseStatus::Valid || e.status == DoseStatus::Accepted);
         if !is_valid {
             let tp_6m_4d = crate::time_period!("6m-4d");
             let age_6m_4d = tp_6m_4d.add_to(patient.birth_date);
@@ -323,55 +322,68 @@ fn count_valid_prior_doses_before_2010(history: &[Dose], patient: &Patient) -> u
     valid_count
 }
 
-fn get_influenza_same_day_priority(cvx: u16, patient_age: chrono::Duration) -> i32 {
-    // Disallowed vaccines have lowest preference (highest priority number)
-    if matches!(cvx, cvx!("194") | cvx!("200") | cvx!("201") | cvx!("202") | cvx!("231") | cvx!("331") | cvx!("337")) {
-        return 100;
+fn get_influenza_same_day_priority(cvx: u16) -> i32 {
+    let is_disallowed = matches!(cvx, 194 | 200 | 201 | 202 | 231 | 331 | 337);
+    let is_nos = matches!(cvx, 88 | 151);
+    if is_disallowed {
+        100
+    } else if is_nos {
+        90
+    } else {
+        20
+    }
+}
+
+fn is_1_dose_season(patient: &Patient, history: &[Dose], season_start: NaiveDate) -> bool {
+    let season_end = get_active_season(season_start).end;
+    let first_dose_date = history.iter()
+        .filter(|d| d.date >= season_start && d.date <= season_end)
+        .map(|d| d.date)
+        .min();
+    
+    let evaluation_date = first_dose_date.unwrap_or(season_start);
+    let tp_9y = crate::time_period!("9y");
+    let age_9y = tp_9y.add_to(patient.birth_date);
+    if evaluation_date >= age_9y {
+        return true;
     }
     
-    // Unspecified formulation (CVX 88) has low preference
-    if cvx == cvx!("88") {
-        return 90;
+    let active_season = get_active_season(evaluation_date);
+    if active_season.name == "20122013_INFLUENZA_SEASON" || active_season.name == "20132014_INFLUENZA_SEASON" {
+        check_1dose_conditions_2012_2014(history, patient, season_start)
+    } else if active_season.name == "20142015_INFLUENZA_SEASON" {
+        let cond_2012 = check_1dose_conditions_2012_2014(history, patient, season_start);
+        let has_dose_2013 = history.iter().any(|d| {
+            d.date >= NaiveDate::from_ymd_opt(2013, 7, 1).unwrap() &&
+            d.date <= NaiveDate::from_ymd_opt(2014, 6, 30).unwrap()
+        });
+        cond_2012 || has_dose_2013
+    } else {
+        let prior_valid_count = count_valid_prior_doses(history, patient, season_start);
+        prior_valid_count >= 2
     }
-    
-    // High-dose / adjuvanted vaccines (CVX 135, 197) are restricted to age >= 65y.
-    // If patient is under 65y, they should be evaluated last.
-    if matches!(cvx, cvx!("135") | cvx!("197")) {
-        let age_65y = chrono::Duration::days(65 * 365 + 16); // approximately 65 years
-        if patient_age < age_65y {
-            return 80;
-        } else {
-            return 5; // preferred for >= 65y
-        }
-    }
-    
-    // Live virus vaccines (LAIV: 111, 149, 151, 333) are preferred and evaluated first
-    if matches!(cvx, cvx!("111") | cvx!("149") | cvx!("151") | cvx!("333")) {
-        return 10;
-    }
-    
-    // Default preference for standard inactivated vaccines
-    20
 }
 
 fn evaluate_history_seasonally(patient: &Patient, history: &[Dose]) -> Vec<DoseEvaluation> {
     let mut evaluations = Vec::new();
     let mut valid_doses_by_season: std::collections::HashMap<String, Vec<NaiveDate>> = std::collections::HashMap::new();
 
-    let mut sorted_history = history.to_vec();
-    sorted_history.sort_by(|a, b| {
-        if a.date != b.date {
-            a.date.cmp(&b.date)
+    let mut history_with_indices: Vec<(usize, Dose)> = history.iter().cloned().enumerate().collect();
+    history_with_indices.sort_by(|a, b| {
+        if a.1.date != b.1.date {
+            a.1.date.cmp(&b.1.date)
         } else {
-            let age_a = a.date - patient.birth_date;
-            let age_b = b.date - patient.birth_date;
-            let prio_a = get_influenza_same_day_priority(a.cvx.0, age_a);
-            let prio_b = get_influenza_same_day_priority(b.cvx.0, age_b);
-            prio_a.cmp(&prio_b)
+            let prio_a = get_influenza_same_day_priority(a.1.cvx.0);
+            let prio_b = get_influenza_same_day_priority(b.1.cvx.0);
+            if prio_a != prio_b {
+                prio_a.cmp(&prio_b)
+            } else {
+                b.0.cmp(&a.0) // Later original index comes first
+            }
         }
     });
 
-    for (i, dose) in sorted_history.iter().enumerate() {
+    for (_, dose) in history_with_indices.iter() {
         let active_season = get_active_season(dose.date);
         let season_key = active_season.start.to_string();
 
@@ -412,8 +424,14 @@ fn evaluate_history_seasonally(patient: &Patient, history: &[Dose]) -> Vec<DoseE
                     reasons.push(EvaluationReason::VaccineNotPartOfSeries);
                 }
 
-                // 5. CVX 161 pediatric restriction check
-                if dose.cvx.0 == cvx!("161") {
+                // 5. Vaccine-specific age limits
+                if matches!(dose.cvx.0, cvx!("144") | cvx!("166")) {
+                    let min_limit = crate::time_period!("12y-4d").add_to(patient.birth_date);
+                    let max_limit = crate::time_period!("65y-1d").add_to(patient.birth_date);
+                    if dose.date < min_limit || dose.date > max_limit {
+                        status = DoseStatus::Invalid;
+                    }
+                } else if dose.cvx.0 == cvx!("161") {
                     let tp_3y = crate::time_period!("3y-1d");
                     let limit = tp_3y.add_to(patient.birth_date);
                     if dose.date > limit {
@@ -425,15 +443,22 @@ fn evaluate_history_seasonally(patient: &Patient, history: &[Dose]) -> Vec<DoseE
                             reasons.push(EvaluationReason::InsufficientAntigen);
                         }
                     }
+                } else if matches!(dose.cvx.0, cvx!("111") | cvx!("149") | cvx!("151") | cvx!("333")) {
+                    let max_limit = crate::time_period!("50y-1d").add_to(patient.birth_date);
+                    if dose.date > max_limit {
+                        status = DoseStatus::Invalid;
+                    }
                 }
 
                 // 6. Interval checks (only if still Valid)
                 if status == DoseStatus::Valid {
                     let last_prior_dose_date = evaluations.iter()
                         .filter(|e| {
-                            e.status == DoseStatus::Valid || 
-                            (!e.reasons.contains(&EvaluationReason::BelowMinimumAge) && 
-                             !e.reasons.contains(&EvaluationReason::PriorToDOB))
+                            e.dose_date < dose.date &&
+                            get_active_season(e.dose_date).name == active_season.name &&
+                            (e.status == DoseStatus::Valid || 
+                             (!e.reasons.contains(&EvaluationReason::BelowMinimumAge) && 
+                              !e.reasons.contains(&EvaluationReason::PriorToDOB)))
                         })
                         .map(|e| e.dose_date)
                         .last();
@@ -446,6 +471,16 @@ fn evaluate_history_seasonally(patient: &Patient, history: &[Dose]) -> Vec<DoseE
                         }
                     }
                 }
+            }
+        }
+
+        // 7. Extra Dose Limit check (Accepted status)
+        if status == DoseStatus::Valid {
+            let is_1_dose = is_1_dose_season(patient, history, active_season.start);
+            let max_allowed = if is_1_dose { 1 } else { 2 };
+            let season_valid_count = valid_doses_by_season.get(&season_key).map_or(0, |v| v.len());
+            if season_valid_count >= max_allowed {
+                status = DoseStatus::Accepted;
             }
         }
 
