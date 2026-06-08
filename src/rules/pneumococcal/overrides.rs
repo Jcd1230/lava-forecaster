@@ -61,7 +61,7 @@ fn has_valid_child_modern_pcv(valid_doses: &[(NaiveDate, usize)], history: &[Dos
 pub fn pneumococcal_custom_dose_number_hook(_series_name: &str, ctx: &EvaluationContext) -> usize {
     let ref_date = ctx.current_dose.map(|d| d.date).unwrap_or(ctx.eval_date);
     let birth = ctx.patient.birth_date;
-    let mut target = ctx.target_dose_number;
+    let target = ctx.target_dose_number;
 
     if age_ge(birth, ref_date, crate::time_period!("5y")) {
         return target.max(6);

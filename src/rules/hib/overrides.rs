@@ -3,8 +3,8 @@ use lava_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
-use crate::date_utils::{SmallVec, TimePeriod, compare_elapsed};
-use crate::rules::helpers::{clamp_date_at_least, age_ge, age_lt};
+use crate::date_utils::{SmallVec, compare_elapsed};
+use crate::rules::helpers::{age_ge, age_lt};
 
 pub fn is_hib_cvx(cvx: Cvx) -> bool {
     const HIB_CVX: &[u16] = &[cvx!("17"), cvx!("22"), cvx!("46"), cvx!("47"), cvx!("48"), cvx!("49"), cvx!("50"), cvx!("51"), cvx!("102"), cvx!("120"), cvx!("132"), cvx!("146"), cvx!("148"), cvx!("170"), cvx!("198")];
