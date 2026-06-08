@@ -11,11 +11,11 @@ Welcome! This guide provides a quick-start reference for AI agents and developer
 
 ## Reference Guides
 
-- Detailed Porting & Implementation Instructions: [agent_onboarding_guide.md](file:///home/jason/projects/ice/agent_onboarding_guide.md)
-- Parity workflow and debugging notes: [parity_workflow_notes.md](file:///home/jason/projects/ice/parity_workflow_notes.md)
-- Current Porting Progress & Task Checklist: [remaining_series_tasks.md](file:///home/jason/projects/ice/remaining_series_tasks.md)
-- Original Java Project Setup & Run Details: [README.md](file:///home/jason/projects/ice/README.md)
-- Test Runner Execution Modes Guide: [tests/README.md](file:///home/jason/projects/ice/tests/README.md)
+- Detailed Porting & Implementation Instructions: [agent_onboarding_guide.md](file://../ice/agent_onboarding_guide.md)
+- Parity workflow and debugging playbook: [parity_workflow_notes.md](file://./parity_workflow_notes.md)
+- Current Porting Progress & Task Checklist: [remaining_series_tasks.md](file://../ice/remaining_series_tasks.md)
+- Original Java Project Setup & Run Details: [README.md](file://../ice/README.md)
+- Test Runner Execution Modes Guide: [tests/README.md](file://../ice/tests/README.md)
 
 ## Essential Developer Commands
 
@@ -44,7 +44,7 @@ All major tasks are configured as `mise` commands or native Cargo binaries.
 - **Java 25 Requirement**: The Java ICE codebase strictly requires Java 25. Running it via `mise` ensures the correct toolchain version is used.
 - **Scaffolding New Modules**: When implementing a new vaccine group, always run `mise run scaffold <group_lower>` first to generate boilerplate and register the module in `rules/mod.rs`.
 - **Drools Output Mapping**: Do not trust the Drools rules literally. `Mark the shot as Ignored` in Drools maps to `DoseStatus::Accepted` in the output XML. `COMPLETE_HIGH_RISK` combined recommendation status maps to `SeriesStatus::Complete` in the final output. Always verify against recorded Java output.
-- **Legacy Rule Definitions**: Legacy rules and support data YAML files are located under the [Series Directory](file:///home/jason/projects/ice/opencds-decision-support-service/src/main/resources/data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/Series/).
+- **Legacy Rule Definitions**: Legacy rules and support data YAML files are located under the [Series Directory](file://../ice/opencds-decision-support-service/src/main/resources/data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/Series/).
 - **Comparing Against Live Java**: When implementing or debugging a vaccine group, you can compare Rust behavior against Java in real time. First start the Java server using `mise run run`, then run `cargo run --release --bin test_runner -- --run tests/suite.ltp --group <name> --compare` in another shell.
 - **Test Runner Verbosity**: The test runner is quiet by default, printing only concise error summaries on failure. Pass `--verbose` or `-v` to see full side-by-side comparison tables.
 - **Decision Trace**: Pass `--trace` or `--explain` on any `--run` or `--reorganize` invocation to get a step-by-step engine decision log (age checks, interval checks, parameter overrides, forecast hook mutations) for each case. Particularly useful when the side-by-side comparison table doesn't immediately explain a date or status mismatch.
@@ -64,7 +64,7 @@ When reducing Java-vs-Rust discrepancies for an existing group, use this loop:
 5. After the group passes, re-run the full compare into a new log under `tests/relative/tmp/`.
 6. Diff per-group failure counts between the previous and new full-compare logs to check for regressions outside the target group.
 
-For detailed mismatch-routing guidance, use [parity_workflow_notes.md](file:///home/jason/projects/ice/parity_workflow_notes.md). For the fuller source-of-truth map and implementation touchpoints, use [agent_onboarding_guide.md](file:///home/jason/projects/ice/agent_onboarding_guide.md).
+For detailed mismatch-routing guidance, use [parity_workflow_notes.md](file://../ice/parity_workflow_notes.md). For the fuller source-of-truth map and implementation touchpoints, use [agent_onboarding_guide.md](file://../ice/agent_onboarding_guide.md).
 
 ## At-a-Glance Compare Triage
 

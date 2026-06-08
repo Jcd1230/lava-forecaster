@@ -74,7 +74,7 @@ cargo run --release -- <path_to_request.json>
 
 The LAVA Forecaster can be compiled to WebAssembly (WASM) to run directly inside web browsers or Node.js environments. Pre-built target packages are also available as assets on the [GitHub Releases page](https://github.com/Jcd1230/lava-forecaster/releases).
 
-For a complete guide on how to build and integrate the WASM build into your web projects, see the [WebAssembly Integration Guide](file:///home/jason/projects/ice/wasm_integration_guide.md).
+For a complete guide on how to build and integrate the WASM build into your web projects, see the [WebAssembly Integration Guide](file://../ice/wasm_integration_guide.md).
 
 ---
 

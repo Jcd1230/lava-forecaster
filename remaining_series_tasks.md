@@ -2,7 +2,7 @@
 
 This task list tracks the vaccine groups and series from the legacy Drools-based Java ICE engine that have been ported to the high-performance Rust LAVA Forecaster.
 
-To implement a group, follow the guidelines in the [Onboarding & Implementation Guide](file:///home/jason/projects/ice/agent_onboarding_guide.md).
+To implement a group, follow the guidelines in the [Onboarding & Implementation Guide](file://../ice/agent_onboarding_guide.md).
 
 ---
 

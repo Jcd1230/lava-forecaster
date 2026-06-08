@@ -506,11 +506,11 @@ When tracking discrepancies, use this navigation map to trace logic from the Rus
 
 | Component in LAVA (Rust) | Location in LAVA Codebase | Legacy Java ICE Equivalent | Location in Java Codebase |
 |---|---|---|---|
-| **Core Engine** | [src/engine.rs](file:///home/jason/projects/ice/src/engine.rs) | Standard evaluation loop & rule flow | `opencds-decision-support-rules/src/main/resources/drools/knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.drl` |
-| **Supporting Data** | [src/rules/](file:///home/jason/projects/ice/src/rules/) (schedules / models) | Series definition YAML files | `opencds-decision-support-service/src/main/resources/data/seriesPlanDefinitions/` |
+| **Core Engine** | [src/engine.rs](file://../ice/src/engine.rs) | Standard evaluation loop & rule flow | `opencds-decision-support-rules/src/main/resources/drools/knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.drl` |
+| **Supporting Data** | [src/rules/](file://../ice/src/rules/) (schedules / models) | Series definition YAML files | `opencds-decision-support-service/src/main/resources/data/seriesPlanDefinitions/` |
 | **Custom Overrides** | `src/rules/<group>/overrides.rs` | Custom evaluation rules (.dslr) | `opencds-decision-support-rules/src/main/resources/drools/knowledgeModule/org.nyc.cir.ice/org.nyc.cir^ICE^1.0.0^Evaluation^<Group>.dslr` |
 | **Custom Recommendations** | `src/rules/<group>/overrides.rs` | Custom recommendation rules (.dslr) | `opencds-decision-support-rules/src/main/resources/drools/knowledgeModule/org.nyc.cir.ice/org.nyc.cir^ICE^1.0.0^Recommendation^<Group>.dslr` |
 | **Series Selection** | `src/rules/<group>/overrides.rs` | Series Selection rules (.drl) | `opencds-decision-support-rules/src/main/resources/drools/knowledgeModule/org.nyc.cir.ice/org.nyc.cir^ICE^1.0.0^SeriesSelection.drl` |
-| **Concept Mapping** | [src/models.rs](file:///home/jason/projects/ice/src/models.rs) | Central mapping config | `opencds-decision-support-service/src/main/resources/config/conceptDeterminationMethods/cdm.xml` |
-| **Target Series/Dose Rules** | [src/schedule.rs](file:///home/jason/projects/ice/src/schedule.rs) | `TargetSeries` / `DoseRule` Java classes | `opencds-decision-support-core/src/main/java/org/cdsframework/ice/service/TargetSeries.java` and `DoseRule.java` |
+| **Concept Mapping** | [src/models.rs](file://../ice/src/models.rs) | Central mapping config | `opencds-decision-support-service/src/main/resources/config/conceptDeterminationMethods/cdm.xml` |
+| **Target Series/Dose Rules** | [src/schedule.rs](file://../ice/src/schedule.rs) | `TargetSeries` / `DoseRule` Java classes | `opencds-decision-support-core/src/main/java/org/cdsframework/ice/service/TargetSeries.java` and `DoseRule.java` |
 
