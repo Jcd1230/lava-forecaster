@@ -169,6 +169,8 @@ pub fn generate_guided_case(
             "INFLUENZA" => "800".to_string(),
             "COVID19" => "850".to_string(),
             "RSV" => "875".to_string(),
+            "MPOX" => "860".to_string(),
+            "H1N1" => "890".to_string(),
             _ => "000".to_string(),
         },
         patient,

@@ -2,7 +2,7 @@ use lava_cvx_macro::cvx;
 use crate::schedule::CompiledSeries;
 
 pub fn pneumococcal_series() -> CompiledSeries {
-    let child_pcv = &[cvx!("100"), cvx!("133"), cvx!("177"), cvx!("215"), cvx!("216"), cvx!("109"), cvx!("152")];
+    let child_pcv = &[cvx!("100"), cvx!("133"), cvx!("177"), cvx!("215"), cvx!("216"), cvx!("109"), cvx!("152"), cvx!("327")];
     let adult_pneumo = &[cvx!("215"), cvx!("216"), cvx!("327"), cvx!("133"), cvx!("33")];
 
     CompiledSeries::builder("PNEUMOCOCCAL_SERIES")
@@ -37,7 +37,7 @@ pub fn pneumococcal_series() -> CompiledSeries {
                 .latest_recommended_age(crate::time_period!("16m+4w"))
                 .cvx(child_pcv)
         })
-        .dose(5, |d| d.cvx(&[cvx!("133"), cvx!("215"), cvx!("216")]))
+        .dose(5, |d| d.cvx(&[cvx!("133"), cvx!("215"), cvx!("216"), cvx!("327")]))
         .dose(6, |d| {
             d.abs_min_age(crate::time_period!("19y"))
                 .min_age(crate::time_period!("50y"))

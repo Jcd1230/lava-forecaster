@@ -35,8 +35,23 @@ pub fn rotavirus_custom_forecast_hook(
     forecast: &mut SeriesForecast,
 ) {
     let birth = patient.birth_date;
+    let tp_8m = crate::time_period!("8m");
+    let date_8m = tp_8m.add_to(birth);
 
     if forecast.status == SeriesStatus::Complete {
+        let num_required = if forecast.series_name == "ROTAVIRUS_2_DOSE_SERIES" { 2 } else { 3 };
+        let actually_complete = valid_doses.iter().any(|(_, num)| *num == num_required);
+
+        if !actually_complete && eval_date > date_8m {
+            forecast.status = SeriesStatus::NotRecommended;
+            forecast.reasons = crate::reasons!["TOO_OLD"];
+            forecast.status = forecast.status.with_earliest_date(None);
+            forecast.status = forecast.status.with_recommended_date(None);
+            forecast.status = forecast.status.with_overdue_date(None);
+            forecast.status = forecast.status.with_latest_date(None);
+            return;
+        }
+
         forecast.reasons = crate::reasons!["COMPLETE"];
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);

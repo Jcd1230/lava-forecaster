@@ -6,6 +6,7 @@ use crate::models::{
 use crate::schedule::{CompiledDoseInterval, CompiledSeries};
 use chrono::NaiveDate;
 use std::cmp::max;
+use crate::set_field;
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct DecisionTrace {
@@ -368,6 +369,7 @@ impl<'a> EvaluationEngine<'a> {
                     status,
                     reasons: crate::reasons![reason],
                     dose_number: Some(output_dose_number),
+                    sources: std::collections::HashMap::new(),
                 });
                 eval_target_dose_numbers.push(target_dose_idx);
 
@@ -388,6 +390,7 @@ impl<'a> EvaluationEngine<'a> {
                     status: DoseStatus::Invalid,
                     reasons: crate::reasons![EvaluationReason::ContraindicatedVaccine],
                     dose_number: Some(output_dose_number),
+                    sources: std::collections::HashMap::new(),
                 });
                 eval_target_dose_numbers.push(target_dose_idx);
                 i += 1;
@@ -464,6 +467,7 @@ impl<'a> EvaluationEngine<'a> {
                     status: dup_status,
                     reasons: dup_reasons,
                     dose_number: Some(prev_dose_num),
+                    sources: std::collections::HashMap::new(),
                 });
                 eval_target_dose_numbers.push(target_dose_idx);
                 i += 1;
@@ -479,6 +483,7 @@ impl<'a> EvaluationEngine<'a> {
                     status: DoseStatus::Invalid,
                     reasons: crate::reasons![EvaluationReason::PriorToDOB],
                     dose_number: Some(output_dose_number),
+                    sources: std::collections::HashMap::new(),
                 });
                 eval_target_dose_numbers.push(target_dose_idx);
                 i += 1;
@@ -534,6 +539,7 @@ impl<'a> EvaluationEngine<'a> {
                             status,
                             reasons,
                             dose_number: Some(output_dose_number),
+                    sources: std::collections::HashMap::new(),
                         });
                         eval_target_dose_numbers.push(target_dose_idx);
                         i += 1;
@@ -548,6 +554,7 @@ impl<'a> EvaluationEngine<'a> {
                     status: DoseStatus::Accepted, // Mark accepted as extra dose
                     reasons: crate::reasons![EvaluationReason::BoosterDose],
                     dose_number: Some(output_dose_number),
+                    sources: std::collections::HashMap::new(),
                 });
                 eval_target_dose_numbers.push(target_dose_idx);
                 i += 1;
@@ -676,6 +683,7 @@ impl<'a> EvaluationEngine<'a> {
                 status,
                 reasons,
                 dose_number: Some(output_dose_number),
+                    sources: std::collections::HashMap::new(),
             });
             eval_target_dose_numbers.push(target_dose_idx);
 
@@ -790,6 +798,7 @@ impl<'a> EvaluationEngine<'a> {
                 series_name: active_series.name.into(),
                 status: SeriesStatus::NotRecommended,
                 reasons: crate::reasons!["CONTRAINDICATION"],
+                sources: std::collections::HashMap::new(),
             };
             trace_decision!("forecast_contraindicated", "Group {} is contraindicated", active_series.vaccine_group);
             if let Some(policy) = self.policy {
@@ -801,9 +810,9 @@ impl<'a> EvaluationEngine<'a> {
         let mut forecast = if is_completed {
             let mut f = SeriesForecast {
                 series_name: active_series.name.into(),
-                
                 status: SeriesStatus::Complete,
                 reasons: crate::reasons!["COMPLETE"],
+                sources: std::collections::HashMap::new(),
             };
             trace_decision!("forecast_complete", "Series {} is completed", active_series.name);
             if let Some(policy) = self.policy {
@@ -847,9 +856,9 @@ impl<'a> EvaluationEngine<'a> {
                 if has_completion_hook && !is_completed {
                     let mut f = SeriesForecast {
                         series_name: active_series.name.into(),
-                        
                         status: SeriesStatus::default(),
                         reasons: crate::reasons!["NOT_COMPLETE"],
+                        sources: std::collections::HashMap::new(),
                     };
                     trace_decision!("forecast_not_completed_awaiting_custom_hook", "Next dose idx {} > num_doses {} but custom completion hook exists; delegating to custom forecast hook", next_dose_idx, active_series.num_doses);
                     if let Some(policy) = self.policy {
@@ -859,9 +868,9 @@ impl<'a> EvaluationEngine<'a> {
                 }
                 let mut f = SeriesForecast {
                     series_name: active_series.name.into(),
-                    
                     status: SeriesStatus::Complete,
                     reasons: crate::reasons!["COMPLETE"],
+                    sources: std::collections::HashMap::new(),
                 };
                 trace_decision!("forecast_complete_extra_doses", "Next dose idx {} > num_doses {} without custom completion override", next_dose_idx, active_series.num_doses);
                 if let Some(policy) = self.policy {
@@ -1030,6 +1039,7 @@ impl<'a> EvaluationEngine<'a> {
                     series_name: active_series.name.into(),
                     status: crate::models::SeriesStatus::NotComplete { earliest_date, recommended_date, overdue_date, latest_date: None },
                     reasons: crate::reasons!["NOT_COMPLETE"],
+                    sources: std::collections::HashMap::new(),
                 };
 
                 // Apply max age clamp if configured
@@ -1038,7 +1048,7 @@ impl<'a> EvaluationEngine<'a> {
                     if eval_date >= clamp_date {
                         if !matches!(f.status, SeriesStatus::Complete) {
                             trace_decision!("forecast_max_age_clamp", "Max age clamp triggered: eval_date={:?} >= max_age_date={:?}, shifting status from {:?} to {:?}", eval_date, clamp_date, f.status, status);
-                            f.status = status.clone();
+                            set_field!(f, status, status.clone());
                             f.status = f.status.with_earliest_date(None);
                             f.status = f.status.with_recommended_date(None);
                             f.status = f.status.with_overdue_date(None);

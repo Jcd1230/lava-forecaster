@@ -21,7 +21,8 @@ pub fn record_summary_result(summary: &mut BTreeMap<String, SummaryCounts>, grou
 }
 
 pub fn print_summary(title: &str, total: usize, passed: usize, failed: usize, group_summary: &BTreeMap<String, SummaryCounts>) {
-    println!("\n--- {} ---", title);
+    println!("
+--- {} ---", title);
     println!("Executed: {}", total);
     println!("Passed  : {}", passed);
     println!("Failed  : {}", failed);
@@ -30,7 +31,8 @@ pub fn print_summary(title: &str, total: usize, passed: usize, failed: usize, gr
     }
 
     if !group_summary.is_empty() {
-        println!("\nPer-Group Summary:");
+        println!("
+Per-Group Summary:");
         println!("{:<16} | {:>8} | {:>8} | {:>8} | {:>8}", "Group", "Executed", "Passed", "Failed", "Pass %");
         println!("{}", "-".repeat(62));
         for (group, counts) in group_summary {
@@ -61,12 +63,14 @@ pub fn print_comparison_table(
     errors: &[String],
 ) {
     if !errors.is_empty() {
-        println!("\nTest Case: \x1b[91m{}\x1b[0m (FAIL)", tc_name);
+        println!("
+Test Case: \x1b[91m{}\x1b[0m (FAIL)", tc_name);
         for err in errors {
-            println!("  - \x1b[91m{}\x1b[0m", err);
+            println!("{}", err);
         }
     } else {
-        println!("\nTest Case: \x1b[92m{}\x1b[0m (PASS)", tc_name);
+        println!("
+Test Case: \x1b[92m{}\x1b[0m (PASS)", tc_name);
     }
 
     println!("{:<12} | {:<4} | {:<28} | {:<28} | Status", "Date", "CVX", "Rust Evaluation", "Expected Evaluation");
@@ -116,29 +120,43 @@ pub fn print_comparison_table(
         println!("{:<12} | {:<4} | {:<28} | {:<28} | {}", dt.format("%Y-%m-%d"), cvx, r_str, e_str, status_indicator);
     }
 
-    println!("\nForecasts:");
-    println!("{:<15} | {:<22} | {:<22}", "Field", "Rust Forecast", "Expected Forecast");
-    println!("{}", "-".repeat(65));
+    if rust_fc.is_some() || exp_fc.is_some() {
+        println!("
+Forecasts:");
+        println!("{:<15} | {:<45} | {:<22}", "Field", "Rust Forecast", "Expected Forecast");
+        println!("{}", "-".repeat(90));
 
-    let fields = ["status", "earliest_date", "recommended_date", "overdue_date"];
-    for field in &fields {
-        let r_val = match (field, rust_fc) {
-            (&"status", Some(fc)) => format!("{:?}", fc.status),
-            (&"earliest_date", Some(fc)) => fc.status.earliest_date().map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string()),
-            (&"recommended_date", Some(fc)) => fc.status.recommended_date().map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string()),
-            (&"overdue_date", Some(fc)) => fc.status.overdue_date().map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string()),
-            _ => "-".to_string(),
-        };
-        let e_val = match (field, exp_fc) {
-            (&"status", Some(fc)) => format!("{:?}", fc.status),
-            (&"earliest_date", Some(fc)) => fc.status.earliest_date().map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string()),
-            (&"recommended_date", Some(fc)) => fc.status.recommended_date().map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string()),
-            (&"overdue_date", Some(fc)) => fc.status.overdue_date().map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string()),
-            _ => "-".to_string(),
-        };
+        let rust_forecast = rust_fc.unwrap();
+        let expected_forecast = exp_fc.unwrap();
 
-        println!("{:<15} | {:<22} | {:<22}", field, r_val, e_val);
+        let fields = ["status", "earliest_date", "recommended_date", "overdue_date", "latest_date"];
+        for field in &fields {
+            let field_name = *field;
+            let rust_val = get_field_val(rust_forecast, field_name);
+            let expected_val = get_field_val(expected_forecast, field_name);
+            
+            if rust_val != expected_val {
+                 let source = rust_forecast.sources.get(field_name).map(|s| format!("(Source: {})", s)).unwrap_or_default();
+                 println!(
+                     "    - \x1b[91m{}\x1b[0m: Rust={:?}, Expected={:?} \x1b[93m{}\x1b[0m",
+                     field_name,
+                     rust_val,
+                     expected_val,
+                     source
+                 );
+            }
+        }
     }
     println!();
 }
 
+fn get_field_val<'a>(forecast: &'a SeriesForecast, field: &str) -> String {
+    match field {
+        "status" => format!("{:?}", forecast.status),
+        "earliest_date" => forecast.status.earliest_date().map_or("-".to_string(), |d| d.format("%Y-%m-%d").to_string()),
+        "recommended_date" => forecast.status.recommended_date().map_or("-".to_string(), |d| d.format("%Y-%m-%d").to_string()),
+        "overdue_date" => forecast.status.overdue_date().map_or("-".to_string(), |d| d.format("%Y-%m-%d").to_string()),
+        "latest_date" => forecast.status.latest_date().map_or("-".to_string(), |d| d.format("%Y-%m-%d").to_string()),
+        _ => "".to_string(),
+    }
+}

@@ -36,7 +36,6 @@ pub fn h1n1_custom_forecast_hook(
     let season_end = NaiveDate::from_ymd_opt(2010, 6, 30).unwrap();
 
     if forecast.status == SeriesStatus::Complete {
-        forecast.status = SeriesStatus::NotRecommended;
         forecast.reasons = crate::reasons!["COMPLETE"];
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);
@@ -55,8 +54,8 @@ pub fn h1n1_custom_forecast_hook(
         return;
     }
 
-    if let Some(rec_date) = forecast.status.recommended_date() {
-        if rec_date > season_end {
+    if let Some(earliest_date) = forecast.status.earliest_date() {
+        if earliest_date > season_end {
             forecast.status = SeriesStatus::NotRecommended;
             forecast.reasons = crate::reasons!["VAC_GROUP_NO_LONGER_REC"];
             forecast.status = forecast.status.with_earliest_date(None);

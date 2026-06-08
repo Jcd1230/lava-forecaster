@@ -12,7 +12,7 @@ fn is_old_zoster(cvx: Cvx) -> bool {
 }
 
 fn is_live_virus(cvx: Cvx) -> bool {
-    const LIVE_VIRUS: &[u16] = &[cvx!("03"), cvx!("04"), cvx!("05"), cvx!("06"), cvx!("07"), cvx!("21"), cvx!("37"), cvx!("38"), cvx!("75"), cvx!("94"), cvx!("105"), cvx!("111"), cvx!("121"), cvx!("125"), cvx!("149"), cvx!("151"), cvx!("183"), cvx!("184"), cvx!("325"), cvx!("333")];
+    const LIVE_VIRUS: &[u16] = &[cvx!("03"), cvx!("04"), cvx!("05"), cvx!("06"), cvx!("07"), cvx!("21"), cvx!("37"), cvx!("38"), cvx!("75"), cvx!("94"), cvx!("105"), cvx!("121"), cvx!("183"), cvx!("184"), cvx!("325")];
     LIVE_VIRUS.contains(&cvx.0)
 }
 
@@ -48,12 +48,17 @@ pub fn zoster_custom_evaluation_hook(
             }
         }
 
-        // Rule 1: CVX 121/188 (old live zoster) → always Accepted/VaccineNotPartOfSeries
+        // Rule 1: CVX 121/188 (old live zoster) → Accepted if otherwise valid for this series
         if is_old_zoster(dose.cvx) {
-            *status = DoseStatus::Accepted;
-            reasons.clear();
-            reasons.push(EvaluationReason::VaccineNotPartOfSeries);
-            reasons.push(EvaluationReason::OutsideRoutineSeries);
+            if *status == DoseStatus::Valid {
+                *status = DoseStatus::Accepted;
+                if !reasons.contains(&EvaluationReason::VaccineNotPartOfSeries) {
+                    reasons.push(EvaluationReason::VaccineNotPartOfSeries);
+                }
+                if !reasons.contains(&EvaluationReason::OutsideRoutineSeries) {
+                    reasons.push(EvaluationReason::OutsideRoutineSeries);
+                }
+            }
             return;
         }
 
@@ -128,6 +133,14 @@ pub fn zoster_custom_forecast_hook(
         }
         if let Some(d) = forecast.status.recommended_date_mut() {
             clamp_date_at_least(d, spacing_date);
+        }
+        if let Some(d) = forecast.status.overdue_date_mut() {
+            // If live virus was given, the overdue interval (7m+4w) is re-anchored.
+            // We subtract 1 day (using pred_opt) to match the engine's overdue date logic.
+            let overdue_spacing = crate::time_period!("7m+4w").add_to(last_date);
+            if let Some(p) = overdue_spacing.pred_opt() {
+                clamp_date_at_least(d, p);
+            }
         }
     }
 

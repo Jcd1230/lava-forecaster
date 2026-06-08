@@ -4,6 +4,7 @@ use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
 use crate::date_utils::{SmallVec, TimePeriod, compare_elapsed};
+use crate::rules::helpers::{clamp_date_at_least, age_ge, age_lt};
 
 pub fn is_hib_cvx(cvx: Cvx) -> bool {
     const HIB_CVX: &[u16] = &[cvx!("17"), cvx!("22"), cvx!("46"), cvx!("47"), cvx!("48"), cvx!("49"), cvx!("50"), cvx!("51"), cvx!("102"), cvx!("120"), cvx!("132"), cvx!("146"), cvx!("148"), cvx!("170"), cvx!("198")];
@@ -40,20 +41,11 @@ pub fn hib_custom_dose_number_hook(
     let ref_date = ctx.current_dose.map(|d| d.date).unwrap_or(ctx.eval_date);
     let mut target_dose_idx = ctx.target_dose_number;
 
-    // Helper closure to check age boundaries
-    let is_age_ge = |tp: TimePeriod| -> bool {
-        compare_elapsed(birth, ref_date, &tp) != std::cmp::Ordering::Less
-    };
-    let is_age_lt = |tp: TimePeriod| -> bool {
-        compare_elapsed(birth, ref_date, &tp) == std::cmp::Ordering::Less
-    };
-
     let tp_7m = crate::time_period!("7m");
     let tp_12m = crate::time_period!("12m");
+    let tp_15m = crate::time_period!("15m");
 
     // Forecast-time skip rules only apply when there are no valid doses at all.
-    // Once a series has started, Java keeps forecasting from the effective
-    // next dose number produced by the evaluated history.
     if ctx.current_dose.is_none() && !ctx.valid_doses.is_empty() {
         return target_dose_idx;
     }
@@ -63,13 +55,11 @@ pub fn hib_custom_dose_number_hook(
         .count();
 
     // Check age ranges:
-    if is_age_ge(crate::time_period!("15m")) {
-        // Skip to 4: Patient over 15 Months
+    if age_ge(birth, ref_date, tp_15m) {
         if target_dose_idx < 4 {
             target_dose_idx = 4;
         }
-    } else if is_age_ge(crate::time_period!("12m")) && is_age_lt(crate::time_period!("15m")) {
-        // Patient between 12 and 15 Months
+    } else if age_ge(birth, ref_date, tp_12m) {
         if count_hib_before_12m < 2 {
             if target_dose_idx < 3 {
                 target_dose_idx = 3;
@@ -79,9 +69,7 @@ pub fn hib_custom_dose_number_hook(
                 target_dose_idx = 4;
             }
         }
-    } else if is_age_ge(crate::time_period!("12m-28d")) && is_age_lt(crate::time_period!("12m")) {
-        // Patient between 12m-28d and 12m
-        // Rule: Skip to 3 if patient has received exactly 1 prior dose which was administered < 7m of age
+    } else if age_ge(birth, ref_date, crate::time_period!("12m-28d")) {
         let prior_hib_count = ctx.valid_doses.len();
         if prior_hib_count == 1 {
             let prior_dose_lt_7m = compare_elapsed(birth, ctx.valid_doses[0].0, &tp_7m) == std::cmp::Ordering::Less;
@@ -91,8 +79,7 @@ pub fn hib_custom_dose_number_hook(
                 }
             }
         }
-    } else if is_age_ge(crate::time_period!("7m")) && is_age_lt(crate::time_period!("12m")) {
-        // Patient between 7 and 12 Months
+    } else if age_ge(birth, ref_date, tp_7m) {
         if target_dose_idx < 2 {
             target_dose_idx = 2;
         }
@@ -119,8 +106,8 @@ pub fn hib_custom_evaluation_hook(
     if dose.cvx.0 == cvx!("50") {
         let tp_1y_4d = crate::time_period!("1y-4d");
         let tp_5y = crate::time_period!("5y");
-        let age_ge_1y_4d = compare_elapsed(birth, admin_date, &tp_1y_4d) != std::cmp::Ordering::Less;
-        let age_ge_5y = compare_elapsed(birth, admin_date, &tp_5y) != std::cmp::Ordering::Less;
+        let age_ge_1y_4d = age_ge(birth, admin_date, tp_1y_4d);
+        let age_ge_5y = age_ge(birth, admin_date, tp_5y);
 
         let num_doses = if series_name == "HIB_OMP_SERIES" { 3 } else { 4 };
         let is_final_dose = target_dose_idx == num_doses;
@@ -137,9 +124,7 @@ pub fn hib_custom_evaluation_hook(
     }
 
     // 2. Age Clamp (>= 5y)
-    let tp_5y = crate::time_period!("5y");
-    let age_ge_5y = compare_elapsed(birth, admin_date, &tp_5y) != std::cmp::Ordering::Less;
-    if age_ge_5y {
+    if age_ge(birth, admin_date, crate::time_period!("5y")) {
         let num_doses = if series_name == "HIB_OMP_SERIES" { 3 } else { 4 };
         let valid_before_5y = ctx.count_valid_doses_before(crate::time_period!("5y"));
         if valid_before_5y < num_doses {
@@ -153,9 +138,7 @@ pub fn hib_custom_evaluation_hook(
 
     // 3. Below Absolute Minimum Age for Final Dose of 4-Dose Series
     if series_name == "HIB_4_DOSE_SERIES" && target_dose_idx == 4 {
-        let tp_1y_4d = crate::time_period!("1y-4d");
-        let age_lt_1y_4d = compare_elapsed(birth, admin_date, &tp_1y_4d) == std::cmp::Ordering::Less;
-        if age_lt_1y_4d {
+        if age_lt(birth, admin_date, crate::time_period!("1y-4d")) {
             let hib_cvx = &[cvx!("17"), cvx!("22"), cvx!("46"), cvx!("47"), cvx!("48"), cvx!("49"), cvx!("50"), cvx!("51"), cvx!("102"), cvx!("120"), cvx!("132"), cvx!("146"), cvx!("148"), cvx!("170"), cvx!("198")];
             let count_before_7m = ctx.count_cvx_before(hib_cvx, crate::time_period!("7m"));
             if count_before_7m == 0 {
@@ -191,16 +174,7 @@ pub fn hib_custom_forecast_hook(
         }
     }
 
-
-
-    // Removed the manual >= 5 years age check since it is now
-    // handled declaratively by active_series.max_age_clamp.
-
-    // Recommended Date Overrides for HIB_4_DOSE_SERIES.
-    // These Java rules act on the series' current effective target dose.
-    // Once a catch-up dose has already satisfied the skipped target, forecasting
-    // should fall back to the generic next-dose timing.
-    if forecast.series_name == "HIB_4_DOSE_SERIES" && forecast.status != SeriesStatus::Complete && valid_doses.is_empty() {
+    if (forecast.series_name == "HIB_4_DOSE_SERIES" || forecast.series_name == "HIB_OMP_SERIES") && forecast.status != SeriesStatus::Complete && valid_doses.is_empty() {
         let tp_7m = crate::time_period!("7m");
         let tp_12m = crate::time_period!("12m");
         let tp_15m = crate::time_period!("15m");
@@ -233,45 +207,57 @@ pub fn hib_custom_forecast_hook(
         let count_valid_before_12m = count_valid_doses_before(valid_doses, date_12m);
         let effective_before_15m = effective_dose_number_before(valid_doses, date_15m);
 
-        if next_target_dose == 2 && eval_ge_7m && eval_lt_12m {
+        if next_target_dose == 1 && !history.is_empty() {
+            let date_2m = crate::time_period!("2m").add_to(birth);
+            let earliest = date_2m - chrono::Duration::days(3);
+            forecast.status = forecast.status.with_earliest_date(Some(earliest));
+            forecast.status = forecast.status.with_recommended_date(Some(date_2m));
+            forecast.status = forecast.status.with_overdue_date(Some(date_2m));
+        } else if next_target_dose == 2 && eval_ge_7m && eval_lt_12m {
             if count_valid_before_7m == 0 {
                 forecast.status = forecast.status.with_recommended_date(Some(date_7m));
-                forecast.status = forecast.status.with_earliest_date(Some(date_7m));
                 forecast.status = forecast.status.with_overdue_date(Some(date_7m));
             }
         } else if next_target_dose == 3 && eval_ge_12m && eval_lt_15m {
             if count_valid_before_12m < 2 {
                 forecast.status = forecast.status.with_recommended_date(Some(date_12m));
-                forecast.status = forecast.status.with_earliest_date(Some(date_12m));
             }
         } else if next_target_dose == 4 && eval_ge_12m && eval_lt_15m {
             if count_valid_before_12m == 2 {
                 forecast.status = forecast.status.with_recommended_date(Some(date_12m));
-                forecast.status = forecast.status.with_earliest_date(Some(date_12m));
             }
         } else if next_target_dose == 4 && eval_ge_15m && eval_lt_5y {
             if effective_before_15m < 4 {
                 forecast.status = forecast.status.with_recommended_date(Some(date_15m));
-                forecast.status = forecast.status.with_earliest_date(Some(date_15m));
             }
         }
     }
 
-    // Space by 28-day repeat interval from the last invalid dose in history,
-    // unless that last dose was invalid due to BelowMinimumAge.
     let last_dose = history.iter().max_by_key(|d| d.date);
     if let Some(ld) = last_dose {
         let is_valid = valid_doses.iter().any(|(date, _)| *date == ld.date);
         if !is_valid {
-            let target_dose_num = valid_doses.len() + 1;
+            // Re-calculate target dose number (should match hook logic)
+            let current_target = valid_doses.len() + 1;
+            let mut targeted_dose = current_target;
+            if forecast.series_name == "HIB_4_DOSE_SERIES" {
+                if age_ge(birth, eval_date, crate::time_period!("15m")) {
+                    targeted_dose = targeted_dose.max(4);
+                } else if age_ge(birth, eval_date, crate::time_period!("12m")) {
+                    targeted_dose = targeted_dose.max(3);
+                } else if age_ge(birth, eval_date, crate::time_period!("7m")) {
+                    targeted_dose = targeted_dose.max(2);
+                }
+            }
+
             let abs_min_age = match forecast.series_name.as_ref() {
-                "HIB_OMP_SERIES" => match target_dose_num {
+                "HIB_OMP_SERIES" => match targeted_dose {
                     1 => Some(crate::time_period!("38d")),
                     2 => Some(crate::time_period!("66d")),
                     3 => Some(crate::time_period!("1y-4d")),
                     _ => None,
                 },
-                _ => match target_dose_num {
+                _ => match targeted_dose {
                     1 => Some(crate::time_period!("38d")),
                     2 => Some(crate::time_period!("66d")),
                     3 => Some(crate::time_period!("94d")),
@@ -280,13 +266,27 @@ pub fn hib_custom_forecast_hook(
                 },
             };
             let is_below_min_age = if let Some(tp) = abs_min_age {
-                compare_elapsed(birth, ld.date, &tp) == std::cmp::Ordering::Less
+                age_lt(birth, ld.date, tp)
             } else {
                 false
             };
 
             if !is_below_min_age {
-                let repeat_date = ld.date + chrono::Duration::days(28);
+                let repeat_interval = match forecast.series_name.as_ref() {
+                    "HIB_OMP_SERIES" => match targeted_dose {
+                        2 => 28,
+                        3 => 56,
+                        _ => 28,
+                    },
+                    _ => match targeted_dose {
+                        2 => 28,
+                        3 => 28,
+                        4 => 56,
+                        _ => 28,
+                    },
+                };
+                let repeat_date = ld.date + chrono::Duration::days(repeat_interval);
+
                 if let Some(Some(earliest)) = forecast.status.earliest_date_mut() {
                     if *earliest < repeat_date {
                         *earliest = repeat_date;
@@ -312,37 +312,32 @@ pub fn hib_custom_switch_hook(
     _target_dose_idx: usize,
     ctx: &EvaluationContext,
 ) -> Option<&'static str> {
-    if current_series_name != "HIB_4_DOSE_SERIES" {
-        return None;
-    }
-
-    let birth = ctx.patient.birth_date;
-    let tp_7m = crate::time_period!("7m");
-    let tp_12m = crate::time_period!("12m");
-
     if let Some(dose) = ctx.current_dose {
-        if is_omp_cvx(dose.cvx) {
-            // Case 1: First dose, < 7m, is OMP
-            if ctx.valid_doses.is_empty() {
-                if compare_elapsed(birth, dose.date, &tp_7m) == std::cmp::Ordering::Less {
-                    return Some("HIB_OMP_SERIES");
+        if current_series_name == "HIB_4_DOSE_SERIES" {
+            if is_omp_cvx(dose.cvx) {
+                if ctx.valid_doses.is_empty() {
+                    if age_lt(ctx.patient.birth_date, dose.date, crate::time_period!("7m")) {
+                        return Some("HIB_OMP_SERIES");
+                    }
                 }
-            }
-            // Case 2: Second dose, < 12m, is OMP, and the first valid dose was OMP given < 7m
-            if ctx.valid_doses.len() == 1 {
-                let first_valid = ctx.valid_doses[0];
-                let first_dose = ctx.history.iter().find(|d| d.date == first_valid.0);
-                if let Some(fd) = first_dose {
-                    if is_omp_cvx(fd.cvx) && compare_elapsed(birth, fd.date, &tp_7m) == std::cmp::Ordering::Less {
-                        if compare_elapsed(birth, dose.date, &tp_12m) == std::cmp::Ordering::Less {
-                            return Some("HIB_OMP_SERIES");
+                if ctx.valid_doses.len() == 1 {
+                    let first_valid = ctx.valid_doses[0];
+                    let first_dose = ctx.history.iter().find(|d| d.date == first_valid.0);
+                    if let Some(fd) = first_dose {
+                        if is_omp_cvx(fd.cvx) && age_lt(ctx.patient.birth_date, fd.date, crate::time_period!("7m")) {
+                            if age_lt(ctx.patient.birth_date, dose.date, crate::time_period!("12m")) {
+                                return Some("HIB_OMP_SERIES");
+                            }
                         }
                     }
                 }
             }
+        } else if current_series_name == "HIB_OMP_SERIES" {
+            if !is_omp_cvx(dose.cvx) && is_hib_cvx(dose.cvx) {
+                return Some("HIB_4_DOSE_SERIES");
+            }
         }
     }
-
     None
 }
 
@@ -362,7 +357,7 @@ fn matches_omp_criteria_from_eval(patient: &Patient, forecast: &VaccineGroupFore
     let total_hib_evals = forecast.evaluations.len();
     if total_hib_evals == 1 && valid_omp_doses.len() == 1 {
         let e = valid_omp_doses[0];
-        if compare_elapsed(birth, e.dose_date, &tp_7m) == std::cmp::Ordering::Less {
+        if age_lt(birth, e.dose_date, tp_7m) {
             return true;
         }
     }
@@ -370,9 +365,7 @@ fn matches_omp_criteria_from_eval(patient: &Patient, forecast: &VaccineGroupFore
     if valid_omp_doses.len() >= 2 {
         let e1 = valid_omp_doses[0];
         let e2 = valid_omp_doses[1];
-        let e1_lt_7m = compare_elapsed(birth, e1.dose_date, &tp_7m) == std::cmp::Ordering::Less;
-        let e2_lt_12m = compare_elapsed(birth, e2.dose_date, &tp_12m) == std::cmp::Ordering::Less;
-        if e1_lt_7m && e2_lt_12m {
+        if age_lt(birth, e1.dose_date, tp_7m) && age_lt(birth, e2.dose_date, tp_12m) {
             return true;
         }
     }
@@ -425,4 +418,47 @@ pub fn hib_group_selection(
     }
 
     four_dose_name
+}
+
+pub struct HibPolicy;
+
+impl crate::engine::EvaluationPolicy for HibPolicy {
+    fn custom_forecast_hook(
+        &self,
+        patient: &Patient,
+        valid_doses: &[(NaiveDate, usize)],
+        history: &[Dose],
+        eval_date: NaiveDate,
+        forecast: &mut SeriesForecast,
+    ) {
+        hib_custom_forecast_hook(patient, valid_doses, history, eval_date, forecast)
+    }
+
+    fn custom_evaluation_hook(
+        &self,
+        series_name: &str,
+        target_dose_idx: usize,
+        ctx: &EvaluationContext,
+        reasons: &mut SmallVec<[EvaluationReason; 4]>,
+        status: &mut DoseStatus,
+    ) {
+        hib_custom_evaluation_hook(series_name, target_dose_idx, ctx, reasons, status)
+    }
+
+    fn custom_dose_number_hook(
+        &self,
+        series_name: &str,
+        ctx: &EvaluationContext,
+    ) -> Option<usize> {
+        Some(hib_custom_dose_number_hook(series_name, ctx))
+    }
+
+    fn custom_switch_hook(
+        &self,
+        current_series_name: &str,
+        target_dose_idx: usize,
+        ctx: &EvaluationContext,
+    ) -> Option<&'static str> {
+        hib_custom_switch_hook(current_series_name, target_dose_idx, ctx)
+    }
 }

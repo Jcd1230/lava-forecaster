@@ -377,6 +377,7 @@ pub fn evaluate_doses_seasonally(
             status,
             reasons,
             dose_number: Some(dose_number),
+            sources: std::collections::HashMap::new(),
         });
     }
 

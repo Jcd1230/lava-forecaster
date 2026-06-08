@@ -694,18 +694,20 @@ pub fn hep_b_group_selection(
                     forecast.evaluations.push(crate::models::DoseEvaluation {
                         dose_date: dose.date,
                         cvx: dose.cvx.clone(),
-                        status: DoseStatus::Valid,
-                        reasons: SmallVec::new(),
+                        status: crate::models::DoseStatus::Valid,
+                        reasons: crate::reasons![],
                         dose_number: Some(dose_num),
+                        sources: std::collections::HashMap::new(),
                     });
                     d1_done = true;
                 } else if dose.cvx.0 == cvx!("189") && dose.date == d2_date && !d2_done {
                     forecast.evaluations.push(crate::models::DoseEvaluation {
                         dose_date: dose.date,
                         cvx: dose.cvx.clone(),
-                        status: DoseStatus::Valid,
-                        reasons: SmallVec::new(),
+                        status: crate::models::DoseStatus::Valid,
+                        reasons: crate::reasons![],
                         dose_number: Some(dose_num),
+                        sources: std::collections::HashMap::new(),
                     });
                     d2_done = true;
                 } else {
@@ -717,6 +719,7 @@ pub fn hep_b_group_selection(
                             EvaluationReason::VaccineNotCountedBasedOnMostRecentVaccineGiven
                         ],
                         dose_number: Some(dose_num),
+                        sources: std::collections::HashMap::new(),
                     });
                 }
             }

@@ -186,6 +186,7 @@ pub fn parse_test_case_dsl(content: &str) -> Result<UnifiedTestCase, String> {
                     reasons: Default::default(),
                     dose_date: date,
                     cvx: Cvx(cvx),
+                    sources: std::collections::HashMap::new(),
                 });
             }
             
@@ -214,6 +215,7 @@ pub fn parse_test_case_dsl(content: &str) -> Result<UnifiedTestCase, String> {
                 reasons: Default::default(),
                 dose_date: doses[dose_num - 1].date,
                 cvx: doses[dose_num - 1].cvx,
+                sources: std::collections::HashMap::new(),
             });
         } else if lower.contains("series status should be ") {
             let status_str = lower.split("series status should be ").nth(1)
@@ -269,6 +271,7 @@ pub fn parse_test_case_dsl(content: &str) -> Result<UnifiedTestCase, String> {
         series_name: std::borrow::Cow::Owned(group.clone()),
         status: forecast_status,
         reasons: Default::default(),
+        sources: std::collections::HashMap::new(),
     };
 
     let mut resolved_focus_code = focus_code;

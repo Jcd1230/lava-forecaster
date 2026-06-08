@@ -26,9 +26,11 @@ To implement a group, follow the guidelines in the [Onboarding & Implementation 
 - [x] Implement custom series selection based on age of initiation (Dose 1 age < 15y vs >= 15y)
 
 ## 4. Hib (Haemophilus influenzae type b)
+*Java Concept:* `HIB` | *Focus Code:* `300`
 - [x] Implement `Hib4DoseSeries.yml` (ActHIB, Hiberix, Pentacel, etc.)
 - [x] Implement `HibOMPSeries.yml` (PedvaxHIB 3-dose series)
 - [x] Implement custom series switching depending on whether OMP or non-OMP vaccines are administered
+- [x] Achieve 100% parity on fuzz suite
 
 ## 5. Pneumococcal (PCV / PPSV)
 - [x] Implement `PneumococcalSeries.yml` (PCV13, PCV15, PCV20, PPSV23)
@@ -69,6 +71,7 @@ To implement a group, follow the guidelines in the [Onboarding & Implementation 
 - [x] Implement 24-day override: if dose is >= 24 days after a valid dose in the *prior* season, it satisfies the interval requirement.
 - [x] Implement age-based rules: children < 9y with 0 prior-season valid doses require 2 doses in the current season; children < 9y with >= 1 prior valid dose (and all individuals >= 9y) require only 1 dose.
 - [x] Suppress "Insufficient Antigen" reasons for patients >= 9y.
+- [x] Achieve 100% parity on fuzz suite
 
 ## 10. COVID-19 (`COVID19`)
 *Java Concept:* `COVID_19` | *Focus Code:* `850`
@@ -140,3 +143,20 @@ To implement a group, follow the guidelines in the [Onboarding & Implementation 
 - [x] Implement `H1N11DoseSeries.yml` & `H1N12DoseSeries.yml`
 - [x] Check H1N1 season boundaries: doses outside dates are evaluated as **Invalid / OUTSIDE_FLU_SEASON**.
 - [x] Ensure H1N1 does not generate recommendations or forecasts (historical database tracking only).
+
+## 18. MMR (Measles, Mumps, Rubella)
+*Java Concept:* `MMR` | *Focus Code:* `500`
+- [x] Implement `MMR2DoseSeries.yml`
+- [x] Implement component-based evaluation & completion (2 doses of each antigen)
+- [x] Achieve 100% parity on fuzz suite
+
+## 19. Varicella (`VARICELLA`)
+*Java Concept:* `VARICELLA` | *Focus Code:* `510`
+- [x] Implement `Varicella2DoseSeries.yml`
+- [x] Achieve 100% parity on fuzz suite
+
+## 20. Zoster (`ZOSTER`)
+*Java Concept:* `ZOSTER` | *Focus Code:* `620`
+- [x] Implement `Zoster2DoseSeries.yml` (Shingrix)
+- [x] Implement live-virus spacing re-anchoring for overdue dates
+- [x] Achieve 100% parity on fuzz suite

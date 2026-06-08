@@ -570,6 +570,7 @@ pub fn parse_legacy_xml(xml_content: &str, focus_code: &str) -> ExpectedResults 
                                     status: map_legacy_dose_status(st),
                                     dose_number: inner_dose_number,
                                     reasons: mapped_reasons.into(),
+                                    sources: std::collections::HashMap::new(),
                                 });
                             }
                         }
@@ -591,6 +592,7 @@ pub fn parse_legacy_xml(xml_content: &str, focus_code: &str) -> ExpectedResults 
                                 legacy_status
                             },
                             reasons: prop_reasons.iter().map(|r| r.clone().into()).collect(),
+                            sources: std::collections::HashMap::new(),
                         });
                     }
                 }

@@ -1,6 +1,18 @@
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use crate::date_utils::SmallVec;
+use std::collections::HashMap;
+
+#[macro_export]
+macro_rules! set_field {
+    ($target:expr, $field:ident, $value:expr) => {
+        if crate::engine::is_trace_enabled() {
+            let source = format!("{}:{}", file!(), line!());
+            $target.sources.insert(stringify!($field), source);
+        }
+        $target.$field = $value;
+    };
+}
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Gender {
@@ -202,6 +214,8 @@ pub struct DoseEvaluation {
     pub reasons: SmallVec<[EvaluationReason; 4]>,
     // The designated target dose number in the series
     pub dose_number: Option<usize>,
+    #[serde(skip)]
+    pub sources: HashMap<&'static str, String>,
 }
 
 impl Default for DoseEvaluation {
@@ -212,6 +226,7 @@ impl Default for DoseEvaluation {
             status: DoseStatus::Valid,
             reasons: SmallVec::new(),
             dose_number: None,
+            sources: HashMap::new(),
         }
     }
 }
@@ -345,6 +360,8 @@ pub struct SeriesForecast {
     pub series_name: std::borrow::Cow<'static, str>,
     pub status: SeriesStatus,
     pub reasons: SmallVec<[std::borrow::Cow<'static, str>; 2]>,
+    #[serde(skip)]
+    pub sources: HashMap<&'static str, String>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -403,6 +420,7 @@ impl From<FlatSeriesForecast> for SeriesForecast {
             series_name: f.series_name,
             status,
             reasons: f.reasons,
+            sources: std::collections::HashMap::new(),
         }
     }
 }
@@ -413,6 +431,7 @@ impl Default for SeriesForecast {
             series_name: std::borrow::Cow::Borrowed(""),
             status: SeriesStatus::default(),
             reasons: SmallVec::new(),
+            sources: HashMap::new(),
         }
     }
 }
