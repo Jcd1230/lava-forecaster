@@ -1,7 +1,7 @@
 {
   "name": "fuzz_fail_mpox_1780710085_1031",
   "group": "MPOX",
-  "focus_code": "000",
+  "focus_code": "860",
   "patient": {
     "birth_date": "2012-01-05",
     "gender": "Male"
