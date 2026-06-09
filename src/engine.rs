@@ -1,12 +1,12 @@
-use crate::date_utils::{compare_elapsed, TimePeriod, SmallVec};
+use crate::date_utils::{compare_elapsed, SmallVec, TimePeriod};
 use crate::models::{
     Cvx, Dose, DoseEvaluation, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus,
     VaccineGroupForecast,
 };
 use crate::schedule::{CompiledDoseInterval, CompiledSeries};
+use crate::set_field;
 use chrono::NaiveDate;
 use std::cmp::max;
-use crate::set_field;
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct DecisionTrace {
@@ -29,7 +29,12 @@ pub fn set_trace_enabled(enabled: bool) {
     TRACE_ENABLED.with(|val| val.set(enabled));
 }
 
-pub fn log_decision(step: &'static str, description: String, source_file: &'static str, line_number: u32) {
+pub fn log_decision(
+    step: &'static str,
+    description: String,
+    source_file: &'static str,
+    line_number: u32,
+) {
     DECISION_TRACES.with(|traces| {
         traces.borrow_mut().push(DecisionTrace {
             step,
@@ -47,9 +52,7 @@ pub fn clear_traces() {
 }
 
 pub fn get_traces() -> Vec<DecisionTrace> {
-    DECISION_TRACES.with(|traces| {
-        traces.borrow().clone()
-    })
+    DECISION_TRACES.with(|traces| traces.borrow().clone())
 }
 
 #[macro_export]
@@ -220,7 +223,8 @@ pub trait EvaluationPolicy: Send + Sync {
         _history: &[Dose],
         _eval_date: NaiveDate,
         _forecast: &mut SeriesForecast,
-    ) {}
+    ) {
+    }
 
     fn custom_switch_hook(
         &self,
@@ -238,7 +242,8 @@ pub trait EvaluationPolicy: Send + Sync {
         _ctx: &EvaluationContext,
         _reasons: &mut SmallVec<[EvaluationReason; 4]>,
         _status: &mut DoseStatus,
-    ) {}
+    ) {
+    }
 
     fn custom_dose_number_hook(
         &self,
@@ -269,10 +274,16 @@ pub trait EvaluationPolicy: Send + Sync {
     }
 
     fn is_same_day_duplicate(&self, _dose: &Dose, _sorted_history_subset: &[Dose]) -> bool {
-        _sorted_history_subset.iter().any(|prev_dose| prev_dose.date == _dose.date)
+        _sorted_history_subset
+            .iter()
+            .any(|prev_dose| prev_dose.date == _dose.date)
     }
 
-    fn ignore_evaluation_for_maximum_date(&self, _patient: &Patient, _eval: &crate::models::DoseEvaluation) -> bool {
+    fn ignore_evaluation_for_maximum_date(
+        &self,
+        _patient: &Patient,
+        _eval: &crate::models::DoseEvaluation,
+    ) -> bool {
         false
     }
 }
@@ -381,7 +392,8 @@ impl<'a> EvaluationEngine<'a> {
                 continue;
             }
 
-            let is_contraindicated = is_dose_contraindicated(patient, dose.cvx, dose.date, &active_series.vaccine_group);
+            let is_contraindicated =
+                is_dose_contraindicated(patient, dose.cvx, dose.date, &active_series.vaccine_group);
             if is_contraindicated {
                 let output_dose_number = std::cmp::min(target_dose_idx, valid_doses.len() + 1);
                 evaluations.push(DoseEvaluation {
@@ -423,7 +435,8 @@ impl<'a> EvaluationEngine<'a> {
             // and should not trigger duplicate detection for subsequent same-day doses.
             let is_duplicate = if i > 0 {
                 let history_subset = &sorted_history[0..i];
-                let has_same_day = self.policy
+                let has_same_day = self
+                    .policy
                     .map(|p| p.is_same_day_duplicate(dose, history_subset))
                     .unwrap_or_else(|| history_subset.iter().any(|prev| prev.date == dose.date));
                 if has_same_day {
@@ -431,10 +444,14 @@ impl<'a> EvaluationEngine<'a> {
                     // (not just Accepted with VaccineNotLicensedForMales)
                     evaluations.iter().any(|e| {
                         e.dose_date == dose.date
+                            && e.status != DoseStatus::Invalid
                             && !(e.status == DoseStatus::Accepted
-                                && e.reasons.contains(&EvaluationReason::VaccineNotLicensedForMales))
+                                && e.reasons
+                                    .contains(&EvaluationReason::VaccineNotLicensedForMales))
                             && !e.reasons.contains(&EvaluationReason::MissingAntigen)
-                            && !e.reasons.contains(&EvaluationReason::VaccineNotPartOfSeries)
+                            && !e
+                                .reasons
+                                .contains(&EvaluationReason::VaccineNotPartOfSeries)
                     })
                 } else {
                     false
@@ -453,12 +470,20 @@ impl<'a> EvaluationEngine<'a> {
                 // (e.g., HPV CVX 118 for males should be Accepted, not a duplicate)
                 if let Some(policy) = self.policy {
                     let ctx = EvaluationContext::new(
-                        patient, history, &valid_doses, Some(dose),
-                        target_dose_idx, eval_date, &active_series.name,
+                        patient,
+                        history,
+                        &valid_doses,
+                        Some(dose),
+                        target_dose_idx,
+                        eval_date,
+                        &active_series.name,
                     );
                     policy.custom_evaluation_hook(
-                        &active_series.name, target_dose_idx, &ctx,
-                        &mut dup_reasons, &mut dup_status,
+                        &active_series.name,
+                        target_dose_idx,
+                        &ctx,
+                        &mut dup_reasons,
+                        &mut dup_status,
                     );
                 }
                 evaluations.push(DoseEvaluation {
@@ -527,7 +552,9 @@ impl<'a> EvaluationEngine<'a> {
                     &active_series.name,
                 );
                 if let Some(policy) = self.policy {
-                    if let Some((status, reasons)) = policy.custom_extra_dose_hook(&active_series.name, &ctx) {
+                    if let Some((status, reasons)) =
+                        policy.custom_extra_dose_hook(&active_series.name, &ctx)
+                    {
                         let output_dose_number =
                             std::cmp::min(target_dose_idx, valid_doses.len() + 1);
                         if status == DoseStatus::Valid {
@@ -539,7 +566,7 @@ impl<'a> EvaluationEngine<'a> {
                             status,
                             reasons,
                             dose_number: Some(output_dose_number),
-                    sources: std::collections::HashMap::new(),
+                            sources: std::collections::HashMap::new(),
                         });
                         eval_target_dose_numbers.push(target_dose_idx);
                         i += 1;
@@ -587,7 +614,12 @@ impl<'a> EvaluationEngine<'a> {
 
             for rule in self.param_overrides {
                 if rule.target_dose_number == target_dose_idx && (rule.condition)(&ctx) {
-                    trace_decision!("parameter_override", "Dose {} parameter override applied: {}", target_dose_idx, rule.description);
+                    trace_decision!(
+                        "parameter_override",
+                        "Dose {} parameter override applied: {}",
+                        target_dose_idx,
+                        rule.description
+                    );
                     if let Some(ref over_age) = rule.override_abs_min_age {
                         dose_rule.absolute_minimum_age = Some(over_age.clone());
                     }
@@ -617,7 +649,17 @@ impl<'a> EvaluationEngine<'a> {
                 let abs_min_age_date = abs_min_age.add_to(patient.birth_date);
                 let age_ok = compare_elapsed(patient.birth_date, dose.date, abs_min_age)
                     != std::cmp::Ordering::Less;
-                trace_decision!("age_check", "Dose {} cvx {} age check: date={} birth={} abs_min_age={:?} (date={}) ok={}", target_dose_idx, dose.cvx, dose.date, patient.birth_date, abs_min_age, abs_min_age_date, age_ok);
+                trace_decision!(
+                    "age_check",
+                    "Dose {} cvx {} age check: date={} birth={} abs_min_age={:?} (date={}) ok={}",
+                    target_dose_idx,
+                    dose.cvx,
+                    dose.date,
+                    patient.birth_date,
+                    abs_min_age,
+                    abs_min_age_date,
+                    age_ok
+                );
                 if !age_ok {
                     is_valid = false;
                     reasons.push(EvaluationReason::BelowMinimumAge);
@@ -630,7 +672,15 @@ impl<'a> EvaluationEngine<'a> {
                     let prev_date = evaluations
                         .iter()
                         .zip(&eval_target_dose_numbers)
-                        .filter(|&(e, t_num)| *t_num == int_rule.from_dose && !is_eval_ignored(active_series.vaccine_group, e.cvx, e.dose_date, e.status))
+                        .filter(|&(e, t_num)| {
+                            *t_num == int_rule.from_dose
+                                && !is_eval_ignored(
+                                    active_series.vaccine_group,
+                                    e.cvx,
+                                    e.dose_date,
+                                    e.status,
+                                )
+                        })
                         .max_by_key(|&(e, _)| (e.status == DoseStatus::Valid, e.dose_date))
                         .map(|(e, _)| e.dose_date);
                     if let Some(prev_date) = prev_date {
@@ -683,7 +733,7 @@ impl<'a> EvaluationEngine<'a> {
                 status,
                 reasons,
                 dose_number: Some(output_dose_number),
-                    sources: std::collections::HashMap::new(),
+                sources: std::collections::HashMap::new(),
             });
             eval_target_dose_numbers.push(target_dose_idx);
 
@@ -703,7 +753,10 @@ impl<'a> EvaluationEngine<'a> {
                 }
             }
 
-            let series_completed = if let Some(res) = self.policy.and_then(|p| p.custom_completion_hook(&ctx_complete)) {
+            let series_completed = if let Some(res) = self
+                .policy
+                .and_then(|p| p.custom_completion_hook(&ctx_complete))
+            {
                 res
             } else {
                 valid_doses
@@ -743,7 +796,9 @@ impl<'a> EvaluationEngine<'a> {
         };
 
         let mut is_completed = is_completed || series_completed;
-        if !is_completed && is_patient_immune_to_group(patient, active_series.vaccine_group, eval_date) {
+        if !is_completed
+            && is_patient_immune_to_group(patient, active_series.vaccine_group, eval_date)
+        {
             is_completed = true;
         }
 
@@ -800,7 +855,11 @@ impl<'a> EvaluationEngine<'a> {
                 reasons: crate::reasons!["CONTRAINDICATION"],
                 sources: std::collections::HashMap::new(),
             };
-            trace_decision!("forecast_contraindicated", "Group {} is contraindicated", active_series.vaccine_group);
+            trace_decision!(
+                "forecast_contraindicated",
+                "Group {} is contraindicated",
+                active_series.vaccine_group
+            );
             if let Some(policy) = self.policy {
                 policy.custom_forecast_hook(patient, valid_doses, history, eval_date, &mut f);
             }
@@ -814,7 +873,11 @@ impl<'a> EvaluationEngine<'a> {
                 reasons: crate::reasons!["COMPLETE"],
                 sources: std::collections::HashMap::new(),
             };
-            trace_decision!("forecast_complete", "Series {} is completed", active_series.name);
+            trace_decision!(
+                "forecast_complete",
+                "Series {} is completed",
+                active_series.name
+            );
             if let Some(policy) = self.policy {
                 policy.custom_forecast_hook(patient, valid_doses, history, eval_date, &mut f);
             }
@@ -832,7 +895,13 @@ impl<'a> EvaluationEngine<'a> {
                     &active_series.name,
                 );
                 if let Some(num) = policy.custom_dose_number_hook(&active_series.name, &ctx) {
-                    trace_decision!("forecast_custom_dose_number_hook", "Custom dose number hook for series {} set next dose idx from {} to {}", active_series.name, next_dose_idx, num);
+                    trace_decision!(
+                        "forecast_custom_dose_number_hook",
+                        "Custom dose number hook for series {} set next dose idx from {} to {}",
+                        active_series.name,
+                        next_dose_idx,
+                        num
+                    );
                     next_dose_idx = num;
                 }
             }
@@ -840,18 +909,21 @@ impl<'a> EvaluationEngine<'a> {
             if next_dose_idx > active_series.num_doses {
                 // If there's a custom completion hook and it says we're not done yet,
                 // generate a placeholder forecast and let the custom_forecast_hook refine it.
-                let has_completion_hook = self.policy.and_then(|p| {
-                    let ctx = EvaluationContext::new(
-                        patient,
-                        history,
-                        valid_doses,
-                        None,
-                        next_dose_idx,
-                        eval_date,
-                        &active_series.name,
-                    );
-                    p.custom_completion_hook(&ctx)
-                }).is_some();
+                let has_completion_hook = self
+                    .policy
+                    .and_then(|p| {
+                        let ctx = EvaluationContext::new(
+                            patient,
+                            history,
+                            valid_doses,
+                            None,
+                            next_dose_idx,
+                            eval_date,
+                            &active_series.name,
+                        );
+                        p.custom_completion_hook(&ctx)
+                    })
+                    .is_some();
 
                 if has_completion_hook && !is_completed {
                     let mut f = SeriesForecast {
@@ -862,7 +934,13 @@ impl<'a> EvaluationEngine<'a> {
                     };
                     trace_decision!("forecast_not_completed_awaiting_custom_hook", "Next dose idx {} > num_doses {} but custom completion hook exists; delegating to custom forecast hook", next_dose_idx, active_series.num_doses);
                     if let Some(policy) = self.policy {
-                        policy.custom_forecast_hook(patient, valid_doses, history, eval_date, &mut f);
+                        policy.custom_forecast_hook(
+                            patient,
+                            valid_doses,
+                            history,
+                            eval_date,
+                            &mut f,
+                        );
                     }
                     return f;
                 }
@@ -872,7 +950,12 @@ impl<'a> EvaluationEngine<'a> {
                     reasons: crate::reasons!["COMPLETE"],
                     sources: std::collections::HashMap::new(),
                 };
-                trace_decision!("forecast_complete_extra_doses", "Next dose idx {} > num_doses {} without custom completion override", next_dose_idx, active_series.num_doses);
+                trace_decision!(
+                    "forecast_complete_extra_doses",
+                    "Next dose idx {} > num_doses {} without custom completion override",
+                    next_dose_idx,
+                    active_series.num_doses
+                );
                 if let Some(policy) = self.policy {
                     policy.custom_forecast_hook(patient, valid_doses, history, eval_date, &mut f);
                 }
@@ -903,7 +986,12 @@ impl<'a> EvaluationEngine<'a> {
                 // Apply recommendation overrides
                 for rule in self.rec_overrides {
                     if rule.target_dose_number == next_dose_idx && (rule.condition)(&ctx) {
-                        trace_decision!("forecast_recommendation_override", "Dose {} recommendation override applied: {}", next_dose_idx, rule.description);
+                        trace_decision!(
+                            "forecast_recommendation_override",
+                            "Dose {} recommendation override applied: {}",
+                            next_dose_idx,
+                            rule.description
+                        );
                         if let Some(ref over_age) = rule.override_min_age {
                             dose_rule.minimum_age = Some(over_age.clone());
                         }
@@ -920,16 +1008,25 @@ impl<'a> EvaluationEngine<'a> {
                     .iter()
                     .filter(|e| {
                         e.status == DoseStatus::Valid
+                            || e.status == DoseStatus::Accepted
                             || (e.status == DoseStatus::Invalid
                                 && !e.reasons.is_empty()
                                 && e.reasons.iter().all(|r| {
                                     *r == EvaluationReason::BelowMinimumAge
                                         || *r == EvaluationReason::BelowMinimumInterval
                                         || *r == EvaluationReason::TooEarlyLiveVirus
+                                        || *r == EvaluationReason::BelowMinimumAgeFinalDose
+                                        || *r == EvaluationReason::OutsideFluVacSeason
+                                        || *r == EvaluationReason::AboveRecommendedAgeSeries
+                                        || *r == EvaluationReason::VaccineNotAllowedInUs
+                                        || *r == EvaluationReason::ContraindicatedVaccine
                                 }))
                     })
                     .filter(|e| {
-                        !self.policy.map(|p| p.ignore_evaluation_for_maximum_date(patient, e)).unwrap_or(false)
+                        !self
+                            .policy
+                            .map(|p| p.ignore_evaluation_for_maximum_date(patient, e))
+                            .unwrap_or(false)
                     })
                     .map(|e| e.dose_date)
                     .max();
@@ -937,7 +1034,13 @@ impl<'a> EvaluationEngine<'a> {
                 // Calculate Earliest Date: max(minimum_age, minimum_interval)
                 let min_age_tp = dose_rule.minimum_age.as_ref();
                 let min_age_date = min_age_tp.map(|tp| tp.add_to(patient.birth_date));
-                trace_decision!("forecast_dates", "Dose {} minimum age: {:?} (date={:?})", next_dose_idx, min_age_tp, min_age_date);
+                trace_decision!(
+                    "forecast_dates",
+                    "Dose {} minimum age: {:?} (date={:?})",
+                    next_dose_idx,
+                    min_age_tp,
+                    min_age_date
+                );
 
                 let get_dose_date = |dose_num: usize| -> Option<NaiveDate> {
                     valid_doses
@@ -969,14 +1072,25 @@ impl<'a> EvaluationEngine<'a> {
                     (None, Some(i)) => Some(i),
                     (None, None) => None,
                 };
-                trace_decision!("forecast_dates", "Dose {} earliest date calculated: {:?}", next_dose_idx, earliest_date);
+                trace_decision!(
+                    "forecast_dates",
+                    "Dose {} earliest date calculated: {:?}",
+                    next_dose_idx,
+                    earliest_date
+                );
 
                 // Calculate Recommended Date
                 let rec_age_date = dose_rule
                     .earliest_recommended_age
                     .as_ref()
                     .map(|tp| tp.add_to(patient.birth_date));
-                trace_decision!("forecast_dates", "Dose {} earliest recommended age: {:?} (date={:?})", next_dose_idx, dose_rule.earliest_recommended_age, rec_age_date);
+                trace_decision!(
+                    "forecast_dates",
+                    "Dose {} earliest recommended age: {:?} (date={:?})",
+                    next_dose_idx,
+                    dose_rule.earliest_recommended_age,
+                    rec_age_date
+                );
                 let rec_int_date = applicable_intervals
                     .iter()
                     .filter_map(|int_rule| {
@@ -1001,14 +1115,25 @@ impl<'a> EvaluationEngine<'a> {
                     (None, Some(i)) => Some(i),
                     (None, None) => None,
                 };
-                trace_decision!("forecast_dates", "Dose {} recommended date calculated: {:?}", next_dose_idx, recommended_date);
+                trace_decision!(
+                    "forecast_dates",
+                    "Dose {} recommended date calculated: {:?}",
+                    next_dose_idx,
+                    recommended_date
+                );
 
                 // Calculate Overdue Date
                 let overdue_age_date = dose_rule
                     .latest_recommended_age
                     .as_ref()
                     .map(|tp| tp.add_to(patient.birth_date));
-                trace_decision!("forecast_dates", "Dose {} latest recommended age: {:?} (date={:?})", next_dose_idx, dose_rule.latest_recommended_age, overdue_age_date);
+                trace_decision!(
+                    "forecast_dates",
+                    "Dose {} latest recommended age: {:?} (date={:?})",
+                    next_dose_idx,
+                    dose_rule.latest_recommended_age,
+                    overdue_age_date
+                );
                 let overdue_int_date = applicable_intervals
                     .iter()
                     .filter_map(|int_rule| {
@@ -1033,11 +1158,21 @@ impl<'a> EvaluationEngine<'a> {
                     overdue_int_date
                 };
                 let overdue_date = overdue_date.and_then(|d| d.pred_opt());
-                trace_decision!("forecast_dates", "Dose {} overdue date calculated (pred_opt): {:?}", next_dose_idx, overdue_date);
+                trace_decision!(
+                    "forecast_dates",
+                    "Dose {} overdue date calculated (pred_opt): {:?}",
+                    next_dose_idx,
+                    overdue_date
+                );
 
                 let mut f = SeriesForecast {
                     series_name: active_series.name.into(),
-                    status: crate::models::SeriesStatus::NotComplete { earliest_date, recommended_date, overdue_date, latest_date: None },
+                    status: crate::models::SeriesStatus::NotComplete {
+                        earliest_date,
+                        recommended_date,
+                        overdue_date,
+                        latest_date: None,
+                    },
                     reasons: crate::reasons!["NOT_COMPLETE"],
                     sources: std::collections::HashMap::new(),
                 };
@@ -1063,7 +1198,12 @@ impl<'a> EvaluationEngine<'a> {
                     let prev_status = f.status.clone();
                     policy.custom_forecast_hook(patient, valid_doses, history, eval_date, &mut f);
                     if f.status != prev_status {
-                        trace_decision!("forecast_custom_forecast_hook", "Custom forecast hook mutated forecast status from {:?} to {:?}", prev_status, f.status);
+                        trace_decision!(
+                            "forecast_custom_forecast_hook",
+                            "Custom forecast hook mutated forecast status from {:?} to {:?}",
+                            prev_status,
+                            f.status
+                        );
                     }
                 }
 
@@ -1098,7 +1238,8 @@ impl<'a> EvaluationEngine<'a> {
             }
 
             // Align earliest <= recommended <= overdue
-            if let (Some(earliest), Some(recommended)) = (*earliest_date, recommended_date.as_mut()) {
+            if let (Some(earliest), Some(recommended)) = (*earliest_date, recommended_date.as_mut())
+            {
                 if *recommended < earliest {
                     *recommended = earliest;
                 }
@@ -1159,9 +1300,8 @@ fn get_same_day_priority(
             _ => 2,
         },
         "DTP" => match cvx_code {
-            115 | 198 => 1,                            // Tdap
-            9 | 28 | 113 | 138 | 139 | 195 | 196 => 2, // DT/Td
-            _ => 0,                                    // DTaP/DTP combo/single
+            9 | 28 | 113 | 138 | 139 | 195 | 196 => 1, // DT/Td
+            _ => 0,                                    // Pertussis-containing DTP/DTaP/Tdap
         },
         "HEP_B" => match cvx_code {
             104 | 110 | 146 => 0,
@@ -1202,10 +1342,10 @@ fn get_same_day_priority(
             _ => 3,
         },
         "HPV" => match cvx_code {
-            118 => 0,   // Cervarix (female-only) — lowest priority
-            62 => 1,    // Gardasil
-            137 => 2,   // Gardasil (Shire)
-            165 => 3,   // Gardasil 9 — highest priority
+            118 => 0, // Cervarix (female-only) — lowest priority
+            62 => 1,  // Gardasil
+            137 => 2, // Gardasil (Shire)
+            165 => 3, // Gardasil 9 — highest priority
             _ => 0,
         },
         "INFLUENZA" => {
@@ -1223,12 +1363,23 @@ fn get_same_day_priority(
     }
 }
 
-fn is_patient_immune_to_group(patient: &crate::models::Patient, group: &str, eval_date: NaiveDate) -> bool {
+fn is_patient_immune_to_group(
+    patient: &crate::models::Patient,
+    group: &str,
+    eval_date: NaiveDate,
+) -> bool {
     let group_lower = group.to_lowercase();
     patient.immunities.iter().any(|imm| {
         let imm_disease_lower = imm.disease.to_lowercase();
-        let matches_group = if group_lower.contains("hepb") || group_lower.contains("hep_b") || group_lower.contains("hep b") || group_lower.contains("hepatitis b") {
-            imm_disease_lower.contains("hepb") || imm_disease_lower.contains("hep_b") || imm_disease_lower.contains("hep b") || imm_disease_lower.contains("hepatitis b")
+        let matches_group = if group_lower.contains("hepb")
+            || group_lower.contains("hep_b")
+            || group_lower.contains("hep b")
+            || group_lower.contains("hepatitis b")
+        {
+            imm_disease_lower.contains("hepb")
+                || imm_disease_lower.contains("hep_b")
+                || imm_disease_lower.contains("hep b")
+                || imm_disease_lower.contains("hepatitis b")
         } else if group_lower.contains("varicella") {
             imm_disease_lower.contains("varicella") || imm_disease_lower.contains("chickenpox")
         } else if group_lower.contains("measles") {
@@ -1238,24 +1389,46 @@ fn is_patient_immune_to_group(patient: &crate::models::Patient, group: &str, eva
         } else if group_lower.contains("rubella") {
             imm_disease_lower.contains("rubella") || imm_disease_lower.contains("german measles")
         } else if group_lower.contains("mmr") {
-            imm_disease_lower.contains("mmr") || imm_disease_lower.contains("measles") || imm_disease_lower.contains("mumps") || imm_disease_lower.contains("rubella")
+            imm_disease_lower.contains("mmr")
+                || imm_disease_lower.contains("measles")
+                || imm_disease_lower.contains("mumps")
+                || imm_disease_lower.contains("rubella")
         } else {
             imm_disease_lower == group_lower
         };
-        
+
         matches_group && eval_date >= imm.date
     })
 }
 
-fn is_group_contraindicated(patient: &crate::models::Patient, group: &str, eval_date: NaiveDate) -> bool {
+fn is_group_contraindicated(
+    patient: &crate::models::Patient,
+    group: &str,
+    eval_date: NaiveDate,
+) -> bool {
     let group_lower = group.to_lowercase();
     patient.contraindications.iter().any(|c| {
         if c.cvx.is_some() {
             return false;
         }
         let target_lower = c.target.to_lowercase();
-        let matches_group = if group_lower.contains("dtp") || group_lower.contains("dtap") || group_lower.contains("dt") || group_lower.contains("tdap") || group_lower.contains("td") || group_lower.contains("diphtheria") || group_lower.contains("tetanus") || group_lower.contains("pertussis") {
-            target_lower.contains("dtp") || target_lower.contains("dtap") || target_lower.contains("dt") || target_lower.contains("tdap") || target_lower.contains("td") || target_lower.contains("diphtheria") || target_lower.contains("tetanus") || target_lower.contains("pertussis")
+        let matches_group = if group_lower.contains("dtp")
+            || group_lower.contains("dtap")
+            || group_lower.contains("dt")
+            || group_lower.contains("tdap")
+            || group_lower.contains("td")
+            || group_lower.contains("diphtheria")
+            || group_lower.contains("tetanus")
+            || group_lower.contains("pertussis")
+        {
+            target_lower.contains("dtp")
+                || target_lower.contains("dtap")
+                || target_lower.contains("dt")
+                || target_lower.contains("tdap")
+                || target_lower.contains("td")
+                || target_lower.contains("diphtheria")
+                || target_lower.contains("tetanus")
+                || target_lower.contains("pertussis")
         } else {
             target_lower == group_lower
         };
@@ -1264,7 +1437,12 @@ fn is_group_contraindicated(patient: &crate::models::Patient, group: &str, eval_
     })
 }
 
-fn is_dose_contraindicated(patient: &crate::models::Patient, cvx: Cvx, date: NaiveDate, group: &str) -> bool {
+fn is_dose_contraindicated(
+    patient: &crate::models::Patient,
+    cvx: Cvx,
+    date: NaiveDate,
+    group: &str,
+) -> bool {
     let group_lower = group.to_lowercase();
     patient.contraindications.iter().any(|c| {
         let active = date >= c.date && c.valid_until.map_or(true, |until| date < until);
@@ -1277,8 +1455,23 @@ fn is_dose_contraindicated(patient: &crate::models::Patient, cvx: Cvx, date: Nai
             }
         } else {
             let target_lower = c.target.to_lowercase();
-            let matches_group = if group_lower.contains("dtp") || group_lower.contains("dtap") || group_lower.contains("dt") || group_lower.contains("tdap") || group_lower.contains("td") || group_lower.contains("diphtheria") || group_lower.contains("tetanus") || group_lower.contains("pertussis") {
-                target_lower.contains("dtp") || target_lower.contains("dtap") || target_lower.contains("dt") || target_lower.contains("tdap") || target_lower.contains("td") || target_lower.contains("diphtheria") || target_lower.contains("tetanus") || target_lower.contains("pertussis")
+            let matches_group = if group_lower.contains("dtp")
+                || group_lower.contains("dtap")
+                || group_lower.contains("dt")
+                || group_lower.contains("tdap")
+                || group_lower.contains("td")
+                || group_lower.contains("diphtheria")
+                || group_lower.contains("tetanus")
+                || group_lower.contains("pertussis")
+            {
+                target_lower.contains("dtp")
+                    || target_lower.contains("dtap")
+                    || target_lower.contains("dt")
+                    || target_lower.contains("tdap")
+                    || target_lower.contains("td")
+                    || target_lower.contains("diphtheria")
+                    || target_lower.contains("tetanus")
+                    || target_lower.contains("pertussis")
             } else {
                 target_lower == group_lower
             };
@@ -1296,11 +1489,11 @@ pub fn is_eval_ignored(group: &str, cvx: Cvx, date: NaiveDate, status: DoseStatu
     }
     if group == "POLIO" {
         let is_cvx_178_179 = cvx.0 == 178 || cvx.0 == 179;
-        let is_cvx_182_after_2016 = cvx.0 == 182 && date >= NaiveDate::from_ymd_opt(2016, 4, 1).unwrap();
+        let is_cvx_182_after_2016 =
+            cvx.0 == 182 && date >= NaiveDate::from_ymd_opt(2016, 4, 1).unwrap();
         if is_cvx_178_179 || is_cvx_182_after_2016 {
             return true;
         }
     }
     false
 }
-

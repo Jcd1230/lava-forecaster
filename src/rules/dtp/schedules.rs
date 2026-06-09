@@ -9,8 +9,8 @@ pub fn dtp_3_dose_series() -> CompiledSeries {
         .vaccine_group("DTP")
         .num_doses(4) // Modeled as 4-dose series to handle pertussis-containing exception
         .dose(1, |d| d
-            .abs_min_age(crate::time_period!("7y"))
-            .min_age(crate::time_period!("7y"))
+            .abs_min_age(crate::time_period!("7y-4d"))
+            .min_age(crate::time_period!("7y-4d"))
             .earliest_recommended_age(crate::time_period!("7y"))
             .latest_recommended_age(crate::time_period!("7y"))
             .cvx(ALLOWED_CVX)
