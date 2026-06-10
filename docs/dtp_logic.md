@@ -50,6 +50,31 @@ Generic mechanics that affect DTP:
 - `opencds-decision-support-core/src/main/java/org/cdsframework/ice/service/DoseRule.java`
 - `opencds-decision-support-core/src/main/java/org/cdsframework/ice/service/PlanDefinitionSeriesDataConsumer.java`
 
+## ICE Execution Mechanics That Matter
+
+The Drools rules are not a complete linear algorithm. Several important DTP
+behaviors come from generic ICE state transitions:
+
+- `TargetSeries.addTargetDoseToSeries(...)` assigns
+  `administeredShotNumberInSeries` in target-dose sort order and recomputes
+  `doseNumberInSeries` via `determineDoseNumberInSeries(...)`.
+- `TargetDose.setStatus(...)` marks `hasBeenEvaluated=true` for `VALID`,
+  `INVALID`, and `ACCEPTED`, but only `VALID` sets `isValid=true`.
+- `TargetSeries.determineEffectiveNumberOfDosesInSeries...` is documented as
+  counting valid and accepted doses, while validity facts and many Drools
+  conditions check `isValid` / `DoseStatus.VALID`.
+- DTP same-day duplicate rules depend on `isPrimarySeriesShot` and
+  `administeredShotNumberInSeries`. Those fields are assigned by generic
+  TargetSeries mechanics, so the same Drools duplicate rule can produce
+  different results depending on whether ICE considered each same-day target
+  dose a primary-series dose.
+- Because Drools rules mutate facts and insert ICE facts, output parity often
+  depends on fact flow: dose status -> pertussis fact -> adolescent Tdap fact
+  -> recurring Td override.
+
+When a snapshot is surprising, first trace which generic TargetSeries/TargetDose
+state the Drools condition was probably seeing before adding a Rust override.
+
 ## Series Data Facts
 
 Both DTP series are data-defined PlanDefinitions:
@@ -114,11 +139,19 @@ Recurring Td after adolescent Tdap completion:
   any DTP shot can satisfy recurring Td age, interval, and extra-dose checks.
 - The Java comment says the minimum interval is 0 days for recurring Td.
 - This explains why post-completion doses can become Valid booster anchors.
-- Recorded output shows `_ADOLESCENT_TDAP_COMPLETED` behavior is not equivalent
-  to "the primary series contained pertussis." LAVA treats it as a valid
-  post-primary pertussis-containing DTP-family dose at or after age 7. Until
-  that gate exists, adult Td-only extra doses such as CVX 09, 138, 139, and
-  196 are commonly Accepted rather than Valid.
+- `_ADOLESCENT_TDAP_COMPLETED` is inserted by `Evaluation^DTP.dslr` only after
+  a `_DOSE_OF_PERTUSSIS` fact exists for a DTP shot at or after age 10 that
+  targets pertussis, diphtheria, and tetanus.
+- `_DOSE_OF_PERTUSSIS` is itself derived from either a valid primary-series
+  pertussis/diphtheria/tetanus shot, an invalid primary-series D/T/P shot with
+  `D_AND_T_INVALID/P_VALID`, or a valid D/T/P shot at or after age 7 when the
+  series is complete.
+- Therefore `_ADOLESCENT_TDAP_COMPLETED` is not equivalent to "the primary
+  series contained pertussis." LAVA approximates the recurring-Td gate by
+  checking for a valid qualifying pertussis-containing DTP-family dose after
+  primary completion / completion exception. Until that gate exists, adult
+  Td-only extra doses such as CVX 09, 138, 139, and 196 are commonly Accepted
+  rather than Valid.
 - CVX 195 can become Valid through the same recurring-Td gate after a
   post-primary pertussis anchor, but it can still be Invalid in in-series
   adult-dose slots when interval/series-selection rules fail.
