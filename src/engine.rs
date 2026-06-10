@@ -134,6 +134,7 @@ pub type RuleCondition = fn(&EvaluationContext) -> bool;
 pub type CustomForecastHook = fn(
     patient: &Patient,
     valid_doses: &[(NaiveDate, usize)],
+    evaluations: &[DoseEvaluation],
     history: &[Dose],
     eval_date: NaiveDate,
     forecast: &mut SeriesForecast,
@@ -220,6 +221,7 @@ pub trait EvaluationPolicy: Send + Sync {
         &self,
         _patient: &Patient,
         _valid_doses: &[(NaiveDate, usize)],
+        _evaluations: &[DoseEvaluation],
         _history: &[Dose],
         _eval_date: NaiveDate,
         _forecast: &mut SeriesForecast,
@@ -869,7 +871,7 @@ impl<'a> EvaluationEngine<'a> {
                 active_series.vaccine_group
             );
             if let Some(policy) = self.policy {
-                policy.custom_forecast_hook(patient, valid_doses, history, eval_date, &mut f);
+                policy.custom_forecast_hook(patient, valid_doses, evaluations, history, eval_date, &mut f);
             }
             return f;
         }
@@ -887,7 +889,7 @@ impl<'a> EvaluationEngine<'a> {
                 active_series.name
             );
             if let Some(policy) = self.policy {
-                policy.custom_forecast_hook(patient, valid_doses, history, eval_date, &mut f);
+                policy.custom_forecast_hook(patient, valid_doses, evaluations, history, eval_date, &mut f);
             }
             f
         } else {
@@ -945,6 +947,7 @@ impl<'a> EvaluationEngine<'a> {
                         policy.custom_forecast_hook(
                             patient,
                             valid_doses,
+                            evaluations,
                             history,
                             eval_date,
                             &mut f,
@@ -965,7 +968,7 @@ impl<'a> EvaluationEngine<'a> {
                     active_series.num_doses
                 );
                 if let Some(policy) = self.policy {
-                    policy.custom_forecast_hook(patient, valid_doses, history, eval_date, &mut f);
+                    policy.custom_forecast_hook(patient, valid_doses, evaluations, history, eval_date, &mut f);
                 }
                 f
             } else {
@@ -1204,7 +1207,7 @@ impl<'a> EvaluationEngine<'a> {
                 // Apply custom rules hook (like Polio 2009 reset) if present
                 if let Some(policy) = self.policy {
                     let prev_status = f.status.clone();
-                    policy.custom_forecast_hook(patient, valid_doses, history, eval_date, &mut f);
+                    policy.custom_forecast_hook(patient, valid_doses, evaluations, history, eval_date, &mut f);
                     if f.status != prev_status {
                         trace_decision!(
                             "forecast_custom_forecast_hook",

@@ -221,6 +221,7 @@ pub fn dtp_custom_extra_dose_hook(
 pub fn dtp_custom_forecast_hook(
     patient: &Patient,
     valid_doses: &[(NaiveDate, usize)],
+    evaluations: &[crate::models::DoseEvaluation],
     history: &[Dose],
     eval_date: NaiveDate,
     forecast: &mut SeriesForecast,
@@ -378,9 +379,13 @@ pub fn dtp_custom_forecast_hook(
             cvx!("196"),
             cvx!("198"),
         ];
-        let history_count = history
+        let history_count = evaluations
             .iter()
-            .filter(|d| ALLOWED_CVX.contains(&d.cvx.0))
+            .filter(|e| ALLOWED_CVX.contains(&e.cvx.0))
+            .filter(|e| {
+                !(e.reasons.contains(&EvaluationReason::DuplicateShotSameDay)
+                    && is_pertussis_vaccine(e.cvx))
+            })
             .count();
         let six_by_seven = eval_date < age_7 && history_count >= 6;
 

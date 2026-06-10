@@ -31,6 +31,7 @@ pub fn h1n1_custom_evaluation_hook(
 pub fn h1n1_custom_forecast_hook(
     _patient: &Patient,
     _valid_doses: &[(NaiveDate, usize)],
+    _evaluations: &[crate::models::DoseEvaluation],
     _history: &[Dose],
     eval_date: NaiveDate,
     forecast: &mut SeriesForecast,

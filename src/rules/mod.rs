@@ -40,12 +40,13 @@ impl crate::engine::EvaluationPolicy for LegacyHookPolicy {
         &self,
         patient: &crate::models::Patient,
         valid_doses: &[(chrono::NaiveDate, usize)],
+        evaluations: &[crate::models::DoseEvaluation],
         history: &[crate::models::Dose],
         eval_date: chrono::NaiveDate,
         forecast: &mut crate::models::SeriesForecast,
     ) {
         if let Some(hook) = self.custom_forecast_hook {
-            (hook)(patient, valid_doses, history, eval_date, forecast);
+            (hook)(patient, valid_doses, evaluations, history, eval_date, forecast);
         }
     }
 

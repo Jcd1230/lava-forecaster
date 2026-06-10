@@ -154,6 +154,7 @@ pub fn hib_custom_evaluation_hook(
 pub fn hib_custom_forecast_hook(
     patient: &Patient,
     valid_doses: &[(NaiveDate, usize)],
+    _evaluations: &[crate::models::DoseEvaluation],
     history: &[Dose],
     eval_date: NaiveDate,
     forecast: &mut SeriesForecast,
@@ -427,11 +428,12 @@ impl crate::engine::EvaluationPolicy for HibPolicy {
         &self,
         patient: &Patient,
         valid_doses: &[(NaiveDate, usize)],
+    _evaluations: &[crate::models::DoseEvaluation],
         history: &[Dose],
         eval_date: NaiveDate,
         forecast: &mut SeriesForecast,
     ) {
-        hib_custom_forecast_hook(patient, valid_doses, history, eval_date, forecast)
+        hib_custom_forecast_hook(patient, valid_doses, _evaluations, history, eval_date, forecast)
     }
 
     fn custom_evaluation_hook(

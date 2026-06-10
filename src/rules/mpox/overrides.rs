@@ -126,6 +126,7 @@ pub fn mpox_custom_extra_dose_hook(
 pub fn mpox_custom_forecast_hook(
     _patient: &Patient,
     valid_doses: &[(NaiveDate, usize)],
+    _evaluations: &[crate::models::DoseEvaluation],
     _history: &[Dose],
     _eval_date: NaiveDate,
     forecast: &mut SeriesForecast,

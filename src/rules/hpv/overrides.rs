@@ -248,6 +248,7 @@ pub fn hpv_custom_evaluation_hook(
 pub fn hpv_custom_forecast_hook(
     patient: &Patient,
     valid_doses: &[(NaiveDate, usize)],
+    _evaluations: &[crate::models::DoseEvaluation],
     _history: &[Dose],
     eval_date: NaiveDate,
     forecast: &mut SeriesForecast,

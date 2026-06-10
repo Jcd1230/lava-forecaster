@@ -16,6 +16,7 @@ pub fn yellow_fever_custom_evaluation_hook(
 pub fn yellow_fever_custom_forecast_hook(
     patient: &Patient,
     _valid_doses: &[(NaiveDate, usize)],
+    _evaluations: &[crate::models::DoseEvaluation],
     _history: &[Dose],
     eval_date: NaiveDate,
     forecast: &mut SeriesForecast,

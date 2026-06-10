@@ -167,6 +167,7 @@ pub fn polio_recommendation_overrides() -> Vec<RecommendationOverrideRule> {
 pub fn polio_custom_forecast_hook(
     patient: &Patient,
     valid_doses: &[(NaiveDate, usize)],
+    _evaluations: &[crate::models::DoseEvaluation],
     history: &[Dose],
     eval_date: NaiveDate,
     forecast: &mut SeriesForecast,

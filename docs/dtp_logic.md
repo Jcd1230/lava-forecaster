@@ -198,9 +198,16 @@ Six-by-seven:
 - If the patient is before age 7, the 5-dose series is incomplete, and the
   number of administered shots excluding duplicate same-day shots is at least
   6, Java forecasts the next dose at age 7.
-- This rule counts Java target doses excluding same-day duplicates, not simply
-  valid doses. Some recorded outputs show edge cases where LAVA's current broad
-  shortcut over-fires, so changes here need representative counterexamples.
+- This rule counts Java target doses, not simply valid doses. Recorded output
+  shows that pertussis-containing same-day duplicates can inflate LAVA's raw
+  history count and over-trigger the rule. LAVA now uses final evaluations in
+  the DTP forecast hook and excludes same-day duplicate evaluations only when
+  the duplicate product contains pertussis.
+- This is still an approximation of Java behavior. Three fuzz counterexamples
+  (`fuzz_fail_dtp_20260608_158219`, `fuzz_fail_dtp_20260608_177129`,
+  `fuzz_fail_dtp_20260608_215276`) suggest Java may count some same-day
+  pertussis-containing invalid doses when they are not treated as duplicate
+  shots by its DTP same-day rule path.
 
 3-dose no-pertussis recommendation:
 
@@ -287,6 +294,9 @@ These are not settled enough for blanket rules:
     doses.
   - LAVA currently has some ordering behavior in `engine.rs`; final parity
     likely needs DTP primary/non-primary context, not just product priority.
+  - This also affects forecast-only six-by-seven behavior because Java's
+    six-by-seven count excludes only shots that Java actually labels duplicate
+    same-day.
 
 ## Representative Cases To Preserve
 
@@ -319,4 +329,3 @@ For each new DTP rule change:
    - `cargo run --release --bin test_runner -- --run tests/cases --group DTP`
    - `cargo run --release --bin test_runner -- --run tests/fuzz-100k-20260608.ltp --group DTP`
    - `cargo run --release --bin test_runner -- --run tests/fuzz-100k-20260608.ltp --group H1N1`
-
