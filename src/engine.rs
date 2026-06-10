@@ -1311,8 +1311,9 @@ fn get_same_day_priority(
             _ => 2,
         },
         "DTP" => match cvx_code {
-            9 | 28 | 113 | 138 | 139 | 195 | 196 => 1, // DT/Td
-            _ => 0,                                    // Pertussis-containing DTP/DTaP/Tdap
+            196 => 0,                            // Td preservative free follows source order in ICE
+            9 | 28 | 113 | 138 | 139 | 195 => 1, // DT/Td
+            _ => 0,                              // Pertussis-containing DTP/DTaP/Tdap
         },
         "HEP_B" => match cvx_code {
             104 | 110 | 146 => 0,

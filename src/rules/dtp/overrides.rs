@@ -680,14 +680,17 @@ pub fn dtp_group_selection(
     let age_7 = add_years_unchecked(patient.birth_date, 7);
     let age_7_minus_4d = age_7 - chrono::Duration::days(4);
 
-    // DTP adult-series selection follows the same 4-day grace boundary used
-    // by evaluation rules for vaccines administered around the 7th birthday.
-    let has_child_age_dose = history.iter().any(|dose| dose.date < age_7_minus_4d);
+    // Java checks for target doses, not arbitrary raw DTP administrations. A
+    // very early Td-family dose that will be invalid for child-series DTP does
+    // not block adult-series selection; near-age-7 doses use minimum-age grace.
+    let has_child_series_target_dose = history
+        .iter()
+        .any(|dose| dose.date < age_7_minus_4d && !is_td_min_age_invalid(dose.cvx));
 
     // Patient must be >= 7 years of age
     let is_at_least_7 = eval_date >= age_7;
 
-    if is_at_least_7 && !has_child_age_dose {
+    if is_at_least_7 && !has_child_series_target_dose {
         "DTP_3_DOSE_SERIES"
     } else {
         "DTP_5_DOSE_SERIES"

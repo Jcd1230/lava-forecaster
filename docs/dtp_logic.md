@@ -6,19 +6,21 @@ behavior inferred from recorded Java output snapshots.
 
 ## Current Parity Snapshot
 
-Latest committed checkpoint:
+Latest verified checkpoint after the series-selection and CVX 196 same-day
+adjustments:
 
-- Curated DTP cases: 315 / 317 passing.
-- DTP fuzz subset: 3105 / 3359 passing.
+- Curated DTP cases: 317 / 317 passing.
+- DTP fuzz subset: 3077 / 3359 passing.
 - H1N1 fuzz subset: 2905 / 2905 passing.
 
-Remaining DTP failures are mostly in three buckets:
+Remaining DTP fuzz failures are mostly in three buckets:
 
-- Forecast/date selection after child/adolescent/adult boundary rules.
-- Adult or post-primary Td-family doses that are Valid vs Accepted depending
-  on context.
-- Same-day DTP duplicate handling, especially whether the same-day pair is in
-  the primary series.
+- Post-primary or adult extra doses where Java distinguishes Valid, Accepted,
+  and Invalid by target-dose state rather than only product family.
+- Same-day DTP handling where Java sometimes lets both products remain usable
+  when the pair is not both primary-series target doses.
+- Forecast/date selection after an extra dose is classified differently from
+  Rust's current valid-dose count.
 
 ## Java Source Map
 
@@ -128,6 +130,17 @@ Java `SeriesSelection.drl` defines the DTP split:
 LAVA currently uses an age-7 minus 4-day practical boundary for adult-series
 eligibility because recorded Java outputs accept near-boundary Td/Tdap products
 according to the vaccine minimum-age grace behavior.
+
+Implementation note from `fuzz_fail_dtp_1780795905_1545` and
+`fuzz_fail_dtp_1780795905_903`:
+
+- The Java blocker is a target-dose concept, not raw administration history.
+- A very early Td-family dose that Java later evaluates as invalid does not
+  block adult 3-dose series selection.
+- A dose administered inside the age-7 grace window is treated as adult-series
+  eligible and also does not force the 5-dose child series.
+- LAVA approximates this by only treating pre-grace doses that look eligible for
+  child-series targeting as blockers.
 
 ## Evaluation Rules
 
@@ -274,6 +287,11 @@ Evaluation order:
 
 - If one same-day DTP shot contains pertussis and the other does not, Java
   evaluates the pertussis-containing shot first.
+- CVX 196 is an exception observed in recorded Java output. It behaves as a
+  Td-family product for antigen/completion purposes, but same-day ordering
+  follows source order rather than the generic pertussis-first sorting. This
+  fixed `fuzz_fail_dtp_1780795905_4324` without regressing the representative
+  pertussis-first cases.
 
 Primary-series same-day behavior:
 
