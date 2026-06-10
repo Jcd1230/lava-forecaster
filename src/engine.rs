@@ -486,12 +486,20 @@ impl<'a> EvaluationEngine<'a> {
                         &mut dup_status,
                     );
                 }
+                let output_dose_number = if dup_status == DoseStatus::Invalid {
+                    prev_dose_num
+                } else {
+                    std::cmp::min(target_dose_idx, valid_doses.len() + 1)
+                };
+                if dup_status == DoseStatus::Valid {
+                    valid_doses.push((dose.date, target_dose_idx));
+                }
                 evaluations.push(DoseEvaluation {
                     dose_date: dose.date,
                     cvx: dose.cvx,
                     status: dup_status,
                     reasons: dup_reasons,
-                    dose_number: Some(prev_dose_num),
+                    dose_number: Some(output_dose_number),
                     sources: std::collections::HashMap::new(),
                 });
                 eval_target_dose_numbers.push(target_dose_idx);

@@ -61,12 +61,20 @@ pub fn dtp_custom_evaluation_hook(
     if let Some(dose) = ctx.current_dose {
         let birth_date = ctx.patient.birth_date;
         let age_7_minus_4d = add_years_unchecked(birth_date, 7) - chrono::Duration::days(4);
+
+        if dose.date >= age_7_minus_4d
+            && reasons.contains(&EvaluationReason::DuplicateShotSameDay)
+            && is_td_family(dose.cvx)
+        {
+            if let Some((extra_status, extra_reasons)) = dtp_custom_extra_dose_hook(series_name, ctx)
+            {
+                *status = extra_status;
+                *reasons = extra_reasons;
+                return;
+            }
+        }
+
         let is_adolescent_tdap = dose.cvx.0 == cvx!("115");
-        let is_td = dose.cvx.0 == cvx!("09")
-            || dose.cvx.0 == cvx!("113")
-            || dose.cvx.0 == cvx!("138")
-            || dose.cvx.0 == cvx!("139")
-            || dose.cvx.0 == cvx!("196");
 
         if dose.date < age_7_minus_4d {
             if is_adolescent_tdap && series_name == "DTP_5_DOSE_SERIES" && target_dose_idx <= 3 {
@@ -75,7 +83,7 @@ pub fn dtp_custom_evaluation_hook(
                 if !reasons.contains(&EvaluationReason::InsufficientAntigen) {
                     reasons.push(EvaluationReason::InsufficientAntigen);
                 }
-            } else if is_td {
+            } else if is_td_min_age_invalid(dose.cvx) {
                 *status = DoseStatus::Invalid;
                 reasons.retain(|r| *r != EvaluationReason::BelowMinimumAge);
                 if !reasons.contains(&EvaluationReason::BelowMinimumAge) {
@@ -94,6 +102,24 @@ pub fn dtp_custom_evaluation_hook(
             }
         }
     }
+}
+
+fn is_td_family(cvx: Cvx) -> bool {
+    cvx.0 == cvx!("09")
+        || cvx.0 == cvx!("28")
+        || cvx.0 == cvx!("113")
+        || cvx.0 == cvx!("138")
+        || cvx.0 == cvx!("139")
+        || cvx.0 == cvx!("195")
+        || cvx.0 == cvx!("196")
+}
+
+fn is_td_min_age_invalid(cvx: Cvx) -> bool {
+    cvx.0 == cvx!("09")
+        || cvx.0 == cvx!("113")
+        || cvx.0 == cvx!("138")
+        || cvx.0 == cvx!("139")
+        || cvx.0 == cvx!("196")
 }
 
 pub fn dtp_custom_dose_number_hook(series_name: &str, ctx: &EvaluationContext) -> usize {
