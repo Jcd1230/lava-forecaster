@@ -8,8 +8,8 @@ behavior inferred from recorded Java output snapshots.
 
 Latest committed checkpoint:
 
-- Curated DTP cases: 308 / 317 passing.
-- DTP fuzz subset: 2982 / 3359 passing.
+- Curated DTP cases: 312 / 317 passing.
+- DTP fuzz subset: 3081 / 3359 passing.
 - H1N1 fuzz subset: 2905 / 2905 passing.
 
 Remaining DTP failures are mostly in three buckets:
@@ -114,6 +114,19 @@ Recurring Td after adolescent Tdap completion:
   any DTP shot can satisfy recurring Td age, interval, and extra-dose checks.
 - The Java comment says the minimum interval is 0 days for recurring Td.
 - This explains why post-completion doses can become Valid booster anchors.
+- Recorded output shows `_ADOLESCENT_TDAP_COMPLETED` behavior is not equivalent
+  to "the primary series contained pertussis." LAVA treats it as a valid
+  post-primary pertussis-containing DTP-family dose at or after age 7. Until
+  that gate exists, adult Td-only extra doses such as CVX 09, 138, 139, and
+  196 are commonly Accepted rather than Valid.
+- CVX 195 can become Valid through the same recurring-Td gate after a
+  post-primary pertussis anchor, but it can still be Invalid in in-series
+  adult-dose slots when interval/series-selection rules fail.
+- Snapshot-derived nuance: in the 3-dose adult series, a first post-primary
+  adult Td product CVX 138 or 139 can be Valid even before the post-primary
+  pertussis gate exists. Later Td-only products remain Accepted unless a valid
+  post-primary pertussis-containing dose has occurred. CVX 09 and CVX 196 have
+  not behaved like this first-anchor product in the observed cases.
 
 Adolescent Tdap:
 

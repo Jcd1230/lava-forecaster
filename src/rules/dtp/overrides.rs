@@ -21,13 +21,18 @@ pub fn is_pertussis_vaccine(cvx: Cvx) -> bool {
 }
 
 fn is_adolescent_tdap_completed(ctx: &EvaluationContext) -> bool {
-    ctx.valid_doses.iter().any(|(v_date, _)| {
-        let is_tdap = ctx
+    ctx.valid_doses.iter().any(|(v_date, dose_number)| {
+        let post_primary = match ctx.active_series_name {
+            "DTP_3_DOSE_SERIES" => *dose_number > 3,
+            "DTP_5_DOSE_SERIES" => *dose_number > 5,
+            _ => false,
+        };
+        let contains_pertussis = ctx
             .history
             .iter()
-            .any(|d| d.date == *v_date && (d.cvx.0 == cvx!("115") || d.cvx.0 == cvx!("198")));
+            .any(|d| d.date == *v_date && is_pertussis_vaccine(d.cvx));
         let age_ge_7 = *v_date >= add_years_unchecked(ctx.patient.birth_date, 7);
-        is_tdap && age_ge_7
+        post_primary && contains_pertussis && age_ge_7
     })
 }
 
@@ -37,15 +42,6 @@ fn get_last_pertussis_date_before(ctx: &EvaluationContext, date: NaiveDate) -> O
         .filter(|d| d.date < date && is_pertussis_vaccine(d.cvx))
         .map(|d| d.date)
         .max()
-}
-
-fn is_dtp_recurring_booster_cvx(cvx: Cvx) -> bool {
-    match cvx.0 {
-        // CVX 195 is a pediatric DT-IPV non-US product; ICE accepts it in DTP
-        // history but does not let it consume the recurring adult booster slot.
-        cvx!("195") => false,
-        _ => true,
-    }
 }
 
 pub fn dtp_custom_evaluation_hook(
@@ -122,6 +118,47 @@ fn is_td_min_age_invalid(cvx: Cvx) -> bool {
         || cvx.0 == cvx!("196")
 }
 
+fn is_first_adult_td_anchor_cvx(cvx: Cvx) -> bool {
+    cvx.0 == cvx!("138") || cvx.0 == cvx!("139")
+}
+
+fn has_prior_post_primary_td_family(ctx: &EvaluationContext, series_name: &str) -> bool {
+    let primary_doses = match series_name {
+        "DTP_3_DOSE_SERIES" => 3,
+        "DTP_5_DOSE_SERIES" => 5,
+        _ => return false,
+    };
+    let current_date = match ctx.current_dose {
+        Some(dose) => dose.date,
+        None => return false,
+    };
+    let last_primary_date = ctx
+        .valid_doses
+        .iter()
+        .filter(|(_, dose_number)| *dose_number <= primary_doses)
+        .map(|(date, _)| *date)
+        .max();
+
+    let has_valid_post_primary_td = ctx.valid_doses.iter().any(|(date, dose_number)| {
+        *dose_number > primary_doses
+            && ctx
+                .history
+                .iter()
+                .any(|d| d.date == *date && is_td_family(d.cvx))
+    });
+    if has_valid_post_primary_td {
+        return true;
+    }
+
+    match last_primary_date {
+        Some(primary_date) => ctx
+            .history
+            .iter()
+            .any(|d| d.date > primary_date && d.date < current_date && is_td_family(d.cvx)),
+        None => false,
+    }
+}
+
 pub fn dtp_custom_dose_number_hook(series_name: &str, ctx: &EvaluationContext) -> usize {
     let mut next_dose = ctx.target_dose_number;
     if series_name == "DTP_5_DOSE_SERIES" {
@@ -156,8 +193,15 @@ pub fn dtp_custom_extra_dose_hook(
     let birth_date = ctx.patient.birth_date;
 
     let age_ge_10 = dose.date >= add_years_unchecked(birth_date, 10);
+    let t_completed = is_adolescent_tdap_completed(ctx);
     if series_name == "DTP_3_DOSE_SERIES" {
-        if age_ge_10 && is_dtp_recurring_booster_cvx(dose.cvx) {
+        if age_ge_10 && (is_pertussis_vaccine(dose.cvx) || t_completed) {
+            return Some((DoseStatus::Valid, SmallVec::new()));
+        }
+        if age_ge_10
+            && is_first_adult_td_anchor_cvx(dose.cvx)
+            && !has_prior_post_primary_td_family(ctx, series_name)
+        {
             return Some((DoseStatus::Valid, SmallVec::new()));
         }
         return Some((
@@ -166,13 +210,12 @@ pub fn dtp_custom_extra_dose_hook(
         ));
     }
 
-    let t_completed = is_adolescent_tdap_completed(ctx);
     if t_completed {
         // Any subsequent dose is valid as a recurring decennial booster
         return Some((DoseStatus::Valid, SmallVec::new()));
     }
 
-    if age_ge_10 && is_dtp_recurring_booster_cvx(dose.cvx) {
+    if age_ge_10 && is_pertussis_vaccine(dose.cvx) {
         return Some((DoseStatus::Valid, SmallVec::new()));
     }
 
