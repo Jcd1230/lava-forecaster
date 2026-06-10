@@ -24,7 +24,7 @@ fn is_adolescent_tdap_completed(ctx: &EvaluationContext) -> bool {
     ctx.valid_doses.iter().any(|(v_date, dose_number)| {
         let post_primary = match ctx.active_series_name {
             "DTP_3_DOSE_SERIES" => *dose_number > 3,
-            "DTP_5_DOSE_SERIES" => *dose_number > 5,
+            "DTP_5_DOSE_SERIES" => *dose_number >= 5,
             _ => false,
         };
         let contains_pertussis = ctx
@@ -210,6 +210,11 @@ pub fn dtp_custom_extra_dose_hook(
         ));
     }
 
+    let age_ge_7 = dose.date >= add_years_unchecked(birth_date, 7);
+    if ctx.target_dose_number < 5 || (ctx.target_dose_number == 5 && age_ge_7) {
+        return Some((DoseStatus::Valid, SmallVec::new()));
+    }
+
     if t_completed {
         // Any subsequent dose is valid as a recurring decennial booster
         return Some((DoseStatus::Valid, SmallVec::new()));
@@ -220,7 +225,6 @@ pub fn dtp_custom_extra_dose_hook(
     }
 
     let is_tdap = dose.cvx.0 == cvx!("115") || dose.cvx.0 == cvx!("198");
-    let age_ge_7 = dose.date >= add_years_unchecked(birth_date, 7);
 
     if is_tdap && age_ge_7 {
         if age_ge_10 {

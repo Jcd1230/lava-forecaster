@@ -8,8 +8,8 @@ behavior inferred from recorded Java output snapshots.
 
 Latest committed checkpoint:
 
-- Curated DTP cases: 312 / 317 passing.
-- DTP fuzz subset: 3081 / 3359 passing.
+- Curated DTP cases: 315 / 317 passing.
+- DTP fuzz subset: 3105 / 3359 passing.
 - H1N1 fuzz subset: 2905 / 2905 passing.
 
 Remaining DTP failures are mostly in three buckets:
@@ -127,6 +127,12 @@ Recurring Td after adolescent Tdap completion:
   pertussis gate exists. Later Td-only products remain Accepted unless a valid
   post-primary pertussis-containing dose has occurred. CVX 09 and CVX 196 have
   not behaved like this first-anchor product in the observed cases.
+- Snapshot-derived 5-dose nuance: if a DTP 5-dose exception makes the series
+  complete before target dose 5, Java can still evaluate later target slots up
+  through dose 5 as Valid rather than treating them as ordinary extra doses.
+  A pertussis-containing dose 5 at or after age 7 also behaves like the
+  recurring-Td gate for later boosters. A routine optional dose 5 before age 7
+  can remain Accepted after a valid dose-4 completion exception.
 
 Adolescent Tdap:
 
