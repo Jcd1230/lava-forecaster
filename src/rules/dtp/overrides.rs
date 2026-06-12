@@ -293,6 +293,13 @@ pub fn dtp_custom_forecast_hook(
         is_dtp && age_ge_10
     });
 
+    let has_valid_pertussis_dose = valid_doses.iter().any(|(v_date, _)| {
+        history
+            .iter()
+            .any(|d| d.date == *v_date && is_pertussis_vaccine(d.cvx))
+    });
+    let has_any_pertussis_history = history.iter().any(|d| is_pertussis_vaccine(d.cvx));
+
     if forecast.status == crate::models::SeriesStatus::Complete {
         forecast.status = crate::models::SeriesStatus::default();
         forecast.reasons = crate::reasons!["NOT_COMPLETE"];
@@ -401,6 +408,34 @@ pub fn dtp_custom_forecast_hook(
         }
     } else {
         // Series is not complete
+        if forecast.series_name == "DTP_3_DOSE_SERIES"
+            && valid_doses.len() >= 3
+            && !has_valid_pertussis_dose
+            && has_any_pertussis_history
+        {
+            let mut earliest = add_years_unchecked(patient.birth_date, 11);
+            let mut recommended = add_years_unchecked(patient.birth_date, 11);
+            let overdue = add_years_unchecked(patient.birth_date, 13)
+                + chrono::Duration::days(28)
+                - chrono::Duration::days(1);
+
+            if let Some(lp_date) = history
+                .iter()
+                .filter(|d| is_pertussis_vaccine(d.cvx))
+                .map(|d| d.date)
+                .max()
+            {
+                let min_interval_date = add_months_unchecked(lp_date, 6);
+                earliest = earliest.max(min_interval_date);
+                recommended = recommended.max(min_interval_date);
+            }
+
+            forecast.status = forecast.status.with_earliest_date(Some(earliest));
+            forecast.status = forecast.status.with_recommended_date(Some(recommended));
+            forecast.status = forecast.status.with_overdue_date(Some(overdue));
+            return;
+        }
+
         let age_7 = add_years_unchecked(patient.birth_date, 7);
         const ALLOWED_CVX: &[u16] = &[
             cvx!("01"),

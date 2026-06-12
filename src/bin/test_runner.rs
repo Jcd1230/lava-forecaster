@@ -40,6 +40,18 @@ struct Cli {
 
 #[derive(clap::Subcommand, Debug)]
 enum Commands {
+    /// Lists test cases from a directory or `.ltp` database file
+    #[command(name = "list")]
+    List {
+        /// Directory containing JSON test cases or a single `.ltp` database file
+        cases_path: std::path::PathBuf,
+        /// Filter cases only for a specific group (e.g. POLIO)
+        #[arg(long)]
+        group: Option<String>,
+        /// Filter a single case by exact name
+        #[arg(long)]
+        case: Option<String>,
+    },
     /// Imports Python JSON suites into individual test files
     #[command(name = "import-cdsi")]
     ImportCdsi {
@@ -167,12 +179,39 @@ fn main() {
             args[1] = "run-cdc-csv".to_string();
         } else if args[1] == "--import-cdsi" {
             args[1] = "import-cdsi".to_string();
+        } else if args[1] == "--list" {
+            args[1] = "list".to_string();
         }
     }
 
     let cli = Cli::parse_from(args);
 
     match cli.command {
+        Commands::List { cases_path, group, case } => {
+            let filter_group = group.map(|g| g.to_uppercase());
+            let filter_case = case;
+
+            let all_loaded_cases = load_cases_from_source(&cases_path).unwrap_or_else(|err| panic!("{}", err));
+            let mut test_cases = Vec::new();
+            for tc in all_loaded_cases {
+                if let Some(ref fg) = filter_group {
+                    if tc.group.to_uppercase() != *fg {
+                        continue;
+                    }
+                }
+                if let Some(ref fc) = filter_case {
+                    if tc.name != *fc {
+                        continue;
+                    }
+                }
+                test_cases.push(tc);
+            }
+
+            println!("Matched {} case(s)", test_cases.len());
+            for tc in test_cases {
+                println!("{}\t{}", tc.group, tc.name);
+            }
+        }
         Commands::ImportCdsi { input_suite, output_dir } => {
             fs::create_dir_all(&output_dir).unwrap();
             import_python_cases(&input_suite, &output_dir);
@@ -527,6 +566,11 @@ fn main() {
                 record_summary_result(&mut group_summary, &tc.group, false);
                 failed_details.push((tc.name.clone(), errors));
             }
+        }
+
+        if total == 0 && (filter_group.is_some() || filter_case.is_some()) {
+            println!("No test cases matched the provided filters.");
+            println!("Hint: use `test_runner list <path> [--group GROUP]` to inspect available case names.");
         }
 
         print_summary("Rust-Native Test Runner Summary", total, passed, failed, &group_summary);

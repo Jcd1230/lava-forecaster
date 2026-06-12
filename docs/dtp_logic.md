@@ -238,6 +238,33 @@ Incomplete series:
   - otherwise forecast Tdap at age 7.
 
 Completed primary series with adolescent Tdap still needed:
+- Java can leave `TargetSeries.isSeriesComplete() = true` for the adult
+  `DTP_3_DOSE_SERIES` even when the selected-series history still lacks a valid
+  pertussis-containing dose.
+- In the traced case `fuzz_fail_dtp_20260608_229764`, Java selected
+  `SUPPORTED_SERIES.DTP_3_DOSE_SERIES` via
+  `SeriesSelection.Select3DoseDTPSeriesIfNoShotsPriorTo7YrsAnd7YrsOldOrOlder`
+  and evaluated:
+  - CVX 139 on `2024-04-21` as `Valid #1`
+  - CVX 195 on `2024-05-19` as `Valid #2`
+  - CVX 22 on `2024-10-24` as `Invalid #3`
+  - CVX 196 on `2025-04-24` as `Valid #3`
+- Java then entered the recommendation workflow for the selected 3-dose adult
+  series, temporarily produced a `DUE_NOW` recommendation at `2025-04-24`, and
+  later returned the final forecast window:
+  - earliest / recommended: `2028-04-21` (11th birthday)
+  - overdue: `2030-05-18` (13 years + 4 weeks - 1 day)
+- This means Java does not treat this shape as "ordinary incomplete adult dose
+  4 now." Instead it treats the adult series as complete enough to suppress the
+  immediate recurring-dose path, but still lacking the adolescent
+  pertussis-containing recommendation milestone.
+- LAVA should model this shape as a special adult-series forecast state:
+  `DTP_3_DOSE_SERIES` with at least 3 valid doses but no valid
+  pertussis-containing dose forecasts the adolescent Tdap window rather than a
+  same-day / last-valid-date recommendation, but only when the history still
+  contains some pertussis-containing DTP-family dose. Pure Td-only adult
+  histories such as `dtp_adult_no_pertussis` remain immediate due-now cases in
+  Java.
 
 - If a pertussis-containing dose occurred from age 7 through before age 10,
   recommend Tdap at age 11, overdue at age 13 years plus 4 weeks.
