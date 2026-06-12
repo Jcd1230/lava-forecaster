@@ -119,7 +119,25 @@ fn is_td_min_age_invalid(cvx: Cvx) -> bool {
 }
 
 fn is_first_adult_td_anchor_cvx(cvx: Cvx) -> bool {
-    cvx.0 == cvx!("138") || cvx.0 == cvx!("139")
+    cvx.0 == cvx!("28") || cvx.0 == cvx!("138") || cvx.0 == cvx!("139")
+}
+
+fn has_valid_primary_series_pertussis(ctx: &EvaluationContext, series_name: &str) -> bool {
+    let primary_doses = match series_name {
+        "DTP_3_DOSE_SERIES" => 3,
+        "DTP_5_DOSE_SERIES" => 5,
+        _ => return false,
+    };
+    let age_7 = add_years_unchecked(ctx.patient.birth_date, 7);
+
+    ctx.valid_doses.iter().any(|(date, dose_number)| {
+        *dose_number <= primary_doses
+            && *date >= age_7
+            && ctx
+                .history
+                .iter()
+                .any(|d| d.date == *date && is_pertussis_vaccine(d.cvx))
+    })
 }
 
 fn has_prior_post_primary_td_family(ctx: &EvaluationContext, series_name: &str) -> bool {
@@ -192,10 +210,18 @@ pub fn dtp_custom_extra_dose_hook(
     let dose = ctx.current_dose?;
     let birth_date = ctx.patient.birth_date;
 
+    let age_ge_7 = dose.date >= add_years_unchecked(birth_date, 7);
     let age_ge_10 = dose.date >= add_years_unchecked(birth_date, 10);
     let t_completed = is_adolescent_tdap_completed(ctx);
     if series_name == "DTP_3_DOSE_SERIES" {
         if age_ge_10 && (is_pertussis_vaccine(dose.cvx) || t_completed) {
+            return Some((DoseStatus::Valid, SmallVec::new()));
+        }
+        if age_ge_7
+            && dose.cvx.0 == cvx!("113")
+            && has_valid_primary_series_pertussis(ctx, series_name)
+            && !has_prior_post_primary_td_family(ctx, series_name)
+        {
             return Some((DoseStatus::Valid, SmallVec::new()));
         }
         if age_ge_10
@@ -713,14 +739,15 @@ pub fn dtp_group_selection(
     _candidate_forecasts: &mut [(&'static str, VaccineGroupForecast)],
 ) -> &'static str {
     let age_7 = add_years_unchecked(patient.birth_date, 7);
-    let age_7_minus_4d = age_7 - chrono::Duration::days(4);
 
     // Java checks for target doses, not arbitrary raw DTP administrations. A
     // very early Td-family dose that will be invalid for child-series DTP does
-    // not block adult-series selection; near-age-7 doses use minimum-age grace.
+    // not block adult-series selection. The adult-series split itself is still
+    // anchored to shots before the exact 7th birthday, even though some
+    // product-level adult minimum-age checks use grace.
     let has_child_series_target_dose = history
         .iter()
-        .any(|dose| dose.date < age_7_minus_4d && !is_td_min_age_invalid(dose.cvx));
+        .any(|dose| dose.date < age_7 && !is_td_min_age_invalid(dose.cvx));
 
     // Patient must be >= 7 years of age
     let is_at_least_7 = eval_date >= age_7;

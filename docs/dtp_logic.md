@@ -137,10 +137,16 @@ Implementation note from `fuzz_fail_dtp_1780795905_1545` and
 - The Java blocker is a target-dose concept, not raw administration history.
 - A very early Td-family dose that Java later evaluates as invalid does not
   block adult 3-dose series selection.
-- A dose administered inside the age-7 grace window is treated as adult-series
-  eligible and also does not force the 5-dose child series.
-- LAVA approximates this by only treating pre-grace doses that look eligible for
-  child-series targeting as blockers.
+- Java adult-series selection still keys off doses before the exact 7th
+  birthday, not the 4-day grace boundary used by some product-level minimum-age
+  checks.
+- Traced counterexample `fuzz_fail_dtp_20260608_4427`: a CVX 139 dose on
+  `2007-08-07` for a `2000-08-08` birth date did force Java into
+  `SUPPORTED_SERIES.DTP_5_DOSE_SERIES`, even though the date is within the
+  4-day grace window before age 7 and later product evaluation paths accept
+  adult-family doses there.
+- Therefore the series-selection blocker and the adult-product evaluation
+  boundary are not identical in Java.
 
 ## Evaluation Rules
 
@@ -169,10 +175,18 @@ Recurring Td after adolescent Tdap completion:
   post-primary pertussis anchor, but it can still be Invalid in in-series
   adult-dose slots when interval/series-selection rules fail.
 - Snapshot-derived nuance: in the 3-dose adult series, a first post-primary
-  adult Td product CVX 138 or 139 can be Valid even before the post-primary
-  pertussis gate exists. Later Td-only products remain Accepted unless a valid
-  post-primary pertussis-containing dose has occurred. CVX 09 and CVX 196 have
-  not behaved like this first-anchor product in the observed cases.
+  adult Td product CVX 28, 138, or 139 can be Valid even before the
+  post-primary pertussis gate exists. Later Td-only products remain Accepted
+  unless a valid post-primary pertussis-containing dose has occurred. CVX 09
+  and CVX 196 have not behaved like this first-anchor product in the observed
+  cases.
+- Additional traced nuance from `fuzz_fail_dtp_20260608_11201`: in the 3-dose
+  adult series, the first post-primary CVX 113 can also stay Valid when the
+  completed primary 3-dose series already includes a valid pertussis-containing
+  adult dose. In that shape Java does not require either age 10 or a prior
+  post-primary pertussis booster before keeping the first CVX 113 extra dose
+  valid; age 7 plus a valid pertussis-containing primary completion appears to
+  be enough.
 - Snapshot-derived 5-dose nuance: if a DTP 5-dose exception makes the series
   complete before target dose 5, Java can still evaluate later target slots up
   through dose 5 as Valid rather than treating them as ordinary extra doses.
