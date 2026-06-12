@@ -11,6 +11,8 @@ use lava_forecaster::{
 mod db;
 #[path = "test_runner/ui.rs"]
 mod ui;
+#[path = "test_runner/eval_match.rs"]
+mod eval_match;
 #[path = "test_runner/java_client.rs"]
 mod java_client;
 #[path = "test_runner/importer.rs"]
@@ -30,6 +32,7 @@ use java_client::{
 };
 use importer::import_python_cases;
 use cdc_csv::run_cdc_csv_mode;
+use eval_match::pair_evaluations_by_occurrence;
 
 #[derive(Parser, Debug)]
 #[command(name = "test_runner", about = "LAVA Forecaster Test Runner", version)]
@@ -452,19 +455,18 @@ fn main() {
 
             if let Some(expected) = &expected_results {
                 // 1. Verify evaluations
-                for ee in &expected.evaluations {
-                    let re = rust_evals.iter().find(|r| r.dose_date == ee.dose_date && r.cvx == ee.cvx);
-                    match re {
-                        Some(re) => {
-                             let mut status_matches = re.status == ee.status;
-                             if !status_matches {
-                                 if re.status == DoseStatus::Valid && ee.status == DoseStatus::Accepted && is_immune(&tc.patient, &tc.group, tc.execution_date) {
-                                     status_matches = true;
-                                 } else if compare_java_url.is_some() && !tc.patient.contraindications.is_empty() {
-                                     status_matches = true;
-                                 }
-                             }
-                             if !status_matches {
+                for ((_date, _cvx), re, ee) in pair_evaluations_by_occurrence(&rust_evals, &expected.evaluations) {
+                    match (re, ee) {
+                        (Some(re), Some(ee)) => {
+                            let mut status_matches = re.status == ee.status;
+                            if !status_matches {
+                                if re.status == DoseStatus::Valid && ee.status == DoseStatus::Accepted && is_immune(&tc.patient, &tc.group, tc.execution_date) {
+                                    status_matches = true;
+                                } else if compare_java_url.is_some() && !tc.patient.contraindications.is_empty() {
+                                    status_matches = true;
+                                }
+                            }
+                            if !status_matches {
                                 is_ok = false;
                                 errors.push(format!(
                                     "Evaluation status mismatch for dose ({:?}, {}): Rust={:?} (reasons={:?}), Expected={:?}",
@@ -472,26 +474,23 @@ fn main() {
                                 ));
                             }
                         }
-                        None => {
+                        (None, Some(ee)) => {
                             is_ok = false;
                             errors.push(format!(
                                 "Evaluation missing in Rust for dose ({:?}, {})",
                                 ee.dose_date, ee.cvx
                             ));
                         }
+                        (Some(re), None) => {
+                            is_ok = false;
+                            errors.push(format!(
+                                "Evaluation missing in Expected for dose ({:?}, {})",
+                                re.dose_date, re.cvx
+                            ));
+                        }
+                        (None, None) => {}
                     }
                 }
-                for re in &rust_evals {
-                    let ee = expected.evaluations.iter().find(|e| e.dose_date == re.dose_date && e.cvx == re.cvx);
-                    if ee.is_none() {
-                        is_ok = false;
-                        errors.push(format!(
-                            "Evaluation missing in Expected for dose ({:?}, {})",
-                            re.dose_date, re.cvx
-                        ));
-                    }
-                }
-
                 // 2. Verify forecasts
                 let exp_fc = expected.forecasts.first();
 
@@ -768,19 +767,18 @@ fn main() {
             let mut errors = Vec::new();
 
             if let Some(expected) = &expected_results {
-                for ee in &expected.evaluations {
-                    let re = rust_evals.iter().find(|r| r.dose_date == ee.dose_date && r.cvx == ee.cvx);
-                    match re {
-                        Some(re) => {
-                             let mut status_matches = re.status == ee.status;
-                             if !status_matches {
-                                 if re.status == DoseStatus::Valid && ee.status == DoseStatus::Accepted && is_immune(&tc.patient, &tc.group, tc.execution_date) {
-                                     status_matches = true;
-                                 } else if compare_java_url.is_some() && !tc.patient.contraindications.is_empty() {
-                                     status_matches = true;
-                                 }
-                             }
-                             if !status_matches {
+                for ((_date, _cvx), re, ee) in pair_evaluations_by_occurrence(&rust_evals, &expected.evaluations) {
+                    match (re, ee) {
+                        (Some(re), Some(ee)) => {
+                            let mut status_matches = re.status == ee.status;
+                            if !status_matches {
+                                if re.status == DoseStatus::Valid && ee.status == DoseStatus::Accepted && is_immune(&tc.patient, &tc.group, tc.execution_date) {
+                                    status_matches = true;
+                                } else if compare_java_url.is_some() && !tc.patient.contraindications.is_empty() {
+                                    status_matches = true;
+                                }
+                            }
+                            if !status_matches {
                                 is_ok = false;
                                 errors.push(format!(
                                     "Evaluation status mismatch for dose ({:?}, {}): Rust={:?} (reasons={:?}), Expected={:?}",
@@ -788,26 +786,23 @@ fn main() {
                                 ));
                             }
                         }
-                        None => {
+                        (None, Some(ee)) => {
                             is_ok = false;
                             errors.push(format!(
                                 "Evaluation missing in Rust for dose ({:?}, {})",
                                 ee.dose_date, ee.cvx
                             ));
                         }
+                        (Some(re), None) => {
+                            is_ok = false;
+                            errors.push(format!(
+                                "Evaluation missing in Expected for dose ({:?}, {})",
+                                re.dose_date, re.cvx
+                            ));
+                        }
+                        (None, None) => {}
                     }
                 }
-                for re in &rust_evals {
-                    let ee = expected.evaluations.iter().find(|e| e.dose_date == re.dose_date && e.cvx == re.cvx);
-                    if ee.is_none() {
-                        is_ok = false;
-                        errors.push(format!(
-                            "Evaluation missing in Expected for dose ({:?}, {})",
-                            re.dose_date, re.cvx
-                        ));
-                    }
-                }
-
                 let exp_fc = expected.forecasts.first();
                 match (rust_fc.as_ref(), exp_fc) {
                     (Some(rf), Some(ef)) => {

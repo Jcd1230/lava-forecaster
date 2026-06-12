@@ -317,8 +317,8 @@ impl<'a> EvaluationEngine<'a> {
         group_series: &'a [CompiledSeries],
     ) -> VaccineGroupForecast {
         // 1. Filter and sort history chronologically (only keep doses relevant to this series or group)
-        let mut sorted_history = SmallVec::<[Dose; 32]>::new();
-        for dose in history {
+        let mut sorted_history = SmallVec::<[(usize, Dose); 32]>::new();
+        for (orig_idx, dose) in history.iter().enumerate() {
             let keep = if group_series.is_empty() {
                 self.series
                     .doses
@@ -332,30 +332,53 @@ impl<'a> EvaluationEngine<'a> {
                 })
             };
             if keep {
-                sorted_history.push(*dose);
+                sorted_history.push((orig_idx, *dose));
             }
         }
+        let first_relevant_date = sorted_history.iter().map(|(_, dose)| dose.date).min();
+
         sorted_history.sort_by(|a, b| {
-            if a.date != b.date {
-                a.date.cmp(&b.date)
+            if a.1.date != b.1.date {
+                a.1.date.cmp(&b.1.date)
             } else {
                 let group = &self.series.vaccine_group;
-                let prio_a = get_same_day_priority(group, a.cvx, patient.birth_date, a.date);
-                let prio_b = get_same_day_priority(group, b.cvx, patient.birth_date, b.date);
+                let dtp_preserve_196_source_order = *group == "DTP"
+                    && should_preserve_dtp_196_source_order(first_relevant_date, a.1.date)
+                    && (a.1.cvx.0 == 196 || b.1.cvx.0 == 196);
+                let prio_a = get_same_day_priority(
+                    group,
+                    a.1.cvx,
+                    patient.birth_date,
+                    a.1.date,
+                    dtp_preserve_196_source_order,
+                );
+                let prio_b = get_same_day_priority(
+                    group,
+                    b.1.cvx,
+                    patient.birth_date,
+                    b.1.date,
+                    dtp_preserve_196_source_order,
+                );
                 if prio_a != prio_b {
                     prio_a.cmp(&prio_b)
+                } else if *group == "DTP" && a.1.cvx == b.1.cvx {
+                    b.0.cmp(&a.0) // Later original index comes first
                 } else if *group == "INFLUENZA" {
-                    let idx_a = history.iter().position(|x| x == a).unwrap_or(0);
-                    let idx_b = history.iter().position(|x| x == b).unwrap_or(0);
-                    idx_b.cmp(&idx_a) // Later original index comes first
+                    b.0.cmp(&a.0) // Later original index comes first
                 } else {
                     std::cmp::Ordering::Equal
                 }
             }
         });
 
+        let sorted_history_doses = sorted_history
+            .iter()
+            .map(|(_, dose)| *dose)
+            .collect::<SmallVec<[Dose; 32]>>();
+
         let mut evaluations = SmallVec::<[DoseEvaluation; 8]>::new();
         let mut eval_target_dose_numbers = SmallVec::<[usize; 8]>::new();
+        let mut evaluation_orig_indices = SmallVec::<[usize; 8]>::new();
         let mut valid_doses = SmallVec::<[(NaiveDate, usize); 32]>::new();
         let mut is_completed = false;
         let mut active_series: &'a CompiledSeries = self.series;
@@ -363,7 +386,7 @@ impl<'a> EvaluationEngine<'a> {
         // 2. Chronological dose evaluation loop
         let mut i = 0;
         while i < sorted_history.len() {
-            let dose = &sorted_history[i];
+            let dose = &sorted_history[i].1;
             let mut target_dose_idx =
                 valid_doses.iter().map(|(_, num)| *num).max().unwrap_or(0) + 1;
 
@@ -385,6 +408,7 @@ impl<'a> EvaluationEngine<'a> {
                     sources: std::collections::HashMap::new(),
                 });
                 eval_target_dose_numbers.push(target_dose_idx);
+                evaluation_orig_indices.push(sorted_history[i].0);
 
                 if target_dose_idx >= active_series.num_doses && valid_override {
                     is_completed = true;
@@ -407,6 +431,7 @@ impl<'a> EvaluationEngine<'a> {
                     sources: std::collections::HashMap::new(),
                 });
                 eval_target_dose_numbers.push(target_dose_idx);
+                evaluation_orig_indices.push(sorted_history[i].0);
                 i += 1;
                 continue;
             }
@@ -436,7 +461,7 @@ impl<'a> EvaluationEngine<'a> {
             // VaccineNotLicensedForMales are non-competing (e.g., CVX 118 for males)
             // and should not trigger duplicate detection for subsequent same-day doses.
             let is_duplicate = if i > 0 {
-                let history_subset = &sorted_history[0..i];
+                let history_subset = &sorted_history_doses[0..i];
                 let has_same_day = self
                     .policy
                     .map(|p| p.is_same_day_duplicate(dose, history_subset))
@@ -505,6 +530,7 @@ impl<'a> EvaluationEngine<'a> {
                     sources: std::collections::HashMap::new(),
                 });
                 eval_target_dose_numbers.push(target_dose_idx);
+                evaluation_orig_indices.push(sorted_history[i].0);
                 i += 1;
                 continue;
             }
@@ -521,6 +547,7 @@ impl<'a> EvaluationEngine<'a> {
                     sources: std::collections::HashMap::new(),
                 });
                 eval_target_dose_numbers.push(target_dose_idx);
+                evaluation_orig_indices.push(sorted_history[i].0);
                 i += 1;
                 continue;
             }
@@ -579,6 +606,7 @@ impl<'a> EvaluationEngine<'a> {
                             sources: std::collections::HashMap::new(),
                         });
                         eval_target_dose_numbers.push(target_dose_idx);
+                        evaluation_orig_indices.push(sorted_history[i].0);
                         i += 1;
                         continue;
                     }
@@ -594,6 +622,7 @@ impl<'a> EvaluationEngine<'a> {
                     sources: std::collections::HashMap::new(),
                 });
                 eval_target_dose_numbers.push(target_dose_idx);
+                evaluation_orig_indices.push(sorted_history[i].0);
                 i += 1;
                 continue;
             }
@@ -746,10 +775,11 @@ impl<'a> EvaluationEngine<'a> {
                 sources: std::collections::HashMap::new(),
             });
             eval_target_dose_numbers.push(target_dose_idx);
+            evaluation_orig_indices.push(sorted_history[i].0);
 
             let ctx_complete = EvaluationContext::new(
                 patient,
-                &sorted_history,
+                &sorted_history_doses,
                 &valid_doses,
                 Some(dose),
                 target_dose_idx,
@@ -783,7 +813,7 @@ impl<'a> EvaluationEngine<'a> {
         let series_completed = if let Some(res) = self.policy.and_then(|p| {
             let ctx_end = EvaluationContext::new(
                 patient,
-                &sorted_history,
+                &sorted_history_doses,
                 &valid_doses,
                 None,
                 0,
@@ -838,6 +868,16 @@ impl<'a> EvaluationEngine<'a> {
 
         let mut forecasts = SmallVec::new();
         forecasts.push(forecast);
+
+        let mut ordered_evaluations = evaluations
+            .into_iter()
+            .zip(evaluation_orig_indices.into_iter())
+            .collect::<SmallVec<[(DoseEvaluation, usize); 8]>>();
+        ordered_evaluations.sort_by_key(|(_, orig_idx)| *orig_idx);
+        let evaluations = ordered_evaluations
+            .into_iter()
+            .map(|(evaluation, _)| evaluation)
+            .collect::<SmallVec<[DoseEvaluation; 8]>>();
 
         VaccineGroupForecast {
             vaccine_group: active_series.vaccine_group.into(),
@@ -1276,6 +1316,7 @@ fn get_same_day_priority(
     cvx: Cvx,
     birth_date: NaiveDate,
     dose_date: NaiveDate,
+    dtp_preserve_196_source_order: bool,
 ) -> i32 {
     let cvx_code = cvx.0;
     match group {
@@ -1311,7 +1352,8 @@ fn get_same_day_priority(
             _ => 2,
         },
         "DTP" => match cvx_code {
-            196 => 0,                            // Td preservative free follows source order in ICE
+            196 if dtp_preserve_196_source_order => 0, // observed no-prior-dose exception
+            196 => 1,
             9 | 28 | 113 | 138 | 139 | 195 => 1, // DT/Td
             _ => 0,                              // Pertussis-containing DTP/DTaP/Tdap
         },
@@ -1373,6 +1415,13 @@ fn get_same_day_priority(
         }
         _ => 0,
     }
+}
+
+fn should_preserve_dtp_196_source_order(
+    first_relevant_date: Option<NaiveDate>,
+    dose_date: NaiveDate,
+) -> bool {
+    first_relevant_date == Some(dose_date)
 }
 
 fn is_patient_immune_to_group(

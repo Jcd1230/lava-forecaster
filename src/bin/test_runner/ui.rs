@@ -1,7 +1,8 @@
 use std::collections::BTreeMap;
-use chrono::NaiveDate;
 use lava_forecaster::engine::is_eval_ignored;
-use lava_forecaster::models::{DoseEvaluation, DoseStatus, SeriesForecast, Cvx};
+use lava_forecaster::models::{DoseEvaluation, DoseStatus, SeriesForecast};
+
+use crate::eval_match::pair_evaluations_by_occurrence;
 
 #[derive(Debug, Default, Clone)]
 pub struct SummaryCounts {
@@ -76,20 +77,7 @@ Test Case: \x1b[92m{}\x1b[0m (PASS)", tc_name);
     println!("{:<12} | {:<4} | {:<28} | {:<28} | Status", "Date", "CVX", "Rust Evaluation", "Expected Evaluation");
     println!("{}", "-".repeat(90));
 
-    let mut all_keys: Vec<(NaiveDate, Cvx)> = Vec::new();
-    for e in rust_evals {
-        all_keys.push((e.dose_date, e.cvx));
-    }
-    for e in exp_evals {
-        if !all_keys.contains(&(e.dose_date, e.cvx)) {
-            all_keys.push((e.dose_date, e.cvx));
-        }
-    }
-    all_keys.sort_by_key(|k| k.0);
-
-    for (dt, cvx) in all_keys {
-        let r = rust_evals.iter().find(|e| e.dose_date == dt && e.cvx == cvx);
-        let e = exp_evals.iter().find(|e| e.dose_date == dt && e.cvx == cvx);
+    for ((dt, cvx), r, e) in pair_evaluations_by_occurrence(rust_evals, exp_evals) {
 
         let format_eval = |eval: &DoseEvaluation| -> String {
             let dose_num = eval.dose_number.map(|n| n.to_string()).unwrap_or_else(|| "-".to_string());

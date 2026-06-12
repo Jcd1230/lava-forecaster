@@ -330,9 +330,14 @@ Evaluation order:
   evaluates the pertussis-containing shot first.
 - CVX 196 is an exception observed in recorded Java output. It behaves as a
   Td-family product for antigen/completion purposes, but same-day ordering
-  follows source order rather than the generic pertussis-first sorting. This
-  fixed `fuzz_fail_dtp_1780795905_4324` without regressing the representative
-  pertussis-first cases.
+  follows source order rather than the generic pertussis-first sorting only in
+  the no-prior-DTP same-day shape. With earlier DTP history already present,
+  Java reverts to the generic mixed-product ordering and then lets the later
+  CVX 196 dose survive through the post-primary extra-dose path. This matches:
+  - `fuzz_fail_dtp_1780795905_4324`: no prior DTP history, `196` stays first,
+    `107` becomes duplicate-invalid.
+  - `fuzz_fail_dtp_20260608_2622`: prior 3-dose adult history exists, `20`
+    consumes dose `#4`, `196` remains valid as same-day dose `#5`.
 
 Primary-series same-day behavior:
 
@@ -349,6 +354,12 @@ Non-primary same-day behavior:
   the duplicate same-day check complete without invalidating either dose.
 - This matches the remaining fuzz shape where post-primary same-day Td-family
   doses are often Accepted or Valid rather than duplicate-invalid.
+- In LAVA terms, the clean mapping is:
+  - evaluate the primary-eligible same-day product first
+  - let DTP's extra-dose hook decide whether the later same-day Td-family dose
+    is `Valid` or `Accepted`
+  - avoid broad product-wide exceptions for `196`; the ordering exception is
+    narrower than that
 
 NOS-specific behavior:
 

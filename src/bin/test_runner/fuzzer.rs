@@ -15,6 +15,7 @@ use lava_forecaster::{
     rules::get_all_groups,
 };
 use crate::db::{read_test_pack, write_test_pack};
+use crate::eval_match::pair_evaluations_by_occurrence;
 use crate::java_client::{get_java_expected_results, get_java_expected_results_bulk, is_group_supported_by_java};
 
 pub struct SimpleRng {
@@ -188,10 +189,9 @@ pub fn compare_results(
 ) -> Vec<String> {
     let mut errors = Vec::new();
 
-    for ee in &expected.evaluations {
-        let re = rust_evals.iter().find(|r| r.dose_date == ee.dose_date && r.cvx == ee.cvx);
-        match re {
-            Some(re) => {
+    for ((_date, _cvx), re, ee) in pair_evaluations_by_occurrence(rust_evals, &expected.evaluations) {
+        match (re, ee) {
+            (Some(re), Some(ee)) => {
                 let status_matches = re.status == ee.status;
                 if !status_matches {
                     errors.push(format!(
@@ -200,22 +200,19 @@ pub fn compare_results(
                     ));
                 }
             }
-            None => {
+            (None, Some(ee)) => {
                 errors.push(format!(
                     "Dose evaluation missing in Rust for date {:?}, cvx {}",
                     ee.dose_date, ee.cvx
                 ));
             }
-        }
-    }
-
-    for re in rust_evals {
-        let ee = expected.evaluations.iter().find(|e| e.dose_date == re.dose_date && e.cvx == re.cvx);
-        if ee.is_none() {
-            errors.push(format!(
-                "Dose evaluation missing in Java for date {:?}, cvx {}",
-                re.dose_date, re.cvx
-            ));
+            (Some(re), None) => {
+                errors.push(format!(
+                    "Dose evaluation missing in Java for date {:?}, cvx {}",
+                    re.dose_date, re.cvx
+                ));
+            }
+            (None, None) => {}
         }
     }
 
