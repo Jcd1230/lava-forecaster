@@ -22,6 +22,55 @@ Remaining DTP fuzz failures are mostly in three buckets:
 - Forecast/date selection after an extra dose is classified differently from
   Rust's current valid-dose count.
 
+Latest working log for handoff:
+
+- `tests/relative/tmp/dtp_fuzz_after_dtp3_retry_anchor_codex.txt`
+
+Bucket summary from that log:
+
+- Evaluation-only failures: 145 cases.
+- Forecast-only failures: 29 cases.
+- Combined evaluation and forecast failures: 39 cases.
+- Largest status transitions:
+  - Rust Valid, Java Accepted: 132.
+  - Rust Valid, Java Invalid: 134.
+  - Rust Accepted, Java Valid: 90.
+  - Rust Invalid, Java Valid: 54.
+- Largest product transitions:
+  - CVX 113 Valid -> Accepted: 36.
+  - CVX 138 Valid -> Accepted: 28.
+  - CVX 139 Valid -> Accepted: 18.
+  - CVX 195 Invalid -> Valid: 14.
+  - CVX 107 Valid -> Invalid: 14.
+  - CVX 20 Valid -> Invalid: 12.
+  - CVX 198 Invalid -> Valid: 12.
+  - CVX 198 Valid -> Invalid: 12.
+  - CVX 28 Valid -> Accepted: 12.
+  - CVX 28 Invalid -> Valid: 12.
+
+Good next target:
+
+- Start with forecast-only failures where evaluations already match. Some are
+  one-day overdue/date-boundary drifts and should be lower risk than changing
+  broad evaluation product rules. Examples from the latest bucket include
+  `fuzz_fail_dtp_20260608_24219`, `fuzz_fail_dtp_20260608_27482`,
+  `fuzz_fail_dtp_20260608_62378`, and `fuzz_fail_dtp_20260608_68525`.
+- After forecast-only cases, return to same-day and Td-family Valid/Accepted
+  classification with Drools traces for representative counterexamples.
+
+Do not repeat this failed broad experiment:
+
+- A tempting rule was to treat DTP 5-dose histories with four valid prior doses
+  as making later Td/Tdap-family dose-5 products Accepted before age 10. It
+  improved some fuzz examples but regressed curated CDSi dose-5 DT/Tdap cases.
+- Cases inspected during that experiment included
+  `fuzz_fail_dtp_20260608_13181`, `fuzz_fail_dtp_20260608_150180`,
+  `fuzz_fail_dtp_20260608_21859`, `fuzz_fail_dtp_20260608_19089`, and
+  `fuzz_fail_dtp_20260608_202786`.
+- Do not add blanket DTP5 dose-5 Accepted overrides for CVX 115, 198, 28, or
+  the Td-family. First map the exact Java rule/fact flow for DTP5 completion
+  exceptions and adolescent Tdap need.
+
 ## Java Source Map
 
 Primary current Java checkout:
@@ -76,6 +125,20 @@ behaviors come from generic ICE state transitions:
 
 When a snapshot is surprising, first trace which generic TargetSeries/TargetDose
 state the Drools condition was probably seeing before adding a Rust override.
+
+For ambiguous DTP cases, prefer a single-case Drools event log over guessing
+from rule text alone. Clear the log first, run one `--compare -v --trace` case,
+then search targeted terms. DTP terms that have been useful:
+
+- `_ADOLESCENT_TDAP_COMPLETED`
+- `_DOSE_OF_PERTUSSIS`
+- `_DTP_5_DOSE_SERIES_EXCEPTION1`
+- `_DTP_5_DOSE_SERIES_EXCEPTION2`
+- `DTP_PERTUSSIS_NEEDED`
+- `DuplicateShotSameDay`
+- `SeriesSelection.Select3DoseDTPSeriesIfNoShotsPriorTo7YrsAnd7YrsOldOrOlder`
+- `SUPPORTED_SERIES.DTP_3_DOSE_SERIES`
+- `SUPPORTED_SERIES.DTP_5_DOSE_SERIES`
 
 ## Series Data Facts
 
@@ -440,6 +503,14 @@ These are not settled enough for blanket rules:
     six-by-seven count excludes only shots that Java actually labels duplicate
     same-day.
 
+- DTP5 dose-5/adolescent Tdap interaction:
+  - Java can keep some later DTP5 target slots Valid after a completion
+    exception, but a broad "four valid prior doses makes Td/Tdap Accepted"
+    approximation regressed curated CDSi cases.
+  - Resolve this with Drools traces around the DTP5 completion exception facts,
+    adolescent Tdap needed/completed facts, and target-dose number rather than
+    by product family alone.
+
 ## Representative Cases To Preserve
 
 Use these as guardrails while changing rules:
@@ -468,6 +539,6 @@ For each new DTP rule change:
    counterexample for the same product family.
 3. Run representative cases first with `--case <name> -v --trace`.
 4. Then run:
-   - `cargo run --release --bin test_runner -- --run tests/cases --group DTP`
-   - `cargo run --release --bin test_runner -- --run tests/fuzz-100k-20260608.ltp --group DTP`
-   - `cargo run --release --bin test_runner -- --run tests/fuzz-100k-20260608.ltp --group H1N1`
+   - `cargo run --release --bin test_runner -- run tests/cases --group DTP`
+   - `cargo run --release --bin test_runner -- run tests/fuzz-100k-20260608.ltp --group DTP`
+   - `cargo run --release --bin test_runner -- run tests/fuzz-100k-20260608.ltp --group H1N1`
