@@ -10,7 +10,7 @@ Latest verified checkpoint after the series-selection and CVX 196 same-day
 adjustments:
 
 - Curated DTP cases: 317 / 317 passing.
-- DTP fuzz subset: 3141 / 3359 passing.
+- DTP fuzz subset: 3146 / 3359 passing.
 - H1N1 fuzz subset: 2905 / 2905 passing.
 
 Remaining DTP fuzz failures are mostly in three buckets:
@@ -230,6 +230,17 @@ Td/Tdap minimum-age ignore behavior:
   minimum age is also marked ignored.
 - In Java output this "ignored" path maps to LAVA `Accepted` with an ignored /
   outside-routine effect rather than a normal Valid dose.
+
+DTP adult-series retry interval anchoring:
+
+- Snapshot-derived behavior from `fuzz_fail_dtp_20260608_14684` and
+  `fuzz_fail_dtp_20260608_24330`: in the adult `DTP_3_DOSE_SERIES`, if a
+  target dose is Invalid but not ignored, Java still uses that invalid attempt
+  as the interval anchor for a later retry of the same target dose. This
+  differs from Rust's default valid-dose anchor and explains cases where Rust
+  previously accepted a later dose 3 by measuring from dose 2, while Java
+  invalidated it because it was less than the dose-3 minimum interval from the
+  prior invalid dose-3 attempt.
 
 5-dose completion exceptions:
 

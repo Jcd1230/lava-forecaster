@@ -722,6 +722,33 @@ impl<'a> EvaluationEngine<'a> {
                         })
                         .max_by_key(|&(e, _)| (e.status == DoseStatus::Valid, e.dose_date))
                         .map(|(e, _)| e.dose_date);
+                    let retry_anchor_date =
+                        if active_series.name == "DTP_3_DOSE_SERIES" && target_dose_idx > 1 {
+                            evaluations
+                                .iter()
+                                .zip(&eval_target_dose_numbers)
+                                .filter(|&(e, t_num)| {
+                                    *t_num == target_dose_idx
+                                        && e.status == DoseStatus::Invalid
+                                        && e.dose_date < dose.date
+                                        && !is_eval_ignored(
+                                            active_series.vaccine_group,
+                                            e.cvx,
+                                            e.dose_date,
+                                            e.status,
+                                        )
+                                })
+                                .map(|(e, _)| e.dose_date)
+                                .max()
+                        } else {
+                            None
+                        };
+                    let prev_date = match (prev_date, retry_anchor_date) {
+                        (Some(prev), Some(retry)) => Some(prev.max(retry)),
+                        (Some(prev), None) => Some(prev),
+                        (None, Some(retry)) => Some(retry),
+                        (None, None) => None,
+                    };
                     if let Some(prev_date) = prev_date {
                         let interval_ok = compare_elapsed(prev_date, dose.date, abs_min_int)
                             != std::cmp::Ordering::Less;
