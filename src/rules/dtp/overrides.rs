@@ -62,7 +62,8 @@ pub fn dtp_custom_evaluation_hook(
             && reasons.contains(&EvaluationReason::DuplicateShotSameDay)
             && is_td_family(dose.cvx)
         {
-            if let Some((extra_status, extra_reasons)) = dtp_custom_extra_dose_hook(series_name, ctx)
+            if let Some((extra_status, extra_reasons)) =
+                dtp_custom_extra_dose_hook(series_name, ctx)
             {
                 *status = extra_status;
                 *reasons = extra_reasons;
@@ -122,25 +123,28 @@ fn is_first_adult_td_anchor_cvx(cvx: Cvx) -> bool {
     cvx.0 == cvx!("28") || cvx.0 == cvx!("138") || cvx.0 == cvx!("139")
 }
 
-fn has_valid_primary_series_pertussis(ctx: &EvaluationContext, series_name: &str) -> bool {
+fn count_valid_primary_series_pertussis(ctx: &EvaluationContext, series_name: &str) -> usize {
     let primary_doses = match series_name {
         "DTP_3_DOSE_SERIES" => 3,
         "DTP_5_DOSE_SERIES" => 5,
-        _ => return false,
+        _ => return 0,
     };
     let age_7 = add_years_unchecked(ctx.patient.birth_date, 7);
 
-    ctx.valid_doses.iter().any(|(date, dose_number)| {
-        *dose_number <= primary_doses
-            && *date >= age_7
-            && ctx
-                .history
-                .iter()
-                .any(|d| d.date == *date && is_pertussis_vaccine(d.cvx))
-    })
+    ctx.valid_doses
+        .iter()
+        .filter(|(date, dose_number)| {
+            *dose_number <= primary_doses
+                && *date >= age_7
+                && ctx
+                    .history
+                    .iter()
+                    .any(|d| d.date == *date && is_pertussis_vaccine(d.cvx))
+        })
+        .count()
 }
 
-fn has_prior_post_primary_td_family(ctx: &EvaluationContext, series_name: &str) -> bool {
+fn has_prior_post_primary_dtp_family(ctx: &EvaluationContext, series_name: &str) -> bool {
     let primary_doses = match series_name {
         "DTP_3_DOSE_SERIES" => 3,
         "DTP_5_DOSE_SERIES" => 5,
@@ -157,14 +161,10 @@ fn has_prior_post_primary_td_family(ctx: &EvaluationContext, series_name: &str) 
         .map(|(date, _)| *date)
         .max();
 
-    let has_valid_post_primary_td = ctx.valid_doses.iter().any(|(date, dose_number)| {
-        *dose_number > primary_doses
-            && ctx
-                .history
-                .iter()
-                .any(|d| d.date == *date && is_td_family(d.cvx))
+    let has_valid_post_primary = ctx.valid_doses.iter().any(|(date, dose_number)| {
+        *dose_number > primary_doses && ctx.history.iter().any(|d| d.date == *date)
     });
-    if has_valid_post_primary_td {
+    if has_valid_post_primary {
         return true;
     }
 
@@ -172,7 +172,7 @@ fn has_prior_post_primary_td_family(ctx: &EvaluationContext, series_name: &str) 
         Some(primary_date) => ctx
             .history
             .iter()
-            .any(|d| d.date > primary_date && d.date < current_date && is_td_family(d.cvx)),
+            .any(|d| d.date > primary_date && d.date < current_date),
         None => false,
     }
 }
@@ -219,14 +219,15 @@ pub fn dtp_custom_extra_dose_hook(
         }
         if age_ge_7
             && dose.cvx.0 == cvx!("113")
-            && has_valid_primary_series_pertussis(ctx, series_name)
-            && !has_prior_post_primary_td_family(ctx, series_name)
+            && count_valid_primary_series_pertussis(ctx, series_name) >= 2
+            && !has_prior_post_primary_dtp_family(ctx, series_name)
         {
             return Some((DoseStatus::Valid, SmallVec::new()));
         }
         if age_ge_10
             && is_first_adult_td_anchor_cvx(dose.cvx)
-            && !has_prior_post_primary_td_family(ctx, series_name)
+            && count_valid_primary_series_pertussis(ctx, series_name) >= 2
+            && !has_prior_post_primary_dtp_family(ctx, series_name)
         {
             return Some((DoseStatus::Valid, SmallVec::new()));
         }
@@ -237,7 +238,10 @@ pub fn dtp_custom_extra_dose_hook(
     }
 
     let age_ge_7 = dose.date >= add_years_unchecked(birth_date, 7);
-    if ctx.target_dose_number < 5 || (ctx.target_dose_number == 5 && age_ge_7) {
+    if ctx.target_dose_number < 5
+        || (ctx.target_dose_number == 5
+            && (ctx.valid_doses.len() < 4 || (age_ge_7 && !is_td_family(dose.cvx))))
+    {
         return Some((DoseStatus::Valid, SmallVec::new()));
     }
 
@@ -441,8 +445,7 @@ pub fn dtp_custom_forecast_hook(
         {
             let mut earliest = add_years_unchecked(patient.birth_date, 11);
             let mut recommended = add_years_unchecked(patient.birth_date, 11);
-            let overdue = add_years_unchecked(patient.birth_date, 13)
-                + chrono::Duration::days(28)
+            let overdue = add_years_unchecked(patient.birth_date, 13) + chrono::Duration::days(28)
                 - chrono::Duration::days(1);
 
             if let Some(lp_date) = history

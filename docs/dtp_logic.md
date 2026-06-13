@@ -10,7 +10,7 @@ Latest verified checkpoint after the series-selection and CVX 196 same-day
 adjustments:
 
 - Curated DTP cases: 317 / 317 passing.
-- DTP fuzz subset: 3077 / 3359 passing.
+- DTP fuzz subset: 3141 / 3359 passing.
 - H1N1 fuzz subset: 2905 / 2905 passing.
 
 Remaining DTP fuzz failures are mostly in three buckets:
@@ -175,24 +175,33 @@ Recurring Td after adolescent Tdap completion:
   post-primary pertussis anchor, but it can still be Invalid in in-series
   adult-dose slots when interval/series-selection rules fail.
 - Snapshot-derived nuance: in the 3-dose adult series, a first post-primary
-  adult Td product CVX 28, 138, or 139 can be Valid even before the
-  post-primary pertussis gate exists. Later Td-only products remain Accepted
-  unless a valid post-primary pertussis-containing dose has occurred. CVX 09
-  and CVX 196 have not behaved like this first-anchor product in the observed
-  cases.
+  adult Td product CVX 28, 138, or 139 can be Valid at age 10 or later even
+  before the post-primary pertussis gate exists, but only when the completed
+  primary 3-dose series already contains at least two valid pertussis-containing
+  adult doses and there has not already been another post-primary DTP-family
+  dose. Later Td-only products remain Accepted unless a valid post-primary
+  pertussis-containing dose has occurred. CVX 09 and CVX 196 have not behaved
+  like this first-anchor product in the observed cases. Representative valid
+  guard: `fuzz_fail_dtp_20260608_4427`. Representative accepted cases:
+  `fuzz_fail_dtp_20260608_7647` and `fuzz_fail_dtp_20260608_13589`.
 - Additional traced nuance from `fuzz_fail_dtp_20260608_11201`: in the 3-dose
-  adult series, the first post-primary CVX 113 can also stay Valid when the
-  completed primary 3-dose series already includes a valid pertussis-containing
-  adult dose. In that shape Java does not require either age 10 or a prior
-  post-primary pertussis booster before keeping the first CVX 113 extra dose
-  valid; age 7 plus a valid pertussis-containing primary completion appears to
-  be enough.
+  adult series, the first post-primary CVX 113 can also stay Valid when given
+  at age 7 or later, but it follows the same primary-series pertussis and "no
+  prior post-primary DTP-family dose" guard. In that shape Java does not
+  require age 10 or a prior post-primary pertussis booster before keeping the
+  first CVX 113 extra dose valid.
 - Snapshot-derived 5-dose nuance: if a DTP 5-dose exception makes the series
   complete before target dose 5, Java can still evaluate later target slots up
   through dose 5 as Valid rather than treating them as ordinary extra doses.
   A pertussis-containing dose 5 at or after age 7 also behaves like the
   recurring-Td gate for later boosters. A routine optional dose 5 before age 7
-  can remain Accepted after a valid dose-4 completion exception.
+  can remain Accepted after a valid dose-4 completion exception. Td-family
+  products after age 7 can still be Valid when filling the fourth counted dose
+  after a 3-dose completion exception; representative case:
+  `fuzz_fail_dtp_1780710085_3376`. Once four valid doses already exist,
+  Td-family products in dose-5 slots can remain Accepted when they do not
+  satisfy the adolescent pertussis need; representative case:
+  `fuzz_fail_dtp_20260608_15613`.
 
 Adolescent Tdap:
 
