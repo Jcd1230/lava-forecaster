@@ -91,5 +91,6 @@ For detailed mismatch-routing guidance, use [parity_workflow_notes.md](file://..
 ## Version Control (Jujutsu / jj-vcs)
 
 - **Primary VCS**: This project primarily uses Jujutsu (`jj`) for version control.
+- **Do not use Git commits**: Do not use `git add` or `git commit` unless the user explicitly asks for Git or a required tool only supports Git.
 - **Commit Guideline**: Developers and agents must run `jj commit -m "..."` after completing meaningful units of work to save progress and maintain a clean repository history.
 - **Task Scope**: Keep parity work to one vaccine bucket per revision when practical, validate the target-group compare and a fresh full compare, then commit.
