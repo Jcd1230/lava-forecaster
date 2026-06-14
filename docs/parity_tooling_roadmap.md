@@ -8,6 +8,8 @@ repeatable way.
 
 ## 1. LTP Inspect Command
 
+Status: implemented.
+
 Priority: highest.
 
 Problem:
@@ -37,6 +39,14 @@ Success criteria:
 
 - A developer can confirm case membership without running evaluation.
 - The earlier `Executed: 0` confusion is easy to diagnose from the CLI.
+
+Implemented command examples:
+
+```bash
+cargo run --release --bin test_runner -- inspect tests/fuzz-100k-20260608.ltp --group DTP --list-cases
+cargo run --release --bin test_runner -- inspect tests/fuzz-100k-20260608.ltp --group DTP --count
+cargo run --release --bin test_runner -- inspect tests/fuzz-100k-20260608.ltp --case fuzz_fail_dtp_20260608_24219
+```
 
 ## 2. Structured Failure Summary
 

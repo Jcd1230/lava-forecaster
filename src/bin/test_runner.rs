@@ -4,7 +4,7 @@ use std::path::Path;
 use clap::Parser;
 use lava_forecaster::{
     evaluate_patient_all_groups,
-    models::{UnifiedTestCase, DoseStatus},
+    models::{UnifiedTestCase, DoseStatus, ExpectedResults, SeriesForecast},
 };
 
 #[path = "test_runner/db.rs"]
@@ -43,6 +43,24 @@ struct Cli {
 
 #[derive(clap::Subcommand, Debug)]
 enum Commands {
+    /// Inspects test cases from a directory or `.ltp` database file without running evaluations
+    #[command(name = "inspect")]
+    Inspect {
+        /// Directory containing JSON test cases or a single `.ltp` database file
+        cases_path: std::path::PathBuf,
+        /// Filter cases only for a specific group (e.g. POLIO)
+        #[arg(long)]
+        group: Option<String>,
+        /// Filter a single case by exact name
+        #[arg(long)]
+        case: Option<String>,
+        /// Print only the number of matched cases and per-group counts
+        #[arg(long)]
+        count: bool,
+        /// Print only matched group/name pairs
+        #[arg(long)]
+        list_cases: bool,
+    },
     /// Lists test cases from a directory or `.ltp` database file
     #[command(name = "list")]
     List {
@@ -184,12 +202,34 @@ fn main() {
             args[1] = "import-cdsi".to_string();
         } else if args[1] == "--list" {
             args[1] = "list".to_string();
+        } else if args[1] == "--inspect" {
+            args[1] = "inspect".to_string();
         }
     }
 
     let cli = Cli::parse_from(args);
 
     match cli.command {
+        Commands::Inspect { cases_path, group, case, count, list_cases } => {
+            let filter_group = group.map(|g| g.to_uppercase());
+            let filter_case = case;
+
+            let all_loaded_cases = load_cases_from_source(&cases_path).unwrap_or_else(|err| panic!("{}", err));
+            let mut test_cases = filter_cases_for_inspect(all_loaded_cases, filter_group.as_deref(), filter_case.as_deref());
+            test_cases.sort_by(|a, b| a.group.cmp(&b.group).then_with(|| a.name.cmp(&b.name)));
+
+            if count {
+                print_inspect_counts(&test_cases);
+            } else if list_cases {
+                print_inspect_case_list(&test_cases);
+            } else {
+                print_inspect_details(&test_cases);
+            }
+
+            if test_cases.is_empty() {
+                std::process::exit(1);
+            }
+        }
         Commands::List { cases_path, group, case } => {
             let filter_group = group.map(|g| g.to_uppercase());
             let filter_case = case;
@@ -930,4 +970,132 @@ fn main() {
         }
     }
 }
+
+}
+
+fn filter_cases_for_inspect(
+    cases: Vec<UnifiedTestCase>,
+    filter_group: Option<&str>,
+    filter_case: Option<&str>,
+) -> Vec<UnifiedTestCase> {
+    cases
+        .into_iter()
+        .filter(|tc| {
+            if let Some(fg) = filter_group {
+                if tc.group.to_uppercase() != fg {
+                    return false;
+                }
+            }
+            if let Some(fc) = filter_case {
+                if tc.name != fc {
+                    return false;
+                }
+            }
+            true
+        })
+        .collect()
+}
+
+fn print_inspect_counts(test_cases: &[UnifiedTestCase]) {
+    let mut group_counts: BTreeMap<&str, usize> = BTreeMap::new();
+    for tc in test_cases {
+        *group_counts.entry(&tc.group).or_default() += 1;
+    }
+
+    println!("Matched {} case(s)", test_cases.len());
+    if !group_counts.is_empty() {
+        println!();
+        println!("{:<16} | {:>8}", "Group", "Cases");
+        println!("{}", "-".repeat(27));
+        for (group, count) in group_counts {
+            println!("{:<16} | {:>8}", group, count);
+        }
+    }
+}
+
+fn print_inspect_case_list(test_cases: &[UnifiedTestCase]) {
+    println!("Matched {} case(s)", test_cases.len());
+    for tc in test_cases {
+        println!("{}\t{}", tc.group, tc.name);
+    }
+}
+
+fn print_inspect_details(test_cases: &[UnifiedTestCase]) {
+    print_inspect_counts(test_cases);
+    for tc in test_cases {
+        println!();
+        print_inspect_case_details(tc);
+    }
+}
+
+fn print_inspect_case_details(tc: &UnifiedTestCase) {
+    println!("Case: {}", tc.name);
+    println!("Group: {}", tc.group);
+    println!("Focus CVX: {}", tc.focus_code);
+    println!("Birth Date: {}", tc.patient.birth_date);
+    println!("Gender: {:?}", tc.patient.gender);
+    println!("Execution Date: {}", tc.execution_date);
+    println!("History: {} dose(s)", tc.history.len());
+    for (idx, dose) in tc.history.iter().enumerate() {
+        let valid_marker = dose
+            .is_valid
+            .map(|valid| format!(" is_valid={}", valid))
+            .unwrap_or_default();
+        println!(
+            "  {:>2}. {} CVX {}{}",
+            idx + 1,
+            dose.date,
+            dose.cvx,
+            valid_marker
+        );
+    }
+
+    match &tc.expected {
+        Some(expected) => print_expected_summary(expected),
+        None => println!("Expected Snapshot: none"),
+    }
+}
+
+fn print_expected_summary(expected: &ExpectedResults) {
+    let mut status_counts: BTreeMap<String, usize> = BTreeMap::new();
+    for eval in &expected.evaluations {
+        *status_counts.entry(format!("{:?}", eval.status)).or_default() += 1;
+    }
+
+    println!("Expected Snapshot: present");
+    println!("Expected Evaluations: {}", expected.evaluations.len());
+    if !status_counts.is_empty() {
+        let counts = status_counts
+            .into_iter()
+            .map(|(status, count)| format!("{}={}", status, count))
+            .collect::<Vec<_>>()
+            .join(", ");
+        println!("Expected Status Counts: {}", counts);
+    }
+
+    if expected.forecasts.is_empty() {
+        println!("Expected Forecasts: 0");
+    } else {
+        println!("Expected Forecasts: {}", expected.forecasts.len());
+        for (idx, forecast) in expected.forecasts.iter().enumerate() {
+            print_forecast_summary(idx + 1, forecast);
+        }
+    }
+}
+
+fn print_forecast_summary(index: usize, forecast: &SeriesForecast) {
+    println!(
+        "  {:>2}. {} status={:?} earliest={} recommended={} overdue={} latest={}",
+        index,
+        forecast.series_name,
+        forecast.status,
+        format_optional_date(forecast.status.earliest_date()),
+        format_optional_date(forecast.status.recommended_date()),
+        format_optional_date(forecast.status.overdue_date()),
+        format_optional_date(forecast.status.latest_date()),
+    );
+}
+
+fn format_optional_date(date: Option<chrono::NaiveDate>) -> String {
+    date.map(|d| d.to_string()).unwrap_or_else(|| "-".to_string())
 }

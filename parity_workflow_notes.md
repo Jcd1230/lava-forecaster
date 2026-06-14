@@ -29,6 +29,14 @@ Run a target group from a fuzz database:
 cargo run --release --bin test_runner -- run tests/fuzz-100k-20260608.ltp --group <GROUP> > tests/relative/tmp/<group>_fuzz_<label>.txt 2>&1
 ```
 
+Inspect case membership or a single case without running evaluation:
+
+```bash
+cargo run --release --bin test_runner -- inspect tests/fuzz-100k-20260608.ltp --group DTP --count
+cargo run --release --bin test_runner -- inspect tests/fuzz-100k-20260608.ltp --group DTP --list-cases
+cargo run --release --bin test_runner -- inspect tests/fuzz-100k-20260608.ltp --case fuzz_fail_dtp_20260608_24219
+```
+
 Run a single case with full detail:
 
 ```bash
