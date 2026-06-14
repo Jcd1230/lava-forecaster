@@ -521,6 +521,35 @@ pub fn dtp_custom_forecast_hook(
 
         if forecast.series_name == "DTP_5_DOSE_SERIES" {
             let next_dose_idx = valid_doses.len() + 1;
+            if valid_doses.is_empty() {
+                let dtp_evaluations = evaluations
+                    .iter()
+                    .filter(|e| ALLOWED_CVX.contains(&e.cvx.0))
+                    .count();
+                if dtp_evaluations >= 2 {
+                    if let Some(first_invalid_date) = evaluations
+                        .iter()
+                        .filter(|e| ALLOWED_CVX.contains(&e.cvx.0))
+                        .filter(|e| e.status == DoseStatus::Invalid)
+                        .map(|e| e.dose_date)
+                        .min()
+                    {
+                        let retry_date = add_days(first_invalid_date, 28);
+                        let earliest = forecast
+                            .status
+                            .earliest_date()
+                            .unwrap_or(retry_date)
+                            .max(retry_date);
+                        let recommended = forecast
+                            .status
+                            .recommended_date()
+                            .unwrap_or(retry_date)
+                            .max(retry_date);
+                        forecast.status = forecast.status.with_earliest_date(Some(earliest));
+                        forecast.status = forecast.status.with_recommended_date(Some(recommended));
+                    }
+                }
+            }
             if let Some(overdue_age) = dtp_5_overdue_age_date(patient.birth_date, next_dose_idx) {
                 let recommended = forecast.status.recommended_date().unwrap_or(overdue_age);
                 forecast.status = forecast

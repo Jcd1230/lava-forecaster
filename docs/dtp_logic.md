@@ -6,9 +6,10 @@ behavior inferred from recorded Java output snapshots.
 
 ## Current Parity Snapshot
 
-Latest verified checkpoint after the DTP5 ignored-shot retry-anchor adjustment:
+Latest verified checkpoint after the DTP5 zero-valid forecast-anchor
+adjustment:
 
-- DTP fuzz subset: 3053 / 3359 passing.
+- DTP fuzz subset: 3055 / 3359 passing.
 - H1N1 fuzz subset: 2905 / 2905 passing.
 - `tests/cases --group DTP` matched 0 cases in the current workspace layout,
   so curated DTP case coverage needs a fixture-layout check before using it as
@@ -25,12 +26,12 @@ Remaining DTP fuzz failures are mostly in three buckets:
 
 Latest working log for handoff:
 
-- `tests/relative/tmp/dtp_run_after_retry_anchor_no_insufficient_antigen.txt`
+- `tests/relative/tmp/dtp_run_after_zero_valid_invalid_anchor.txt`
 
 Bucket summary from that log:
 
 - Evaluation-only failures: 195 cases.
-- Forecast-only failures: 22 cases.
+- Forecast-only failures: 20 cases.
 - Combined evaluation and forecast failures: 89 cases.
 - Largest status transitions:
   - Rust Valid, Java Invalid: 169.
@@ -325,6 +326,20 @@ DTP5 ignored-shot retry forecast anchoring:
   shapes rather than 28-day retry anchors. Guard cases:
   `fuzz_fail_dtp_20260608_112350` and
   `fuzz_fail_dtp_20260608_181198`.
+
+DTP5 zero-valid invalid-history forecast anchoring:
+
+- Snapshot-derived behavior from `fuzz_fail_dtp_20260608_24219` and
+  `fuzz_fail_dtp_20260608_81697`: when the selected DTP5 series has no valid
+  doses but at least two DTP-family target evaluations, Java can use the first
+  invalid DTP-family attempt as a 28-day interval floor for the next forecast.
+- This floors earliest and recommended dates only; the routine child overdue
+  age boundary remains age-based. In `fuzz_fail_dtp_20260608_81697`, for
+  example, earliest moves to first invalid plus 28 days while recommended stays
+  at the age-2-month recommendation date.
+- Keep this separate from the ignored-shot retry-anchor rule. The zero-valid
+  case is about forecasting after no accepted valid series start, not about a
+  final ignored Td-family shot after an established valid-dose anchor.
 
 5-dose completion exceptions:
 
