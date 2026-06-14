@@ -1,6 +1,6 @@
-use std::collections::BTreeMap;
 use lava_forecaster::engine::is_eval_ignored;
 use lava_forecaster::models::{DoseEvaluation, DoseStatus, SeriesForecast};
+use std::collections::BTreeMap;
 
 use crate::eval_match::pair_evaluations_by_occurrence;
 
@@ -11,7 +11,11 @@ pub struct SummaryCounts {
     pub failed: usize,
 }
 
-pub fn record_summary_result(summary: &mut BTreeMap<String, SummaryCounts>, group: &str, passed: bool) {
+pub fn record_summary_result(
+    summary: &mut BTreeMap<String, SummaryCounts>,
+    group: &str,
+    passed: bool,
+) {
     let entry = summary.entry(group.to_string()).or_default();
     entry.executed += 1;
     if passed {
@@ -21,9 +25,18 @@ pub fn record_summary_result(summary: &mut BTreeMap<String, SummaryCounts>, grou
     }
 }
 
-pub fn print_summary(title: &str, total: usize, passed: usize, failed: usize, group_summary: &BTreeMap<String, SummaryCounts>) {
-    println!("
---- {} ---", title);
+pub fn print_summary(
+    title: &str,
+    total: usize,
+    passed: usize,
+    failed: usize,
+    group_summary: &BTreeMap<String, SummaryCounts>,
+) {
+    println!(
+        "
+--- {} ---",
+        title
+    );
     println!("Executed: {}", total);
     println!("Passed  : {}", passed);
     println!("Failed  : {}", failed);
@@ -32,9 +45,14 @@ pub fn print_summary(title: &str, total: usize, passed: usize, failed: usize, gr
     }
 
     if !group_summary.is_empty() {
-        println!("
-Per-Group Summary:");
-        println!("{:<16} | {:>8} | {:>8} | {:>8} | {:>8}", "Group", "Executed", "Passed", "Failed", "Pass %");
+        println!(
+            "
+Per-Group Summary:"
+        );
+        println!(
+            "{:<16} | {:>8} | {:>8} | {:>8} | {:>8}",
+            "Group", "Executed", "Passed", "Failed", "Pass %"
+        );
         println!("{}", "-".repeat(62));
         for (group, counts) in group_summary {
             let pass_pct = if counts.executed > 0 {
@@ -44,11 +62,7 @@ Per-Group Summary:");
             };
             println!(
                 "{:<16} | {:>8} | {:>8} | {:>8} | {:>7.2}",
-                group,
-                counts.executed,
-                counts.passed,
-                counts.failed,
-                pass_pct,
+                group, counts.executed, counts.passed, counts.failed, pass_pct,
             );
         }
     }
@@ -64,23 +78,34 @@ pub fn print_comparison_table(
     errors: &[String],
 ) {
     if !errors.is_empty() {
-        println!("
-Test Case: \x1b[91m{}\x1b[0m (FAIL)", tc_name);
+        println!(
+            "
+Test Case: \x1b[91m{}\x1b[0m (FAIL)",
+            tc_name
+        );
         for err in errors {
             println!("{}", err);
         }
     } else {
-        println!("
-Test Case: \x1b[92m{}\x1b[0m (PASS)", tc_name);
+        println!(
+            "
+Test Case: \x1b[92m{}\x1b[0m (PASS)",
+            tc_name
+        );
     }
 
-    println!("{:<12} | {:<4} | {:<28} | {:<28} | Status", "Date", "CVX", "Rust Evaluation", "Expected Evaluation");
+    println!(
+        "{:<12} | {:<4} | {:<28} | {:<28} | Status",
+        "Date", "CVX", "Rust Evaluation", "Expected Evaluation"
+    );
     println!("{}", "-".repeat(90));
 
     for ((dt, cvx), r, e) in pair_evaluations_by_occurrence(rust_evals, exp_evals) {
-
         let format_eval = |eval: &DoseEvaluation| -> String {
-            let dose_num = eval.dose_number.map(|n| n.to_string()).unwrap_or_else(|| "-".to_string());
+            let dose_num = eval
+                .dose_number
+                .map(|n| n.to_string())
+                .unwrap_or_else(|| "-".to_string());
             if eval.status == DoseStatus::Invalid {
                 let ignored = is_eval_ignored(group, eval.cvx, eval.dose_date, eval.status);
                 let tag = if ignored { "Ignored" } else { "Not Ignored" };
@@ -100,38 +125,58 @@ Test Case: \x1b[92m{}\x1b[0m (PASS)", tc_name);
         };
 
         let match_ok = match (r, e) {
-            (Some(re), Some(ee)) => re.status == ee.status && (ee.dose_number.is_none() || re.dose_number == ee.dose_number),
+            (Some(re), Some(ee)) => {
+                re.status == ee.status
+                    && (ee.dose_number.is_none() || re.dose_number == ee.dose_number)
+            }
             _ => false,
         };
 
-        let status_indicator = if match_ok { "\x1b[92mOK\x1b[0m" } else { "\x1b[91mFAIL\x1b[0m" };
-        println!("{:<12} | {:<4} | {:<28} | {:<28} | {}", dt.format("%Y-%m-%d"), cvx, r_str, e_str, status_indicator);
+        let status_indicator = if match_ok {
+            "\x1b[92mOK\x1b[0m"
+        } else {
+            "\x1b[91mFAIL\x1b[0m"
+        };
+        println!(
+            "{:<12} | {:<4} | {:<28} | {:<28} | {}",
+            dt.format("%Y-%m-%d"),
+            cvx,
+            r_str,
+            e_str,
+            status_indicator
+        );
     }
 
     if rust_fc.is_some() || exp_fc.is_some() {
-        println!("
-Forecasts:");
-        println!("{:<15} | {:<45} | {:<22}", "Field", "Rust Forecast", "Expected Forecast");
+        println!("\nForecasts:");
+        println!(
+            "{:<15} | {:<45} | {:<22}",
+            "Field", "Rust Forecast", "Expected Forecast"
+        );
         println!("{}", "-".repeat(90));
 
-        let rust_forecast = rust_fc.unwrap();
-        let expected_forecast = exp_fc.unwrap();
-
-        let fields = ["status", "earliest_date", "recommended_date", "overdue_date", "latest_date"];
+        let fields = [
+            "status",
+            "earliest_date",
+            "recommended_date",
+            "overdue_date",
+            "latest_date",
+        ];
         for field in &fields {
             let field_name = *field;
-            let rust_val = get_field_val(rust_forecast, field_name);
-            let expected_val = get_field_val(expected_forecast, field_name);
-            
+            let rust_val = rust_fc.map_or("MISSING".to_string(), |f| get_field_val(f, field_name));
+            let expected_val =
+                exp_fc.map_or("MISSING".to_string(), |f| get_field_val(f, field_name));
+
             if rust_val != expected_val {
-                 let source = rust_forecast.sources.get(field_name).map(|s| format!("(Source: {})", s)).unwrap_or_default();
-                 println!(
-                     "    - \x1b[91m{}\x1b[0m: Rust={:?}, Expected={:?} \x1b[93m{}\x1b[0m",
-                     field_name,
-                     rust_val,
-                     expected_val,
-                     source
-                 );
+                let source = rust_fc
+                    .and_then(|f| f.sources.get(field_name))
+                    .map(|s| format!("(Source: {})", s))
+                    .unwrap_or_default();
+                println!(
+                    "    - \x1b[91m{}\x1b[0m: Rust={:?}, Expected={:?} \x1b[93m{}\x1b[0m",
+                    field_name, rust_val, expected_val, source
+                );
             }
         }
     }
@@ -141,10 +186,22 @@ Forecasts:");
 fn get_field_val<'a>(forecast: &'a SeriesForecast, field: &str) -> String {
     match field {
         "status" => format!("{:?}", forecast.status),
-        "earliest_date" => forecast.status.earliest_date().map_or("-".to_string(), |d| d.format("%Y-%m-%d").to_string()),
-        "recommended_date" => forecast.status.recommended_date().map_or("-".to_string(), |d| d.format("%Y-%m-%d").to_string()),
-        "overdue_date" => forecast.status.overdue_date().map_or("-".to_string(), |d| d.format("%Y-%m-%d").to_string()),
-        "latest_date" => forecast.status.latest_date().map_or("-".to_string(), |d| d.format("%Y-%m-%d").to_string()),
+        "earliest_date" => forecast
+            .status
+            .earliest_date()
+            .map_or("-".to_string(), |d| d.format("%Y-%m-%d").to_string()),
+        "recommended_date" => forecast
+            .status
+            .recommended_date()
+            .map_or("-".to_string(), |d| d.format("%Y-%m-%d").to_string()),
+        "overdue_date" => forecast
+            .status
+            .overdue_date()
+            .map_or("-".to_string(), |d| d.format("%Y-%m-%d").to_string()),
+        "latest_date" => forecast
+            .status
+            .latest_date()
+            .map_or("-".to_string(), |d| d.format("%Y-%m-%d").to_string()),
         _ => "".to_string(),
     }
 }

@@ -8,7 +8,11 @@ pub type EvalKey = (NaiveDate, u16);
 pub fn pair_evaluations_by_occurrence<'a>(
     rust_evals: &'a [DoseEvaluation],
     expected_evals: &'a [DoseEvaluation],
-) -> Vec<(EvalKey, Option<&'a DoseEvaluation>, Option<&'a DoseEvaluation>)> {
+) -> Vec<(
+    EvalKey,
+    Option<&'a DoseEvaluation>,
+    Option<&'a DoseEvaluation>,
+)> {
     let mut rust_map: BTreeMap<EvalKey, Vec<&DoseEvaluation>> = BTreeMap::new();
     let mut expected_map: BTreeMap<EvalKey, Vec<&DoseEvaluation>> = BTreeMap::new();
     let mut all_keys: BTreeSet<EvalKey> = BTreeSet::new();

@@ -12,7 +12,7 @@ fn is_old_zoster(cvx: Cvx) -> bool {
 }
 
 fn is_live_virus(cvx: Cvx) -> bool {
-    const LIVE_VIRUS: &[u16] = &[cvx!("03"), cvx!("04"), cvx!("05"), cvx!("06"), cvx!("07"), cvx!("21"), cvx!("37"), cvx!("38"), cvx!("75"), cvx!("94"), cvx!("105"), cvx!("121"), cvx!("183"), cvx!("184"), cvx!("325")];
+    const LIVE_VIRUS: &[u16] = &[cvx!("03"), cvx!("04"), cvx!("05"), cvx!("06"), cvx!("07"), cvx!("21"), cvx!("37"), cvx!("38"), cvx!("75"), cvx!("94"), cvx!("105"), cvx!("111"), cvx!("121"), cvx!("125"), cvx!("149"), cvx!("151"), cvx!("183"), cvx!("184"), cvx!("325"), cvx!("333")];
     LIVE_VIRUS.contains(&cvx.0)
 }
 

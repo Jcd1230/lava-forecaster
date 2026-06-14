@@ -1,14 +1,17 @@
-use std::collections::{HashMap, BTreeMap};
-use std::path::Path;
+use crate::java_client::query_rust_rest_service;
+use crate::ui::{print_summary, record_summary_result, SummaryCounts};
 use chrono::NaiveDate;
 use csv::ReaderBuilder;
-use reqwest::blocking::Client;
 use lava_forecaster::{
     evaluate_patient_all_groups,
-    models::{Dose, DoseEvaluation, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, UnifiedTestCase, Cvx, Patient, Gender},
+    models::{
+        Cvx, Dose, DoseEvaluation, DoseStatus, EvaluationReason, Gender, Patient, SeriesForecast,
+        SeriesStatus, UnifiedTestCase,
+    },
 };
-use crate::ui::{SummaryCounts, record_summary_result, print_summary};
-use crate::java_client::query_rust_rest_service;
+use reqwest::blocking::Client;
+use std::collections::{BTreeMap, HashMap};
+use std::path::Path;
 
 #[derive(Debug, Clone)]
 pub struct CdcExpectedDose {
@@ -61,7 +64,13 @@ pub fn sanitize_name(test_id: &str, name: &str) -> String {
     let full_name = format!("cdsi_{}_{}", test_id, name);
     full_name
         .chars()
-        .map(|c| if c.is_ascii_alphanumeric() { c.to_ascii_lowercase() } else { '_' })
+        .map(|c| {
+            if c.is_ascii_alphanumeric() {
+                c.to_ascii_lowercase()
+            } else {
+                '_'
+            }
+        })
         .collect::<String>()
         .trim_matches('_')
         .split('_')
@@ -126,11 +135,15 @@ pub fn map_rust_reason_to_cdc(eval: &DoseEvaluation) -> Option<&'static str> {
 
     let has_reason = |target: EvaluationReason| eval.reasons.iter().any(|reason| *reason == target);
 
-    if has_reason(EvaluationReason::BelowMinimumAge) || has_reason(EvaluationReason::BelowMinimumAgeFinalDose) {
+    if has_reason(EvaluationReason::BelowMinimumAge)
+        || has_reason(EvaluationReason::BelowMinimumAgeFinalDose)
+    {
         Some("Age: Too Young")
     } else if has_reason(EvaluationReason::AboveRecommendedAgeSeries) {
         Some("Age: Too Old")
-    } else if has_reason(EvaluationReason::BelowMinimumInterval) || has_reason(EvaluationReason::DuplicateShotSameDay) {
+    } else if has_reason(EvaluationReason::BelowMinimumInterval)
+        || has_reason(EvaluationReason::DuplicateShotSameDay)
+    {
         Some("Interval: too Soon")
     } else if has_reason(EvaluationReason::TooEarlyLiveVirus) {
         Some("Live Virus Conflict")
@@ -157,7 +170,10 @@ pub fn map_rust_dose_status_to_cdc(eval: &DoseEvaluation) -> &'static str {
         DoseStatus::Valid => "Valid",
         DoseStatus::Invalid => "Not Valid",
         DoseStatus::Accepted | DoseStatus::Ignored => {
-            if matches!(map_rust_reason_to_cdc(eval), Some("Series Already Complete" | "Age: Too Old")) {
+            if matches!(
+                map_rust_reason_to_cdc(eval),
+                Some("Series Already Complete" | "Age: Too Old")
+            ) {
                 "Extraneous"
             } else {
                 "Not Valid"
@@ -172,7 +188,11 @@ pub fn map_rust_series_status_to_cdc(forecast: &SeriesForecast) -> &'static str 
         SeriesStatus::Complete => "Complete",
         SeriesStatus::NotRecommended => "Aged out",
         SeriesStatus::ConditionallyRecommended => {
-            if forecast.reasons.iter().any(|reason| reason.as_ref() == "MAX_AGE_EXCEEDED") {
+            if forecast
+                .reasons
+                .iter()
+                .any(|reason| reason.as_ref() == "MAX_AGE_EXCEEDED")
+            {
                 "Aged out"
             } else {
                 "Not complete"
@@ -245,13 +265,18 @@ pub fn load_cdc_csv_cases(csv_path: &Path) -> Result<Vec<CdcCsvCase>, String> {
         }
 
         let csv_group = row.get("Vaccine_Group").map(|s| s.trim()).unwrap_or("");
-        let (group_name, focus_code) = cdc_group_map(csv_group)
-            .ok_or_else(|| format!("Unknown CDC vaccine group '{}' in test case {}", csv_group, test_id))?;
+        let (group_name, focus_code) = cdc_group_map(csv_group).ok_or_else(|| {
+            format!(
+                "Unknown CDC vaccine group '{}' in test case {}",
+                csv_group, test_id
+            )
+        })?;
 
         let dob = parse_cdc_date(row.get("DOB").map(|s| s.as_str()).unwrap_or(""))?
             .ok_or_else(|| format!("Missing DOB in test case {}", test_id))?;
-        let execution_date = parse_cdc_date(row.get("Assessment_Date").map(|s| s.as_str()).unwrap_or(""))?
-            .unwrap_or(dob);
+        let execution_date =
+            parse_cdc_date(row.get("Assessment_Date").map(|s| s.as_str()).unwrap_or(""))?
+                .unwrap_or(dob);
         let gender = match row.get("gender").map(|s| s.trim()).unwrap_or("") {
             "F" => Gender::Female,
             "M" => Gender::Male,
@@ -266,22 +291,33 @@ pub fn load_cdc_csv_cases(csv_path: &Path) -> Result<Vec<CdcCsvCase>, String> {
             let status_key = format!("Evaluation_Status_{}", idx);
             let reason_key = format!("Evaluation_Reason_{}", idx);
 
-            let Some(dose_date) = parse_cdc_date(row.get(&date_key).map(|s| s.as_str()).unwrap_or(""))? else {
+            let Some(dose_date) =
+                parse_cdc_date(row.get(&date_key).map(|s| s.as_str()).unwrap_or(""))?
+            else {
                 continue;
             };
             let cvx_str = row.get(&cvx_key).map(|s| s.trim()).unwrap_or("");
             if cvx_str.is_empty() {
                 continue;
             }
-            let cvx = Cvx(
-                cvx_str
-                    .parse::<u16>()
-                    .map_err(|_| format!("Invalid CVX '{}' in test case {} dose {}", cvx_str, test_id, idx))?,
-            );
+            let cvx = Cvx(cvx_str.parse::<u16>().map_err(|_| {
+                format!(
+                    "Invalid CVX '{}' in test case {} dose {}",
+                    cvx_str, test_id, idx
+                )
+            })?);
 
-            history.push(Dose { date: dose_date, cvx, is_valid: None });
+            history.push(Dose {
+                date: dose_date,
+                cvx,
+                is_valid: None,
+            });
 
-            let status = row.get(&status_key).map(|s| s.trim()).unwrap_or("").to_string();
+            let status = row
+                .get(&status_key)
+                .map(|s| s.trim())
+                .unwrap_or("")
+                .to_string();
             let reason = row
                 .get(&reason_key)
                 .map(|s| s.trim())
@@ -296,20 +332,37 @@ pub fn load_cdc_csv_cases(csv_path: &Path) -> Result<Vec<CdcCsvCase>, String> {
             });
         }
 
-        let series_status = row.get("Series_Status").map(|s| s.trim()).unwrap_or("").to_string();
+        let series_status = row
+            .get("Series_Status")
+            .map(|s| s.trim())
+            .unwrap_or("")
+            .to_string();
         if series_status.is_empty() {
             return Err(format!("Missing Series_Status in test case {}", test_id));
         }
 
         let expected_forecast = CdcExpectedForecast {
             series_status,
-            forecast_number: parse_cdc_forecast_number(row.get("Forecast_#").map(|s| s.as_str()).unwrap_or(""))?,
-            earliest_date: parse_cdc_date(row.get("Earliest_Date").map(|s| s.as_str()).unwrap_or(""))?,
-            recommended_date: parse_cdc_date(row.get("Recommended_Date").map(|s| s.as_str()).unwrap_or(""))?,
-            overdue_date: parse_cdc_date(row.get("Past_Due_Date").map(|s| s.as_str()).unwrap_or(""))?,
+            forecast_number: parse_cdc_forecast_number(
+                row.get("Forecast_#").map(|s| s.as_str()).unwrap_or(""),
+            )?,
+            earliest_date: parse_cdc_date(
+                row.get("Earliest_Date").map(|s| s.as_str()).unwrap_or(""),
+            )?,
+            recommended_date: parse_cdc_date(
+                row.get("Recommended_Date")
+                    .map(|s| s.as_str())
+                    .unwrap_or(""),
+            )?,
+            overdue_date: parse_cdc_date(
+                row.get("Past_Due_Date").map(|s| s.as_str()).unwrap_or(""),
+            )?,
         };
 
-        let case_name = sanitize_name(test_id, row.get("Test_Case_Name").map(|s| s.as_str()).unwrap_or(""));
+        let case_name = sanitize_name(
+            test_id,
+            row.get("Test_Case_Name").map(|s| s.as_str()).unwrap_or(""),
+        );
         cases.push(CdcCsvCase {
             test_id: test_id.to_string(),
             unified_case: UnifiedTestCase {
@@ -353,10 +406,14 @@ pub fn print_cdc_comparison_table(
         println!("\nTest Case: \x1b[92m{}\x1b[0m (PASS)", tc_name);
     }
 
-    println!("{:<12} | {:<4} | {:<32} | {:<32} | Status", "Date", "CVX", "Rust CDC Eval", "Expected CDC Eval");
+    println!(
+        "{:<12} | {:<4} | {:<32} | {:<32} | Status",
+        "Date", "CVX", "Rust CDC Eval", "Expected CDC Eval"
+    );
     println!("{}", "-".repeat(96));
 
-    let mut all_keys: Vec<(NaiveDate, Cvx)> = rust_evals.iter().map(|e| (e.dose_date, e.cvx)).collect();
+    let mut all_keys: Vec<(NaiveDate, Cvx)> =
+        rust_evals.iter().map(|e| (e.dose_date, e.cvx)).collect();
     for eval in exp_evals {
         if !all_keys.contains(&(eval.dose_date, eval.cvx)) {
             all_keys.push((eval.dose_date, eval.cvx));
@@ -365,8 +422,12 @@ pub fn print_cdc_comparison_table(
     all_keys.sort_by_key(|key| key.0);
 
     for (date, cvx) in all_keys {
-        let rust_eval = rust_evals.iter().find(|eval| eval.dose_date == date && eval.cvx == cvx);
-        let exp_eval = exp_evals.iter().find(|eval| eval.dose_date == date && eval.cvx == cvx);
+        let rust_eval = rust_evals
+            .iter()
+            .find(|eval| eval.dose_date == date && eval.cvx == cvx);
+        let exp_eval = exp_evals
+            .iter()
+            .find(|eval| eval.dose_date == date && eval.cvx == cvx);
 
         let rust_str = rust_eval
             .map(|eval| match &eval.reason {
@@ -388,7 +449,11 @@ pub fn print_cdc_comparison_table(
             }
             _ => false,
         };
-        let status_indicator = if match_ok { "\x1b[92mOK\x1b[0m" } else { "\x1b[91mFAIL\x1b[0m" };
+        let status_indicator = if match_ok {
+            "\x1b[92mOK\x1b[0m"
+        } else {
+            "\x1b[91mFAIL\x1b[0m"
+        };
 
         println!(
             "{:<12} | {:<4} | {:<32} | {:<32} | {}",
@@ -401,19 +466,53 @@ pub fn print_cdc_comparison_table(
     }
 
     println!("\nCDC Forecast:");
-    println!("{:<18} | {:<22} | {:<22}", "Field", "Rust Forecast", "Expected Forecast");
+    println!(
+        "{:<18} | {:<22} | {:<22}",
+        "Field", "Rust Forecast", "Expected Forecast"
+    );
     println!("{}", "-".repeat(70));
     let format_optional_date = |date: Option<NaiveDate>| {
-        date.map(|d| d.format("%Y-%m-%d").to_string()).unwrap_or_else(|| "-".to_string())
+        date.map(|d| d.format("%Y-%m-%d").to_string())
+            .unwrap_or_else(|| "-".to_string())
     };
     let format_optional_number = |value: Option<usize>| {
-        value.map(|n| n.to_string()).unwrap_or_else(|| "-".to_string())
+        value
+            .map(|n| n.to_string())
+            .unwrap_or_else(|| "-".to_string())
     };
-    println!("{:<18} | {:<22} | {:<22}", "series_status", rust_fc.series_status.clone().unwrap_or_else(|| "-".to_string()), exp_fc.series_status.clone());
-    println!("{:<18} | {:<22} | {:<22}", "forecast_number", format_optional_number(rust_fc.forecast_number), format_optional_number(exp_fc.forecast_number));
-    println!("{:<18} | {:<22} | {:<22}", "earliest_date", format_optional_date(rust_fc.earliest_date), format_optional_date(exp_fc.earliest_date));
-    println!("{:<18} | {:<22} | {:<22}", "recommended_date", format_optional_date(rust_fc.recommended_date), format_optional_date(exp_fc.recommended_date));
-    println!("{:<18} | {:<22} | {:<22}", "past_due_date", format_optional_date(rust_fc.overdue_date), format_optional_date(exp_fc.overdue_date));
+    println!(
+        "{:<18} | {:<22} | {:<22}",
+        "series_status",
+        rust_fc
+            .series_status
+            .clone()
+            .unwrap_or_else(|| "-".to_string()),
+        exp_fc.series_status.clone()
+    );
+    println!(
+        "{:<18} | {:<22} | {:<22}",
+        "forecast_number",
+        format_optional_number(rust_fc.forecast_number),
+        format_optional_number(exp_fc.forecast_number)
+    );
+    println!(
+        "{:<18} | {:<22} | {:<22}",
+        "earliest_date",
+        format_optional_date(rust_fc.earliest_date),
+        format_optional_date(exp_fc.earliest_date)
+    );
+    println!(
+        "{:<18} | {:<22} | {:<22}",
+        "recommended_date",
+        format_optional_date(rust_fc.recommended_date),
+        format_optional_date(exp_fc.recommended_date)
+    );
+    println!(
+        "{:<18} | {:<22} | {:<22}",
+        "past_due_date",
+        format_optional_date(rust_fc.overdue_date),
+        format_optional_date(exp_fc.overdue_date)
+    );
 }
 
 pub fn run_cdc_csv_mode(
@@ -451,7 +550,11 @@ pub fn run_cdc_csv_mode(
         let (rust_evals, rust_fc) = if let Some(ref r_url) = rest_url {
             match query_rust_rest_service(client, r_url, tc) {
                 Ok(resp) => {
-                    let rust_group = resp.vaccine_groups.iter().find(|rg| rg.vaccine_group == tc.group).cloned();
+                    let rust_group = resp
+                        .vaccine_groups
+                        .iter()
+                        .find(|rg| rg.vaccine_group == tc.group)
+                        .cloned();
                     match rust_group {
                         Some(rg) => (rg.evaluations.to_vec(), rg.forecasts.first().cloned()),
                         None => (Vec::new(), None),
@@ -465,7 +568,8 @@ pub fn run_cdc_csv_mode(
                 }
             }
         } else {
-            let rust_results = evaluate_patient_all_groups(&tc.patient, &tc.history, tc.execution_date);
+            let rust_results =
+                evaluate_patient_all_groups(&tc.patient, &tc.history, tc.execution_date);
             let rust_group = rust_results.iter().find(|rg| rg.vaccine_group == tc.group);
             match rust_group {
                 Some(rg) => (rg.evaluations.to_vec(), rg.forecasts.first().cloned()),
@@ -473,7 +577,8 @@ pub fn run_cdc_csv_mode(
             }
         };
 
-        let (cdc_rust_evals, cdc_rust_fc) = normalize_rust_results_to_cdc(&rust_evals, rust_fc.as_ref());
+        let (cdc_rust_evals, cdc_rust_fc) =
+            normalize_rust_results_to_cdc(&rust_evals, rust_fc.as_ref());
 
         if filter_case.is_some() && verbose {
             println!("DEBUG: patient: {:?}", tc.patient);
@@ -488,9 +593,9 @@ pub fn run_cdc_csv_mode(
         let mut errors = Vec::new();
 
         for expected_eval in &cdc_case.expected.evaluations {
-            let rust_eval = cdc_rust_evals
-                .iter()
-                .find(|eval| eval.dose_date == expected_eval.dose_date && eval.cvx == expected_eval.cvx);
+            let rust_eval = cdc_rust_evals.iter().find(|eval| {
+                eval.dose_date == expected_eval.dose_date && eval.cvx == expected_eval.cvx
+            });
             match rust_eval {
                 Some(rust_eval) => {
                     if rust_eval.status != expected_eval.status {
@@ -520,24 +625,21 @@ pub fn run_cdc_csv_mode(
                     is_ok = false;
                     errors.push(format!(
                         "Evaluation missing in Rust for dose ({:?}, {})",
-                        expected_eval.dose_date,
-                        expected_eval.cvx,
+                        expected_eval.dose_date, expected_eval.cvx,
                     ));
                 }
             }
         }
         for rust_eval in &cdc_rust_evals {
-            let expected_eval = cdc_case
-                .expected
-                .evaluations
-                .iter()
-                .find(|eval| eval.dose_date == rust_eval.dose_date && eval.cvx == rust_eval.cvx);
+            let expected_eval =
+                cdc_case.expected.evaluations.iter().find(|eval| {
+                    eval.dose_date == rust_eval.dose_date && eval.cvx == rust_eval.cvx
+                });
             if expected_eval.is_none() {
                 is_ok = false;
                 errors.push(format!(
                     "Evaluation missing in CDC expected results for dose ({:?}, {})",
-                    rust_eval.dose_date,
-                    rust_eval.cvx,
+                    rust_eval.dose_date, rust_eval.cvx,
                 ));
             }
         }
@@ -546,40 +648,35 @@ pub fn run_cdc_csv_mode(
             is_ok = false;
             errors.push(format!(
                 "CDC forecast status mismatch: Rust={:?}, Expected={:?}",
-                cdc_rust_fc.series_status,
-                cdc_case.expected.forecast.series_status,
+                cdc_rust_fc.series_status, cdc_case.expected.forecast.series_status,
             ));
         }
         if cdc_rust_fc.forecast_number != cdc_case.expected.forecast.forecast_number {
             is_ok = false;
             errors.push(format!(
                 "CDC forecast target mismatch: Rust={:?}, Expected={:?}",
-                cdc_rust_fc.forecast_number,
-                cdc_case.expected.forecast.forecast_number,
+                cdc_rust_fc.forecast_number, cdc_case.expected.forecast.forecast_number,
             ));
         }
         if cdc_rust_fc.earliest_date != cdc_case.expected.forecast.earliest_date {
             is_ok = false;
             errors.push(format!(
                 "CDC forecast earliest date mismatch: Rust={:?}, Expected={:?}",
-                cdc_rust_fc.earliest_date,
-                cdc_case.expected.forecast.earliest_date,
+                cdc_rust_fc.earliest_date, cdc_case.expected.forecast.earliest_date,
             ));
         }
         if cdc_rust_fc.recommended_date != cdc_case.expected.forecast.recommended_date {
             is_ok = false;
             errors.push(format!(
                 "CDC forecast recommended date mismatch: Rust={:?}, Expected={:?}",
-                cdc_rust_fc.recommended_date,
-                cdc_case.expected.forecast.recommended_date,
+                cdc_rust_fc.recommended_date, cdc_case.expected.forecast.recommended_date,
             ));
         }
         if cdc_rust_fc.overdue_date != cdc_case.expected.forecast.overdue_date {
             is_ok = false;
             errors.push(format!(
                 "CDC forecast past due date mismatch: Rust={:?}, Expected={:?}",
-                cdc_rust_fc.overdue_date,
-                cdc_case.expected.forecast.overdue_date,
+                cdc_rust_fc.overdue_date, cdc_case.expected.forecast.overdue_date,
             ));
         }
 
@@ -609,7 +706,13 @@ pub fn run_cdc_csv_mode(
         }
     }
 
-    print_summary("CDC Compliance Summary", total, passed, failed, &group_summary);
+    print_summary(
+        "CDC Compliance Summary",
+        total,
+        passed,
+        failed,
+        &group_summary,
+    );
 
     if failed > 0 {
         println!("\nFailed Cases:");

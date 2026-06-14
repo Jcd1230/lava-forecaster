@@ -630,14 +630,49 @@ impl<'a> EvaluationEngine<'a> {
             // Look up dose parameters
             let mut dose_rule = active_series.doses[target_dose_idx - 1].clone();
             let mut applicable_intervals: Vec<CompiledDoseInterval> = if target_dose_idx > 1 {
-                active_series
+                let mut intervals: Vec<CompiledDoseInterval> = active_series
                     .intervals
                     .iter()
                     .filter(|int| int.to_dose == target_dose_idx)
                     .cloned()
-                    .collect()
+                    .collect();
+                let has_same_dose_prev = evaluations.iter().zip(&eval_target_dose_numbers).any(|(e, t_num)| {
+                    *t_num == target_dose_idx && !is_eval_ignored(active_series.vaccine_group, e.cvx, e.dose_date, e.status)
+                });
+                if has_same_dose_prev {
+                    if let Some(int) = active_series.intervals.iter().find(|int| int.to_dose == target_dose_idx) {
+                        intervals.push(CompiledDoseInterval {
+                            from_dose: target_dose_idx,
+                            to_dose: target_dose_idx,
+                            absolute_minimum_interval: int.absolute_minimum_interval.clone(),
+                            minimum_interval: int.minimum_interval.clone(),
+                            earliest_recommended_interval: int.earliest_recommended_interval.clone(),
+                            latest_recommended_interval: int.latest_recommended_interval.clone(),
+                        });
+                    }
+                }
+                intervals
             } else {
-                Vec::new()
+                let has_prev_non_ignored_eval = evaluations.iter().any(|e| {
+                    !is_eval_ignored(active_series.vaccine_group, e.cvx, e.dose_date, e.status)
+                });
+                if has_prev_non_ignored_eval {
+                    active_series
+                        .intervals
+                        .iter()
+                        .filter(|int| int.to_dose == 2 && int.from_dose == 1)
+                        .map(|int| CompiledDoseInterval {
+                            from_dose: 1,
+                            to_dose: 1,
+                            absolute_minimum_interval: int.absolute_minimum_interval.clone(),
+                            minimum_interval: int.minimum_interval.clone(),
+                            earliest_recommended_interval: int.earliest_recommended_interval.clone(),
+                            latest_recommended_interval: int.latest_recommended_interval.clone(),
+                        })
+                        .collect()
+                } else {
+                    Vec::new()
+                }
             };
 
             // Apply parameter overrides (pre-2009 overrides, etc.)
@@ -1440,6 +1475,10 @@ fn get_same_day_priority(
                 20
             }
         }
+        "RSV" => match cvx_code {
+            304 | 314 | 315 => 1,
+            _ => 0,
+        },
         _ => 0,
     }
 }

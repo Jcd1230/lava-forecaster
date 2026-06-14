@@ -7,7 +7,7 @@ pub fn polio_4_dose_series() -> CompiledSeries {
     CompiledSeries::builder("POLIO_4_DOSE_SERIES")
         .code("POLIO_4_DOSE_SERIES")
         .vaccine_group("POLIO")
-        .num_doses(4)
+        .num_doses(5)
         .dose(1, |d| d
             .abs_min_age(crate::time_period!("38d"))
             .min_age(crate::time_period!("42d"))
@@ -36,6 +36,13 @@ pub fn polio_4_dose_series() -> CompiledSeries {
             .latest_recommended_age(crate::time_period!("7y+4w"))
             .cvx(allowed_cvx)
         )
+        .dose(5, |d| d
+            .abs_min_age(crate::time_period!("4y-4d"))
+            .min_age(crate::time_period!("4y"))
+            .earliest_recommended_age(crate::time_period!("4y"))
+            .latest_recommended_age(crate::time_period!("7y+4w"))
+            .cvx(allowed_cvx)
+        )
         .interval(1, 2, |i| i
             .abs_min_interval(crate::time_period!("24d"))
             .min_interval(crate::time_period!("28d"))
@@ -54,6 +61,12 @@ pub fn polio_4_dose_series() -> CompiledSeries {
             .earliest_recommended_interval(crate::time_period!("6m"))
             .latest_recommended_interval(crate::time_period!("6y+4w"))
         )
+        .interval(4, 5, |i| i
+            .abs_min_interval(crate::time_period!("6m-4d"))
+            .min_interval(crate::time_period!("6m"))
+            .earliest_recommended_interval(crate::time_period!("6m"))
+            .latest_recommended_interval(crate::time_period!("6y+4w"))
+        )
         .build()
 }
 
@@ -63,7 +76,7 @@ pub fn polio_fipv_series() -> CompiledSeries {
     CompiledSeries::builder("POLIO_FRACTIONAL_IPV_SERIES")
         .code("POLIO_FRACTIONAL_IPV_SERIES")
         .vaccine_group("POLIO")
-        .num_doses(5)
+        .num_doses(6)
         .dose(1, |d| d
             .abs_min_age(crate::time_period!("38d"))
             .min_age(crate::time_period!("42d"))
@@ -99,6 +112,13 @@ pub fn polio_fipv_series() -> CompiledSeries {
             .latest_recommended_age(crate::time_period!("7y+4w"))
             .cvx(allowed_cvx)
         )
+        .dose(6, |d| d
+            .abs_min_age(crate::time_period!("4y-4d"))
+            .min_age(crate::time_period!("4y"))
+            .earliest_recommended_age(crate::time_period!("4y"))
+            .latest_recommended_age(crate::time_period!("7y+4w"))
+            .cvx(allowed_cvx)
+        )
         .interval(1, 2, |i| i
             .abs_min_interval(crate::time_period!("24d"))
             .min_interval(crate::time_period!("28d"))
@@ -118,6 +138,12 @@ pub fn polio_fipv_series() -> CompiledSeries {
             .latest_recommended_interval(crate::time_period!("15m+4w"))
         )
         .interval(4, 5, |i| i
+            .abs_min_interval(crate::time_period!("6m-4d"))
+            .min_interval(crate::time_period!("6m"))
+            .earliest_recommended_interval(crate::time_period!("6m"))
+            .latest_recommended_interval(crate::time_period!("6y+4w"))
+        )
+        .interval(5, 6, |i| i
             .abs_min_interval(crate::time_period!("6m-4d"))
             .min_interval(crate::time_period!("6m"))
             .earliest_recommended_interval(crate::time_period!("6m"))

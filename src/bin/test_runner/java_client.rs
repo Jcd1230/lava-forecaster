@@ -1,7 +1,7 @@
 use chrono::NaiveDate;
 use lava_forecaster::models::{
-    Patient, Dose, Gender, DoseStatus, DoseEvaluation, SeriesForecast,
-    ExpectedResults, SeriesStatus, EvaluationReason, Cvx, UnifiedTestCase,
+    Cvx, Dose, DoseEvaluation, DoseStatus, EvaluationReason, ExpectedResults, Gender, Patient,
+    SeriesForecast, SeriesStatus, UnifiedTestCase,
 };
 
 pub fn generate_xml_payload(patient: &Patient, history: &[Dose]) -> String {
@@ -36,13 +36,24 @@ pub fn generate_xml_payload(patient: &Patient, history: &[Dose]) -> String {
 
     for immunity in &patient.immunities {
         let (focus_code, focus_system) = match immunity.disease.to_lowercase().as_str() {
-            "hepb" | "hep_b" | "hep b" | "hepatitis b" => ("070.30".to_string(), "2.16.840.1.113883.6.103".to_string()),
-            "varicella" | "chickenpox" => ("052.9".to_string(), "2.16.840.1.113883.6.103".to_string()),
+            "hepb" | "hep_b" | "hep b" | "hepatitis b" => {
+                ("070.30".to_string(), "2.16.840.1.113883.6.103".to_string())
+            }
+            "varicella" | "chickenpox" => {
+                ("052.9".to_string(), "2.16.840.1.113883.6.103".to_string())
+            }
             "measles" | "rubeola" => ("055.9".to_string(), "2.16.840.1.113883.6.103".to_string()),
             "mumps" => ("072.9".to_string(), "2.16.840.1.113883.6.103".to_string()),
-            "rubella" | "german measles" => ("056.9".to_string(), "2.16.840.1.113883.6.103".to_string()),
-            "hepa" | "hep_a" | "hep a" | "hepatitis a" => ("070.1".to_string(), "2.16.840.1.113883.6.103".to_string()),
-            _ => (immunity.disease.clone(), "2.16.840.1.113883.3.795.12.1.1".to_string()),
+            "rubella" | "german measles" => {
+                ("056.9".to_string(), "2.16.840.1.113883.6.103".to_string())
+            }
+            "hepa" | "hep_a" | "hep a" | "hepatitis a" => {
+                ("070.1".to_string(), "2.16.840.1.113883.6.103".to_string())
+            }
+            _ => (
+                immunity.disease.clone(),
+                "2.16.840.1.113883.3.795.12.1.1".to_string(),
+            ),
         };
         let reason_code = match immunity.reason.to_lowercase().as_str() {
             "disease documented" | "disease_documented" => "DISEASE_DOCUMENTED",
@@ -67,12 +78,17 @@ pub fn generate_xml_payload(patient: &Patient, history: &[Dose]) -> String {
 
     for contra in &patient.contraindications {
         let (focus_code, focus_system) = match contra.target.to_lowercase().as_str() {
-            "dtp" | "dtap" | "pertussis" => ("70654002".to_string(), "2.16.840.1.113883.6.96".to_string()),
+            "dtp" | "dtap" | "pertussis" => {
+                ("70654002".to_string(), "2.16.840.1.113883.6.96".to_string())
+            }
             _ => {
                 if contra.target.chars().all(|c| c.is_ascii_digit()) {
                     (contra.target.clone(), "2.16.840.1.113883.6.96".to_string())
                 } else {
-                    (contra.target.clone(), "2.16.840.1.113883.3.795.12.1.1".to_string())
+                    (
+                        contra.target.clone(),
+                        "2.16.840.1.113883.3.795.12.1.1".to_string(),
+                    )
                 }
             }
         };
@@ -101,7 +117,10 @@ pub fn generate_xml_payload(patient: &Patient, history: &[Dose]) -> String {
     let obs_str = if obs_templates.is_empty() {
         "".to_string()
     } else {
-        format!("                <observationResults>\n{}\n                </observationResults>\n", obs_templates.join("\n"))
+        format!(
+            "                <observationResults>\n{}\n                </observationResults>\n",
+            obs_templates.join("\n")
+        )
     };
 
     let dob_str = patient.birth_date.format("%Y%m%d").to_string();
@@ -204,7 +223,10 @@ pub fn parse_date_only(date_str: &str) -> Option<NaiveDate> {
 }
 
 pub fn map_legacy_status(legacy_status: &str, reasons: &[String]) -> SeriesStatus {
-    if reasons.iter().any(|r| r == "PROOF_OF_IMMUNITY" || r == "DISEASE_DOCUMENTED") {
+    if reasons
+        .iter()
+        .any(|r| r == "PROOF_OF_IMMUNITY" || r == "DISEASE_DOCUMENTED")
+    {
         return SeriesStatus::Complete;
     }
     if legacy_status == "COMPLETE" || reasons.iter().any(|r| r.contains("COMPLETE")) {
@@ -226,8 +248,15 @@ pub fn is_immune(patient: &Patient, group: &str, eval_date: NaiveDate) -> bool {
     let group_lower = group.to_lowercase();
     patient.immunities.iter().any(|imm| {
         let imm_disease_lower = imm.disease.to_lowercase();
-        let matches_group = if group_lower.contains("hepb") || group_lower.contains("hep_b") || group_lower.contains("hep b") || group_lower.contains("hepatitis b") {
-            imm_disease_lower.contains("hepb") || imm_disease_lower.contains("hep_b") || imm_disease_lower.contains("hep b") || imm_disease_lower.contains("hepatitis b")
+        let matches_group = if group_lower.contains("hepb")
+            || group_lower.contains("hep_b")
+            || group_lower.contains("hep b")
+            || group_lower.contains("hepatitis b")
+        {
+            imm_disease_lower.contains("hepb")
+                || imm_disease_lower.contains("hep_b")
+                || imm_disease_lower.contains("hep b")
+                || imm_disease_lower.contains("hepatitis b")
         } else if group_lower.contains("varicella") {
             imm_disease_lower.contains("varicella") || imm_disease_lower.contains("chickenpox")
         } else if group_lower.contains("measles") {
@@ -237,7 +266,10 @@ pub fn is_immune(patient: &Patient, group: &str, eval_date: NaiveDate) -> bool {
         } else if group_lower.contains("rubella") {
             imm_disease_lower.contains("rubella") || imm_disease_lower.contains("german measles")
         } else if group_lower.contains("mmr") {
-            imm_disease_lower.contains("mmr") || imm_disease_lower.contains("measles") || imm_disease_lower.contains("mumps") || imm_disease_lower.contains("rubella")
+            imm_disease_lower.contains("mmr")
+                || imm_disease_lower.contains("measles")
+                || imm_disease_lower.contains("mumps")
+                || imm_disease_lower.contains("rubella")
         } else {
             imm_disease_lower == group_lower
         };
@@ -252,8 +284,23 @@ pub fn is_contraindicated(patient: &Patient, group: &str, eval_date: NaiveDate) 
             return false;
         }
         let target_lower = c.target.to_lowercase();
-        let matches_group = if group_lower.contains("dtp") || group_lower.contains("dtap") || group_lower.contains("dt") || group_lower.contains("tdap") || group_lower.contains("td") || group_lower.contains("diphtheria") || group_lower.contains("tetanus") || group_lower.contains("pertussis") {
-            target_lower.contains("dtp") || target_lower.contains("dtap") || target_lower.contains("dt") || target_lower.contains("tdap") || target_lower.contains("td") || target_lower.contains("diphtheria") || target_lower.contains("tetanus") || target_lower.contains("pertussis")
+        let matches_group = if group_lower.contains("dtp")
+            || group_lower.contains("dtap")
+            || group_lower.contains("dt")
+            || group_lower.contains("tdap")
+            || group_lower.contains("td")
+            || group_lower.contains("diphtheria")
+            || group_lower.contains("tetanus")
+            || group_lower.contains("pertussis")
+        {
+            target_lower.contains("dtp")
+                || target_lower.contains("dtap")
+                || target_lower.contains("dt")
+                || target_lower.contains("tdap")
+                || target_lower.contains("td")
+                || target_lower.contains("diphtheria")
+                || target_lower.contains("tetanus")
+                || target_lower.contains("pertussis")
         } else {
             target_lower == group_lower
         };
@@ -289,8 +336,13 @@ pub fn process_element(
     prop_status: &mut Option<String>,
     prop_reasons: &mut Vec<String>,
 ) {
-    let event_depth = tag_stack.iter().filter(|&t| t == "substanceAdministrationEvent").count();
-    let in_proposal = tag_stack.iter().any(|t| t == "substanceAdministrationProposal");
+    let event_depth = tag_stack
+        .iter()
+        .filter(|&t| t == "substanceAdministrationEvent")
+        .count();
+    let in_proposal = tag_stack
+        .iter()
+        .any(|t| t == "substanceAdministrationProposal");
 
     match name {
         b"substanceAdministrationEvent" => {
@@ -382,7 +434,8 @@ pub fn process_element(
                 for attr in attributes {
                     if let Ok(a) = attr {
                         if a.key.as_ref() == b"code" {
-                            *inner_status = Some(String::from_utf8_lossy(a.value.as_ref()).into_owned());
+                            *inner_status =
+                                Some(String::from_utf8_lossy(a.value.as_ref()).into_owned());
                         }
                     }
                 }
@@ -390,7 +443,8 @@ pub fn process_element(
                 for attr in attributes {
                     if let Ok(a) = attr {
                         if a.key.as_ref() == b"code" {
-                            *prop_status = Some(String::from_utf8_lossy(a.value.as_ref()).into_owned());
+                            *prop_status =
+                                Some(String::from_utf8_lossy(a.value.as_ref()).into_owned());
                         }
                     }
                 }
@@ -401,7 +455,8 @@ pub fn process_element(
                 for attr in attributes {
                     if let Ok(a) = attr {
                         if a.key.as_ref() == b"code" {
-                            inner_reasons.push(String::from_utf8_lossy(a.value.as_ref()).into_owned());
+                            inner_reasons
+                                .push(String::from_utf8_lossy(a.value.as_ref()).into_owned());
                         }
                     }
                 }
@@ -409,7 +464,8 @@ pub fn process_element(
                 for attr in attributes {
                     if let Ok(a) = attr {
                         if a.key.as_ref() == b"code" {
-                            prop_reasons.push(String::from_utf8_lossy(a.value.as_ref()).into_owned());
+                            prop_reasons
+                                .push(String::from_utf8_lossy(a.value.as_ref()).into_owned());
                         }
                     }
                 }
@@ -490,7 +546,11 @@ pub fn parse_legacy_xml(xml_content: &str, focus_code: &str) -> ExpectedResults 
 
     loop {
         match reader.read_event_into(&mut buf) {
-            Err(e) => panic!("Error parsing XML at position {}: {:?}", reader.buffer_position(), e),
+            Err(e) => panic!(
+                "Error parsing XML at position {}: {:?}",
+                reader.buffer_position(),
+                e
+            ),
             Ok(Event::Eof) => break,
             Ok(Event::Start(ref e)) => {
                 let name = e.local_name();
@@ -547,19 +607,36 @@ pub fn parse_legacy_xml(xml_content: &str, focus_code: &str) -> ExpectedResults 
                 let name_str = String::from_utf8_lossy(name_bytes);
 
                 if name_bytes == b"substanceAdministrationEvent" {
-                    let event_depth = tag_stack.iter().filter(|&t| t == "substanceAdministrationEvent").count();
+                    let event_depth = tag_stack
+                        .iter()
+                        .filter(|&t| t == "substanceAdministrationEvent")
+                        .count();
                     if event_depth == 2 {
                         if inner_focus_matched {
-                            if let (Some(dt), Some(cvx), Some(ref st)) = (outer_date, outer_cvx.as_ref(), inner_status.as_ref()) {
+                            if let (Some(dt), Some(cvx), Some(ref st)) =
+                                (outer_date, outer_cvx.as_ref(), inner_status.as_ref())
+                            {
                                 let mapped_reasons: Vec<EvaluationReason> = inner_reasons
                                     .iter()
                                     .filter_map(|r| match r.as_str() {
-                                        "BelowMinimumAge" => Some(EvaluationReason::BelowMinimumAge),
-                                        "BelowMinimumInterval" => Some(EvaluationReason::BelowMinimumInterval),
-                                        "TooEarlyLiveVirus" => Some(EvaluationReason::TooEarlyLiveVirus),
-                                        "DuplicateShotSameDay" => Some(EvaluationReason::DuplicateShotSameDay),
-                                        "VaccineNotPartOfSeries" => Some(EvaluationReason::VaccineNotPartOfSeries),
-                                        "AboveRecommendedAgeSeries" => Some(EvaluationReason::AboveRecommendedAgeSeries),
+                                        "BelowMinimumAge" => {
+                                            Some(EvaluationReason::BelowMinimumAge)
+                                        }
+                                        "BelowMinimumInterval" => {
+                                            Some(EvaluationReason::BelowMinimumInterval)
+                                        }
+                                        "TooEarlyLiveVirus" => {
+                                            Some(EvaluationReason::TooEarlyLiveVirus)
+                                        }
+                                        "DuplicateShotSameDay" => {
+                                            Some(EvaluationReason::DuplicateShotSameDay)
+                                        }
+                                        "VaccineNotPartOfSeries" => {
+                                            Some(EvaluationReason::VaccineNotPartOfSeries)
+                                        }
+                                        "AboveRecommendedAgeSeries" => {
+                                            Some(EvaluationReason::AboveRecommendedAgeSeries)
+                                        }
                                         _ => None,
                                     })
                                     .collect();
@@ -614,7 +691,11 @@ pub fn parse_legacy_xml(xml_content: &str, focus_code: &str) -> ExpectedResults 
     }
 }
 
-pub fn query_java_service(client: &reqwest::blocking::Client, java_endpoint: &str, payload: serde_json::Value) -> String {
+pub fn query_java_service(
+    client: &reqwest::blocking::Client,
+    java_endpoint: &str,
+    payload: serde_json::Value,
+) -> String {
     let resp = client
         .post(java_endpoint)
         .json(&payload)
@@ -623,7 +704,8 @@ pub fn query_java_service(client: &reqwest::blocking::Client, java_endpoint: &st
 
     let resp_json: serde_json::Value = resp.json().expect("Failed to parse Java JSON response");
 
-    let b64_payload = resp_json["finalKMEvaluationResponse"][0]["kmEvaluationResultData"][0]["data"]["base64EncodedPayload"][0]
+    let b64_payload = resp_json["finalKMEvaluationResponse"][0]["kmEvaluationResultData"][0]
+        ["data"]["base64EncodedPayload"][0]
         .as_str()
         .expect("Failed to extract base64 payload from Java response");
 
@@ -634,26 +716,40 @@ pub fn query_java_service(client: &reqwest::blocking::Client, java_endpoint: &st
     String::from_utf8(xml_bytes).expect("Failed to decode UTF-8 XML string")
 }
 
-pub fn get_java_expected_results(client: &reqwest::blocking::Client, java_url: &str, tc: &UnifiedTestCase) -> Result<ExpectedResults, String> {
-    let java_endpoint = format!("{}/opencds-decision-support-service/api/resources/evaluateAtSpecifiedTime", java_url);
-    let payload = build_evaluate_payload(
-        &tc.patient,
-        &tc.history,
-        tc.execution_date,
+pub fn get_java_expected_results(
+    client: &reqwest::blocking::Client,
+    java_url: &str,
+    tc: &UnifiedTestCase,
+) -> Result<ExpectedResults, String> {
+    let java_endpoint = format!(
+        "{}/opencds-decision-support-service/api/resources/evaluateAtSpecifiedTime",
+        java_url
     );
-    let resp = client.post(&java_endpoint)
+    let payload = build_evaluate_payload(&tc.patient, &tc.history, tc.execution_date);
+    let resp = client
+        .post(&java_endpoint)
         .json(&payload)
         .send()
-        .map_err(|e| format!("Failed to connect to Java ICE service at {}: {}", java_url, e))?;
+        .map_err(|e| {
+            format!(
+                "Failed to connect to Java ICE service at {}: {}",
+                java_url, e
+            )
+        })?;
 
     if !resp.status().is_success() {
-        return Err(format!("Java service returned HTTP error: {}", resp.status()));
+        return Err(format!(
+            "Java service returned HTTP error: {}",
+            resp.status()
+        ));
     }
 
-    let resp_json: serde_json::Value = resp.json()
+    let resp_json: serde_json::Value = resp
+        .json()
         .map_err(|e| format!("Failed to parse Java JSON response: {}", e))?;
 
-    let b64_payload = resp_json["finalKMEvaluationResponse"][0]["kmEvaluationResultData"][0]["data"]["base64EncodedPayload"][0]
+    let b64_payload = resp_json["finalKMEvaluationResponse"][0]["kmEvaluationResultData"][0]
+        ["data"]["base64EncodedPayload"][0]
         .as_str()
         .ok_or_else(|| "Failed to extract base64 payload from Java response".to_string())?;
 
@@ -673,47 +769,67 @@ pub fn get_java_expected_results(client: &reqwest::blocking::Client, java_url: &
     Ok(java_res)
 }
 
-pub fn get_java_expected_results_bulk(client: &reqwest::blocking::Client, java_url: &str, cases: &[&UnifiedTestCase]) -> Result<Vec<Result<ExpectedResults, String>>, String> {
-    let java_endpoint = format!("{}/opencds-decision-support-service/api/resources/bulkEvaluateAtSpecifiedTime", java_url);
+pub fn get_java_expected_results_bulk(
+    client: &reqwest::blocking::Client,
+    java_url: &str,
+    cases: &[&UnifiedTestCase],
+) -> Result<Vec<Result<ExpectedResults, String>>, String> {
+    let java_endpoint = format!(
+        "{}/opencds-decision-support-service/api/resources/bulkEvaluateAtSpecifiedTime",
+        java_url
+    );
     let mut payloads = Vec::new();
     for tc in cases {
-        let payload = build_evaluate_payload(
-            &tc.patient,
-            &tc.history,
-            tc.execution_date,
-        );
+        let payload = build_evaluate_payload(&tc.patient, &tc.history, tc.execution_date);
         payloads.push(payload);
     }
-    let resp = client.post(&java_endpoint)
+    let resp = client
+        .post(&java_endpoint)
         .json(&payloads)
         .send()
-        .map_err(|e| format!("Failed to connect to Java ICE service at {}: {}", java_url, e))?;
+        .map_err(|e| {
+            format!(
+                "Failed to connect to Java ICE service at {}: {}",
+                java_url, e
+            )
+        })?;
 
     if !resp.status().is_success() {
-        return Err(format!("Java bulk service returned HTTP error: {}", resp.status()));
+        return Err(format!(
+            "Java bulk service returned HTTP error: {}",
+            resp.status()
+        ));
     }
 
-    let resp_json: serde_json::Value = resp.json()
+    let resp_json: serde_json::Value = resp
+        .json()
         .map_err(|e| format!("Failed to parse Java JSON response: {}", e))?;
 
-    let resp_array = resp_json.as_array()
+    let resp_array = resp_json
+        .as_array()
         .ok_or_else(|| "Java bulk service response is not a JSON array".to_string())?;
 
     if resp_array.len() != cases.len() {
-        return Err(format!("Java bulk service returned {} responses, but expected {}", resp_array.len(), cases.len()));
+        return Err(format!(
+            "Java bulk service returned {} responses, but expected {}",
+            resp_array.len(),
+            cases.len()
+        ));
     }
 
     let mut results = Vec::new();
     for (i, resp_item) in resp_array.iter().enumerate() {
         let tc = cases[i];
         let parse_res = (|| {
-            let b64_payload = resp_item["finalKMEvaluationResponse"][0]["kmEvaluationResultData"][0]["data"]["base64EncodedPayload"][0]
+            let b64_payload = resp_item["finalKMEvaluationResponse"][0]["kmEvaluationResultData"]
+                [0]["data"]["base64EncodedPayload"][0]
                 .as_str()
                 .ok_or_else(|| "Failed to extract base64 payload from Java response".to_string())?;
 
             let clean_b64: String = b64_payload.chars().filter(|c| !c.is_whitespace()).collect();
-            let xml_bytes = base64::Engine::decode(&base64::prelude::BASE64_STANDARD, clean_b64.as_bytes())
-                .map_err(|e| format!("Failed to decode base64 XML payload: {}", e))?;
+            let xml_bytes =
+                base64::Engine::decode(&base64::prelude::BASE64_STANDARD, clean_b64.as_bytes())
+                    .map_err(|e| format!("Failed to decode base64 XML payload: {}", e))?;
 
             let xml_content = String::from_utf8(xml_bytes)
                 .map_err(|e| format!("Failed to decode UTF-8 XML string: {}", e))?;
@@ -736,25 +852,34 @@ pub fn is_group_supported_by_java(group: &str) -> bool {
     g != "CHOLERA" && g != "JEV" && g != "TYPHOID" && g != "YELLOW_FEVER" && g != "YELLOWFEVER"
 }
 
-pub fn query_rust_rest_service(client: &reqwest::blocking::Client, rust_url: &str, tc: &UnifiedTestCase) -> Result<lava_forecaster::models::ForecastResponse, String> {
+pub fn query_rust_rest_service(
+    client: &reqwest::blocking::Client,
+    rust_url: &str,
+    tc: &UnifiedTestCase,
+) -> Result<lava_forecaster::models::ForecastResponse, String> {
     let req_payload = lava_forecaster::models::ForecastRequest {
         patient: tc.patient.clone(),
         history: tc.history.clone(),
         execution_date: tc.execution_date,
     };
     let endpoint = format!("{}/evaluate", rust_url);
-    let resp = client.post(&endpoint)
+    let resp = client
+        .post(&endpoint)
         .json(&req_payload)
         .send()
         .map_err(|e| format!("Failed to connect to Rust REST server: {}", e))?;
-    
+
     if !resp.status().is_success() {
-        return Err(format!("Rust REST server returned error: {}", resp.status()));
+        return Err(format!(
+            "Rust REST server returned error: {}",
+            resp.status()
+        ));
     }
-    
-    let resp_data: lava_forecaster::models::ForecastResponse = resp.json()
+
+    let resp_data: lava_forecaster::models::ForecastResponse = resp
+        .json()
         .map_err(|e| format!("Failed to parse Rust REST response: {}", e))?;
-    
+
     Ok(resp_data)
 }
 
@@ -794,7 +919,10 @@ mod tests {
         let res = parse_legacy_xml(xml, "03");
         assert_eq!(res.evaluations.len(), 1);
         let eval = &res.evaluations[0];
-        assert_eq!(eval.dose_date, NaiveDate::from_ymd_opt(2021, 1, 15).unwrap());
+        assert_eq!(
+            eval.dose_date,
+            NaiveDate::from_ymd_opt(2021, 1, 15).unwrap()
+        );
         assert_eq!(eval.cvx, Cvx(3));
         assert_eq!(eval.status, DoseStatus::Valid);
         assert_eq!(eval.dose_number, Some(1));
@@ -802,12 +930,26 @@ mod tests {
         assert_eq!(res.forecasts.len(), 1);
         let fc = &res.forecasts[0];
         assert!(matches!(fc.status, SeriesStatus::NotComplete { .. }));
-        if let SeriesStatus::NotComplete { earliest_date, recommended_date, overdue_date, latest_date } = fc.status {
-            assert_eq!(earliest_date, Some(NaiveDate::from_ymd_opt(2021, 2, 15).unwrap()));
-            assert_eq!(recommended_date, Some(NaiveDate::from_ymd_opt(2021, 3, 15).unwrap()));
-            assert_eq!(overdue_date, Some(NaiveDate::from_ymd_opt(2021, 6, 15).unwrap()));
+        if let SeriesStatus::NotComplete {
+            earliest_date,
+            recommended_date,
+            overdue_date,
+            latest_date,
+        } = fc.status
+        {
+            assert_eq!(
+                earliest_date,
+                Some(NaiveDate::from_ymd_opt(2021, 2, 15).unwrap())
+            );
+            assert_eq!(
+                recommended_date,
+                Some(NaiveDate::from_ymd_opt(2021, 3, 15).unwrap())
+            );
+            assert_eq!(
+                overdue_date,
+                Some(NaiveDate::from_ymd_opt(2021, 6, 15).unwrap())
+            );
             assert_eq!(latest_date, None);
         }
     }
 }
-

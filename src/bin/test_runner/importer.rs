@@ -1,9 +1,9 @@
+use chrono::{Datelike, NaiveDate};
+use lava_forecaster::models::{Cvx, Dose, Gender, Patient, UnifiedTestCase};
+use serde::Deserialize;
+use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
-use std::collections::HashMap;
-use chrono::{Datelike, NaiveDate};
-use serde::Deserialize;
-use lava_forecaster::models::{Patient, Dose, Gender, UnifiedTestCase, Cvx};
 
 // Helper for relative date resolution
 pub struct RelativeDateResolver {
@@ -28,7 +28,7 @@ impl RelativeDateResolver {
             month += 12;
             year -= 1;
         }
-        
+
         // Handle end-of-month clamping (e.g. Oct 31 + 1 month -> Nov 30)
         let mut day = d.day();
         loop {
@@ -137,7 +137,8 @@ struct RawTestSuite {
 
 pub fn import_python_cases(input_file: &Path, output_dir: &Path) {
     let content = fs::read_to_string(input_file).expect("Failed to read raw suite file");
-    let suite: RawTestSuite = serde_json::from_str(&content).expect("Failed to parse raw suite JSON");
+    let suite: RawTestSuite =
+        serde_json::from_str(&content).expect("Failed to parse raw suite JSON");
 
     let mut imported = 0;
     for tc in suite.test_cases {
@@ -167,7 +168,12 @@ pub fn import_python_cases(input_file: &Path, output_dir: &Path) {
         let resolved_eval_date = resolver.resolve(&tc.eval_date);
 
         let mut focus_code = tc.focus.clone();
-        if focus_code.len() == 1 && focus_code.chars().next().map_or(false, |c| c.is_ascii_digit()) {
+        if focus_code.len() == 1
+            && focus_code
+                .chars()
+                .next()
+                .map_or(false, |c| c.is_ascii_digit())
+        {
             focus_code = format!("0{}", focus_code);
         }
 
@@ -208,26 +214,51 @@ mod tests {
         assert_eq!(resolver.resolve("birth"), dob);
 
         // Test offsets
-        assert_eq!(resolver.resolve("birth + 1y"), NaiveDate::from_ymd_opt(2021, 10, 31).unwrap());
-        
+        assert_eq!(
+            resolver.resolve("birth + 1y"),
+            NaiveDate::from_ymd_opt(2021, 10, 31).unwrap()
+        );
+
         // Test end-of-month clamping (Oct 31 + 1m -> Nov 30)
-        assert_eq!(resolver.resolve("birth + 1m"), NaiveDate::from_ymd_opt(2020, 11, 30).unwrap());
-        
+        assert_eq!(
+            resolver.resolve("birth + 1m"),
+            NaiveDate::from_ymd_opt(2020, 11, 30).unwrap()
+        );
+
         // Test negative days offset
-        assert_eq!(resolver.resolve("birth + -4d"), NaiveDate::from_ymd_opt(2020, 10, 27).unwrap());
+        assert_eq!(
+            resolver.resolve("birth + -4d"),
+            NaiveDate::from_ymd_opt(2020, 10, 27).unwrap()
+        );
 
         // Test weeks offset
-        assert_eq!(resolver.resolve("birth + 4w"), NaiveDate::from_ymd_opt(2020, 11, 28).unwrap());
+        assert_eq!(
+            resolver.resolve("birth + 4w"),
+            NaiveDate::from_ymd_opt(2020, 11, 28).unwrap()
+        );
 
         // Test prev reference
-        resolver.dose_dates.push(NaiveDate::from_ymd_opt(2020, 12, 1).unwrap());
-        assert_eq!(resolver.resolve("prev + 2m"), NaiveDate::from_ymd_opt(2021, 2, 1).unwrap());
+        resolver
+            .dose_dates
+            .push(NaiveDate::from_ymd_opt(2020, 12, 1).unwrap());
+        assert_eq!(
+            resolver.resolve("prev + 2m"),
+            NaiveDate::from_ymd_opt(2021, 2, 1).unwrap()
+        );
 
         // Test dose index reference
-        resolver.dose_dates.push(NaiveDate::from_ymd_opt(2021, 1, 15).unwrap());
-        assert_eq!(resolver.resolve("dose2 + 3d"), NaiveDate::from_ymd_opt(2021, 1, 18).unwrap());
+        resolver
+            .dose_dates
+            .push(NaiveDate::from_ymd_opt(2021, 1, 15).unwrap());
+        assert_eq!(
+            resolver.resolve("dose2 + 3d"),
+            NaiveDate::from_ymd_opt(2021, 1, 18).unwrap()
+        );
 
         // Test absolute date parsing fallback
-        assert_eq!(resolver.resolve("2026-06-07"), NaiveDate::from_ymd_opt(2026, 6, 7).unwrap());
+        assert_eq!(
+            resolver.resolve("2026-06-07"),
+            NaiveDate::from_ymd_opt(2026, 6, 7).unwrap()
+        );
     }
 }

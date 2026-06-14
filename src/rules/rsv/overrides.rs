@@ -66,6 +66,24 @@ pub fn rsv_custom_evaluation_hook(
         return;
     };
 
+    // Absolute maximum age checks for RSV mAb:
+    // CVX 306, 307, 315: absolute maximum age is 24m (2 years)
+    // CVX 332: absolute maximum age is 8m
+    let is_rsv_mab_invalid = match dose.cvx.0 {
+        cvx!("306") | cvx!("307") | cvx!("315") => {
+            age_ge(ctx.patient.birth_date, dose.date, crate::time_period!("24m"))
+        }
+        cvx!("332") => {
+            age_ge(ctx.patient.birth_date, dose.date, crate::time_period!("8m"))
+        }
+        _ => false,
+    };
+    if is_rsv_mab_invalid {
+        *status = DoseStatus::Invalid;
+        reasons.clear();
+        return;
+    }
+
     if let Some(cutoff) = availability_cutoff(series_name, dose.cvx) {
         if dose.date < cutoff {
             *status = DoseStatus::Invalid;
@@ -81,6 +99,86 @@ pub fn rsv_custom_evaluation_hook(
     }
 }
 
+fn get_rsv_same_day_priority(cvx: Cvx) -> i32 {
+    match cvx.0 {
+        304 | 314 | 315 => 1,
+        _ => 0,
+    }
+}
+
+fn is_dose_valid_or_accepted_for_series(
+    series_name: &str,
+    patient: &Patient,
+    history: &[Dose],
+    dose_idx: usize,
+) -> bool {
+    let limit = add_months_unchecked(patient.birth_date, 20);
+    let dose = &history[dose_idx];
+
+    // Check if the dose matches the series boundary:
+    if series_name == "RSV_INFANT_SERIES" && dose.date >= limit {
+        return false;
+    }
+    if series_name == "RSV_ADULT_SERIES" && dose.date < limit {
+        return false;
+    }
+    if series_name == "RSV_ADULT_SERIES" && !age_ge(patient.birth_date, dose.date, crate::time_period!("50y")) {
+        return false;
+    }
+
+    // 1. Same-day priority check:
+    let same_day_doses: Vec<(usize, &Dose)> = history.iter().enumerate()
+        .filter(|(_, d)| d.date == dose.date)
+        .collect();
+    if same_day_doses.len() > 1 {
+        let mut best_idx = same_day_doses[0].0;
+        let mut best_prio = get_rsv_same_day_priority(same_day_doses[0].1.cvx);
+        for &(idx, d) in same_day_doses.iter().skip(1) {
+            let prio = get_rsv_same_day_priority(d.cvx);
+            if prio < best_prio {
+                best_prio = prio;
+                best_idx = idx;
+            }
+        }
+        if dose_idx != best_idx {
+            return false;
+        }
+    }
+
+    // 2. Absolute maximum age checks:
+    let is_rsv_mab_invalid = match dose.cvx.0 {
+        cvx!("306") | cvx!("307") | cvx!("315") => {
+            age_ge(patient.birth_date, dose.date, crate::time_period!("24m"))
+        }
+        cvx!("332") => {
+            age_ge(patient.birth_date, dose.date, crate::time_period!("8m"))
+        }
+        _ => false,
+    };
+    if is_rsv_mab_invalid {
+        return false;
+    }
+
+    // 3. Availability cutoff check:
+    if let Some(cutoff) = availability_cutoff(series_name, dose.cvx) {
+        if dose.date < cutoff {
+            return false;
+        }
+    }
+
+    // 4. Allowed vaccine check:
+    let is_allowed = match series_name {
+        "RSV_INFANT_SERIES" => matches!(dose.cvx.0, cvx!("304") | cvx!("306") | cvx!("307") | cvx!("315") | cvx!("332")),
+        "RSV_ADULT_SERIES" => matches!(dose.cvx.0, cvx!("303") | cvx!("304") | cvx!("305") | cvx!("314") | cvx!("326")),
+        _ => false,
+    };
+    if !is_allowed {
+        return false;
+    }
+
+    true
+}
+
 pub fn rsv_custom_forecast_hook(
     patient: &Patient,
     valid_doses: &[(NaiveDate, usize)],
@@ -89,8 +187,10 @@ pub fn rsv_custom_forecast_hook(
     eval_date: NaiveDate,
     forecast: &mut SeriesForecast,
 ) {
-    if forecast.status == SeriesStatus::Complete {
-        forecast.reasons = crate::reasons!["COMPLETE"];
+    let support_start = date(RSV_SUPPORT_START.0, RSV_SUPPORT_START.1, RSV_SUPPORT_START.2);
+    if eval_date < support_start {
+        forecast.status = SeriesStatus::NotRecommended;
+        forecast.reasons = crate::reasons!["NOT_SUPPORTED"];
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);
         forecast.status = forecast.status.with_overdue_date(None);
@@ -98,10 +198,23 @@ pub fn rsv_custom_forecast_hook(
         return;
     }
 
-    let support_start = date(RSV_SUPPORT_START.0, RSV_SUPPORT_START.1, RSV_SUPPORT_START.2);
-    if eval_date < support_start {
-        forecast.status = SeriesStatus::NotRecommended;
-        forecast.reasons = crate::reasons!["NOT_SUPPORTED"];
+    let is_complete = forecast.status == SeriesStatus::Complete || (0..history.len()).any(|idx| {
+        is_dose_valid_or_accepted_for_series(&forecast.series_name, patient, history, idx)
+    });
+
+    if is_complete {
+        if forecast.series_name == "RSV_INFANT_SERIES" {
+            if age_lt(patient.birth_date, eval_date, crate::time_period!("20m")) {
+                forecast.status = SeriesStatus::Complete;
+                forecast.reasons = crate::reasons!["COMPLETE_HIGH_RISK"];
+            } else {
+                forecast.status = SeriesStatus::Complete;
+                forecast.reasons = crate::reasons!["COMPLETE"];
+            }
+        } else {
+            forecast.status = SeriesStatus::Complete;
+            forecast.reasons = crate::reasons!["COMPLETE"];
+        }
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);
         forecast.status = forecast.status.with_overdue_date(None);
@@ -172,12 +285,53 @@ pub fn rsv_group_selection(
     patient: &Patient,
     _history: &[Dose],
     eval_date: NaiveDate,
-    _candidate_forecasts: &mut [(&'static str, VaccineGroupForecast)],
+    candidate_forecasts: &mut [(&'static str, VaccineGroupForecast)],
 ) -> &'static str {
-    let adult_start = add_months_unchecked(patient.birth_date, 20);
-    if eval_date >= adult_start {
-        "RSV_ADULT_SERIES"
-    } else {
-        "RSV_INFANT_SERIES"
+    let limit = add_months_unchecked(patient.birth_date, 20);
+
+    // Find the infant and adult forecasts in candidate_forecasts
+    let mut infant_idx = None;
+    let mut adult_idx = None;
+    for (idx, (name, _)) in candidate_forecasts.iter().enumerate() {
+        if *name == "RSV_INFANT_SERIES" {
+            infant_idx = Some(idx);
+        } else if *name == "RSV_ADULT_SERIES" {
+            adult_idx = Some(idx);
+        }
     }
+
+    // If we have both, merge their evaluations based on the patient's age at the time of each dose.
+    if let (Some(inf_idx), Some(ad_idx)) = (infant_idx, adult_idx) {
+        let inf_evals = candidate_forecasts[inf_idx].1.evaluations.clone();
+        let ad_evals = candidate_forecasts[ad_idx].1.evaluations.clone();
+
+        let mut merged_evals = crate::date_utils::SmallVec::new();
+        for i in 0..inf_evals.len() {
+            let inf_eval = &inf_evals[i];
+            if inf_eval.dose_date < limit {
+                merged_evals.push(inf_eval.clone());
+            } else if i < ad_evals.len() {
+                merged_evals.push(ad_evals[i].clone());
+            }
+        }
+
+        candidate_forecasts[inf_idx].1.evaluations = merged_evals.clone();
+        candidate_forecasts[ad_idx].1.evaluations = merged_evals;
+    }
+
+    if eval_date < limit {
+        "RSV_INFANT_SERIES"
+    } else {
+        "RSV_ADULT_SERIES"
+    }
+}
+
+pub fn rsv_custom_extra_dose_hook(
+    series_name: &str,
+    ctx: &EvaluationContext,
+) -> Option<(DoseStatus, SmallVec<[EvaluationReason; 4]>)> {
+    let mut status = DoseStatus::Accepted;
+    let mut reasons = crate::reasons![EvaluationReason::BoosterDose];
+    rsv_custom_evaluation_hook(series_name, 0, ctx, &mut reasons, &mut status);
+    Some((status, reasons))
 }
