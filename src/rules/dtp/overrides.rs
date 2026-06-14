@@ -547,9 +547,14 @@ pub fn dtp_custom_forecast_hook(
         });
 
         if let Some(ignored_shot) = last_ignored_shot {
-            if let Some((earliest, recommended, overdue)) =
-                get_ignored_adjustments(patient, history, valid_doses, forecast, ignored_shot)
-            {
+            if let Some((earliest, recommended, overdue)) = get_ignored_adjustments(
+                patient,
+                history,
+                valid_doses,
+                evaluations,
+                forecast,
+                ignored_shot,
+            ) {
                 forecast.status = forecast.status.with_earliest_date(earliest);
                 forecast.status = forecast.status.with_recommended_date(recommended);
                 forecast.status = forecast.status.with_overdue_date(overdue);
@@ -583,6 +588,7 @@ fn get_ignored_adjustments(
     patient: &Patient,
     history: &[Dose],
     valid_doses: &[(NaiveDate, usize)],
+    evaluations: &[crate::models::DoseEvaluation],
     forecast: &SeriesForecast,
     ignored_shot: &Dose,
 ) -> Option<(Option<NaiveDate>, Option<NaiveDate>, Option<NaiveDate>)> {
@@ -598,10 +604,21 @@ fn get_ignored_adjustments(
     let clamp_ignored_earliest_to_recommended = next_dose_idx == 4
         && ignored_shot.cvx.0 != cvx!("198")
         && (ignored_shot.date != *prev_date || ignored_date_has_cvx_198);
+    let prior_invalid_retry_anchor = evaluations
+        .iter()
+        .filter(|e| e.dose_date < ignored_shot.date)
+        .filter(|e| e.dose_date > *prev_date)
+        .filter(|e| e.status == DoseStatus::Invalid)
+        .filter(|e| !e.reasons.contains(&EvaluationReason::InsufficientAntigen))
+        .filter(|e| is_pertussis_vaccine(e.cvx) || e.cvx.0 == cvx!("195") || e.cvx.0 == cvx!("198"))
+        .map(|e| e.dose_date)
+        .max();
     let interval_anchor = if ignored_shot.cvx.0 == cvx!("198")
         || (ignored_shot.date > *prev_date && ignored_date_has_cvx_198)
     {
         ignored_shot.date
+    } else if let Some(retry_anchor) = prior_invalid_retry_anchor {
+        retry_anchor
     } else {
         *prev_date
     };

@@ -6,12 +6,13 @@ behavior inferred from recorded Java output snapshots.
 
 ## Current Parity Snapshot
 
-Latest verified checkpoint after the series-selection and CVX 196 same-day
-adjustments:
+Latest verified checkpoint after the DTP5 ignored-shot retry-anchor adjustment:
 
-- Curated DTP cases: 317 / 317 passing.
-- DTP fuzz subset: 3146 / 3359 passing.
+- DTP fuzz subset: 3053 / 3359 passing.
 - H1N1 fuzz subset: 2905 / 2905 passing.
+- `tests/cases --group DTP` matched 0 cases in the current workspace layout,
+  so curated DTP case coverage needs a fixture-layout check before using it as
+  a signal.
 
 Remaining DTP fuzz failures are mostly in three buckets:
 
@@ -24,29 +25,28 @@ Remaining DTP fuzz failures are mostly in three buckets:
 
 Latest working log for handoff:
 
-- `tests/relative/tmp/dtp_fuzz_after_dtp3_retry_anchor_codex.txt`
+- `tests/relative/tmp/dtp_run_after_retry_anchor_no_insufficient_antigen.txt`
 
 Bucket summary from that log:
 
-- Evaluation-only failures: 145 cases.
-- Forecast-only failures: 29 cases.
-- Combined evaluation and forecast failures: 39 cases.
+- Evaluation-only failures: 195 cases.
+- Forecast-only failures: 22 cases.
+- Combined evaluation and forecast failures: 89 cases.
 - Largest status transitions:
-  - Rust Valid, Java Accepted: 132.
-  - Rust Valid, Java Invalid: 134.
-  - Rust Accepted, Java Valid: 90.
-  - Rust Invalid, Java Valid: 54.
+  - Rust Valid, Java Invalid: 169.
+  - Rust Valid, Java Accepted: 66.
+  - Rust Invalid, Java Valid: 58.
+  - Rust Accepted, Java Valid: 45.
 - Largest product transitions:
-  - CVX 113 Valid -> Accepted: 36.
-  - CVX 138 Valid -> Accepted: 28.
-  - CVX 139 Valid -> Accepted: 18.
-  - CVX 195 Invalid -> Valid: 14.
-  - CVX 107 Valid -> Invalid: 14.
-  - CVX 20 Valid -> Invalid: 12.
-  - CVX 198 Invalid -> Valid: 12.
-  - CVX 198 Valid -> Invalid: 12.
-  - CVX 28 Valid -> Accepted: 12.
-  - CVX 28 Invalid -> Valid: 12.
+  - CVX 113 Valid -> Accepted: 18.
+  - CVX 198 Valid -> Invalid: 17.
+  - CVX 132 Valid -> Invalid: 14.
+  - CVX 138 Valid -> Accepted: 14.
+  - CVX 20 Valid -> Invalid: 14.
+  - CVX 107 Valid -> Invalid: 13.
+  - CVX 170 Valid -> Invalid: 13.
+  - CVX 195 Valid -> Invalid: 13.
+  - CVX 195 Invalid -> Valid: 10.
 
 Good next target:
 
@@ -304,6 +304,27 @@ DTP adult-series retry interval anchoring:
   previously accepted a later dose 3 by measuring from dose 2, while Java
   invalidated it because it was less than the dose-3 minimum interval from the
   prior invalid dose-3 attempt.
+
+DTP5 ignored-shot retry forecast anchoring:
+
+- Snapshot-derived behavior from `fuzz_fail_dtp_20260608_109958`,
+  `fuzz_fail_dtp_20260608_148964`, and
+  `fuzz_fail_dtp_20260608_246356`: when the last child-series shot is a
+  below-minimum-age Td-family shot that Java ignores for interval purposes, the
+  next DTP5 forecast can still anchor from an earlier invalid retry attempt
+  after the latest valid dose. This matters when the earlier invalid attempt is
+  a pertussis-containing product or special CVX 195/198 and failed for
+  age/interval timing.
+- Do not apply this to all prior invalid shots. Prior invalid Td-family
+  products such as CVX 139 do not generally anchor this forecast; guard case:
+  `fuzz_fail_dtp_20260608_10237`.
+- Do not apply it to invalid attempts before a later valid dose; guard case:
+  `fuzz_fail_dtp_20260608_103071`.
+- Do not apply it to child-series Tdap attempts that LAVA classifies as
+  `InsufficientAntigen`; Java snapshots keep those as due-now / last-shot
+  shapes rather than 28-day retry anchors. Guard cases:
+  `fuzz_fail_dtp_20260608_112350` and
+  `fuzz_fail_dtp_20260608_181198`.
 
 5-dose completion exceptions:
 
