@@ -50,6 +50,8 @@ cargo run --release --bin test_runner -- inspect tests/fuzz-100k-20260608.ltp --
 
 ## 2. Structured Failure Summary
 
+Status: implemented.
+
 Priority: high.
 
 Problem:
@@ -85,6 +87,19 @@ Success criteria:
 
 - The next parity bucket can be chosen from one command.
 - Before/after impact can be measured without manually parsing colored logs.
+
+Implemented command examples:
+
+```bash
+cargo run --release --bin test_runner -- run tests/fuzz-100k-20260608.ltp --group DTP --summary tests/relative/tmp/dtp_summary.json
+cargo run --release --bin test_runner -- summarize tests/relative/tmp/dtp_summary.json
+```
+
+The JSON report records per-case evaluation mismatches, forecast mismatches,
+status transitions, CVX codes, same-day dose flags, and date deltas. The
+summarizer prints eval-only / forecast-only / combined case shapes, status
+transition counts, CVX transition counts, forecast field counts, forecast date
+deltas, and same-day mismatch counts.
 
 ## 3. Drools Single-Case Capture Script
 
@@ -194,10 +209,9 @@ Success criteria:
 ## Recommended Order
 
 1. Implement `inspect`.
-2. Implement `--summary` and `summarize`.
-3. Add `scripts/drools_case.sh`.
-4. Add case promotion once case extraction is available.
-5. Add JSON traces after the lower-risk workflow tools are in place.
+2. Add `scripts/drools_case.sh`.
+3. Add case promotion once case extraction is available.
+4. Add JSON traces after the lower-risk workflow tools are in place.
 
 The first three items should have the largest immediate impact on DTP parity:
 they reduce wasted runs, identify the largest safe buckets, and make Java rule

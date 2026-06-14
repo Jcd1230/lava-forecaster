@@ -73,51 +73,17 @@ awk '/FAIL:/{g=$NF; sub(/[()]/, "", g); sub(/[()]/, "", g); count[g]++} END {for
 join -a1 -a2 -e0 -o 0,1.2,2.2 before.counts after.counts | awk '$2 != $3'
 ```
 
-Summarize status-transition and forecast buckets from a saved group log:
+Summarize status-transition and forecast buckets from structured runner output:
 
 ```bash
-python - <<'PY'
-import collections
-import re
-
-path = "tests/relative/tmp/dtp_fuzz_after_dtp3_retry_anchor_codex.txt"
-ansi = re.compile(r"\x1b\[[0-9;]*m")
-case = None
-failcases = []
-case_eval = collections.defaultdict(int)
-case_forecast = collections.defaultdict(int)
-status = collections.Counter()
-cvx_status = collections.Counter()
-
-with open(path, errors="replace") as fh:
-    for raw in fh:
-        line = ansi.sub("", raw.rstrip())
-        m = re.match(r"Test Case: (\S+) \(FAIL\)", line)
-        if m:
-            case = m.group(1)
-            failcases.append(case)
-            continue
-        m = re.search(r"Evaluation status mismatch for dose \([^,]+, (\d+)\): Rust=(\w+).*Expected=(\w+)", line)
-        if m:
-            cvx, rust, expected = m.groups()
-            status[(rust, expected)] += 1
-            cvx_status[(cvx, rust, expected)] += 1
-            case_eval[case] += 1
-            continue
-        if "Forecast " in line and "mismatch" in line:
-            case_forecast[case] += 1
-
-print("case shapes")
-for key, count in collections.Counter((case_eval[c] > 0, case_forecast[c] > 0) for c in failcases).items():
-    print(key, count)
-print("status transitions")
-for (rust, expected), count in status.most_common(20):
-    print(f"{rust}->{expected}: {count}")
-print("cvx transitions")
-for (cvx, rust, expected), count in cvx_status.most_common(30):
-    print(f"CVX {cvx} {rust}->{expected}: {count}")
-PY
+cargo run --release --bin test_runner -- run tests/fuzz-100k-20260608.ltp --group DTP --summary tests/relative/tmp/dtp_summary.json
+cargo run --release --bin test_runner -- summarize tests/relative/tmp/dtp_summary.json
 ```
+
+The summary JSON is written before the runner exits, including on failing test
+runs. Use the `summarize` command to get eval-only / forecast-only / combined
+case shapes, status transitions, CVX transitions, forecast date deltas, and
+same-day mismatch counts.
 
 ## Mismatch Routing
 
