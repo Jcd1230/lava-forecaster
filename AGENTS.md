@@ -33,6 +33,10 @@ All major tasks are configured as `mise` commands or native Cargo binaries.
 | `cargo run --release --bin test_runner -- --run tests/suite.ltp` | Runs the test runner to verify LAVA logic against expected snapshots (offline) stored in a compact `.ltp` database file. |
 | `cargo run --release --bin test_runner -- --run tests/suite.ltp --group <GROUP> --compare` | Runs the Rust test runner on a database file, comparing dynamically against the live Java ICE server. |
 | `cargo run --release --bin test_runner -- --run tests/suite.ltp --case <CASE> -v` | Runs a single case from a database file with side-by-side verbose details. |
+| `cargo run --release --bin test_runner -- inspect tests/suite.ltp --group <GROUP> --count` | Confirms `.ltp` case membership and per-group counts without running evaluation. |
+| `cargo run --release --bin test_runner -- run tests/suite.ltp --group <GROUP> --summary tests/relative/tmp/<group>_summary.json` | Writes structured mismatch JSON for bucket analysis. |
+| `cargo run --release --bin test_runner -- summarize tests/relative/tmp/<group>_summary.json` | Prints eval-only, forecast-only, status-transition, CVX-transition, date-delta, and same-day mismatch buckets. |
+| `scripts/drools_case.sh <GROUP> <CASE>` | Clears the active Drools log, runs one live Java compare, and saves compare/raw/filtered artifacts under `tests/relative/tmp/drools/`. |
 | `cargo run --release --bin test_runner -- --reorganize tests/cases tests/cases` | Regression tests all JSON files under `tests/cases/` and re-categorizes them into `passed/<GROUP>/` and `failed/<GROUP>/`. |
 | `cargo run --release --bin test_runner -- --reorganize tests/cases tests/suite.ltp` | Re-evaluates test cases in the directory and packs them into a single compact `.ltp` database file. |
 | `cargo run --release --bin test_runner -- --record tests/suite.ltp` | Connects to the live Java ICE server and records expected output snapshots directly into the `.ltp` database file. |
@@ -48,6 +52,7 @@ All major tasks are configured as `mise` commands or native Cargo binaries.
 - **Comparing Against Live Java**: When implementing or debugging a vaccine group, you can compare Rust behavior against Java in real time. First start the Java server using `mise run run`, then run `cargo run --release --bin test_runner -- --run tests/suite.ltp --group <name> --compare` in another shell.
 - **Test Runner Verbosity**: The test runner is quiet by default, printing only concise error summaries on failure. Pass `--verbose` or `-v` to see full side-by-side comparison tables.
 - **Decision Trace**: Pass `--trace` or `--explain` on any `--run` or `--reorganize` invocation to get a step-by-step engine decision log (age checks, interval checks, parameter overrides, forecast hook mutations) for each case. Particularly useful when the side-by-side comparison table doesn't immediately explain a date or status mismatch.
+- **Drools Case Capture**: For hard Java parity questions, prefer `scripts/drools_case.sh <GROUP> <CASE>` over manual log handling. It truncates the configured Drools log first and saves a focused evidence bundle.
 - **Invalid (Ignored) Annotation**: The evaluation comparison table now shows `Invalid (Ignored)` or `Invalid (Not Ignored)` for `Invalid` doses. Quickly confirms whether a mismatched shot is intentionally ignored for series completion (e.g., bivalent OPV in POLIO) or genuinely counts.
 - **Formatting Scope**: Avoid broad `cargo fmt` / `rustfmt` unless you intend to format the whole Rust module tree. Prefer formatting only files you intentionally changed; `rustfmt` can follow `mod.rs` declarations and touch sibling vaccine modules.
 

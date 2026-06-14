@@ -235,7 +235,7 @@ fn main() {
 
             let all_loaded_cases =
                 load_cases_from_source(&cases_path).unwrap_or_else(|err| panic!("{}", err));
-            let mut test_cases = filter_cases_for_inspect(
+            let mut test_cases = filter_cases(
                 all_loaded_cases,
                 filter_group.as_deref(),
                 filter_case.as_deref(),
@@ -264,20 +264,8 @@ fn main() {
 
             let all_loaded_cases =
                 load_cases_from_source(&cases_path).unwrap_or_else(|err| panic!("{}", err));
-            let mut test_cases = Vec::new();
-            for tc in all_loaded_cases {
-                if let Some(ref fg) = filter_group {
-                    if tc.group.to_uppercase() != *fg {
-                        continue;
-                    }
-                }
-                if let Some(ref fc) = filter_case {
-                    if tc.name != *fc {
-                        continue;
-                    }
-                }
-                test_cases.push(tc);
-            }
+            let test_cases =
+                filter_cases(all_loaded_cases, filter_group.as_deref(), filter_case.as_deref());
 
             println!("Matched {} case(s)", test_cases.len());
             for tc in test_cases {
@@ -426,20 +414,8 @@ fn main() {
 
             let all_loaded_cases =
                 load_cases_from_source(&cases_path).unwrap_or_else(|err| panic!("{}", err));
-            let mut test_cases = Vec::new();
-            for tc in all_loaded_cases {
-                if let Some(ref fg) = filter_group {
-                    if tc.group.to_uppercase() != *fg {
-                        continue;
-                    }
-                }
-                if let Some(ref fc) = filter_case {
-                    if tc.name != *fc {
-                        continue;
-                    }
-                }
-                test_cases.push(tc);
-            }
+            let test_cases =
+                filter_cases(all_loaded_cases, filter_group.as_deref(), filter_case.as_deref());
 
             let mut java_expected_map = HashMap::new();
             if let Some(ref j_url) = compare_java_url {
@@ -764,7 +740,7 @@ fn main() {
 
             if total == 0 && (filter_group.is_some() || filter_case.is_some()) {
                 println!("No test cases matched the provided filters.");
-                println!("Hint: use `test_runner list <path> [--group GROUP]` to inspect available case names.");
+                println!("Hint: use `test_runner inspect <path> [--group GROUP] --list-cases` to inspect available case names.");
             }
 
             print_summary(
@@ -1217,7 +1193,7 @@ fn main() {
     }
 }
 
-fn filter_cases_for_inspect(
+fn filter_cases(
     cases: Vec<UnifiedTestCase>,
     filter_group: Option<&str>,
     filter_case: Option<&str>,

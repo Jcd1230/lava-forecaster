@@ -108,6 +108,37 @@ DSL/Drools text appears to say something broader than the final output. The
 goal is to identify the facts and rules ICE actually used, then verify the
 final Java output through the test runner.
 
+Prefer the capture script for ordinary one-case investigations:
+
+```bash
+scripts/drools_case.sh DTP fuzz_fail_dtp_20260608_24219
+```
+
+By default the script uses:
+
+```text
+/home/jason/projects/java-ice/opencds-decision-support-service/logs/drools-events.log
+```
+
+Override that path when needed:
+
+```bash
+DROOLS_LOG=/path/to/drools-events.log scripts/drools_case.sh DTP fuzz_fail_dtp_20260608_24219
+```
+
+It truncates the Drools log, runs exactly one live compare, then writes:
+
+```text
+tests/relative/tmp/drools/<GROUP>/<CASE>/compare.txt
+tests/relative/tmp/drools/<GROUP>/<CASE>/drools_filtered.txt
+tests/relative/tmp/drools/<GROUP>/<CASE>/drools_raw.log
+```
+
+Read `compare.txt` and `drools_filtered.txt` first. Open `drools_raw.log` only
+when the filtered view omits a needed rule or fact.
+
+Manual fallback:
+
 1. Enable Drools event logging in the Java ICE server config. In this project
    this has been done with `enable-drools-event-logging: true`, plus logger
    configuration that routes `drools-logger` output to a file.

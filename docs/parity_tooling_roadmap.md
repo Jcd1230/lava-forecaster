@@ -103,6 +103,8 @@ deltas, and same-day mismatch counts.
 
 ## 3. Drools Single-Case Capture Script
 
+Status: implemented.
+
 Priority: high after the first two CLI improvements.
 
 Problem:
@@ -143,6 +145,17 @@ Success criteria:
 - Each hard Java behavior question has a small, reproducible evidence bundle.
 - Fresh agents can inspect the same compare output and filtered Drools rule
   flow without rerunning the server.
+
+Implemented command examples:
+
+```bash
+scripts/drools_case.sh DTP fuzz_fail_dtp_20260608_24219
+DROOLS_LOG=/path/to/drools-events.log scripts/drools_case.sh DTP fuzz_fail_dtp_20260608_24219 tests/fuzz-100k-20260608.ltp
+```
+
+The script truncates the active Drools log, runs one `-v --trace --compare`
+case, and writes `compare.txt`, `drools_raw.log`, and `drools_filtered.txt`
+under `tests/relative/tmp/drools/<GROUP>/<CASE>/`.
 
 ## 4. Promote Fuzz Cases Into Named Parity Cases
 
@@ -209,10 +222,11 @@ Success criteria:
 ## Recommended Order
 
 1. Implement `inspect`.
-2. Add `scripts/drools_case.sh`.
-3. Add case promotion once case extraction is available.
-4. Add JSON traces after the lower-risk workflow tools are in place.
+2. Generate structured failure summaries.
+3. Add `scripts/drools_case.sh`.
+4. Add case promotion once case extraction is available.
+5. Add JSON traces after the lower-risk workflow tools are in place.
 
-The first three items should have the largest immediate impact on DTP parity:
-they reduce wasted runs, identify the largest safe buckets, and make Java rule
-flow visible before adding Rust exceptions.
+The first three items are now in place. The next highest-value build is case
+promotion, because it converts rule discoveries from opaque fuzz IDs into
+readable regression guards before adding more DTP-specific exceptions.
