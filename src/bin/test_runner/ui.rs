@@ -107,7 +107,7 @@ Test Case: \x1b[92m{}\x1b[0m (PASS)",
                 .map(|n| n.to_string())
                 .unwrap_or_else(|| "-".to_string());
             if eval.status == DoseStatus::Invalid {
-                let ignored = is_eval_ignored(group, eval.cvx, eval.dose_date, eval.status);
+                let ignored = is_eval_ignored(group, eval.cvx, eval.dose_date, eval.status, None);
                 let tag = if ignored { "Ignored" } else { "Not Ignored" };
                 format!("{:?} ({}) #{}", eval.status, tag, dose_num)
             } else {

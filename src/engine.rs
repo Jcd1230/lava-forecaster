@@ -637,7 +637,7 @@ impl<'a> EvaluationEngine<'a> {
                     .cloned()
                     .collect();
                 let has_same_dose_prev = evaluations.iter().zip(&eval_target_dose_numbers).any(|(e, t_num)| {
-                    *t_num == target_dose_idx && !is_eval_ignored(active_series.vaccine_group, e.cvx, e.dose_date, e.status)
+                    *t_num == target_dose_idx && !is_eval_ignored(active_series.vaccine_group, e.cvx, e.dose_date, e.status, Some(patient.birth_date))
                 });
                 if has_same_dose_prev {
                     if let Some(int) = active_series.intervals.iter().find(|int| int.to_dose == target_dose_idx) {
@@ -654,7 +654,7 @@ impl<'a> EvaluationEngine<'a> {
                 intervals
             } else {
                 let has_prev_non_ignored_eval = evaluations.iter().any(|e| {
-                    !is_eval_ignored(active_series.vaccine_group, e.cvx, e.dose_date, e.status)
+                    !is_eval_ignored(active_series.vaccine_group, e.cvx, e.dose_date, e.status, Some(patient.birth_date))
                 });
                 if has_prev_non_ignored_eval {
                     active_series
@@ -753,6 +753,7 @@ impl<'a> EvaluationEngine<'a> {
                                     e.cvx,
                                     e.dose_date,
                                     e.status,
+                                    Some(patient.birth_date),
                                 )
                         })
                         .max_by_key(|&(e, _)| (e.status == DoseStatus::Valid, e.dose_date))
@@ -771,6 +772,7 @@ impl<'a> EvaluationEngine<'a> {
                                             e.cvx,
                                             e.dose_date,
                                             e.status,
+                                            Some(patient.birth_date),
                                         )
                                 })
                                 .map(|(e, _)| e.dose_date)
@@ -1610,7 +1612,13 @@ fn is_dose_contraindicated(
     })
 }
 
-pub fn is_eval_ignored(group: &str, cvx: Cvx, date: NaiveDate, status: DoseStatus) -> bool {
+pub fn is_eval_ignored(
+    group: &str,
+    cvx: Cvx,
+    date: NaiveDate,
+    status: DoseStatus,
+    birth_date: Option<NaiveDate>,
+) -> bool {
     if status == DoseStatus::Ignored || status == DoseStatus::Accepted {
         return true;
     }
@@ -1620,6 +1628,20 @@ pub fn is_eval_ignored(group: &str, cvx: Cvx, date: NaiveDate, status: DoseStatu
             cvx.0 == 182 && date >= NaiveDate::from_ymd_opt(2016, 4, 1).unwrap();
         if is_cvx_178_179 || is_cvx_182_after_2016 {
             return true;
+        }
+    }
+    if group == "DTP" {
+        // Td (CVX 09, 113, 138, 139, 196) under 7 years - 4 days
+        let is_td = cvx.0 == 9 || cvx.0 == 113 || cvx.0 == 138 || cvx.0 == 139 || cvx.0 == 196;
+        // Tdap (CVX 115, 198) under 7 years - 4 days
+        let is_tdap = cvx.0 == 115 || cvx.0 == 198;
+        if is_td || is_tdap {
+            if let Some(birth) = birth_date {
+                let age_7_minus_4d = crate::date_utils::add_years_unchecked(birth, 7) - chrono::Duration::days(4);
+                if date < age_7_minus_4d {
+                    return true;
+                }
+            }
         }
     }
     false

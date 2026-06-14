@@ -175,7 +175,22 @@ pub fn hpv_custom_evaluation_hook(
     status: &mut DoseStatus,
 ) {
     if let Some(dose) = ctx.current_dose {
-        // 0. Mark current Target Dose 2 as Invalid in 2-Dose Series if Interval from most recent Invalid Dose 2 < 12w-4 days
+        // 0a. Dose 1 retry: Drools has no retry interval for dose 1 in HPV.
+        // The custom interval checks (activation-group "doseIntervalCheck") only fire for dose 2+.
+        // When the base engine applies the dose 1→2 interval as a dose 1→1 retry interval,
+        // clear the BelowMinimumInterval reason if the dose passes the minimum age check.
+        if target_dose_idx == 1
+            && *status == DoseStatus::Invalid
+            && reasons.contains(&EvaluationReason::BelowMinimumInterval)
+            && !reasons.contains(&EvaluationReason::BelowMinimumAge)
+        {
+            reasons.retain(|r| *r != EvaluationReason::BelowMinimumInterval);
+            if reasons.is_empty() {
+                *status = DoseStatus::Valid;
+            }
+        }
+
+        // 0b. Mark current Target Dose 2 as Invalid in 2-Dose Series if Interval from most recent Invalid Dose 2 < 12w-4 days
         if series_name == "HPV_2_DOSE_SERIES" && target_dose_idx == 2 {
             let sim_results = simulate_hpv_evaluations(ctx.patient, ctx.history, series_name);
             if let Some((_, sim_status)) = sim_results.iter().find(|(d, _)| *d == dose.date) {
