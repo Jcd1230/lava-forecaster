@@ -159,6 +159,8 @@ under `tests/relative/tmp/drools/<GROUP>/<CASE>/`.
 
 ## 4. Promote Fuzz Cases Into Named Parity Cases
 
+Status: implemented.
+
 Priority: medium.
 
 Problem:
@@ -170,6 +172,7 @@ Proposed command:
 
 ```bash
 scripts/promote_case.sh tests/fuzz-100k-20260608.ltp fuzz_fail_dtp_20260608_24219 tests/cases/dtp/parity/<behavior_name>.json
+cargo run --release --bin test_runner -- promote tests/fuzz-100k-20260608.ltp tests/cases/dtp/parity/<behavior_name>.json --case fuzz_fail_dtp_20260608_24219
 ```
 
 Implementation outline:
@@ -185,6 +188,15 @@ Success criteria:
 
 - Important discovered parity rules survive beyond the fuzz database.
 - Regression tests explain behavior through file names and compact fixtures.
+
+Implemented notes:
+
+- Promoted cases are readable JSON fixtures, not `.ltp` files. JSON remains the
+  source of truth for named parity regressions; `.ltp` stays reserved for large
+  fuzz corpora.
+- The native command refuses to overwrite an existing file unless `--force` is
+  passed.
+- The wrapper script is a thin compatibility layer over `test_runner promote`.
 
 ## 5. Structured Rust Trace JSON
 

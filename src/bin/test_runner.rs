@@ -63,6 +63,20 @@ enum Commands {
         #[arg(long)]
         list_cases: bool,
     },
+    /// Extracts one named test case into a readable JSON fixture
+    #[command(name = "promote")]
+    Promote {
+        /// Directory, JSON test case, `.test` file, or `.ltp` database to read from
+        source: std::path::PathBuf,
+        /// Output JSON fixture path
+        output_json: std::path::PathBuf,
+        /// Exact case name to promote
+        #[arg(long)]
+        case: String,
+        /// Replace the output file if it already exists
+        #[arg(long)]
+        force: bool,
+    },
     /// Lists test cases from a directory or `.ltp` database file
     #[command(name = "list")]
     List {
@@ -215,6 +229,8 @@ fn main() {
             args[1] = "list".to_string();
         } else if args[1] == "--inspect" {
             args[1] = "inspect".to_string();
+        } else if args[1] == "--promote" {
+            args[1] = "promote".to_string();
         } else if args[1] == "--summarize" {
             args[1] = "summarize".to_string();
         }
@@ -251,6 +267,17 @@ fn main() {
             }
 
             if test_cases.is_empty() {
+                std::process::exit(1);
+            }
+        }
+        Commands::Promote {
+            source,
+            output_json,
+            case,
+            force,
+        } => {
+            if let Err(err) = promote_case(&source, &case, &output_json, force) {
+                eprintln!("{}", err);
                 std::process::exit(1);
             }
         }
@@ -1214,6 +1241,63 @@ fn filter_cases(
             true
         })
         .collect()
+}
+
+fn promote_case(
+    source: &Path,
+    case_name: &str,
+    output_json: &Path,
+    force: bool,
+) -> Result<(), String> {
+    let cases = load_cases_from_source(source)?;
+    let matches = filter_cases(cases, None, Some(case_name));
+
+    if matches.is_empty() {
+        return Err(format!(
+            "No case named `{}` found in {:?}. Use `test_runner inspect {:?} --list-cases` to inspect available cases.",
+            case_name, source, source
+        ));
+    }
+    if matches.len() > 1 {
+        return Err(format!(
+            "Found {} cases named `{}` in {:?}; promotion requires exactly one match.",
+            matches.len(),
+            case_name,
+            source
+        ));
+    }
+    if output_json.exists() && !force {
+        return Err(format!(
+            "Output file {:?} already exists. Re-run with --force to replace it.",
+            output_json
+        ));
+    }
+
+    if let Some(parent) = output_json.parent() {
+        if !parent.as_os_str().is_empty() {
+            fs::create_dir_all(parent).map_err(|err| {
+                format!("Failed to create output directory {:?}: {}", parent, err)
+            })?;
+        }
+    }
+
+    let case = matches.into_iter().next().expect("case existence checked");
+    let out_json = serde_json::to_string_pretty(&case)
+        .map_err(|err| format!("Failed to serialize promoted case: {}", err))?;
+    fs::write(output_json, out_json)
+        .map_err(|err| format!("Failed to write promoted case {:?}: {}", output_json, err))?;
+
+    println!(
+        "Promoted case `{}` from {:?} to {:?}",
+        case_name, source, output_json
+    );
+    if case.expected.is_some() {
+        println!("Expected snapshot: preserved");
+    } else {
+        println!("Expected snapshot: none");
+    }
+
+    Ok(())
 }
 
 fn print_inspect_counts(test_cases: &[UnifiedTestCase]) {

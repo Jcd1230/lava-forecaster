@@ -37,6 +37,7 @@ All major tasks are configured as `mise` commands or native Cargo binaries.
 | `cargo run --release --bin test_runner -- run tests/suite.ltp --group <GROUP> --summary tests/relative/tmp/<group>_summary.json` | Writes structured mismatch JSON for bucket analysis. |
 | `cargo run --release --bin test_runner -- summarize tests/relative/tmp/<group>_summary.json` | Prints eval-only, forecast-only, status-transition, CVX-transition, date-delta, and same-day mismatch buckets. |
 | `scripts/drools_case.sh <GROUP> <CASE>` | Clears the active Drools log, runs one live Java compare, and saves compare/raw/filtered artifacts under `tests/relative/tmp/drools/`. |
+| `scripts/promote_case.sh tests/suite.ltp <CASE> tests/cases/<group>/parity/<behavior>.json` | Extracts one fuzz/database case into a readable named JSON parity fixture while preserving its expected snapshot. |
 | `cargo run --release --bin test_runner -- --reorganize tests/cases tests/cases` | Regression tests all JSON files under `tests/cases/` and re-categorizes them into `passed/<GROUP>/` and `failed/<GROUP>/`. |
 | `cargo run --release --bin test_runner -- --reorganize tests/cases tests/suite.ltp` | Re-evaluates test cases in the directory and packs them into a single compact `.ltp` database file. |
 | `cargo run --release --bin test_runner -- --record tests/suite.ltp` | Connects to the live Java ICE server and records expected output snapshots directly into the `.ltp` database file. |

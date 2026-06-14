@@ -85,6 +85,16 @@ runs. Use the `summarize` command to get eval-only / forecast-only / combined
 case shapes, status transitions, CVX transitions, forecast date deltas, and
 same-day mismatch counts.
 
+Promote an important fuzz case into a named JSON parity fixture after the
+behavior is understood:
+
+```bash
+scripts/promote_case.sh tests/fuzz-100k-20260608.ltp fuzz_fail_dtp_20260608_24219 tests/cases/dtp/parity/<behavior_name>.json
+```
+
+Use behavior names rather than fuzz IDs. Keep promoted cases as readable JSON
+source fixtures; reserve `.ltp` files for large generated fuzz corpora.
+
 ## Mismatch Routing
 
 Use the mismatch shape to decide what to read next before editing code.
