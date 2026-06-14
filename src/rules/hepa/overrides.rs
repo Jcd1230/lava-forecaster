@@ -72,6 +72,21 @@ pub fn hepa_custom_evaluation_hook(
                     }
                 }
             }
+        } else if series_name == "HEP_A_2_DOSE_CHILD_ADULT_SERIES" && target_dose_idx == 2 {
+            if let Some(&(dose_1_date, _)) = ctx.valid_doses.first() {
+                if interval_ge(dose_1_date, dose.date, crate::time_period!("6m-4d")) {
+                    if let Some(pos) = reasons.iter().position(|r| *r == EvaluationReason::BelowMinimumInterval) {
+                        reasons.remove(pos);
+                    }
+                    let has_other_invalid = reasons.iter().any(|r| {
+                        *r == EvaluationReason::BelowMinimumAge ||
+                        *r == EvaluationReason::VaccineNotPartOfSeries
+                    });
+                    if !has_other_invalid {
+                        *status = DoseStatus::Valid;
+                    }
+                }
+            }
         }
     }
 }
