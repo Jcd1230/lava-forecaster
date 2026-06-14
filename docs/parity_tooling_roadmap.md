@@ -150,7 +150,7 @@ Implemented command examples:
 
 ```bash
 scripts/drools_case.sh DTP fuzz_fail_dtp_20260608_24219
-DROOLS_LOG=/path/to/drools-events.log scripts/drools_case.sh DTP fuzz_fail_dtp_20260608_24219 tests/fuzz-100k-20260608.ltp
+DROOLS_LOG=relative/path/to/drools-events.log scripts/drools_case.sh DTP fuzz_fail_dtp_20260608_24219 tests/fuzz-100k-20260608.ltp
 ```
 
 The script truncates the active Drools log, runs one `-v --trace --compare`

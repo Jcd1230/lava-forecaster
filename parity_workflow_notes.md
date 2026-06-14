@@ -117,13 +117,13 @@ scripts/drools_case.sh DTP fuzz_fail_dtp_20260608_24219
 By default the script uses:
 
 ```text
-/home/jason/projects/java-ice/opencds-decision-support-service/logs/drools-events.log
+../java-ice/opencds-decision-support-service/logs/drools-events.log
 ```
 
 Override that path when needed:
 
 ```bash
-DROOLS_LOG=/path/to/drools-events.log scripts/drools_case.sh DTP fuzz_fail_dtp_20260608_24219
+DROOLS_LOG=relative/path/to/drools-events.log scripts/drools_case.sh DTP fuzz_fail_dtp_20260608_24219
 ```
 
 It truncates the Drools log, runs exactly one live compare, then writes:
@@ -148,7 +148,7 @@ Manual fallback:
 3. Before each single-case investigation, truncate the log:
 
 ```bash
-: > /path/to/drools.log
+: > relative/path/to/drools.log
 ```
 
 4. Run exactly one focused compare:
@@ -160,7 +160,7 @@ cargo run --release --bin test_runner -- run tests/fuzz-100k-20260608.ltp --grou
 5. Search the Drools log before opening it. Useful DTP terms include:
 
 ```bash
-rg -n 'RuleFired|DTP|TargetDose|SUPPORTED_SERIES|ADOLESCENT|PERTUSSIS|Duplicate|Recommendation|SeriesSelection' /path/to/drools.log
+rg -n 'RuleFired|DTP|TargetDose|SUPPORTED_SERIES|ADOLESCENT|PERTUSSIS|Duplicate|Recommendation|SeriesSelection' relative/path/to/drools.log
 ```
 
 6. Record conclusions in the group logic doc. Separate direct source facts

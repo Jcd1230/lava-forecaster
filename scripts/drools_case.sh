@@ -8,8 +8,8 @@ Usage:
 
 Environment:
   DROOLS_LOG  Path to the Java ICE drools event log. If unset, the script uses
-              /home/jason/projects/java-ice/opencds-decision-support-service/logs/drools-events.log
-              when that file exists.
+              ../java-ice/opencds-decision-support-service/logs/drools-events.log
+              relative to this repository when that file exists.
   JAVA_URL    Java ICE base URL. Defaults to http://localhost:8080.
 
 Example:
@@ -32,9 +32,9 @@ CASE="$2"
 CASES_PATH="${3:-tests/fuzz-100k-20260608.ltp}"
 JAVA_URL="${JAVA_URL:-http://localhost:8080}"
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-DEFAULT_DROOLS_LOG="/home/jason/projects/java-ice/opencds-decision-support-service/logs/drools-events.log"
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+DEFAULT_DROOLS_LOG="../java-ice/opencds-decision-support-service/logs/drools-events.log"
 
 if [[ -z "${DROOLS_LOG:-}" ]]; then
   if [[ -e "${DEFAULT_DROOLS_LOG}" ]]; then
@@ -42,7 +42,7 @@ if [[ -z "${DROOLS_LOG:-}" ]]; then
   else
     echo "DROOLS_LOG is not set and the default log was not found:" >&2
     echo "  ${DEFAULT_DROOLS_LOG}" >&2
-    echo "Set DROOLS_LOG=/path/to/drools-events.log and retry." >&2
+    echo "Set DROOLS_LOG=relative/path/to/drools-events.log and retry." >&2
     exit 2
   fi
 fi
@@ -53,7 +53,7 @@ if [[ ! -e "${DROOLS_LOG}" ]]; then
   exit 2
 fi
 
-ARTIFACT_DIR="${REPO_ROOT}/tests/relative/tmp/drools/${GROUP}/${CASE}"
+ARTIFACT_DIR="tests/relative/tmp/drools/${GROUP}/${CASE}"
 COMPARE_OUT="${ARTIFACT_DIR}/compare.txt"
 RAW_OUT="${ARTIFACT_DIR}/drools_raw.log"
 FILTERED_OUT="${ARTIFACT_DIR}/drools_filtered.txt"
@@ -64,7 +64,6 @@ mkdir -p "${ARTIFACT_DIR}"
 
 set +e
 (
-  cd "${REPO_ROOT}"
   cargo run --release --bin test_runner -- run "${CASES_PATH}" \
     --group "${GROUP}" \
     --case "${CASE}" \
