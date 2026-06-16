@@ -556,6 +556,17 @@ These are not settled enough for blanket rules:
     rather than Valid.
   - The likely distinction is whether the dose is satisfying the recurring Td
     slot, an adolescent/extra-dose slot, or a post-primary same-day extra.
+  - Drools traces from `fuzz_fail_dtp_20260608_11201` and
+    `fuzz_fail_dtp_20260608_24013` show this is also an effective-series
+    selection issue. In `11201`, the final returned valid CVX 113 evaluation is
+    from `DTP_5_DOSE_SERIES` after DTP5 exception processing. In `24013`, the
+    same product/date role is returned as Accepted from the selected
+    `DTP_3_DOSE_SERIES`, even though the DTP5 path also evaluated a target dose
+    for the same shot. Do not resolve this bucket with a blanket CVX 113/138/139
+    product rule; map Java's selected/returned TargetSeries first.
+  - Evidence artifacts:
+    `tests/relative/tmp/drools/DTP/fuzz_fail_dtp_20260608_11201/` and
+    `tests/relative/tmp/drools/DTP/fuzz_fail_dtp_20260608_24013/`.
 
 - Six-by-seven:
   - The source rule is broad (`administered shots excluding duplicate same-day
