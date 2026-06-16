@@ -6,9 +6,9 @@ behavior inferred from recorded Java output snapshots.
 
 ## Current Parity Snapshot
 
-Latest verified checkpoint after the same-day CVX 198 ordering refinement:
+Latest verified checkpoint after the prior-pertussis adolescent Tdap refinement:
 
-- DTP fuzz subset: 3169 / 3359 passing.
+- DTP fuzz subset: 3181 / 3359 passing.
 - H1N1 fuzz subset: 2905 / 2905 passing.
 - `tests/cases --group DTP` matched 0 cases in the current workspace layout,
   so curated DTP case coverage needs a fixture-layout check before using it as
@@ -25,21 +25,21 @@ Remaining DTP fuzz failures are mostly in three buckets:
 
 Latest working log for handoff:
 
-- `tests/relative/tmp/dtp_run_after_dtp_cvx198_same_cvx_guard.txt`
+- `tests/relative/tmp/dtp_run_after_dtp_prior_pertussis_ge7_guard.txt`
 
 Bucket summary from that log:
 
-- Evaluation-only failures: 143 cases.
+- Evaluation-only failures: 131 cases.
 - Forecast-only failures: 13 cases.
 - Combined evaluation and forecast failures: 34 cases.
 - Failed cases with same-day DTP doses: 50 cases.
 - Largest status transitions:
-  - Rust Valid, Java Accepted: 66.
   - Rust Valid, Java Invalid: 60.
+  - Rust Valid, Java Accepted: 53.
   - Rust Accepted, Java Valid: 45.
   - Rust Invalid, Java Valid: 22.
 - Largest product transitions:
-  - CVX 113 Valid -> Accepted: 18.
+  - CVX 113 Valid -> Accepted: 17.
   - CVX 138 Valid -> Accepted: 14.
   - CVX 139 Valid -> Accepted: 9.
   - CVX 195 Invalid -> Valid: 7.
@@ -274,6 +274,12 @@ Adolescent Tdap:
   from age 7 through before age 10, the first such dose may be Valid.
 - Further qualifying adolescent Tdap shots in that 7-to-10 window are Accepted
   as extra doses.
+- The "first such dose" check is any valid pertussis-containing DTP-family dose
+  at or after age 7, not just CVX 115/198. In DTP5 histories, if a valid
+  pertussis dose such as CVX 130 already occurred after age 7, a later CVX 115
+  before age 10 can be Accepted rather than Valid. Representative fixes:
+  `fuzz_fail_dtp_20260608_13181`, `fuzz_fail_dtp_20260608_150180`, and
+  `fuzz_fail_dtp_20260608_21859`.
 - At age 10 or later, a qualifying pertussis/diphtheria/tetanus dose is Valid
   and creates `_ADOLESCENT_TDAP_COMPLETED`.
 - If the interval between pertussis shots is less than 28 days, Java marks the

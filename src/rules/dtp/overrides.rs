@@ -44,6 +44,18 @@ fn get_last_pertussis_date_before(ctx: &EvaluationContext, date: NaiveDate) -> O
         .max()
 }
 
+fn has_prior_valid_pertussis_ge_7(ctx: &EvaluationContext, date: NaiveDate) -> bool {
+    let age_7 = add_years_unchecked(ctx.patient.birth_date, 7);
+    ctx.valid_doses.iter().any(|(v_date, _)| {
+        *v_date < date
+            && *v_date >= age_7
+            && ctx
+                .history
+                .iter()
+                .any(|d| d.date == *v_date && is_pertussis_vaccine(d.cvx))
+    })
+}
+
 pub fn dtp_custom_evaluation_hook(
     series_name: &str,
     target_dose_idx: usize,
@@ -240,7 +252,10 @@ pub fn dtp_custom_extra_dose_hook(
     let age_ge_7 = dose.date >= add_years_unchecked(birth_date, 7);
     if ctx.target_dose_number < 5
         || (ctx.target_dose_number == 5
-            && (ctx.valid_doses.len() < 4 || (age_ge_7 && !is_td_family(dose.cvx))))
+            && (ctx.valid_doses.len() < 4
+                || (age_ge_7
+                    && !is_td_family(dose.cvx)
+                    && !has_prior_valid_pertussis_ge_7(ctx, dose.date))))
     {
         return Some((DoseStatus::Valid, SmallVec::new()));
     }
@@ -268,14 +283,7 @@ pub fn dtp_custom_extra_dose_hook(
             }
             return Some((DoseStatus::Valid, SmallVec::new()));
         } else {
-            let has_prior_tdap_ge_7 = ctx.valid_doses.iter().any(|(v_date, _)| {
-                let is_prior_tdap = ctx.history.iter().any(|d| {
-                    d.date == *v_date && (d.cvx.0 == cvx!("115") || d.cvx.0 == cvx!("198"))
-                });
-                let prior_ge_7 = *v_date >= add_years_unchecked(birth_date, 7);
-                is_prior_tdap && prior_ge_7
-            });
-            if !has_prior_tdap_ge_7 {
+            if !has_prior_valid_pertussis_ge_7(ctx, dose.date) {
                 if let Some(prev_p_date) = get_last_pertussis_date_before(ctx, dose.date) {
                     if dose.date < prev_p_date + chrono::Duration::days(28) {
                         return Some((
