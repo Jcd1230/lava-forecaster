@@ -350,26 +350,38 @@ pub fn dtp_custom_forecast_hook(
             forecast.status = forecast.status.with_recommended_date(Some(recommended));
             forecast.status = forecast.status.with_overdue_date(Some(overdue));
         } else {
-            if forecast.series_name == "DTP_5_DOSE_SERIES" {
-                if let Some((last_valid_date, _)) = valid_doses.last() {
-                    let age_7 = add_years_unchecked(patient.birth_date, 7);
-                    let age_10 = add_years_unchecked(patient.birth_date, 10);
-                    let last_valid_td_family = history
-                        .iter()
-                        .any(|d| d.date == *last_valid_date && !is_pertussis_vaccine(d.cvx));
+            if let Some((last_valid_date, _)) = valid_doses.last() {
+                let age_7 = add_years_unchecked(patient.birth_date, 7);
+                let last_valid_td_family = history
+                    .iter()
+                    .any(|d| d.date == *last_valid_date && !is_pertussis_vaccine(d.cvx));
+                let has_valid_pertussis_ge_7 = valid_doses.iter().any(|(v_date, _)| {
+                    *v_date >= age_7
+                        && history
+                            .iter()
+                            .any(|d| d.date == *v_date && is_pertussis_vaccine(d.cvx))
+                });
 
-                    if last_valid_td_family
-                        && *last_valid_date >= age_7
-                        && *last_valid_date < age_10
-                    {
-                        forecast.status =
-                            forecast.status.with_earliest_date(Some(*last_valid_date));
-                        forecast.status = forecast
-                            .status
-                            .with_recommended_date(Some(*last_valid_date));
-                        forecast.status = forecast.status.with_overdue_date(Some(*last_valid_date));
-                        return;
-                    }
+                if forecast.series_name == "DTP_3_DOSE_SERIES" && !has_valid_pertussis_ge_7 {
+                    forecast.status = forecast.status.with_earliest_date(Some(*last_valid_date));
+                    forecast.status = forecast
+                        .status
+                        .with_recommended_date(Some(*last_valid_date));
+                    forecast.status = forecast.status.with_overdue_date(Some(*last_valid_date));
+                    return;
+                }
+
+                if forecast.series_name == "DTP_5_DOSE_SERIES"
+                    && last_valid_td_family
+                    && *last_valid_date >= age_7
+                    && !has_valid_pertussis_ge_7
+                {
+                    forecast.status = forecast.status.with_earliest_date(Some(*last_valid_date));
+                    forecast.status = forecast
+                        .status
+                        .with_recommended_date(Some(*last_valid_date));
+                    forecast.status = forecast.status.with_overdue_date(Some(*last_valid_date));
+                    return;
                 }
             }
 
@@ -441,8 +453,19 @@ pub fn dtp_custom_forecast_hook(
         if forecast.series_name == "DTP_3_DOSE_SERIES"
             && valid_doses.len() >= 3
             && !has_valid_pertussis_dose
-            && has_any_pertussis_history
         {
+            if !has_any_pertussis_history {
+                let last_valid_date = valid_doses
+                    .iter()
+                    .map(|(date, _)| *date)
+                    .max()
+                    .unwrap_or(eval_date);
+                forecast.status = forecast.status.with_earliest_date(Some(last_valid_date));
+                forecast.status = forecast.status.with_recommended_date(Some(last_valid_date));
+                forecast.status = forecast.status.with_overdue_date(Some(last_valid_date));
+                return;
+            }
+
             let mut earliest = add_years_unchecked(patient.birth_date, 11);
             let mut recommended = add_years_unchecked(patient.birth_date, 11);
             let overdue = add_years_unchecked(patient.birth_date, 13) + chrono::Duration::days(28)

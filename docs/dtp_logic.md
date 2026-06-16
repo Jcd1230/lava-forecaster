@@ -6,10 +6,10 @@ behavior inferred from recorded Java output snapshots.
 
 ## Current Parity Snapshot
 
-Latest verified checkpoint after the DTP5 zero-valid forecast-anchor
-adjustment:
+Latest verified checkpoint after the adolescent Tdap due-now forecast
+refinement:
 
-- DTP fuzz subset: 3055 / 3359 passing.
+- DTP fuzz subset: 3062 / 3359 passing.
 - H1N1 fuzz subset: 2905 / 2905 passing.
 - `tests/cases --group DTP` matched 0 cases in the current workspace layout,
   so curated DTP case coverage needs a fixture-layout check before using it as
@@ -26,13 +26,13 @@ Remaining DTP fuzz failures are mostly in three buckets:
 
 Latest working log for handoff:
 
-- `tests/relative/tmp/dtp_run_after_zero_valid_invalid_anchor.txt`
+- `tests/relative/tmp/dtp_run_after_adolescent_due_now_refine.txt`
 
 Bucket summary from that log:
 
-- Evaluation-only failures: 195 cases.
-- Forecast-only failures: 20 cases.
-- Combined evaluation and forecast failures: 89 cases.
+- Evaluation-only failures: 200 cases.
+- Forecast-only failures: 13 cases.
+- Combined evaluation and forecast failures: 84 cases.
 - Largest status transitions:
   - Rust Valid, Java Invalid: 169.
   - Rust Valid, Java Accepted: 66.
@@ -51,13 +51,15 @@ Bucket summary from that log:
 
 Good next target:
 
-- Start with forecast-only failures where evaluations already match. Some are
-  one-day overdue/date-boundary drifts and should be lower risk than changing
-  broad evaluation product rules. Examples from the latest bucket include
-  `fuzz_fail_dtp_20260608_24219`, `fuzz_fail_dtp_20260608_27482`,
-  `fuzz_fail_dtp_20260608_62378`, and `fuzz_fail_dtp_20260608_68525`.
-- After forecast-only cases, return to same-day and Td-family Valid/Accepted
-  classification with Drools traces for representative counterexamples.
+- The remaining forecast-only failures all have same-day DTP-family doses.
+  That suggests the next forecast fixes should be handled alongside DTP
+  same-day counting/ordering rather than as isolated forecast-date rules.
+  Representative remaining cases include `fuzz_fail_dtp_20260608_27482`,
+  `fuzz_fail_dtp_20260608_62378`, `fuzz_fail_dtp_20260608_68525`,
+  `fuzz_fail_dtp_20260608_158219`, and
+  `fuzz_fail_dtp_20260608_215276`.
+- Next broad bucket: same-day and Td-family Valid/Accepted classification with
+  Drools traces for representative counterexamples.
 
 Do not repeat this failed broad experiment:
 
@@ -401,6 +403,16 @@ Completed primary series with adolescent Tdap still needed:
 
 - If a pertussis-containing dose occurred from age 7 through before age 10,
   recommend Tdap at age 11, overdue at age 13 years plus 4 weeks.
+- If the completed/reopened DTP forecast has no valid pertussis dose at or
+  after age 7, Java can make the adolescent Tdap need due immediately at the
+  latest valid dose instead of forecasting age 11. Representative fixes:
+  `fuzz_fail_dtp_20260608_36519`, `fuzz_fail_dtp_20260608_156288`,
+  `fuzz_fail_dtp_20260608_187116`, and
+  `fuzz_fail_dtp_20260608_212403`.
+- If a valid pertussis dose exists at or after age 7 but before age 10, keep
+  the age-11 adolescent window. Representative counter/fix cases:
+  `fuzz_fail_dtp_20260608_180155`, `fuzz_fail_dtp_20260608_198770`, and
+  `fuzz_fail_dtp_20260608_202956`.
 - For 5-dose completion, Java checks adolescent Tdap exception A and B:
   - A: no pertussis dose at or after age 4 minus 4 days.
   - B: fewer than 4 pertussis doses before age 7.
