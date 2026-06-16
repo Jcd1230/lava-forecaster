@@ -362,7 +362,13 @@ impl<'a> EvaluationEngine<'a> {
                 if prio_a != prio_b {
                     prio_a.cmp(&prio_b)
                 } else if *group == "DTP" && a.1.cvx == b.1.cvx {
-                    b.0.cmp(&a.0) // Later original index comes first
+                    let dtp_same_date_has_cvx_115 =
+                        history.iter().any(|d| d.date == a.1.date && d.cvx.0 == 115);
+                    if a.1.cvx.0 == 198 && !dtp_same_date_has_cvx_115 {
+                        a.0.cmp(&b.0)
+                    } else {
+                        b.0.cmp(&a.0) // Later original index comes first
+                    }
                 } else if *group == "INFLUENZA" {
                     b.0.cmp(&a.0) // Later original index comes first
                 } else {

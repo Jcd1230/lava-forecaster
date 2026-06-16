@@ -6,9 +6,9 @@ behavior inferred from recorded Java output snapshots.
 
 ## Current Parity Snapshot
 
-Latest verified checkpoint after the CVX 198 interval-anchor refinement:
+Latest verified checkpoint after the same-day CVX 198 ordering refinement:
 
-- DTP fuzz subset: 3163 / 3359 passing.
+- DTP fuzz subset: 3169 / 3359 passing.
 - H1N1 fuzz subset: 2905 / 2905 passing.
 - `tests/cases --group DTP` matched 0 cases in the current workspace layout,
   so curated DTP case coverage needs a fixture-layout check before using it as
@@ -25,29 +25,28 @@ Remaining DTP fuzz failures are mostly in three buckets:
 
 Latest working log for handoff:
 
-- `tests/relative/tmp/dtp_run_after_cvx198_interval_anchor.txt`
+- `tests/relative/tmp/dtp_run_after_dtp_cvx198_same_cvx_guard.txt`
 
 Bucket summary from that log:
 
-- Evaluation-only failures: 149 cases.
+- Evaluation-only failures: 143 cases.
 - Forecast-only failures: 13 cases.
 - Combined evaluation and forecast failures: 34 cases.
+- Failed cases with same-day DTP doses: 50 cases.
 - Largest status transitions:
   - Rust Valid, Java Accepted: 66.
-  - Rust Valid, Java Invalid: 66.
+  - Rust Valid, Java Invalid: 60.
   - Rust Accepted, Java Valid: 45.
-  - Rust Invalid, Java Valid: 28.
+  - Rust Invalid, Java Valid: 22.
 - Largest product transitions:
   - CVX 113 Valid -> Accepted: 18.
   - CVX 138 Valid -> Accepted: 14.
   - CVX 139 Valid -> Accepted: 9.
-  - CVX 107 Valid -> Invalid: 7.
   - CVX 195 Invalid -> Valid: 7.
-  - CVX 198 Invalid -> Valid: 6.
-  - CVX 198 Valid -> Invalid: 6.
+  - CVX 107 Valid -> Invalid: 7.
   - CVX 20 Valid -> Invalid: 6.
-  - CVX 28 Invalid -> Valid: 6.
   - CVX 28 Valid -> Accepted: 6.
+  - CVX 28 Invalid -> Valid: 6.
 
 Good next target:
 
@@ -467,6 +466,15 @@ Evaluation order:
 
 - If one same-day DTP shot contains pertussis and the other does not, Java
   evaluates the pertussis-containing shot first.
+- Identical same-day CVX 198 doses usually preserve source order rather than
+  using LAVA's older DTP same-CVX reverse ordering. This matches
+  `fuzz_fail_dtp_20260608_78041`, `fuzz_fail_dtp_20260608_245513`,
+  `fuzz_fail_dtp_20260608_127315`, `fuzz_fail_dtp_20260608_146598`,
+  `fuzz_fail_dtp_20260608_174803`, and `fuzz_fail_dtp_20260608_205462`.
+- That CVX 198 ordering is not blanket same-CVX behavior. If CVX 115 is also
+  present on the same date, recorded Java output still follows the later-source
+  duplicate ordering (`fuzz_fail_dtp_20260608_17430`). Identical CVX 139 also
+  keeps later-source ordering (`fuzz_fail_dtp_20260608_793`).
 - CVX 196 is an exception observed in recorded Java output. It behaves as a
   Td-family product for antigen/completion purposes, but same-day ordering
   follows source order rather than the generic pertussis-first sorting only in
