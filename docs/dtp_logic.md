@@ -6,10 +6,9 @@ behavior inferred from recorded Java output snapshots.
 
 ## Current Parity Snapshot
 
-Latest verified checkpoint after the adolescent Tdap due-now forecast
-refinement:
+Latest verified checkpoint after the CVX 198 interval-anchor refinement:
 
-- DTP fuzz subset: 3062 / 3359 passing.
+- DTP fuzz subset: 3163 / 3359 passing.
 - H1N1 fuzz subset: 2905 / 2905 passing.
 - `tests/cases --group DTP` matched 0 cases in the current workspace layout,
   so curated DTP case coverage needs a fixture-layout check before using it as
@@ -26,28 +25,29 @@ Remaining DTP fuzz failures are mostly in three buckets:
 
 Latest working log for handoff:
 
-- `tests/relative/tmp/dtp_run_after_adolescent_due_now_refine.txt`
+- `tests/relative/tmp/dtp_run_after_cvx198_interval_anchor.txt`
 
 Bucket summary from that log:
 
-- Evaluation-only failures: 200 cases.
+- Evaluation-only failures: 149 cases.
 - Forecast-only failures: 13 cases.
-- Combined evaluation and forecast failures: 84 cases.
+- Combined evaluation and forecast failures: 34 cases.
 - Largest status transitions:
-  - Rust Valid, Java Invalid: 169.
   - Rust Valid, Java Accepted: 66.
-  - Rust Invalid, Java Valid: 58.
+  - Rust Valid, Java Invalid: 66.
   - Rust Accepted, Java Valid: 45.
+  - Rust Invalid, Java Valid: 28.
 - Largest product transitions:
   - CVX 113 Valid -> Accepted: 18.
-  - CVX 198 Valid -> Invalid: 17.
-  - CVX 132 Valid -> Invalid: 14.
   - CVX 138 Valid -> Accepted: 14.
-  - CVX 20 Valid -> Invalid: 14.
-  - CVX 107 Valid -> Invalid: 13.
-  - CVX 170 Valid -> Invalid: 13.
-  - CVX 195 Valid -> Invalid: 13.
-  - CVX 195 Invalid -> Valid: 10.
+  - CVX 139 Valid -> Accepted: 9.
+  - CVX 107 Valid -> Invalid: 7.
+  - CVX 195 Invalid -> Valid: 7.
+  - CVX 198 Invalid -> Valid: 6.
+  - CVX 198 Valid -> Invalid: 6.
+  - CVX 20 Valid -> Invalid: 6.
+  - CVX 28 Invalid -> Valid: 6.
+  - CVX 28 Valid -> Accepted: 6.
 
 Good next target:
 
@@ -294,6 +294,14 @@ Td/Tdap minimum-age ignore behavior:
   ignored when calculating intervals and forecast target dose dates.
 - CVX 115 as target dose 1, 2, or 3 in the 5-dose series and below its valid
   minimum age is also marked ignored.
+- CVX 198 is not ignored just because the patient is under age 7. In the
+  child DTP5 series Java can treat CVX 198 as a valid DTaP-containing dose, and
+  that valid dose anchors later DTP intervals. Rust previously ignored all
+  under-age Tdap-family CVX 115/198 doses for interval anchoring; narrowing
+  that to CVX 115 plus Td-family products fixed a large bucket. Representative
+  fixes: `fuzz_fail_dtp_20260608_3980`,
+  `fuzz_fail_dtp_20260608_6145`, `fuzz_fail_dtp_20260608_14024`, and
+  `fuzz_fail_dtp_20260608_240182`.
 - In Java output this "ignored" path maps to LAVA `Accepted` with an ignored /
   outside-routine effect rather than a normal Valid dose.
 

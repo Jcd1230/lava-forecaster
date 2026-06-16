@@ -636,17 +636,34 @@ impl<'a> EvaluationEngine<'a> {
                     .filter(|int| int.to_dose == target_dose_idx)
                     .cloned()
                     .collect();
-                let has_same_dose_prev = evaluations.iter().zip(&eval_target_dose_numbers).any(|(e, t_num)| {
-                    *t_num == target_dose_idx && !is_eval_ignored(active_series.vaccine_group, e.cvx, e.dose_date, e.status, Some(patient.birth_date))
-                });
+                let has_same_dose_prev =
+                    evaluations
+                        .iter()
+                        .zip(&eval_target_dose_numbers)
+                        .any(|(e, t_num)| {
+                            *t_num == target_dose_idx
+                                && !is_eval_ignored(
+                                    active_series.vaccine_group,
+                                    e.cvx,
+                                    e.dose_date,
+                                    e.status,
+                                    Some(patient.birth_date),
+                                )
+                        });
                 if has_same_dose_prev {
-                    if let Some(int) = active_series.intervals.iter().find(|int| int.to_dose == target_dose_idx) {
+                    if let Some(int) = active_series
+                        .intervals
+                        .iter()
+                        .find(|int| int.to_dose == target_dose_idx)
+                    {
                         intervals.push(CompiledDoseInterval {
                             from_dose: target_dose_idx,
                             to_dose: target_dose_idx,
                             absolute_minimum_interval: int.absolute_minimum_interval.clone(),
                             minimum_interval: int.minimum_interval.clone(),
-                            earliest_recommended_interval: int.earliest_recommended_interval.clone(),
+                            earliest_recommended_interval: int
+                                .earliest_recommended_interval
+                                .clone(),
                             latest_recommended_interval: int.latest_recommended_interval.clone(),
                         });
                     }
@@ -654,7 +671,13 @@ impl<'a> EvaluationEngine<'a> {
                 intervals
             } else {
                 let has_prev_non_ignored_eval = evaluations.iter().any(|e| {
-                    !is_eval_ignored(active_series.vaccine_group, e.cvx, e.dose_date, e.status, Some(patient.birth_date))
+                    !is_eval_ignored(
+                        active_series.vaccine_group,
+                        e.cvx,
+                        e.dose_date,
+                        e.status,
+                        Some(patient.birth_date),
+                    )
                 });
                 if has_prev_non_ignored_eval {
                     active_series
@@ -666,7 +689,9 @@ impl<'a> EvaluationEngine<'a> {
                             to_dose: 1,
                             absolute_minimum_interval: int.absolute_minimum_interval.clone(),
                             minimum_interval: int.minimum_interval.clone(),
-                            earliest_recommended_interval: int.earliest_recommended_interval.clone(),
+                            earliest_recommended_interval: int
+                                .earliest_recommended_interval
+                                .clone(),
                             latest_recommended_interval: int.latest_recommended_interval.clone(),
                         })
                         .collect()
@@ -975,7 +1000,14 @@ impl<'a> EvaluationEngine<'a> {
                 active_series.vaccine_group
             );
             if let Some(policy) = self.policy {
-                policy.custom_forecast_hook(patient, valid_doses, evaluations, history, eval_date, &mut f);
+                policy.custom_forecast_hook(
+                    patient,
+                    valid_doses,
+                    evaluations,
+                    history,
+                    eval_date,
+                    &mut f,
+                );
             }
             return f;
         }
@@ -993,7 +1025,14 @@ impl<'a> EvaluationEngine<'a> {
                 active_series.name
             );
             if let Some(policy) = self.policy {
-                policy.custom_forecast_hook(patient, valid_doses, evaluations, history, eval_date, &mut f);
+                policy.custom_forecast_hook(
+                    patient,
+                    valid_doses,
+                    evaluations,
+                    history,
+                    eval_date,
+                    &mut f,
+                );
             }
             f
         } else {
@@ -1072,7 +1111,14 @@ impl<'a> EvaluationEngine<'a> {
                     active_series.num_doses
                 );
                 if let Some(policy) = self.policy {
-                    policy.custom_forecast_hook(patient, valid_doses, evaluations, history, eval_date, &mut f);
+                    policy.custom_forecast_hook(
+                        patient,
+                        valid_doses,
+                        evaluations,
+                        history,
+                        eval_date,
+                        &mut f,
+                    );
                 }
                 f
             } else {
@@ -1311,7 +1357,14 @@ impl<'a> EvaluationEngine<'a> {
                 // Apply custom rules hook (like Polio 2009 reset) if present
                 if let Some(policy) = self.policy {
                     let prev_status = f.status.clone();
-                    policy.custom_forecast_hook(patient, valid_doses, evaluations, history, eval_date, &mut f);
+                    policy.custom_forecast_hook(
+                        patient,
+                        valid_doses,
+                        evaluations,
+                        history,
+                        eval_date,
+                        &mut f,
+                    );
                     if f.status != prev_status {
                         trace_decision!(
                             "forecast_custom_forecast_hook",
@@ -1633,11 +1686,13 @@ pub fn is_eval_ignored(
     if group == "DTP" {
         // Td (CVX 09, 113, 138, 139, 196) under 7 years - 4 days
         let is_td = cvx.0 == 9 || cvx.0 == 113 || cvx.0 == 138 || cvx.0 == 139 || cvx.0 == 196;
-        // Tdap (CVX 115, 198) under 7 years - 4 days
-        let is_tdap = cvx.0 == 115 || cvx.0 == 198;
+        // Tdap CVX 115 under 7 years - 4 days. CVX 198 can be a valid
+        // child-series DTaP-containing dose and should still anchor intervals.
+        let is_tdap = cvx.0 == 115;
         if is_td || is_tdap {
             if let Some(birth) = birth_date {
-                let age_7_minus_4d = crate::date_utils::add_years_unchecked(birth, 7) - chrono::Duration::days(4);
+                let age_7_minus_4d =
+                    crate::date_utils::add_years_unchecked(birth, 7) - chrono::Duration::days(4);
                 if date < age_7_minus_4d {
                     return true;
                 }
