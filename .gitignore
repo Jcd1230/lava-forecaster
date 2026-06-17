@@ -41,3 +41,7 @@ README.HISTORY
 *.log
 cargo_check_warnings*.txt
 
+
+# Local package
+vendor
+dist
