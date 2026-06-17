@@ -1,48 +1,60 @@
 # LAVA Forecaster: MMR Logic Guide
 
-This document reverse-engineers the Measles, Mumps, and Rubella (MMR) forecasting logic from the Java ICE engine to ensure 100% behavioral parity. The logic for MMR is unique as it is primarily "component-based."
+This document reverse-engineers the Measles, Mumps, and Rubella (MMR) forecasting and evaluation logic from the legacy Java ICE engine to ensure 100% behavioral parity.
 
 ## Key Concepts & Rules
 
-### 1. Component-Based Completion
+### 1. Component-Based Counting & Completion
 
-Unlike most other vaccine groups which count doses, the MMR group tracks the three antigens (Measles, Mumps, and Rubella) separately. The series is only complete when the patient has received a sufficient number of valid antigens for *each* of the three diseases.
-
-- **Source of Truth**: This logic is implicit in the Drools rules and is handled by the core Java engine helpers (e.g., `ICELogicHelper.java`). The `.dslr` files act on the *outcome* of this component counting rather than performing the count themselves.
-- **Logic**:
-  - The engine maintains a running total of valid Measles, Mumps, and Rubella antigens.
-  - A plain MMR vaccine (CVX 03) provides one of each.
-  - A Measles-only vaccine (CVX 05) provides only a Measles antigen.
-  - An MR vaccine provides one Measles and one Rubella antigen.
-  - The standard series requires **2 valid doses of each antigen**.
-- **Verification**: Test cases where a patient has a mixed history, such as one MMR dose and one separate Rubella dose. The forecast should indicate that Measles and Mumps are still needed, but Rubella is complete.
-
-### 2. Series Completion Status ("Complete High Risk")
-
-A patient who has successfully completed the MMR series is not considered simply "Complete." Due to the importance of ensuring immunity, they are perpetually considered to be at high risk for acquiring the diseases if their immunity wanes.
-
-- **Source of Truth**: `Recommendation^MMR.dslr`
-  - Comment: `(MMR should never have a recommendation of Not Recommended/Complete.)`
-  - Rule: `"MMR: If a patient completed the series, recommendation is Not Recommended / COMPLETE_HIGH_RISK"`
-- **Logic**: Once the engine determines that the patient has received at least two valid doses of all three antigens, the series forecast status must be set to `Complete` with a reason of `COMPLETE_HIGH_RISK`.
-- **Verification**: Any test case where a patient has a history of two valid MMR doses. The final forecast status must be `Complete` and the reason `COMPLETE_HIGH_RISK`.
-
-### 3. Born Before 1957 Presumptive Immunity
-
-Individuals born before 1957 are generally presumed to be immune to measles and mumps.
-
-- **Source of Truth**: `Recommendation^MMR.dslr`
-  - Rule: `"MMR: Recommend conditional/high risk if born prior to 1/1/1957 and series not complete"`
-- **Logic**: If a patient was born before 1957 and has an incomplete vaccination history, they should receive a `ConditionallyRecommended` forecast rather than a `NotComplete` one.
-- **Verification**: A test case with a patient born in 1956 with no MMR vaccinations. The forecast should be `ConditionallyRecommended`.
-
-### 4. Same-Day Vaccine Preference
-
-When multiple MMR-containing vaccines are administered on the same day, the engine prioritizes the most comprehensive vaccine.
-
-- **Source of Truth**: `DuplicateShotSameDay^MMR.drl`
+Unlike most other vaccine groups that count raw doses, the MMR group tracks the three antigens (Measles, Mumps, and Rubella) separately because a dose can target a subset of these diseases.
 - **Rules**:
-  - MMRV (CVX 94) is preferred over plain MMR (CVX 03).
-  - Plain MMR (CVX 03) is preferred over single-antigen vaccines.
-- **Logic**: If two valid MMR-containing shots are given on the same day, the less comprehensive one is marked as `Invalid` with a `DUPLICATE_SAME_DAY` reason, ensuring that only the antigens from the preferred vaccine are counted.
-- **Verification**: A test case where a patient receives both an MMR and a separate Mumps vaccine on the same day. The Mumps-only vaccine should be ignored.
+  - The series is only complete when the patient has received a sufficient number of valid components for *each* of the three diseases (Measles: 2, Mumps: 2, Rubella: 2).
+  - A plain MMR vaccine (CVX 03) and MMRV (CVX 94) provide one of each antigen.
+  - A Measles-only vaccine (CVX 05) provides only a Measles antigen.
+  - An MR vaccine (CVX 04) provides one Measles and one Rubella antigen.
+  - A Mumps-only vaccine (CVX 07) provides only a Mumps antigen.
+  - A Rubella-only vaccine (CVX 06) provides only a Rubella antigen.
+  - Rubella/Mumps vaccine (CVX 38) provides one Rubella and one Mumps antigen.
+  - **CVX 168 Warning**: CVX 168 is *Influenza, trivalent, adjuvanted, preservative free* and does **not** count towards the MMR/mumps component count.
+
+### 2. Same-Day Duplicate Invalidation
+
+Java ICE has both MMR-specific and generic same-day duplicate rules:
+- **Evaluation Order**:
+  - MMRV (CVX 94) is evaluated first.
+  - MMR (CVX 03) is evaluated second.
+  - Other components (MR, Measles, Mumps, Rubella) are evaluated last.
+- **Duplicate Invalidation**:
+  - If MMRV (CVX 94) is valid, any other same-day MMR-family vaccine is evaluated as `Invalid (Duplicate Same Day)`.
+  - If MMR (CVX 03) is valid, any other same-day MMR-family vaccine (except MMRV) is evaluated as `Invalid (Duplicate Same Day)`.
+  - Otherwise, for other vaccines (like single/partial-antigens), the generic **Rule 5a** applies: duplicate same-day invalidation is only triggered if the vaccines target the **exact same set of diseases**.
+  - As a result, disjoint same-day partial-antigen combinations (such as CVX 05 Measles + CVX 06 Rubella + CVX 07 Mumps) are **not duplicates** and are all evaluated as `Valid`.
+  - **Engine Bypass**: Because these same-day non-duplicate doses target the same dose number but are administered on the same day, the engine must bypass the minimum interval check (treating 0-day intervals as valid) to prevent them from failing as `BelowMinimumInterval`.
+
+### 3. Live Virus Conflict Spacing
+
+Because MMR vaccines are live-virus vaccines, they must be spaced appropriately to prevent interference.
+- **Same-Group Spacing (within MMR)**:
+  - Normally, two live-virus vaccines in the same vaccine group require a minimum interval of **24 days**.
+  - **MMR Custom Exception**: If the *current* vaccine under evaluation is CVX 94 (MMRV) and the *previous* vaccine evaluated in the MMR series is CVX 94 or CVX 03, the required spacing is **28 days**.
+- **Different-Group Spacing (cross-group)**:
+  - Live vaccines from different vaccine groups (e.g., Varicella CVX 21 and MMR CVX 03) require a minimum interval of **28 days**.
+- **Universal Date Clamping**:
+  - If a patient has received a live virus vaccine, the next recommendation for any live vaccine group (like MMR) must have its earliest and recommended dates clamped to at least **28 days** after the last live virus dose.
+
+### 4. Early Dose 1 Exception ("Outside Routine Series")
+
+- **Rule**: If CVX 03, 04, or 05 is administered at age $\ge \text{6 months} - \text{4 days}$ and $< \text{1 year} - \text{4 days}$ (absolute minimum age for Dose 1), it is evaluated as `Accepted` with the reason `Outside Routine Series`.
+- **Note**: CVX 94 (MMRV) is explicitly excluded from this rule and will be evaluated as `Invalid (Below Minimum Age)` if given early.
+- **Accepted vs. Valid**: Doses evaluated as `Accepted` are *not* valid. They do not increment disease-specific component counters and do not count toward series completion.
+
+### 5. Adult Completion & Booster Rules
+
+- **Dose 2 Age 19+**: If Dose 2 is administered at age $\ge 19\text{y}$, it is evaluated as `Accepted / BoosterDose` (Extra Dose) and marks the series complete.
+- **Post-Evaluation Age 19+**: If the patient is $\ge 19\text{y}$ at evaluation time, the series is not complete, the effective dose number is 2 (meaning they have exactly 1 valid MMR dose), and no unevaluated MMR shots remain, the series is marked complete.
+- **Early Accepted Dose Interaction**: An early accepted dose is not valid and does not increment the valid dose count. Therefore, a patient with only one early accepted dose has an effective dose number of 1 (so the age-19 completion rule does not fire). They must have at least one valid dose to trigger the age-19 completion rule.
+
+### 6. Forecast Recommendation Reason
+
+- **COMPLETE_HIGH_RISK**: When the MMR series is completed, Java ICE's recommendation engine outputs `NOT_RECOMMENDED` with a reason of `COMPLETE_HIGH_RISK`. LAVA normalizes this status to displayed `Complete` with a reason of `COMPLETE_HIGH_RISK`.
+- **ConditionallyRecommended**: If a patient was born before Jan 1, 1957, they are presumed immune. If their series is incomplete, the forecast status is set to `ConditionallyRecommended` with the reason `CONDITIONAL` (and all forecast dates are cleared).

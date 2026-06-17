@@ -37,10 +37,44 @@ fn count_components(cvxs: &[Cvx]) -> (usize, usize, usize) {
     for cvx in cvxs {
         let c = cvx.0;
         if matches!(c, 3 | 4 | 5 | 94) { m += 1; }
-        if matches!(c, 3 | 7 | 38 | 94 | 168) { mu += 1; }
+        if matches!(c, 3 | 7 | 38 | 94) { mu += 1; }
         if matches!(c, 3 | 4 | 6 | 38 | 94) { r += 1; }
     }
     (m, mu, r)
+}
+
+fn check_live_virus_conflict(dose: &Dose, history: &[Dose]) -> Option<SmallVec<[EvaluationReason; 4]>> {
+    if is_live_virus(dose.cvx) {
+        let mut reasons = SmallVec::new();
+        let mut conflict = false;
+        for prev in history {
+            if prev.date < dose.date && is_live_virus(prev.cvx) {
+                let is_both_mmr = is_mmr_group(dose.cvx) && is_mmr_group(prev.cvx);
+                let required_days = if is_both_mmr {
+                    let prev_has_varicella = prev.cvx.0 == 94;
+                    let custom_rule = dose.cvx.0 == 94 && prev.cvx.0 == 3;
+                    if prev_has_varicella || custom_rule {
+                        28
+                    } else {
+                        24
+                    }
+                } else {
+                    28
+                };
+
+                if dose.date < prev.date + chrono::Duration::days(required_days) {
+                    conflict = true;
+                    if !reasons.contains(&EvaluationReason::TooEarlyLiveVirus) {
+                        reasons.push(EvaluationReason::TooEarlyLiveVirus);
+                    }
+                }
+            }
+        }
+        if conflict {
+            return Some(reasons);
+        }
+    }
+    None
 }
 
 pub fn mmr_custom_evaluation_hook(
@@ -53,7 +87,18 @@ pub fn mmr_custom_evaluation_hook(
     if let Some(dose) = ctx.current_dose {
         let birth_date = ctx.patient.birth_date;
 
-        // 1. Outside Routine Series for Dose 1
+        // 1. Live Virus Conflict
+        if let Some(conflict_reasons) = check_live_virus_conflict(dose, ctx.history) {
+            *status = DoseStatus::Invalid;
+            for r in conflict_reasons {
+                if !reasons.contains(&r) {
+                    reasons.push(r);
+                }
+            }
+            return;
+        }
+
+        // 2. Outside Routine Series for Dose 1
         if target_dose_idx == 1 {
             if dose.cvx.0 == 3 || dose.cvx.0 == 4 || dose.cvx.0 == 5 {
                 if age_ge(birth_date, dose.date, crate::time_period!("6m-4d")) && age_lt(birth_date, dose.date, crate::time_period!("1y-4d")) {
@@ -65,7 +110,7 @@ pub fn mmr_custom_evaluation_hook(
             }
         }
 
-        // 2. Adult Dose 2 Booster/Completion
+        // 3. Adult Dose 2 Booster/Completion
         if target_dose_idx == 2 {
             if age_ge(birth_date, dose.date, crate::time_period!("19y")) {
                 *status = DoseStatus::Accepted;
@@ -90,25 +135,6 @@ pub fn mmr_custom_evaluation_hook(
             reasons.clear();
             reasons.push(EvaluationReason::BoosterDose);
             return;
-        }
-
-        // 3. Live Virus Conflict
-        if is_live_virus(dose.cvx) {
-            for prev in ctx.history {
-                if prev.date < dose.date && is_live_virus(prev.cvx) {
-                    let is_both_mmr = is_mmr_group(dose.cvx) && is_mmr_group(prev.cvx);
-                    let required_days = if is_both_mmr {
-                        if dose.cvx.0 == 94 || prev.cvx.0 == 94 { 28 } else { 24 }
-                    } else { 28 };
-
-                    if dose.date < prev.date + chrono::Duration::days(required_days) {
-                        *status = DoseStatus::Invalid;
-                        if !reasons.contains(&EvaluationReason::TooEarlyLiveVirus) {
-                            reasons.push(EvaluationReason::TooEarlyLiveVirus);
-                        }
-                    }
-                }
-            }
         }
     }
 }
@@ -181,24 +207,7 @@ pub fn mmr_custom_dose_number_hook(
 ) -> usize {
     let valid_cvxs = get_valid_doses_cvx(ctx);
     let (m, mu, r) = count_components(&valid_cvxs);
-
-    if let Some(current_dose) = ctx.current_dose {
-        let (d_m, d_mu, d_r) = count_components(&[current_dose.cvx]);
-        let needs_d1 = m < 1 || mu < 1 || r < 1;
-        if needs_d1 && (d_m > 0 || d_mu > 0 || d_r > 0) {
-            1
-        } else {
-            2
-        }
-    } else {
-        if m < 1 || mu < 1 || r < 1 {
-            1
-        } else if m < 2 || mu < 2 || r < 2 {
-            2
-        } else {
-            3
-        }
-    }
+    std::cmp::min(m, std::cmp::min(mu, r)) + 1
 }
 
 pub fn mmr_custom_completion_hook(ctx: &EvaluationContext) -> bool {
@@ -245,6 +254,19 @@ impl crate::engine::EvaluationPolicy for MmrPolicy {
         Some(mmr_custom_completion_hook(ctx))
     }
 
+    fn custom_extra_dose_hook(
+        &self,
+        _series_name: &str,
+        ctx: &EvaluationContext,
+    ) -> Option<(DoseStatus, SmallVec<[EvaluationReason; 4]>)> {
+        if let Some(dose) = ctx.current_dose {
+            if let Some(conflict_reasons) = check_live_virus_conflict(dose, ctx.history) {
+                return Some((DoseStatus::Invalid, conflict_reasons));
+            }
+        }
+        None
+    }
+
     fn adjust_same_day_target_dose_number(
         &self,
         dose: &Dose,
@@ -262,11 +284,13 @@ impl crate::engine::EvaluationPolicy for MmrPolicy {
     }
 
     fn is_same_day_duplicate(&self, dose: &Dose, sorted_history_subset: &[Dose]) -> bool {
-        let (d_m, d_mu, d_r) = count_components(&[dose.cvx]);
         sorted_history_subset.iter().any(|prev_dose| {
             if prev_dose.date != dose.date { return false; }
-            let (p_m, p_mu, p_r) = count_components(&[prev_dose.cvx]);
-            (d_m > 0 && p_m > 0) || (d_mu > 0 && p_mu > 0) || (d_r > 0 && p_r > 0)
+            prev_dose.cvx == dose.cvx
+                || prev_dose.cvx.0 == 3
+                || prev_dose.cvx.0 == 94
+                || dose.cvx.0 == 3
+                || dose.cvx.0 == 94
         })
     }
 }
