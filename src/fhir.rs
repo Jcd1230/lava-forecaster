@@ -554,6 +554,7 @@ mod tests {
                             latest_date: None,
                         },
                         reasons: crate::date_utils::SmallVec::new(),
+                        sources: std::collections::HashMap::new(),
                     });
                     v
                 },

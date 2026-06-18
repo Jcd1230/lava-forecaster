@@ -19,6 +19,7 @@ To implement a group, follow the guidelines in the [Onboarding & Implementation 
 - [x] Implement `HepBAdult2DoseSeries.yml` (Heplisav-B CVX 189)
 - [x] Implement `HepBAdult3DoseSeries.yml`
 - [x] Implement custom switch/selection logic between Twinrix, child/adolescent, and adult series
+- [x] Achieve high fuzz-parity on fuzz slice (6,767/7,169 passed cases) and 96.4% on standard suite by resolving underage adult Hep B product invalidation, series-selection heuristics, and forecast spacing
 
 ## 3. HPV (Human Papillomavirus)
 - [x] Implement `HPV2DoseSeries.yml`
