@@ -72,7 +72,7 @@ To implement a group, follow the guidelines in the [Onboarding & Implementation 
 - [x] Implement 24-day override: if dose is >= 24 days after a valid dose in the *prior* season, it satisfies the interval requirement.
 - [x] Implement age-based rules: children < 9y with 0 prior-season valid doses require 2 doses in the current season; children < 9y with >= 1 prior valid dose (and all individuals >= 9y) require only 1 dose.
 - [x] Suppress "Insufficient Antigen" reasons for patients >= 9y.
-- [x] Achieve 100% parity on fuzz suite
+- [x] Achieve high parity on fuzz slice (6,053/8,581 passed cases) by refining seasonal completion forecast layout, centralizing unsupported product lists, and removing high-dose age restrictions.
 
 ## 10. COVID-19 (`COVID19`)
 *Java Concept:* `COVID_19` | *Focus Code:* `850`

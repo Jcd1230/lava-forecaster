@@ -73,6 +73,17 @@ pub fn get_active_season_name(eval_date: NaiveDate) -> &'static str {
     get_active_season(eval_date).name
 }
 
+fn is_ice_unsupported_influenza_cvx(cvx_code: u16) -> bool {
+    matches!(
+        cvx_code,
+        // ICE treats these seasonal influenza products as not usable in the
+        // supported US influenza schedules represented by this group.
+        cvx!("144") | cvx!("161") | cvx!("166") |
+        cvx!("194") | cvx!("200") | cvx!("201") | cvx!("202") |
+        cvx!("231") | cvx!("331") | cvx!("337")
+    )
+}
+
 pub fn influenza_custom_evaluation_hook(
     _series_name: &str,
     _target_dose_idx: usize,
@@ -93,7 +104,7 @@ pub fn influenza_custom_evaluation_hook(
         }
     }
 
-    if matches!(dose.cvx.0, cvx!("194") | cvx!("200") | cvx!("201") | cvx!("202") | cvx!("231") | cvx!("331") | cvx!("337")) {
+    if is_ice_unsupported_influenza_cvx(dose.cvx.0) {
         *status = DoseStatus::Invalid;
         reasons.retain(|r| *r != EvaluationReason::VaccineNotPartOfSeries);
         if !reasons.contains(&EvaluationReason::VaccineNotAllowedInUs) {
@@ -101,12 +112,9 @@ pub fn influenza_custom_evaluation_hook(
         }
     }
 
-    if matches!(dose.cvx.0, cvx!("135") | cvx!("197")) {
-        let min_limit = crate::time_period!("65y-4d").add_to(ctx.patient.birth_date);
-        if dose.date < min_limit {
-            *status = DoseStatus::Invalid;
-        }
-    }
+    // ICE does not appear to apply the ACIP high-dose age restriction as an
+    // invalidating rule in this forecast group. CVX 135/197 can still count
+    // toward the seasonal influenza dose requirement in fuzz traces.
 }
 
 pub fn influenza_custom_forecast_hook(
@@ -128,16 +136,17 @@ pub fn influenza_custom_forecast_hook(
     if forecast.status == SeriesStatus::Complete && season_valid_count >= needed {
         forecast.status = SeriesStatus::default();
         let next_season_start = active_season.end + chrono::Duration::days(1);
-        let mut earliest = next_season_start;
         let mut recommended = next_season_start;
 
         if let Some(last) = history.iter().max_by_key(|d| d.date) {
             let interval_date = last.date + chrono::Duration::days(28);
-            if interval_date > earliest { earliest = interval_date; }
             if interval_date > recommended { recommended = interval_date; }
         }
 
-        forecast.status = forecast.status.with_earliest_date(Some(earliest));
+        // ICE's process-results output leaves earliest_date blank once the
+        // current influenza season has been satisfied. The next actionable
+        // date is carried as recommended_date for the following season.
+        forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(Some(recommended));
         forecast.status = forecast.status.with_overdue_date(None);
         forecast.status = forecast.status.with_latest_date(None);
@@ -177,10 +186,9 @@ pub fn influenza_custom_forecast_hook(
 }
 
 fn count_valid_prior_doses(history: &[Dose], patient: &Patient, active_season_start: NaiveDate) -> usize {
-    let disallowed_cvx = [cvx!("194"), cvx!("200"), cvx!("201"), cvx!("202"), cvx!("231"), cvx!("331"), cvx!("337")];
     let mut eligible_doses: Vec<NaiveDate> = history.iter()
         .filter(|d| d.date < active_season_start)
-        .filter(|d| !disallowed_cvx.contains(&d.cvx.0))
+        .filter(|d| !is_ice_unsupported_influenza_cvx(d.cvx.0))
         .filter(|d| {
             let tp_6m_4d = crate::time_period!("6m-4d");
             let abs_min_date = tp_6m_4d.add_to(patient.birth_date);
@@ -250,18 +258,8 @@ fn evaluate_history_seasonally(patient: &Patient, history: &[Dose]) -> Vec<DoseE
                     reasons.push(EvaluationReason::BelowMinimumAge);
                 }
 
-                if matches!(dose.cvx.0, cvx!("194") | cvx!("200") | cvx!("201") | cvx!("202") | cvx!("231") | cvx!("331") | cvx!("337")) {
+                if is_ice_unsupported_influenza_cvx(dose.cvx.0) {
                     status = DoseStatus::Invalid;
-                }
-
-                if status == DoseStatus::Valid {
-                    if matches!(dose.cvx.0, cvx!("135") | cvx!("197")) {
-                        let min_limit = crate::time_period!("65y-4d").add_to(patient.birth_date);
-                        if dose.date < min_limit { status = DoseStatus::Invalid; }
-                    }
-                    if dose.cvx.0 == 161 && dose.date == NaiveDate::from_ymd_opt(2020, 6, 30).unwrap() {
-                        status = DoseStatus::Invalid;
-                    }
                 }
 
                 if status == DoseStatus::Valid {
