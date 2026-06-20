@@ -36,6 +36,8 @@ To implement a group, follow the guidelines in the [Onboarding & Implementation 
 ## 5. Pneumococcal (PCV / PPSV)
 - [x] Implement `PneumococcalSeries.yml` (PCV13, PCV15, PCV20, PPSV23)
 - [x] Implement complex risk-group and sequence-based evaluation rules
+- [x] Achieve high fuzz-parity on fuzz slice (6,134/11,830 passed cases) by refining target-dose sequencing, age 5-18 conditional catch-up recommendations, CVX 327 classification, and child forecast clamp corrections
+
 
 ## 6. Meningococcal Conjugate (MCV4)
 - [x] Implement `MCV42DoseSeries.yml` (Menactra, Menveo, MenQuadfi)
