@@ -145,8 +145,24 @@ pub fn evaluate_doses_seasonally(
         else {
             // 3. Authorization check
             let mut auth_ok = true;
+            if dose.date < NaiveDate::from_ymd_opt(2020, 12, 14).unwrap()
+                && matches!(
+                    dose.cvx.0,
+                    cvx!("211") | cvx!("213") | cvx!("229") | cvx!("300")
+                        | cvx!("301") | cvx!("302") | cvx!("519")
+                )
+            {
+                auth_ok = false;
+            }
             if (dose.cvx.0 == cvx!("308") || dose.cvx.0 == cvx!("309") || dose.cvx.0 == cvx!("310") || dose.cvx.0 == cvx!("311") || dose.cvx.0 == cvx!("312"))
                 && dose.date < NaiveDate::from_ymd_opt(2023, 9, 11).unwrap()
+            {
+                auth_ok = false;
+            }
+            if dose.date >= NaiveDate::from_ymd_opt(2024, 8, 22).unwrap()
+                && (dose.cvx.0 == cvx!("308")
+                    || (matches!(dose.cvx.0, cvx!("310") | cvx!("311"))
+                        && age_ge(patient.birth_date, dose.date, crate::time_period!("12y"))))
             {
                 auth_ok = false;
             }
@@ -357,7 +373,9 @@ pub fn evaluate_doses_seasonally(
             num
         };
 
-        // Dose number capping
+        // Dose number capping. If a dose would exceed the season's dose
+        // requirement, ICE keeps the target dose identity but reports the dose
+        // as accepted rather than valid.
         let cap = if season_key == "PRIOR_SEASONS_LT5" {
             3
         } else if season == "COVID_19_AUG_2025_SEASON" {
@@ -369,7 +387,25 @@ pub fn evaluate_doses_seasonally(
         } else {
             3
         };
-        dose_number = std::cmp::min(dose_number, cap);
+        if status == DoseStatus::Valid && dose_number > cap {
+            status = DoseStatus::Accepted;
+            reasons.clear();
+            if let Some(season_valid_doses) = valid_doses_by_season.get_mut(season_key) {
+                if season_valid_doses.last() == Some(&dose.date) {
+                    season_valid_doses.pop();
+                }
+            }
+        } else if status == DoseStatus::Invalid
+            && dose_number > cap
+            && reasons.contains(&EvaluationReason::BelowMinimumInterval)
+            && !reasons.contains(&EvaluationReason::PriorToDOB)
+            && !reasons.contains(&EvaluationReason::DuplicateShotSameDay)
+        {
+            status = DoseStatus::Accepted;
+            reasons.clear();
+        } else if status == DoseStatus::Valid || status == DoseStatus::Invalid {
+            dose_number = std::cmp::min(dose_number, cap);
+        }
 
         evaluations.push(DoseEvaluation {
             dose_date: dose.date,
@@ -573,7 +609,7 @@ pub fn covid19_custom_forecast_hook(
                         earliest = earliest.max(last + chrono::Duration::days(17));
                         recommended = recommended.max(last + chrono::Duration::days(17));
                     } else {
-                        earliest = earliest.max(last + chrono::Duration::days(52));
+                        earliest = earliest.max(last + chrono::Duration::days(56));
                         recommended = recommended.max(last + chrono::Duration::days(56));
                     }
                 }
@@ -629,7 +665,7 @@ pub fn covid19_custom_forecast_hook(
                         earliest = earliest.max(last + chrono::Duration::days(17));
                         recommended = recommended.max(last + chrono::Duration::days(17));
                     } else {
-                        earliest = earliest.max(last + chrono::Duration::days(52));
+                        earliest = earliest.max(last + chrono::Duration::days(56));
                         recommended = recommended.max(last + chrono::Duration::days(56));
                     }
                 }

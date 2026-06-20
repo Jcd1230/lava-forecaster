@@ -86,6 +86,7 @@ To implement a group, follow the guidelines in the [Onboarding & Implementation 
 - [x] Enforce complex duplicate-same-day preference rules (Janssen order, Moderna preferred over Pfizer, approved vs WHO-only, etc.).
 - [x] Overdue/Forecast date adjustments based on vaccine brand and interval-dependent supplemental text.
 - [x] Map series completion to `Not Recommended / COMPLETE_HIGH_RISK`.
+- [x] Refine seasonal evaluation caps, authorization bounds (old CVX codes & 2023 series bounds), and earliest forecast date spacing (reducing failures by 2,789 cases on the fuzz slice).
 
 ## 11. Mpox (`MPOX`)
 *Java Concept:* `MPOX` | *Focus Code:* `860`
