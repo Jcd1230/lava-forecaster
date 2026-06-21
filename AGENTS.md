@@ -57,6 +57,7 @@ All major tasks are configured as `mise` commands or native Cargo binaries.
 - **Invalid (Ignored) Annotation**: The evaluation comparison table now shows `Invalid (Ignored)` or `Invalid (Not Ignored)` for `Invalid` doses. Quickly confirms whether a mismatched shot is intentionally ignored for series completion (e.g., bivalent OPV in POLIO) or genuinely counts.
 - **Formatting Scope**: Avoid broad `cargo fmt` / `rustfmt` unless you intend to format the whole Rust module tree. Prefer formatting only files you intentionally changed; `rustfmt` can follow `mod.rs` declarations and touch sibling vaccine modules.
 - **Corpus Strategy**: Fuzzing discovers ICE behavior; curated JSON fixtures preserve understood behavior. Keep large `.ltp` corpora for discovery/pressure testing, and promote only representative edge cases into named readable fixtures.
+- **Offline Bundle Builds**: For ChatGPT/offline containers, prefer `cargo ... --locked --no-default-features` unless allocator behavior is being tested. The default feature set enables `jemalloc`, which can build slowly in constrained sandboxes.
 
 ## Recommended Parity Workflow
 

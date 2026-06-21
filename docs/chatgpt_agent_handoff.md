@@ -24,3 +24,6 @@ Core principles:
   or committed.
 - Research-only handoffs should return source-grounded reports that separate
   direct Java/ICE facts from inferred execution behavior.
+- In constrained offline sandboxes, prompt agents to use
+  `cargo ... --locked --no-default-features` unless the task specifically needs
+  the default `jemalloc` feature.

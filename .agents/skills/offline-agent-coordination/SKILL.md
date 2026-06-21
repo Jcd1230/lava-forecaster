@@ -92,6 +92,35 @@ Attach `dist/lava-forecaster-source-bundle.zip`, the tailored prompt, and any
 evidence files the agent needs. Keep generated local artifacts under
 `tests/relative/tmp/`.
 
+## Offline Bundle Build Hints
+
+For ChatGPT-style sandboxes, prefer locked, no-default-feature builds unless
+jemalloc behavior is the task. The default feature set enables `jemalloc` on
+non-WASM Unix targets, which can build slowly in constrained containers.
+
+Use these commands in offline prompts when the agent only needs to prove the
+bundle builds and runs:
+
+```bash
+cargo run --locked --no-default-features --bin test_runner -- \
+  inspect tests/fuzz-100k-20260608.ltp --count
+
+cargo run --locked --no-default-features --bin test_runner -- \
+  run tests/fuzz-100k-20260608.ltp \
+  --summary tests/relative/tmp/fuzz100k_summary.json
+```
+
+If the sandbox has a supplied Rust toolchain outside the normal PATH, prefix
+commands with that toolchain's `bin` directory:
+
+```bash
+PATH=/path/to/rust-toolchain/bin:$PATH cargo run --locked --no-default-features --bin test_runner -- ...
+```
+
+Ask agents to run `inspect ... --count` before long `.ltp` runs. File names
+such as `fuzz-100k` may describe generation size rather than the number of
+matched executable cases.
+
 ## Tailor The Offline Prompt
 
 Use the prompt mode that fits the assignment. Edit aggressively: remove
@@ -119,7 +148,7 @@ Allowed edit scope:
 - Shared engine changes require a clear trace-based justification.
 
 Required commands:
-- cargo check
+- cargo check --locked --no-default-features
 - <focused test command>
 - <representative case command with -v --trace, if applicable>
 
@@ -259,7 +288,8 @@ Phase 2: Development
   changes unless the research proves shared behavior is wrong.
 - Add or promote representative fixtures only when they document a distinct
   behavior.
-- Run cargo check and focused test_runner commands available offline.
+- Run locked, no-default-feature cargo check and focused test_runner commands
+  available offline.
 
 Required return:
 1. Research report with source references.
@@ -320,6 +350,12 @@ Minimum for most returned patches:
 
 ```bash
 cargo check
+```
+
+For offline-agent reproduction in constrained sandboxes, use:
+
+```bash
+cargo check --locked --no-default-features
 ```
 
 For parity changes:

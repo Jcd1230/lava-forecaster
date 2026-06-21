@@ -4,6 +4,22 @@ The Rust-native `test_runner` binary (`src/bin/test_runner.rs`) is a multi-funct
 
 ---
 
+## Offline Bundle Quickstart
+
+When running from a vendored source bundle in a constrained sandbox, prefer
+locked, no-default-feature commands unless you specifically need the default
+`jemalloc` feature:
+
+```bash
+cargo run --locked --no-default-features --bin test_runner -- inspect tests/fuzz-100k-20260608.ltp --count
+cargo run --locked --no-default-features --bin test_runner -- run tests/fuzz-100k-20260608.ltp --summary tests/relative/tmp/fuzz100k_summary.json
+```
+
+Run `inspect ... --count` before long `.ltp` runs. A corpus filename may reflect
+the generation batch size rather than the number of matched executable cases.
+
+---
+
 ## Major Execution Modes
 
 ### 1. Verification / Runner Mode (`--run`)
@@ -119,4 +135,3 @@ cargo run --release --bin test_runner -- --run-cdc-csv <csv_path> [options]
     *   `tests/cases/failed/<GROUP>/`: For test cases with outstanding mismatches or failing results.
 2.  **`tests/suite.ltp`**: A single, high-density binary database file using MessagePack serialization format. The `.ltp` format includes a 4-byte magic header (`LTP\x01`) followed by the MessagePack representation of the array of `UnifiedTestCase`s, generated with strict struct-map serialization to preserve optional fields. It reduces disk block overhead significantly (e.g. 218 POLIO test cases pack into a single 132 KB file).
 3.  **`tests/relative/`**: Contains raw relative-date suites (e.g. `cdsi_hpv.json`) and their corresponding expected outputs (`cdsi_hpv.expected.json`). They must be imported/resolved via `--import-cdsi` into a directory or database to be run.
-
