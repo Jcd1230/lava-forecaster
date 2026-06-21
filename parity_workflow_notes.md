@@ -49,6 +49,76 @@ Compare a single case against a live ICE server:
 cargo run --release --bin test_runner -- run tests/fuzz-100k-20260608.ltp --group <GROUP> --case <test_case_name> -v --trace --compare
 ```
 
+## Corpus Strategy
+
+Use separate corpora for separate purposes:
+
+- `tests/cases/` is the durable regression suite. Promote only cases that
+  protect understood behavior, and name files after the behavior.
+- `.ltp` databases are discovery and pressure-test corpora. They can be large
+  and redundant because their job is breadth, not explanation.
+- `tests/relative/` and CDSi-derived inputs are source material for standard
+  cases and snapshot refreshes.
+
+Fuzzing should discover rules; curated fixtures should preserve rules. When a
+fuzz case teaches a real ICE behavior, promote one or a few representative JSON
+fixtures after the behavior is understood. Do not promote dozens of equivalent
+cases that all fail for the same missing rule.
+
+Large fuzz corpora are still valuable. Run them as stress tests and keep their
+failure summaries, but use mismatch buckets and named fixtures to drive code
+changes.
+
+## Iterative Parity Loop
+
+For each group, repeat this loop until fresh fuzzing stops finding novel
+behavior:
+
+1. **Stabilize the current frontier**: run the current curated and fuzz corpora,
+   then bucket failures by mismatch shape before changing code.
+2. **Fix one behavior bucket**: choose a representative failure, confirm it with
+   `-v --trace`, and use Java/Drools evidence when the expected behavior is not
+   obvious.
+3. **Promote the rule**: once the bucket is understood, extract or create a
+   readable fixture that names the behavior being guarded.
+4. **Verify locally**: run the representative case, target group, target fuzz
+   corpus, and any unrelated guard group if shared engine behavior changed.
+5. **Regenerate pressure**: after broad failures are low, run a new targeted
+   fuzz wave for that group to search for edge cases the previous corpus missed.
+6. **Track novelty**: keep failures that introduce new behavior buckets; archive
+   or ignore redundant cases that only repeat an existing mismatch.
+
+Avoid running huge new fuzz campaigns while high-level buckets are still
+obviously broken. Those runs mostly generate redundant failures. Once the group
+is close to green, targeted fuzzing becomes much more useful because each new
+failure is more likely to expose a genuinely missing edge rule.
+
+## Targeted Fuzzing Heuristics
+
+Pure random fuzzing is useful, but it will miss sparse clinical boundaries.
+Bias future fuzz waves toward known fragile surfaces:
+
+- Exact age boundaries and one-day offsets around minimum, recommended, maximum,
+  and catch-up ages.
+- Minimum interval boundaries, including 4-day grace windows and just-before /
+  just-after dates.
+- Same-day products, duplicate doses, combination vaccines, and product
+  precedence.
+- Series switches, mixed product families, withdrawn products, and unsupported
+  CVX codes.
+- Seasonal schedules, birth-year cutoffs, assessment-date season boundaries,
+  and authorization windows.
+- High-risk flags, conditional recommendations, completion overrides, and
+  adult-only recommendation statuses.
+- Invalid-but-ignored doses, accepted doses that should not count for
+  completion, and dose-number reassignment.
+
+When possible, record a compact "failure fingerprint" before deciding whether
+to keep a generated case: group, case name, eval-vs-forecast shape, status or
+CVX transition, date delta, same-day involvement, selected series, and the Rust
+trace decision path if available. A new fingerprint is usually worth
+investigating; repeated fingerprints should be sampled, not hoarded.
+
 ## At-a-Glance Triage
 
 List failing buckets from a saved full compare:

@@ -250,6 +250,51 @@ fn get_same_day_priority(group: &str, cvx: &str, birth_date: NaiveDate, dose_dat
 
 To verify that the implementation is 100% logically equivalent to the legacy Drools-based Java ICE engine, we execute 1:1 diff comparisons.
 
+### Long-Term Parity Strategy
+
+Think of parity work as two related loops:
+
+1. **Discovery**: fuzzing and live Java comparison expose unknown ICE behavior.
+2. **Preservation**: small named fixtures capture the behavior once it is understood.
+
+Do not try to turn every generated case into a permanent test. LAVA is fast
+enough to run large corpora, but a huge undifferentiated suite becomes hard to
+reason about. Keep three corpus tiers with different jobs:
+
+- **Curated JSON fixtures** under `tests/cases/`: human-readable regression
+  guards for known ICE behaviors. These should be named for the behavior they
+  protect, not for the fuzz ID that discovered them.
+- **Bulk `.ltp` corpora** such as `tests/fuzz-100k-20260608.ltp`: large
+  generated pressure tests used to find new behavior and catch regressions.
+  These may contain redundant cases and do not need to be individually legible.
+- **Relative/CDSi source suites** under `tests/relative/`: baseline source
+  material and standard test imports used to refresh or cross-check snapshots.
+
+Early fuzz runs often produce many failures from one missing high-level rule.
+Fix those broad buckets before generating much more data. Once a group is near
+green on the current corpus, run fresh targeted fuzz waves to search for novel
+edge behavior.
+
+When a fuzz case reveals a real ICE rule:
+
+1. Confirm the behavior with `-v --trace` and, when needed, live Java compare
+   or Drools evidence.
+2. Reduce the case mentally or mechanically to the smallest history that still
+   demonstrates the behavior.
+3. Promote one or a few representative cases into readable JSON fixtures.
+4. Keep the larger `.ltp` corpus as a pressure test, not as the main explanation
+   of the rule.
+
+Use these practical parity levels:
+
+- **Implemented**: schedules and obvious hooks exist, but known mismatches may
+  remain.
+- **Current-corpus parity**: curated cases and the current fuzz corpus pass.
+- **Fresh-fuzz parity**: fresh targeted fuzz waves produce no novel failures.
+- **Regression-hardened parity**: the group has named fixtures for discovered
+  edge behaviors, passes live Java compare, and does not regress under full
+  offline suite runs.
+
 ### Essential Commands
 
 All testing and verification commands are managed via `mise`:
@@ -513,4 +558,3 @@ When tracking discrepancies, use this navigation map to trace logic from the Rus
 | **Series Selection** | `src/rules/<group>/overrides.rs` | Series Selection rules (.drl) | `opencds-decision-support-rules/src/main/resources/drools/knowledgeModule/org.nyc.cir.ice/org.nyc.cir^ICE^1.0.0^SeriesSelection.drl` |
 | **Concept Mapping** | [src/models.rs](file://../ice/src/models.rs) | Central mapping config | `opencds-decision-support-service/src/main/resources/config/conceptDeterminationMethods/cdm.xml` |
 | **Target Series/Dose Rules** | [src/schedule.rs](file://../ice/src/schedule.rs) | `TargetSeries` / `DoseRule` Java classes | `opencds-decision-support-core/src/main/java/org/cdsframework/ice/service/TargetSeries.java` and `DoseRule.java` |
-

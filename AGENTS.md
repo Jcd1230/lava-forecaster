@@ -56,6 +56,7 @@ All major tasks are configured as `mise` commands or native Cargo binaries.
 - **Drools Case Capture**: For hard Java parity questions, prefer `scripts/drools_case.sh <GROUP> <CASE>` over manual log handling. It truncates the configured Drools log first and saves a focused evidence bundle.
 - **Invalid (Ignored) Annotation**: The evaluation comparison table now shows `Invalid (Ignored)` or `Invalid (Not Ignored)` for `Invalid` doses. Quickly confirms whether a mismatched shot is intentionally ignored for series completion (e.g., bivalent OPV in POLIO) or genuinely counts.
 - **Formatting Scope**: Avoid broad `cargo fmt` / `rustfmt` unless you intend to format the whole Rust module tree. Prefer formatting only files you intentionally changed; `rustfmt` can follow `mod.rs` declarations and touch sibling vaccine modules.
+- **Corpus Strategy**: Fuzzing discovers ICE behavior; curated JSON fixtures preserve understood behavior. Keep large `.ltp` corpora for discovery/pressure testing, and promote only representative edge cases into named readable fixtures.
 
 ## Recommended Parity Workflow
 
