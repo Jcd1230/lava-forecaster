@@ -72,6 +72,18 @@ When reducing Java-vs-Rust discrepancies for an existing group, use this loop:
 
 For detailed mismatch-routing guidance, use [parity_workflow_notes.md](file://../ice/parity_workflow_notes.md). For the fuller source-of-truth map and implementation touchpoints, use [agent_onboarding_guide.md](file://../ice/agent_onboarding_guide.md).
 
+## ChatGPT Offline Agent Handoff
+
+Use the repo-local `offline-agent-coordination` skill when handing work to
+offline ChatGPT agents or incorporating their returned patches:
+
+- Skill path: [.agents/skills/offline-agent-coordination/SKILL.md](file://./.agents/skills/offline-agent-coordination/SKILL.md)
+- Overview: [docs/chatgpt_agent_handoff.md](file://./docs/chatgpt_agent_handoff.md)
+
+This workflow is intentionally skill-driven rather than script-driven so each
+packet can be tailored to parity buckets, feature work, bug triage,
+documentation, or test-corpus analysis.
+
 ## At-a-Glance Compare Triage
 
 - List failing groups from a saved full compare:
