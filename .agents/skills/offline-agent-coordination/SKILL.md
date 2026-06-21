@@ -25,8 +25,8 @@ reviewable, and easy to validate locally.
 
 Before preparing a packet, decide:
 
-- Task type: parity bucket, feature/refactor, bug triage, documentation, or
-  test-corpus analysis.
+- Task mode: research, development, research-then-development, bug triage,
+  documentation, or test-corpus analysis.
 - Success criteria: exact cases, commands, and expected behavior.
 - Allowed edit scope: files/directories the agent may change, plus any areas
   that require explicit justification.
@@ -37,6 +37,16 @@ Before preparing a packet, decide:
 
 Ask the user before delegation only when product intent or scope is ambiguous.
 Do not ask where repo facts live; inspect the repo.
+
+Prefer these modes:
+
+- **Research** when the goal is understanding ICE behavior, Java/Drools fact
+  flow, or fuzz-generator targets. Return docs/report, not code.
+- **Development** when the behavior is already understood and the agent should
+  implement a narrow fix or test.
+- **Research-then-development** when a long-running offline session should first
+  map behavior, then implement only if the evidence supports a concrete change.
+  Require the agent to separate the research conclusions from the patch.
 
 ## Prepare Evidence Locally
 
@@ -84,8 +94,11 @@ evidence files the agent needs. Keep generated local artifacts under
 
 ## Tailor The Offline Prompt
 
-Use this structure, editing it for the specific task. Remove irrelevant
-sections and add concrete file paths/cases when known.
+Use the prompt mode that fits the assignment. Edit aggressively: remove
+irrelevant sections and add concrete file paths, cases, logs, and source areas
+when known.
+
+### Development Prompt
 
 ```text
 You are working offline in the LAVA Forecaster source bundle.
@@ -123,12 +136,146 @@ Required return:
 4. Remaining failures, uncertainty, or follow-up recommendations.
 ```
 
+### Research Prompt
+
+Use this mode for source-grounded ICE/LAVA research, especially before fixing a
+hard group or improving fuzz generation. Give the agent both source trees when
+possible.
+
+```text
+You are researching the Java ICE immunization forecasting engine and the Rust
+LAVA forecaster implementation. You have access to both source trees. Produce
+source-grounded documentation that helps engineers port or verify ICE behavior
+in LAVA.
+
+Research target:
+<GROUP, architecture area, fuzzing question, or specific behavior>
+
+Primary goal:
+Explain how ICE actually reaches its outputs, not just what the Drools/DSL text
+appears to say in isolation.
+
+Important mindset:
+- Do not assume Drools text alone is the full algorithm.
+- ICE behavior may emerge from series YAML, candidate series initialization,
+  target-dose construction/sorting, selected TargetSeries behavior, TargetDose
+  fields, inserted ICEFactTypeFinding facts, generic rules, group-specific
+  rules, duplicate same-day rules, and ProcessResults output selection.
+- Separate directly stated source facts from inferred execution behavior.
+- If behavior depends on rule ordering, inserted facts, or selected-series
+  output, describe the likely fact flow.
+- If comments and observed output conflict, call that out.
+- When uncertain, state what trace or test case would confirm the behavior.
+
+Source areas to inspect:
+- Java series plan YAML and supporting data.
+- Java Drools/DSL rules, including generic HistoryEvaluation,
+  DuplicateShotSameDay, SeriesSelection, ProcessResults, and group-specific
+  Evaluation/Recommendation rules.
+- Java core classes involved in series, target-dose, dose-rule, and result
+  construction.
+- Rust LAVA engine, group schedules, overrides, tests, parity docs, and group
+  logic docs.
+
+Documentation format:
+# <TARGET> Java Logic Map
+## Current Understanding
+Brief summary of how ICE appears to evaluate and forecast this target.
+## Source Files
+Relevant Java, Drools/DSL, YAML, Rust, test, and doc files. Include rule,
+function, class, or nearby unique names; include line numbers when available.
+## Series Data
+Series names, dose counts, recurring settings, dose-number mode, age/interval
+rules, allowed products, and risk/conditional dimensions.
+## Series Selection
+How ICE selects series, fallback behavior, and how prior invalid/accepted/
+ignored doses affect selection if known.
+## Evaluation Flow
+How doses become Valid, Accepted, Invalid, or ignored. Include generic rules,
+group rules, special CVX behavior, same-day behavior, target-dose fields, and
+inserted facts.
+## Forecast Flow
+How recommendations are produced, including generic mechanics, group rules,
+completion rules, date quirks, and conditional/not-recommended cases.
+## Important ICE Facts
+Fact name, where inserted, conditions that insert it, and later rules that
+consume it.
+## LAVA Mapping Notes
+How this likely maps to schedules, override hooks, same-day mechanics,
+forecast hooks, and places to avoid broad rules.
+## Open Questions
+Unresolved behavior and the trace/test that would answer it.
+## Representative Cases
+Relevant test/fuzz cases and what they demonstrate, if available.
+
+Also produce an architecture note when the target depends on engine mechanics:
+- candidate series initialization;
+- target-dose initialization;
+- administeredShotNumber and doseNumber assignment;
+- isPrimarySeriesShot;
+- status versus isValid;
+- Accepted versus Invalid and Valid in later counting;
+- same-day duplicate checks;
+- selected-series effect on returned evaluations;
+- recommendation phase after evaluation;
+- ProcessResults final output selection.
+
+Required return:
+1. Source-grounded report or doc patch.
+2. List of files/rules/classes inspected.
+3. Direct source facts versus inferences.
+4. Open questions and recommended confirming traces/tests.
+5. Suggested parity fixes or fuzz targets, clearly separated from confirmed
+   behavior.
+```
+
+### Research-Then-Development Prompt
+
+Use this mode when the offline agent should work for a long session but still
+avoid speculative patches. The research phase must justify the development
+phase.
+
+```text
+You are working offline with the Java ICE source and Rust LAVA source.
+
+Mission:
+First research <GROUP/behavior>. Then implement a narrow LAVA parity improvement
+only if the research identifies a concrete, source-backed change.
+
+Phase 1: Research
+- Produce the Java Logic Map sections requested in the research prompt.
+- Identify representative failing or edge cases.
+- State the exact ICE behavior to preserve and whether it is directly sourced
+  or inferred from traces/snapshots.
+
+Development gate:
+- Proceed to code only if you can state a specific rule, hook, schedule, test,
+  or fuzz-generation change that follows from the evidence.
+- If evidence is insufficient, return the research report and do not patch.
+
+Phase 2: Development
+- Make the smallest coherent LAVA change.
+- Prefer group-specific schedules/overrides/docs/tests over shared engine
+  changes unless the research proves shared behavior is wrong.
+- Add or promote representative fixtures only when they document a distinct
+  behavior.
+- Run cargo check and focused test_runner commands available offline.
+
+Required return:
+1. Research report with source references.
+2. Decision: patched or research-only, with rationale.
+3. Unified patch if patched.
+4. Commands run and pass/fail summary.
+5. Remaining uncertainty and recommended local Java/Drools verification.
+```
+
 For non-parity tasks, change the evidence and commands. Examples:
 
 - Feature/refactor: include design constraints, public API expectations, and
   focused `cargo test` or smoke commands.
 - Bug triage: request diagnosis first, patch only if root cause is clear.
-- Documentation: require changed docs plus any command/output verification.
+- Documentation/research: require source references and separate facts from
+  inferences.
 - Test-corpus analysis: request findings and candidate fixtures, not code.
 
 ## Validate A Returned Patch

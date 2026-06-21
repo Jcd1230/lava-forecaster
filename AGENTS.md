@@ -82,8 +82,9 @@ offline ChatGPT agents or incorporating their returned patches:
 - Overview: [docs/chatgpt_agent_handoff.md](file://./docs/chatgpt_agent_handoff.md)
 
 This workflow is intentionally skill-driven rather than script-driven so each
-packet can be tailored to parity buckets, feature work, bug triage,
-documentation, or test-corpus analysis.
+packet can be tailored to ICE research, parity development,
+research-then-development sessions, feature work, bug triage, documentation, or
+test-corpus analysis.
 
 ## At-a-Glance Compare Triage
 
