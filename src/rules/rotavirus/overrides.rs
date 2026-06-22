@@ -1,9 +1,11 @@
 use crate::date_utils::SmallVec;
 use crate::engine::CandidateForecastsExt;
-use lava_cvx_macro::cvx;
-use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
-use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
+use crate::models::{
+    Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus, VaccineGroupForecast,
+};
+use chrono::NaiveDate;
+use lava_cvx_macro::cvx;
 
 pub fn rotavirus_custom_evaluation_hook(
     _series_name: &str,
@@ -18,19 +20,45 @@ pub fn rotavirus_custom_evaluation_hook(
 
     // Strict age clamp: Any dose given at age > 8 months is evaluated as Accepted/AboveRecommendedAgeSeries
     let tp_8m = crate::time_period!("8m");
-    let is_age_gt_8m = crate::date_utils::compare_elapsed(ctx.patient.birth_date, dose.date, &tp_8m) == std::cmp::Ordering::Greater;
+    let is_age_gt_8m =
+        crate::date_utils::compare_elapsed(ctx.patient.birth_date, dose.date, &tp_8m)
+            == std::cmp::Ordering::Greater;
 
     if is_age_gt_8m {
         *status = DoseStatus::Accepted;
         reasons.clear();
         reasons.push(EvaluationReason::AboveRecommendedAgeSeries);
+        return;
+    }
+
+    // ICE's RV1 product-preference path keeps patients on the 2-dose Rotarix
+    // series after a valid CVX 119 starts it. Later non-RV1 rotavirus products
+    // are accepted, not counted as valid doses toward the 2-dose series and not
+    // allowed to switch the selected output to the 3-dose series.
+    if _series_name == "ROTAVIRUS_2_DOSE_SERIES" && dose.cvx.0 != cvx!("119") {
+        let prior_valid_rv1_count = ctx
+            .valid_doses
+            .iter()
+            .filter(|(valid_date, _)| {
+                *valid_date < dose.date
+                    && ctx
+                        .history
+                        .iter()
+                        .any(|h| h.date == *valid_date && h.cvx.0 == cvx!("119"))
+            })
+            .count();
+
+        if prior_valid_rv1_count >= 2 {
+            *status = DoseStatus::Accepted;
+            reasons.clear();
+        }
     }
 }
 
 pub fn rotavirus_custom_forecast_hook(
     patient: &Patient,
     valid_doses: &[(NaiveDate, usize)],
-    _evaluations: &[crate::models::DoseEvaluation],
+    evaluations: &[crate::models::DoseEvaluation],
     _history: &[Dose],
     eval_date: NaiveDate,
     forecast: &mut SeriesForecast,
@@ -40,8 +68,14 @@ pub fn rotavirus_custom_forecast_hook(
     let date_8m = tp_8m.add_to(birth);
 
     if forecast.status == SeriesStatus::Complete {
-        let num_required = if forecast.series_name == "ROTAVIRUS_2_DOSE_SERIES" { 2 } else { 3 };
-        let actually_complete = valid_doses.iter().any(|(_, num)| *num == num_required);
+        let num_required = if forecast.series_name == "ROTAVIRUS_2_DOSE_SERIES" {
+            2
+        } else {
+            3
+        };
+        let actually_complete = evaluations
+            .iter()
+            .any(|e| e.status == DoseStatus::Valid && e.dose_number == Some(num_required));
 
         if !actually_complete && eval_date > date_8m {
             forecast.status = SeriesStatus::NotRecommended;
@@ -66,7 +100,10 @@ pub fn rotavirus_custom_forecast_hook(
     let date_8m = tp_8m.add_to(birth);
 
     let is_currently_gt_8m = eval_date > date_8m;
-    let is_rec_gt_8m = forecast.status.recommended_date().map_or(false, |d| d > date_8m);
+    let is_rec_gt_8m = forecast
+        .status
+        .recommended_date()
+        .map_or(false, |d| d > date_8m);
 
     if is_currently_gt_8m || is_rec_gt_8m {
         forecast.status = SeriesStatus::NotRecommended;
@@ -92,10 +129,7 @@ pub fn rotavirus_custom_forecast_hook(
     }
 }
 
-pub fn rotavirus_custom_dose_number_hook(
-    series_name: &str,
-    ctx: &EvaluationContext,
-) -> usize {
+pub fn rotavirus_custom_dose_number_hook(series_name: &str, ctx: &EvaluationContext) -> usize {
     if series_name != "ROTAVIRUS_2_DOSE_SERIES" {
         return ctx.target_dose_number;
     }
@@ -129,6 +163,17 @@ pub fn rotavirus_custom_dose_number_hook(
     ctx.target_dose_number + prior_122_count
 }
 
+pub fn rotavirus_custom_completion_hook(ctx: &EvaluationContext) -> bool {
+    let required = if ctx.active_series_name == "ROTAVIRUS_2_DOSE_SERIES" {
+        2
+    } else {
+        3
+    };
+    ctx.valid_doses
+        .iter()
+        .any(|(_, dose_number)| *dose_number == required)
+}
+
 pub fn rotavirus_group_selection(
     _patient: &Patient,
     _history: &[Dose],
@@ -142,21 +187,46 @@ pub fn rotavirus_group_selection(
     let has_3_dose = candidate_forecasts.contains_forecast(&series_3_dose);
 
     if has_2_dose && has_3_dose {
-        // 1. Check if any valid dose of CVX 116, 74, or 122 was administered in either candidate's evaluations.
+        let fc_2 = candidate_forecasts.get_forecast(&series_2_dose).unwrap();
         let fc_3 = candidate_forecasts.get_forecast(&series_3_dose).unwrap();
-        let has_valid_3dose_cvx = fc_3.evaluations.iter().any(|e| {
-            e.status == DoseStatus::Valid && (e.cvx.0 == cvx!("116") || e.cvx.0 == cvx!("74") || e.cvx.0 == cvx!("122"))
-        });
-        if has_valid_3dose_cvx {
+
+        // A completed RV1 path stays on the 2-dose series. Before RV1
+        // completion, Java's 3-dose product rule wins for CVX 116/122/74.
+        let first_valid_rv1 = fc_2
+            .evaluations
+            .iter()
+            .chain(fc_3.evaluations.iter())
+            .filter(|e| {
+                e.status == DoseStatus::Valid && e.dose_number == Some(1) && e.cvx.0 == cvx!("119")
+            })
+            .map(|e| e.dose_date)
+            .min();
+
+        let first_valid_3dose_product = fc_3
+            .evaluations
+            .iter()
+            .filter(|e| {
+                e.status == DoseStatus::Valid
+                    && (e.cvx.0 == cvx!("116") || e.cvx.0 == cvx!("74") || e.cvx.0 == cvx!("122"))
+            })
+            .map(|e| e.dose_date)
+            .min();
+
+        let valid_rv1_count = fc_2
+            .evaluations
+            .iter()
+            .filter(|e| e.status == DoseStatus::Valid && e.cvx.0 == cvx!("119"))
+            .count();
+
+        if valid_rv1_count >= 2 {
+            return series_2_dose;
+        }
+
+        if first_valid_3dose_product.is_some() {
             return series_3_dose;
         }
 
-        // 2. Check if dose 1 is CVX 119 and is valid in 2-dose series candidate evaluations.
-        let fc_2 = candidate_forecasts.get_forecast(&series_2_dose).unwrap();
-        let dose_1_is_valid_rv1 = fc_2.evaluations.iter().any(|e| {
-            e.status == DoseStatus::Valid && e.dose_number == Some(1) && e.cvx.0 == cvx!("119")
-        });
-        if dose_1_is_valid_rv1 {
+        if first_valid_rv1.is_some() {
             return series_2_dose;
         }
     }

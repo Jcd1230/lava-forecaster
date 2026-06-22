@@ -818,8 +818,9 @@ impl<'a> EvaluationEngine<'a> {
                         (None, None) => None,
                     };
                     if let Some(prev_date) = prev_date {
-                        let interval_ok = prev_date == dose.date || compare_elapsed(prev_date, dose.date, abs_min_int)
-                            != std::cmp::Ordering::Less;
+                        let interval_ok = prev_date == dose.date
+                            || compare_elapsed(prev_date, dose.date, abs_min_int)
+                                != std::cmp::Ordering::Less;
                         trace_decision!("interval_check", "Dose {} cvx {} interval check from dose {}: date={} prev_date={} abs_min_interval={:?} ok={}", target_dose_idx, dose.cvx, int_rule.from_dose, dose.date, prev_date, abs_min_int, interval_ok);
                         if !interval_ok {
                             is_valid = false;
@@ -1502,12 +1503,14 @@ fn get_same_day_priority(
                 match cvx_code {
                     119 => 1,
                     74 => 2,
+                    122 => 3,
                     _ => 0,
                 }
             } else {
                 match cvx_code {
                     74 => 0,
                     119 => 2,
+                    122 => 3,
                     _ => 1,
                 }
             }

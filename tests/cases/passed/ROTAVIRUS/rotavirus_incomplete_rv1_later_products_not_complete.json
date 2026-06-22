@@ -1,0 +1,95 @@
+{
+  "name": "fuzz_fail_rotavirus_20260608_111477",
+  "group": "ROTAVIRUS",
+  "focus_code": "820",
+  "patient": {
+    "birth_date": "2017-06-21",
+    "gender": "Female"
+  },
+  "history": [
+    {
+      "date": "2017-07-19",
+      "cvx": "122"
+    },
+    {
+      "date": "2017-09-05",
+      "cvx": "119"
+    },
+    {
+      "date": "2018-06-08",
+      "cvx": "116"
+    },
+    {
+      "date": "2018-09-06",
+      "cvx": "122"
+    },
+    {
+      "date": "2019-03-03",
+      "cvx": "119"
+    },
+    {
+      "date": "2019-04-24",
+      "cvx": "74"
+    }
+  ],
+  "execution_date": "2025-05-18",
+  "expected": {
+    "evaluations": [
+      {
+        "dose_date": "2017-07-19",
+        "cvx": "122",
+        "status": "Invalid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2017-09-05",
+        "cvx": "119",
+        "status": "Valid",
+        "reasons": [],
+        "dose_number": 1
+      },
+      {
+        "dose_date": "2018-06-08",
+        "cvx": "116",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2018-09-06",
+        "cvx": "122",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2019-03-03",
+        "cvx": "119",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 2
+      },
+      {
+        "dose_date": "2019-04-24",
+        "cvx": "74",
+        "status": "Accepted",
+        "reasons": [],
+        "dose_number": 2
+      }
+    ],
+    "forecasts": [
+      {
+        "series_name": "ROTAVIRUS",
+        "earliest_date": null,
+        "recommended_date": null,
+        "overdue_date": null,
+        "latest_date": null,
+        "status": "NotRecommended",
+        "reasons": [
+          "TOO_OLD"
+        ]
+      }
+    ]
+  }
+}
