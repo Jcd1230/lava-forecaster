@@ -174,6 +174,9 @@ enum Commands {
         /// Write structured mismatch summary JSON to this path
         #[arg(long)]
         summary: Option<std::path::PathBuf>,
+        /// Print only the final summary and omit individual case failures/details
+        #[arg(long)]
+        summary_only: bool,
     },
     /// Summarizes a structured mismatch summary JSON file
     #[command(name = "summarize")]
@@ -206,6 +209,9 @@ enum Commands {
         /// Print a step-by-step decision trace to stdout for ran cases
         #[arg(long, aliases = ["explain"])]
         trace: bool,
+        /// Print only the final summary and omit individual case failures/details
+        #[arg(long)]
+        summary_only: bool,
     },
 }
 
@@ -423,6 +429,7 @@ fn main() {
             verbose,
             trace,
             summary,
+            summary_only,
         } => {
             let filter_group = group.map(|g| g.to_uppercase());
             let filter_case = case;
@@ -484,8 +491,12 @@ fn main() {
 
             let mut failed_details = Vec::new();
 
+            let total_cases_count = test_cases.len();
             for tc in test_cases {
                 total += 1;
+                if summary_only && total % 5000 == 0 {
+                    println!("Progress: {} / {} cases processed...", total, total_cases_count);
+                }
 
                 let (rust_evals, rust_fc) = if let Some(ref r_url) = rest_url {
                     match query_rust_rest_service(&client, r_url, &tc) {
@@ -730,9 +741,11 @@ fn main() {
                         &errors,
                     );
                 } else if !is_ok {
-                    println!("\nTest Case: \x1b[91m{}\x1b[0m (FAIL)", tc.name);
-                    for err in &errors {
-                        println!("  - \x1b[91m{}\x1b[0m", err);
+                    if !summary_only {
+                        println!("\nTest Case: \x1b[91m{}\x1b[0m (FAIL)", tc.name);
+                        for err in &errors {
+                            println!("  - \x1b[91m{}\x1b[0m", err);
+                        }
                     }
                 }
 
@@ -784,11 +797,13 @@ fn main() {
             }
 
             if failed > 0 {
-                println!("\nFailed Cases:");
-                for (name, errs) in failed_details {
-                    println!("  FAIL: {}", name);
-                    for err in errs {
-                        println!("    - {}", err);
+                if !summary_only {
+                    println!("\nFailed Cases:");
+                    for (name, errs) in failed_details {
+                        println!("  FAIL: {}", name);
+                        for err in errs {
+                            println!("    - {}", err);
+                        }
                     }
                 }
                 std::process::exit(1);
@@ -809,6 +824,7 @@ fn main() {
             rest_url,
             verbose,
             trace,
+            summary_only,
         } => {
             let source_path = source;
             let target_path = target;
@@ -919,8 +935,12 @@ fn main() {
             let mut passed_cases_out = Vec::new();
             let mut failed_cases_out = Vec::new();
 
+            let total_cases_count = test_cases.len();
             for (mut tc, old_path) in test_cases {
                 total += 1;
+                if summary_only && total % 5000 == 0 {
+                    println!("Progress: {} / {} cases processed...", total, total_cases_count);
+                }
 
                 let (rust_evals, rust_fc) = if let Some(ref r_url) = rest_url {
                     match query_rust_rest_service(&client, r_url, &tc) {
@@ -1116,9 +1136,11 @@ fn main() {
                         &errors,
                     );
                 } else if !is_ok {
-                    println!("\nTest Case: \x1b[91m{}\x1b[0m (FAIL)", tc.name);
-                    for err in &errors {
-                        println!("  - \x1b[91m{}\x1b[0m", err);
+                    if !summary_only {
+                        println!("\nTest Case: \x1b[91m{}\x1b[0m (FAIL)", tc.name);
+                        for err in &errors {
+                            println!("  - \x1b[91m{}\x1b[0m", err);
+                        }
                     }
                 }
 
