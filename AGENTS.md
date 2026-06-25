@@ -113,5 +113,6 @@ test-corpus analysis.
 
 - **Primary VCS**: This project primarily uses Jujutsu (`jj`) for version control.
 - **Do not use Git commits**: Do not use `git add` or `git commit` unless the user explicitly asks for Git or a required tool only supports Git.
+- **Commit Before Starting New Work**: It is strongly preferable to start every task from a clean jj revision. Before making edits, run `jj status`. If there are meaningful existing changes, either commit them with `jj commit -m "..."` when they are complete and understood, or stop and ask the user how to handle them. Starting new work on top of uncommitted changes mixes unrelated work together and makes review, rollback, and follow-up commits much harder.
 - **Commit Guideline**: Developers and agents must run `jj commit -m "..."` after completing meaningful units of work to save progress and maintain a clean repository history.
 - **Task Scope**: Keep parity work to one vaccine bucket per revision when practical, validate the target-group compare and a fresh full compare, then commit.
