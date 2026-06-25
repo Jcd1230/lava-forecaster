@@ -1,10 +1,10 @@
-pub mod helpers;
 pub mod cross_group;
+pub mod helpers;
 
 use crate::engine::{
-    ConditionalCompletionRule, CustomDoseNumberHook, CustomEvaluationHook, CustomExtraDoseHook,
-    CustomForecastHook, CustomSwitchHook, GroupSelectionAndPostProcess, ParameterOverrideRule,
-    RecommendationOverrideRule, CustomCompletionHook,
+    ConditionalCompletionRule, CustomCompletionHook, CustomDoseNumberHook, CustomEvaluationHook,
+    CustomExtraDoseHook, CustomForecastHook, CustomSwitchHook, GroupSelectionAndPostProcess,
+    ParameterOverrideRule, RecommendationOverrideRule,
 };
 use crate::schedule::CompiledSeries;
 use std::collections::HashMap;
@@ -46,7 +46,14 @@ impl crate::engine::EvaluationPolicy for LegacyHookPolicy {
         forecast: &mut crate::models::SeriesForecast,
     ) {
         if let Some(hook) = self.custom_forecast_hook {
-            (hook)(patient, valid_doses, evaluations, history, eval_date, forecast);
+            (hook)(
+                patient,
+                valid_doses,
+                evaluations,
+                history,
+                eval_date,
+                forecast,
+            );
         }
     }
 
@@ -56,7 +63,8 @@ impl crate::engine::EvaluationPolicy for LegacyHookPolicy {
         target_dose_idx: usize,
         ctx: &crate::engine::EvaluationContext,
     ) -> Option<&'static str> {
-        self.custom_switch_hook.and_then(|h| (h)(current_series_name, target_dose_idx, ctx))
+        self.custom_switch_hook
+            .and_then(|h| (h)(current_series_name, target_dose_idx, ctx))
     }
 
     fn custom_evaluation_hook(
@@ -84,8 +92,12 @@ impl crate::engine::EvaluationPolicy for LegacyHookPolicy {
         &self,
         series_name: &str,
         ctx: &crate::engine::EvaluationContext,
-    ) -> Option<(crate::models::DoseStatus, crate::date_utils::SmallVec<[crate::models::EvaluationReason; 4]>)> {
-        self.custom_extra_dose_hook.and_then(|h| (h)(series_name, ctx))
+    ) -> Option<(
+        crate::models::DoseStatus,
+        crate::date_utils::SmallVec<[crate::models::EvaluationReason; 4]>,
+    )> {
+        self.custom_extra_dose_hook
+            .and_then(|h| (h)(series_name, ctx))
     }
 
     fn custom_completion_hook(&self, ctx: &crate::engine::EvaluationContext) -> Option<bool> {
@@ -109,10 +121,14 @@ macro_rules! register_groups {
             map.get(group_name)
         }
 
-        pub fn get_all_groups() -> Vec<&'static VaccineGroupDefinition> {
-            vec![
-                $(get_ruleset($group_id).unwrap(),)*
-            ]
+        pub fn get_all_groups() -> &'static [&'static VaccineGroupDefinition] {
+            static ALL_GROUPS: OnceLock<Vec<&'static VaccineGroupDefinition>> = OnceLock::new();
+
+            ALL_GROUPS
+                .get_or_init(|| vec![
+                    $(get_ruleset($group_id).unwrap(),)*
+                ])
+                .as_slice()
         }
     };
 }

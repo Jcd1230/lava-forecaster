@@ -635,8 +635,10 @@ impl<'a> EvaluationEngine<'a> {
 
             // Look up dose parameters
             let mut dose_rule = active_series.doses[target_dose_idx - 1].clone();
-            let mut applicable_intervals: Vec<CompiledDoseInterval> = if target_dose_idx > 1 {
-                let mut intervals: Vec<CompiledDoseInterval> = active_series
+            let mut applicable_intervals: SmallVec<[CompiledDoseInterval; 4]> = if target_dose_idx
+                > 1
+            {
+                let mut intervals: SmallVec<[CompiledDoseInterval; 4]> = active_series
                     .intervals
                     .iter()
                     .filter(|int| int.to_dose == target_dose_idx)
@@ -702,7 +704,7 @@ impl<'a> EvaluationEngine<'a> {
                         })
                         .collect()
                 } else {
-                    Vec::new()
+                    SmallVec::new()
                 }
             };
 
@@ -1130,16 +1132,17 @@ impl<'a> EvaluationEngine<'a> {
                 f
             } else {
                 let mut dose_rule = active_series.doses[next_dose_idx - 1].clone();
-                let mut applicable_intervals: Vec<CompiledDoseInterval> = if next_dose_idx > 1 {
-                    active_series
-                        .intervals
-                        .iter()
-                        .filter(|int| int.to_dose == next_dose_idx)
-                        .cloned()
-                        .collect()
-                } else {
-                    Vec::new()
-                };
+                let mut applicable_intervals: SmallVec<[CompiledDoseInterval; 4]> =
+                    if next_dose_idx > 1 {
+                        active_series
+                            .intervals
+                            .iter()
+                            .filter(|int| int.to_dose == next_dose_idx)
+                            .cloned()
+                            .collect()
+                    } else {
+                        SmallVec::new()
+                    };
 
                 let ctx = EvaluationContext::new(
                     patient,
@@ -1559,6 +1562,10 @@ fn is_patient_immune_to_group(
     group: &str,
     eval_date: NaiveDate,
 ) -> bool {
+    if patient.immunities.is_empty() {
+        return false;
+    }
+
     let group_lower = group.to_lowercase();
     patient.immunities.iter().any(|imm| {
         let imm_disease_lower = imm.disease.to_lowercase();
@@ -1597,6 +1604,10 @@ fn is_group_contraindicated(
     group: &str,
     eval_date: NaiveDate,
 ) -> bool {
+    if patient.contraindications.is_empty() {
+        return false;
+    }
+
     let group_lower = group.to_lowercase();
     patient.contraindications.iter().any(|c| {
         if c.cvx.is_some() {
@@ -1634,6 +1645,10 @@ fn is_dose_contraindicated(
     date: NaiveDate,
     group: &str,
 ) -> bool {
+    if patient.contraindications.is_empty() {
+        return false;
+    }
+
     let group_lower = group.to_lowercase();
     patient.contraindications.iter().any(|c| {
         let active = date >= c.date && c.valid_until.map_or(true, |until| date < until);

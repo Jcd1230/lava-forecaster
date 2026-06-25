@@ -12,9 +12,9 @@ pub mod test_dsl;
 #[cfg(target_arch = "wasm32")]
 pub mod wasm;
 
+use crate::date_utils::SmallVec;
 use chrono::NaiveDate;
 use models::{Dose, Patient, VaccineGroupForecast};
-use crate::date_utils::SmallVec;
 
 #[cfg(not(target_arch = "wasm32"))]
 use std::sync::Once;
@@ -32,8 +32,9 @@ pub fn init_rayon_pool() {
     });
 }
 
-
-pub fn parse_request(content: &str) -> Result<models::ForecastRequest, crate::errors::ForecasterError> {
+pub fn parse_request(
+    content: &str,
+) -> Result<models::ForecastRequest, crate::errors::ForecasterError> {
     // Try to parse as simplified format first
     if let Ok(req) = serde_json::from_str::<models::ForecastRequest>(content) {
         return Ok(req);
@@ -53,7 +54,8 @@ pub fn evaluate_patient_all_groups(
     let mut results = SmallVec::<[VaccineGroupForecast; 24]>::new();
     for ruleset in rules::get_all_groups() {
         if let Some(group_selection) = ruleset.group_selection {
-            let mut candidate_forecasts = SmallVec::<[(&'static str, VaccineGroupForecast); 4]>::new();
+            let mut candidate_forecasts =
+                SmallVec::<[(&'static str, VaccineGroupForecast); 6]>::new();
             for series in &ruleset.series {
                 let mut engine = engine::EvaluationEngine::new(series);
                 engine.param_overrides = &ruleset.param_overrides;
@@ -67,10 +69,8 @@ pub fn evaluate_patient_all_groups(
                     custom_extra_dose_hook: ruleset.custom_extra_dose_hook,
                     custom_completion_hook: ruleset.custom_completion_hook,
                 };
-                let policy_ref: &dyn crate::engine::EvaluationPolicy = ruleset
-                    .policy
-                    .as_deref()
-                    .unwrap_or(&legacy_policy);
+                let policy_ref: &dyn crate::engine::EvaluationPolicy =
+                    ruleset.policy.as_deref().unwrap_or(&legacy_policy);
                 engine.policy = Some(policy_ref);
 
                 let forecast =
@@ -103,10 +103,8 @@ pub fn evaluate_patient_all_groups(
                     custom_extra_dose_hook: ruleset.custom_extra_dose_hook,
                     custom_completion_hook: ruleset.custom_completion_hook,
                 };
-                let policy_ref: &dyn crate::engine::EvaluationPolicy = ruleset
-                    .policy
-                    .as_deref()
-                    .unwrap_or(&legacy_policy);
+                let policy_ref: &dyn crate::engine::EvaluationPolicy =
+                    ruleset.policy.as_deref().unwrap_or(&legacy_policy);
                 engine.policy = Some(policy_ref);
 
                 let forecast =
@@ -118,7 +116,6 @@ pub fn evaluate_patient_all_groups(
 
     // Cross-group post-processing
     rules::cross_group::post_process_all_groups(patient, history, eval_date, &mut results);
-
 
     results
 }
