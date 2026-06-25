@@ -22,20 +22,6 @@ fn series_primary_dose_count(series_name: &str) -> Option<usize> {
     }
 }
 
-fn first_valid_dose_date(forecast: &VaccineGroupForecast, dose_number: usize) -> Option<NaiveDate> {
-    forecast
-        .evaluations
-        .iter()
-        .find(|evaluation| {
-            evaluation.status == DoseStatus::Valid && evaluation.dose_number == Some(dose_number)
-        })
-        .map(|evaluation| evaluation.dose_date)
-}
-
-fn completion_date(series_name: &str, forecast: &VaccineGroupForecast) -> Option<NaiveDate> {
-    first_valid_dose_date(forecast, series_primary_dose_count(series_name)?)
-}
-
 pub fn mpox_custom_evaluation_hook(
     series_name: &str,
     _target_dose_idx: usize,
@@ -230,4 +216,3 @@ pub fn mpox_custom_completion_hook(ctx: &EvaluationContext) -> bool {
     };
     ctx.valid_doses.iter().any(|(_, num)| *num == target_doses)
 }
-

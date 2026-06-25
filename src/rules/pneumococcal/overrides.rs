@@ -14,21 +14,6 @@ fn is_pcv_cvx(cvx: Cvx) -> bool {
     matches!(cvx.0, cvx!("100") | cvx!("109") | cvx!("133") | cvx!("152") | cvx!("177") | cvx!("215") | cvx!("216") | cvx!("327"))
 }
 
-fn get_valid_doses_cvx(ctx: &EvaluationContext) -> Vec<Cvx> {
-    let mut cvxs = Vec::new();
-    let mut history_idx = 0;
-    for &(valid_date, _) in ctx.valid_doses {
-        while history_idx < ctx.history.len() && ctx.history[history_idx].date != valid_date {
-            history_idx += 1;
-        }
-        if history_idx < ctx.history.len() {
-            cvxs.push(ctx.history[history_idx].cvx.clone());
-            history_idx += 1;
-        }
-    }
-    cvxs
-}
-
 fn count_pcv_history_before_age(history: &[Dose], birth: NaiveDate, age: TimePeriod) -> usize {
     let cutoff = age.add_to(birth);
     history
