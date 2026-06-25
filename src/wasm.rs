@@ -1,6 +1,6 @@
-use wasm_bindgen::prelude::*;
-use crate::models;
 use crate::evaluate_patient_all_groups;
+use crate::models;
+use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 pub fn evaluate_patient(request_json: &str) -> Result<String, String> {
@@ -10,8 +10,7 @@ pub fn evaluate_patient(request_json: &str) -> Result<String, String> {
     let response = models::ForecastResponse {
         vaccine_groups: results,
     };
-    serde_json::to_string(&response)
-        .map_err(|e| format!("Failed to serialize response: {}", e))
+    serde_json::to_string(&response).map_err(|e| format!("Failed to serialize response: {}", e))
 }
 
 #[wasm_bindgen]

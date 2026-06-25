@@ -179,7 +179,7 @@ Use the mismatch shape to decide what to read next before editing code.
 	- Read Java `SeriesSelection.drl` and the supporting-data YAML for the group.
 	- Then inspect Rust `group_selection`, `custom_switch_hook`, and `custom_dose_number_hook`.
 - Same-day duplicate behavior or combination-vaccine precedence drift:
-	- Check the engine same-day priority logic before changing group-specific rules.
+	- Check the vaccine group's `EvaluationPolicy` same-day hooks before changing generic engine logic.
 
 ## Drools Event Log Workflow
 

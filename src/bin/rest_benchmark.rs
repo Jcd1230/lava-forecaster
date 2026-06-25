@@ -1,3 +1,6 @@
+use flatbuffers::FlatBufferBuilder;
+use reqwest::Client;
+use serde_json;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
@@ -5,12 +8,9 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
 use tokio::net::TcpStream;
-use reqwest::Client;
-use serde_json;
-use flatbuffers::FlatBufferBuilder;
 
-use lava_forecaster::models::{UnifiedTestCase, ForecastRequest, BulkForecastRequest};
 use lava_forecaster::forecaster_generated::org::cdsframework::ice::flatbuf as fb;
+use lava_forecaster::models::{BulkForecastRequest, ForecastRequest, UnifiedTestCase};
 
 const BULK_BENCHMARK_BATCH_SIZE: usize = 128;
 const SINGLE_JSON_CONCURRENCY: &[usize] = &[1, 10, 50];
@@ -43,37 +43,49 @@ fn serialize_flatbuffers_bulk(requests: &[ForecastRequest]) -> Vec<u8> {
             lava_forecaster::models::Gender::Unknown => "Unknown",
         });
 
-        let patient_offset = fb::Patient::create(&mut builder, &fb::PatientArgs {
-            birth_date,
-            gender: Some(gender_str),
-        });
+        let patient_offset = fb::Patient::create(
+            &mut builder,
+            &fb::PatientArgs {
+                birth_date,
+                gender: Some(gender_str),
+            },
+        );
 
         let mut dose_offsets = Vec::with_capacity(req.history.len());
         for dose in &req.history {
             let dose_date = date_to_epoch_days(dose.date);
             let cvx_str = builder.create_string(&dose.cvx.0.to_string());
-            let dose_offset = fb::Dose::create(&mut builder, &fb::DoseArgs {
-                date: dose_date,
-                cvx: Some(cvx_str),
-            });
+            let dose_offset = fb::Dose::create(
+                &mut builder,
+                &fb::DoseArgs {
+                    date: dose_date,
+                    cvx: Some(cvx_str),
+                },
+            );
             dose_offsets.push(dose_offset);
         }
         let history_vec = builder.create_vector(&dose_offsets);
 
         let exec_date = date_to_epoch_days(req.execution_date);
 
-        let req_offset = fb::PatientRequest::create(&mut builder, &fb::PatientRequestArgs {
-            patient: Some(patient_offset),
-            history: Some(history_vec),
-            execution_date: exec_date,
-        });
+        let req_offset = fb::PatientRequest::create(
+            &mut builder,
+            &fb::PatientRequestArgs {
+                patient: Some(patient_offset),
+                history: Some(history_vec),
+                execution_date: exec_date,
+            },
+        );
         req_offsets.push(req_offset);
     }
 
     let requests_vec = builder.create_vector(&req_offsets);
-    let bulk_req = fb::BulkForecastRequest::create(&mut builder, &fb::BulkForecastRequestArgs {
-        requests: Some(requests_vec),
-    });
+    let bulk_req = fb::BulkForecastRequest::create(
+        &mut builder,
+        &fb::BulkForecastRequestArgs {
+            requests: Some(requests_vec),
+        },
+    );
 
     builder.finish(bulk_req, None);
     builder.finished_data().to_vec()
@@ -94,7 +106,14 @@ async fn wait_for_server(addr: &str, timeout_secs: u64) -> bool {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("=== Building REST Server in Release Profile ===");
     let build_status = Command::new("cargo")
-        .args(["build", "--release", "--bin", "lava-forecaster", "--features", "jemalloc"])
+        .args([
+            "build",
+            "--release",
+            "--bin",
+            "lava-forecaster",
+            "--features",
+            "jemalloc",
+        ])
         .status()?;
     if !build_status.success() {
         panic!("Failed to build REST server binary");
@@ -119,7 +138,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let entries = fs::read_dir(cases_dir)?;
     for entry in entries {
         let path = entry?.path();
-        if path.extension().map_or(false, |e| e == "json") && !path.to_string_lossy().contains(".expected") {
+        if path.extension().map_or(false, |e| e == "json")
+            && !path.to_string_lossy().contains(".expected")
+        {
             let content = fs::read_to_string(&path)?;
             if let Ok(tc) = serde_json::from_str::<UnifiedTestCase>(&content) {
                 cases.push(tc);
@@ -161,24 +182,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let bulk_json_payload = serde_json::to_string(&bulk_req_data)?;
     let bulk_fb_payload = serialize_flatbuffers_bulk(&bulk_req_data.requests);
 
-    let client = Client::builder()
-        .pool_max_idle_per_host(100)
-        .build()?;
+    let client = Client::builder().pool_max_idle_per_host(100).build()?;
 
     // Warmup
     println!("\nWarming up endpoints...");
     for i in 0..10 {
-        let _ = client.post("http://127.0.0.1:8081/evaluate")
+        let _ = client
+            .post("http://127.0.0.1:8081/evaluate")
             .body(single_json_payloads[i % num_cases].clone())
             .send()
             .await;
     }
-    let _ = client.post("http://127.0.0.1:8081/evaluate_bulk")
+    let _ = client
+        .post("http://127.0.0.1:8081/evaluate_bulk")
         .header("Content-Type", "application/json")
         .body(bulk_json_payload.clone())
         .send()
         .await;
-    let _ = client.post("http://127.0.0.1:8081/evaluate_bulk_flatbuffers")
+    let _ = client
+        .post("http://127.0.0.1:8081/evaluate_bulk_flatbuffers")
         .header("Content-Type", "application/octet-stream")
         .body(bulk_fb_payload.clone())
         .send()
@@ -186,7 +208,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Warmup complete.");
 
     // Benchmark runners
-    println!("Using bulk benchmark batch size: {} requests", bulk_req_data.requests.len());
+    println!(
+        "Using bulk benchmark batch size: {} requests",
+        bulk_req_data.requests.len()
+    );
 
     run_benchmark(
         "Single JSON (/evaluate)",
@@ -196,7 +221,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "http://127.0.0.1:8081/evaluate",
         1,
         SINGLE_JSON_CONCURRENCY,
-    ).await?;
+    )
+    .await?;
     run_benchmark(
         "Bulk JSON (/evaluate_bulk)",
         &client,
@@ -205,7 +231,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "http://127.0.0.1:8081/evaluate_bulk",
         bulk_req_data.requests.len(),
         BULK_CONCURRENCY,
-    ).await?;
+    )
+    .await?;
     run_benchmark(
         "Bulk FlatBuffers (/evaluate_bulk_flatbuffers)",
         &client,
@@ -214,7 +241,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "http://127.0.0.1:8081/evaluate_bulk_flatbuffers",
         bulk_req_data.requests.len(),
         BULK_CONCURRENCY,
-    ).await?;
+    )
+    .await?;
 
     Ok(())
 }
@@ -245,20 +273,21 @@ async fn run_benchmark(
             let payloads = payloads.to_vec();
             let tx = tx.clone();
             let logged_failure = logged_failure.clone();
-            
+
             let handle = tokio::spawn(async move {
                 let mut index = 0;
                 while start.elapsed() < duration {
                     let body = payloads[index % payloads.len()].clone();
                     index += 1;
-                    
+
                     let req_start = Instant::now();
-                    let resp = client.post(url)
+                    let resp = client
+                        .post(url)
                         .header("Content-Type", content_type)
                         .body(body)
                         .send()
                         .await;
-                    
+
                     if let Ok(r) = resp {
                         let status = r.status();
                         let body = r.bytes().await.unwrap_or_default();
@@ -316,7 +345,10 @@ async fn run_benchmark(
                 p99.as_secs_f64() * 1000.0,
             );
         } else {
-            println!("Concurrency: {:2} | No successful requests completed.", concurrency);
+            println!(
+                "Concurrency: {:2} | No successful requests completed.",
+                concurrency
+            );
         }
     }
 

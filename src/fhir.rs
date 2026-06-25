@@ -1,6 +1,9 @@
-use serde::{Serialize, Deserialize};
+use crate::models::{
+    Cvx, Dose, DoseEvaluation, DoseStatus, EvaluationReason, Gender, Patient as InternalPatient,
+    SeriesStatus, VaccineGroupForecast,
+};
 use chrono::NaiveDate;
-use crate::models::{Gender, Dose, DoseEvaluation, DoseStatus, EvaluationReason, SeriesStatus, VaccineGroupForecast, Patient as InternalPatient, Cvx};
+use serde::{Deserialize, Serialize};
 
 // =========================================================================
 // FHIR R4 Resource Models (Minimal subset for Immunization Decision Support)
@@ -130,7 +133,10 @@ pub struct ImmunizationEvaluation {
     pub dose_status_reason: Option<Vec<CodeableConcept>>,
     #[serde(rename = "immunizationEvent")]
     pub immunization_event: Reference,
-    #[serde(rename = "doseNumberPositiveInt", skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "doseNumberPositiveInt",
+        skip_serializing_if = "Option::is_none"
+    )]
     pub dose_number_positive_int: Option<i32>,
 }
 
@@ -152,7 +158,10 @@ pub struct RecommendationItem {
     pub date_criterion: Option<Vec<DateCriterion>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    #[serde(rename = "supportingImmunization", skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "supportingImmunization",
+        skip_serializing_if = "Option::is_none"
+    )]
     pub supporting_immunization: Option<Vec<Reference>>,
 }
 
@@ -268,7 +277,9 @@ impl TryFrom<Patient> for InternalPatient {
     type Error = String;
 
     fn try_from(p: Patient) -> Result<Self, Self::Error> {
-        let birth_date_str = p.birth_date.ok_or_else(|| "Missing birthDate".to_string())?;
+        let birth_date_str = p
+            .birth_date
+            .ok_or_else(|| "Missing birthDate".to_string())?;
         // Parse date (assumes YYYY-MM-DD or simple prefix)
         let clean_date = birth_date_str.chars().take(10).collect::<String>();
         let birth_date = NaiveDate::parse_from_str(&clean_date, "%Y-%m-%d")
@@ -295,22 +306,28 @@ impl TryFrom<Immunization> for Dose {
 
     fn try_from(imm: Immunization) -> Result<Self, Self::Error> {
         // Extract occurrence date
-        let date_str = imm.occurrence_date_time
+        let date_str = imm
+            .occurrence_date_time
             .or(imm.occurrence_string)
             .ok_or_else(|| "Missing occurrenceDateTime or occurrenceString".to_string())?;
-        
+
         let clean_date = date_str.chars().take(10).collect::<String>();
         let date = NaiveDate::parse_from_str(&clean_date, "%Y-%m-%d")
             .map_err(|e| format!("Invalid occurrence date format: {}", e))?;
 
         // Extract CVX code
-        let codings = imm.vaccine_code.coding.ok_or_else(|| "Missing codings in vaccineCode".to_string())?;
-        let cvx_code = codings.iter()
+        let codings = imm
+            .vaccine_code
+            .coding
+            .ok_or_else(|| "Missing codings in vaccineCode".to_string())?;
+        let cvx_code = codings
+            .iter()
             .find(|c| c.system.as_deref() == Some("http://hl7.org/fhir/sid/cvx"))
             .and_then(|c| c.code.as_ref())
             .ok_or_else(|| "Missing CVX code in vaccineCode codings".to_string())?;
 
-        let cvx_val = cvx_code.parse::<u16>()
+        let cvx_val = cvx_code
+            .parse::<u16>()
             .map_err(|e| format!("Invalid CVX code (not a u16): {}", e))?;
 
         Ok(Dose {
@@ -326,7 +343,11 @@ impl TryFrom<Immunization> for Dose {
 pub fn map_evaluation_reason(reason: EvaluationReason) -> CodeableConcept {
     let display = format!("{:?}", reason);
     // Standard system for immunization evaluation reasons or custom text fallback
-    CodeableConcept::new_simple("http://terminology.hl7.org/CodeSystem/immunization-evaluation-dose-status-reason", &display, &display)
+    CodeableConcept::new_simple(
+        "http://terminology.hl7.org/CodeSystem/immunization-evaluation-dose-status-reason",
+        &display,
+        &display,
+    )
 }
 
 pub fn map_target_disease(group_name: &str) -> CodeableConcept {
@@ -345,7 +366,10 @@ pub fn map_target_disease(group_name: &str) -> CodeableConcept {
         "meningococcal" | "mening" => Some(("16541001", "Meningococcal infectious disease")),
         "flu" | "influenza" => Some(("6142004", "Influenza")),
         "rotavirus" | "rota" => Some(("18624000", "Disease caused by Rotavirus")),
-        "hib" => Some(("442438000", "Infection caused by Haemophilus influenzae type b")),
+        "hib" => Some((
+            "442438000",
+            "Infection caused by Haemophilus influenzae type b",
+        )),
         _ => None,
     };
 
@@ -363,28 +387,30 @@ pub fn make_immunization_evaluation(
     target_group: &str,
 ) -> ImmunizationEvaluation {
     let eval_id = format!("eval-{}-{}", patient_id, dose_idx);
-    
+
     let dose_status = match dose_eval.status {
-        DoseStatus::Valid | DoseStatus::Accepted => {
-            CodeableConcept::new_simple(
-                "http://terminology.hl7.org/CodeSystem/immunization-evaluation-dose-status",
-                "valid",
-                "Valid"
-            )
-        }
-        DoseStatus::Invalid | DoseStatus::Ignored => {
-            CodeableConcept::new_simple(
-                "http://terminology.hl7.org/CodeSystem/immunization-evaluation-dose-status",
-                "invalid",
-                "Invalid"
-            )
-        }
+        DoseStatus::Valid | DoseStatus::Accepted => CodeableConcept::new_simple(
+            "http://terminology.hl7.org/CodeSystem/immunization-evaluation-dose-status",
+            "valid",
+            "Valid",
+        ),
+        DoseStatus::Invalid | DoseStatus::Ignored => CodeableConcept::new_simple(
+            "http://terminology.hl7.org/CodeSystem/immunization-evaluation-dose-status",
+            "invalid",
+            "Invalid",
+        ),
     };
 
     let dose_status_reason = if dose_eval.reasons.is_empty() {
         None
     } else {
-        Some(dose_eval.reasons.iter().map(|&r| map_evaluation_reason(r)).collect())
+        Some(
+            dose_eval
+                .reasons
+                .iter()
+                .map(|&r| map_evaluation_reason(r))
+                .collect(),
+        )
     };
 
     let dose_number = dose_eval.dose_number.map(|n| n as i32);
@@ -413,7 +439,8 @@ pub fn make_immunization_recommendation(
     exec_date: NaiveDate,
     forecasts: &[VaccineGroupForecast],
 ) -> ImmunizationRecommendation {
-    let rec_items = forecasts.iter()
+    let rec_items = forecasts
+        .iter()
         .flat_map(|vg| {
             vg.forecasts.iter().map(|fc| {
                 let status_code = match fc.status {
@@ -421,7 +448,12 @@ pub fn make_immunization_recommendation(
                     SeriesStatus::NotRecommended => "not-recommended",
                     SeriesStatus::ConditionallyRecommended => "recommended",
                     SeriesStatus::NotComplete { .. } => {
-                        if fc.status.overdue_date().map(|d| exec_date >= d).unwrap_or(false) {
+                        if fc
+                            .status
+                            .overdue_date()
+                            .map(|d| exec_date >= d)
+                            .unwrap_or(false)
+                        {
                             "overdue"
                         } else {
                             "due"
@@ -432,41 +464,61 @@ pub fn make_immunization_recommendation(
                 let forecast_status = CodeableConcept::new_simple(
                     "http://terminology.hl7.org/CodeSystem/immunization-recommendation-status",
                     status_code,
-                    status_code
+                    status_code,
                 );
 
                 let mut criteria = Vec::new();
-                
+
                 // Earliest: LOINC 30980-7
                 if let Some(date) = fc.status.earliest_date() {
                     criteria.push(DateCriterion {
-                        code: CodeableConcept::new_simple("http://loinc.org", "30980-7", "Earliest date"),
+                        code: CodeableConcept::new_simple(
+                            "http://loinc.org",
+                            "30980-7",
+                            "Earliest date",
+                        ),
                         value: date.format("%Y-%m-%d").to_string(),
                     });
                 }
                 // Recommended: LOINC 30981-5
                 if let Some(date) = fc.status.recommended_date() {
                     criteria.push(DateCriterion {
-                        code: CodeableConcept::new_simple("http://loinc.org", "30981-5", "Recommended date"),
+                        code: CodeableConcept::new_simple(
+                            "http://loinc.org",
+                            "30981-5",
+                            "Recommended date",
+                        ),
                         value: date.format("%Y-%m-%d").to_string(),
                     });
                 }
                 // Overdue: LOINC 30982-3
                 if let Some(date) = fc.status.overdue_date() {
                     criteria.push(DateCriterion {
-                        code: CodeableConcept::new_simple("http://loinc.org", "30982-3", "Past due date"),
+                        code: CodeableConcept::new_simple(
+                            "http://loinc.org",
+                            "30982-3",
+                            "Past due date",
+                        ),
                         value: date.format("%Y-%m-%d").to_string(),
                     });
                 }
                 // Latest: LOINC 30983-1
                 if let Some(date) = fc.status.latest_date() {
                     criteria.push(DateCriterion {
-                        code: CodeableConcept::new_simple("http://loinc.org", "30983-1", "Latest date"),
+                        code: CodeableConcept::new_simple(
+                            "http://loinc.org",
+                            "30983-1",
+                            "Latest date",
+                        ),
                         value: date.format("%Y-%m-%d").to_string(),
                     });
                 }
 
-                let date_criterion = if criteria.is_empty() { None } else { Some(criteria) };
+                let date_criterion = if criteria.is_empty() {
+                    None
+                } else {
+                    Some(criteria)
+                };
 
                 let reasons_text = if fc.reasons.is_empty() {
                     None
@@ -501,8 +553,8 @@ pub fn make_immunization_recommendation(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use serde_json::json;
     use crate::models::SeriesForecast;
+    use serde_json::json;
 
     #[test]
     fn test_patient_conversion() {
@@ -512,7 +564,10 @@ mod tests {
         });
         let p: Patient = serde_json::from_value(p_json).unwrap();
         let internal_p = InternalPatient::try_from(p).unwrap();
-        assert_eq!(internal_p.birth_date, NaiveDate::from_ymd_opt(2022, 4, 15).unwrap());
+        assert_eq!(
+            internal_p.birth_date,
+            NaiveDate::from_ymd_opt(2022, 4, 15).unwrap()
+        );
         assert_eq!(internal_p.gender, Gender::Female);
     }
 
@@ -539,37 +594,44 @@ mod tests {
 
     #[test]
     fn test_make_recommendation() {
-        let forecasts = vec![
-            VaccineGroupForecast {
-                vaccine_group: std::borrow::Cow::Borrowed("Polio"),
-                evaluations: crate::date_utils::SmallVec::new(),
-                forecasts: {
-                    let mut v = crate::date_utils::SmallVec::new();
-                    v.push(SeriesForecast {
-                        series_name: std::borrow::Cow::Borrowed("IPVs"),
-                        status: SeriesStatus::NotComplete {
-                            earliest_date: Some(NaiveDate::from_ymd_opt(2022, 6, 1).unwrap()),
-                            recommended_date: Some(NaiveDate::from_ymd_opt(2022, 6, 15).unwrap()),
-                            overdue_date: Some(NaiveDate::from_ymd_opt(2022, 7, 1).unwrap()),
-                            latest_date: None,
-                        },
-                        reasons: crate::date_utils::SmallVec::new(),
-                        sources: std::collections::HashMap::new(),
-                    });
-                    v
-                },
-                selected_series: None,
-            }
-        ];
+        let forecasts = vec![VaccineGroupForecast {
+            vaccine_group: std::borrow::Cow::Borrowed("Polio"),
+            evaluations: crate::date_utils::SmallVec::new(),
+            forecasts: {
+                let mut v = crate::date_utils::SmallVec::new();
+                v.push(SeriesForecast {
+                    series_name: std::borrow::Cow::Borrowed("IPVs"),
+                    status: SeriesStatus::NotComplete {
+                        earliest_date: Some(NaiveDate::from_ymd_opt(2022, 6, 1).unwrap()),
+                        recommended_date: Some(NaiveDate::from_ymd_opt(2022, 6, 15).unwrap()),
+                        overdue_date: Some(NaiveDate::from_ymd_opt(2022, 7, 1).unwrap()),
+                        latest_date: None,
+                    },
+                    reasons: crate::date_utils::SmallVec::new(),
+                    sources: std::collections::HashMap::new(),
+                });
+                v
+            },
+            selected_series: None,
+        }];
 
-        let rec = make_immunization_recommendation("test-pat", NaiveDate::from_ymd_opt(2022, 6, 20).unwrap(), &forecasts);
+        let rec = make_immunization_recommendation(
+            "test-pat",
+            NaiveDate::from_ymd_opt(2022, 6, 20).unwrap(),
+            &forecasts,
+        );
         assert_eq!(rec.resource_type, "ImmunizationRecommendation");
         assert_eq!(rec.patient.reference, "Patient/test-pat");
         assert_eq!(rec.recommendation.len(), 1);
-        
+
         let item = &rec.recommendation[0];
-        assert_eq!(item.forecast_status.coding.as_ref().unwrap()[0].code.as_deref(), Some("due"));
-        
+        assert_eq!(
+            item.forecast_status.coding.as_ref().unwrap()[0]
+                .code
+                .as_deref(),
+            Some("due")
+        );
+
         let criteria = item.date_criterion.as_ref().unwrap();
         assert_eq!(criteria.len(), 3);
         assert_eq!(criteria[0].value, "2022-06-01");

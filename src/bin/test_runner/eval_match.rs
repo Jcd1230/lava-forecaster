@@ -7,11 +7,13 @@ pub type EvalKey = (NaiveDate, u16);
 pub fn pair_evaluations_by_occurrence<'a>(
     rust_evals: &'a [DoseEvaluation],
     expected_evals: &'a [DoseEvaluation],
-) -> SmallVec<[(
-    EvalKey,
-    Option<&'a DoseEvaluation>,
-    Option<&'a DoseEvaluation>,
-); 8]> {
+) -> SmallVec<
+    [(
+        EvalKey,
+        Option<&'a DoseEvaluation>,
+        Option<&'a DoseEvaluation>,
+    ); 8],
+> {
     let mut all_keys = SmallVec::<[EvalKey; 8]>::new();
 
     for eval in rust_evals {
@@ -29,11 +31,13 @@ pub fn pair_evaluations_by_occurrence<'a>(
 
     all_keys.sort_unstable();
 
-    let mut pairs = SmallVec::<[(
-        EvalKey,
-        Option<&'a DoseEvaluation>,
-        Option<&'a DoseEvaluation>,
-    ); 8]>::new();
+    let mut pairs = SmallVec::<
+        [(
+            EvalKey,
+            Option<&'a DoseEvaluation>,
+            Option<&'a DoseEvaluation>,
+        ); 8],
+    >::new();
     for key in all_keys {
         let rust_count = rust_evals
             .iter()
@@ -55,11 +59,7 @@ pub fn pair_evaluations_by_occurrence<'a>(
                 .filter(|eval| (eval.dose_date, eval.cvx.0) == key)
                 .nth(idx);
 
-            pairs.push((
-                key,
-                rust_eval,
-                expected_eval,
-            ));
+            pairs.push((key, rust_eval, expected_eval));
         }
     }
 

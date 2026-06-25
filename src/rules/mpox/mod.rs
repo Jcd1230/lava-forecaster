@@ -1,8 +1,8 @@
 use crate::rules::VaccineGroupDefinition;
 use crate::schedule::CompiledSeries;
 
-pub mod schedules;
 pub mod overrides;
+pub mod schedules;
 
 pub fn definition() -> VaccineGroupDefinition {
     VaccineGroupDefinition {
@@ -21,7 +21,7 @@ pub fn definition() -> VaccineGroupDefinition {
         custom_extra_dose_hook: Some(overrides::mpox_custom_extra_dose_hook),
         custom_completion_hook: Some(overrides::mpox_custom_completion_hook),
         group_selection: Some(overrides::mpox_group_selection),
-        policy: None,
+        policy: Some(Box::new(overrides::MpoxPolicy)),
     }
 }
 

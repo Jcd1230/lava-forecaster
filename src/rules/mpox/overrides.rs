@@ -1,15 +1,28 @@
 use crate::date_utils::SmallVec;
 use crate::engine::CandidateForecastsExt;
-use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
-use crate::models::{Dose,
-    DoseStatus,
-    EvaluationReason,
-    Patient,
-    SeriesForecast,
-    SeriesStatus,
-    VaccineGroupForecast,
+use crate::engine::ValidDoseRef;
+use crate::models::{
+    Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus, VaccineGroupForecast,
 };
+use chrono::NaiveDate;
+
+pub struct MpoxPolicy;
+
+impl crate::engine::EvaluationPolicy for MpoxPolicy {
+    fn same_day_priority(
+        &self,
+        dose: &Dose,
+        _context: &crate::engine::SameDayPriorityContext,
+    ) -> i32 {
+        match dose.cvx.0 {
+            206 => 0,
+            75 | 105 => 1,
+            325 => 2,
+            _ => 3,
+        }
+    }
+}
 
 const MPOX_1_DOSE_SERIES: &str = "MPOX_1_DOSE_SERIES";
 const MPOX_2_DOSE_SERIES: &str = "MPOX_2_DOSE_SERIES";
@@ -32,7 +45,8 @@ pub fn mpox_custom_evaluation_hook(
     if let Some(dose) = ctx.current_dose {
         if dose.cvx.0 == 75 || dose.cvx.0 == 105 {
             let limit = crate::time_period!("1y-4d");
-            if crate::date_utils::compare_elapsed(ctx.patient.birth_date, dose.date, &limit).is_lt() {
+            if crate::date_utils::compare_elapsed(ctx.patient.birth_date, dose.date, &limit).is_lt()
+            {
                 *status = DoseStatus::Invalid;
                 reasons.clear();
                 reasons.push(EvaluationReason::BelowMinimumAge);
@@ -64,21 +78,17 @@ pub fn mpox_custom_extra_dose_hook(
     let cvx = dose.cvx.0;
 
     // The booster dose MUST be the immediately following administered shot in history after the completing valid dose.
-    let completing_dose_date = ctx.valid_doses
+    let completing_dose = ctx
+        .valid_doses
         .iter()
-        .find(|(_, num)| *num == primary_dose_count)
-        .map(|(date, _)| *date);
+        .find(|dose| dose.dose_number == primary_dose_count);
 
-    if let Some(comp_date) = completing_dose_date {
-        let comp_idx = ctx.history.iter().position(|d| d.date == comp_date);
-        if let Some(idx) = comp_idx {
-            // Find the next shot in history
-            if idx + 1 < ctx.history.len() {
-                let next_shot = &ctx.history[idx + 1];
-                if next_shot.date != dose.date {
-                    return None;
-                }
-            } else {
+    if let Some(completing_dose) = completing_dose {
+        // EvaluationContext.history is original patient-history order in this hook path.
+        let idx = completing_dose.original_index;
+        if idx + 1 < ctx.history.len() {
+            let next_shot = &ctx.history[idx + 1];
+            if next_shot.date != dose.date {
                 return None;
             }
         } else {
@@ -90,20 +100,29 @@ pub fn mpox_custom_extra_dose_hook(
     if ctx.valid_doses.len() == primary_dose_count
         && ctx.target_dose_number == primary_dose_count + 1
     {
-        return Some((DoseStatus::Valid, crate::reasons![EvaluationReason::BoosterDose]));
+        return Some((
+            DoseStatus::Valid,
+            crate::reasons![EvaluationReason::BoosterDose],
+        ));
     }
 
     // 2. Perform age check for CVX 75 / 105
     if cvx == 75 || cvx == 105 {
         let limit = crate::time_period!("1y-4d");
         if crate::date_utils::compare_elapsed(ctx.patient.birth_date, dose.date, &limit).is_lt() {
-            return Some((DoseStatus::Invalid, crate::reasons![EvaluationReason::BelowMinimumAge]));
+            return Some((
+                DoseStatus::Invalid,
+                crate::reasons![EvaluationReason::BelowMinimumAge],
+            ));
         }
     }
 
     // 3. For any subsequent extra doses, if they pass age checks, they are Accepted / ExtraDose
     if ctx.target_dose_number > primary_dose_count + 1 {
-        return Some((DoseStatus::Accepted, crate::reasons![EvaluationReason::BoosterDose]));
+        return Some((
+            DoseStatus::Accepted,
+            crate::reasons![EvaluationReason::BoosterDose],
+        ));
     }
 
     None
@@ -111,7 +130,7 @@ pub fn mpox_custom_extra_dose_hook(
 
 pub fn mpox_custom_forecast_hook(
     _patient: &Patient,
-    valid_doses: &[(NaiveDate, usize)],
+    valid_doses: &[ValidDoseRef],
     _evaluations: &[crate::models::DoseEvaluation],
     _history: &[Dose],
     _eval_date: NaiveDate,
@@ -146,22 +165,35 @@ pub fn mpox_group_selection(
     let one_dose = candidate_forecasts.get_forecast(MPOX_1_DOSE_SERIES);
 
     let two_dose_complete = two_dose.map_or(false, |f| {
-        f.forecasts.iter().any(|sf| sf.series_name == MPOX_2_DOSE_SERIES && sf.status == SeriesStatus::Complete)
+        f.forecasts
+            .iter()
+            .any(|sf| sf.series_name == MPOX_2_DOSE_SERIES && sf.status == SeriesStatus::Complete)
     });
     let one_dose_complete = one_dose.map_or(false, |f| {
-        f.forecasts.iter().any(|sf| sf.series_name == MPOX_1_DOSE_SERIES && sf.status == SeriesStatus::Complete)
+        f.forecasts
+            .iter()
+            .any(|sf| sf.series_name == MPOX_1_DOSE_SERIES && sf.status == SeriesStatus::Complete)
     });
 
     let d1_1_dose = one_dose.and_then(|f| {
-        f.evaluations.iter().find(|e| e.status == DoseStatus::Valid && e.dose_number == Some(1)).map(|e| e.dose_date)
+        f.evaluations
+            .iter()
+            .find(|e| e.status == DoseStatus::Valid && e.dose_number == Some(1))
+            .map(|e| e.dose_date)
     });
     let d1_2_dose = two_dose.and_then(|f| {
-        f.evaluations.iter().find(|e| e.status == DoseStatus::Valid && e.dose_number == Some(1)).map(|e| e.dose_date)
+        f.evaluations
+            .iter()
+            .find(|e| e.status == DoseStatus::Valid && e.dose_number == Some(1))
+            .map(|e| e.dose_date)
     });
 
     let comp_1_dose = d1_1_dose;
     let comp_2_dose = two_dose.and_then(|f| {
-        f.evaluations.iter().find(|e| e.status == DoseStatus::Valid && e.dose_number == Some(2)).map(|e| e.dose_date)
+        f.evaluations
+            .iter()
+            .find(|e| e.status == DoseStatus::Valid && e.dose_number == Some(2))
+            .map(|e| e.dose_date)
     });
 
     if two_dose_complete && one_dose_complete {
@@ -214,5 +246,7 @@ pub fn mpox_custom_completion_hook(ctx: &EvaluationContext) -> bool {
         MPOX_2_DOSE_SERIES => 2,
         _ => return false,
     };
-    ctx.valid_doses.iter().any(|(_, num)| *num == target_doses)
+    ctx.valid_doses
+        .iter()
+        .any(|dose| dose.dose_number == target_doses)
 }

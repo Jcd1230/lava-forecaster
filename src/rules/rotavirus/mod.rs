@@ -21,7 +21,7 @@ pub fn definition() -> VaccineGroupDefinition {
         custom_extra_dose_hook: None,
         custom_completion_hook: Some(overrides::rotavirus_custom_completion_hook),
         group_selection: Some(overrides::rotavirus_group_selection),
-        policy: None,
+        policy: Some(Box::new(overrides::RotavirusPolicy)),
     }
 }
 

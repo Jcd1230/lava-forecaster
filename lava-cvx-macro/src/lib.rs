@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, LitStr};
+use syn::{LitStr, parse_macro_input};
 
 // The single source of truth for special overrides
 const OVERRIDES: &[(&str, u16)] = &[
@@ -16,7 +16,10 @@ fn parse_cvx_impl(s: &str) -> u16 {
     }
     // 2. Fallback to numeric parsing
     s.parse::<u16>().unwrap_or_else(|_| {
-        panic!("Invalid CVX code '{}': must be numeric or in the overrides registry", s);
+        panic!(
+            "Invalid CVX code '{}': must be numeric or in the overrides registry",
+            s
+        );
     })
 }
 

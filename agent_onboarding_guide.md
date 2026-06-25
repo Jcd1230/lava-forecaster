@@ -227,19 +227,20 @@ pub fn get_all_groups() -> Vec<&'static VaccineGroupDefinition> {
 
 ---
 
-### Step E: Add Same-Day Priority Rules (`src/engine.rs`)
+### Step E: Add Same-Day Priority Rules (`src/rules/<group>/overrides.rs`)
 If the group contains combined/combination vaccines (e.g. CVX 94 MMRV), we must prefer the combination vaccine over the single-antigen vaccine if given on the same day.
-Register the priorities in `get_same_day_priority` inside `src/engine.rs`:
+Register the priorities by implementing `same_day_priority` on the group's `EvaluationPolicy`:
 
 ```rust
-fn get_same_day_priority(group: &str, cvx: &str, birth_date: NaiveDate, dose_date: NaiveDate) -> i32 {
-    match group {
-        "VARICELLA" => match cvx {
-            "94" => 0, // Prefer MMRV (lower is higher priority)
-            "21" => 1, // Single antigen Varicella
+pub struct VaricellaPolicy;
+
+impl crate::engine::EvaluationPolicy for VaricellaPolicy {
+    fn same_day_priority(&self, dose: &Dose, _context: &SameDayPriorityContext) -> i32 {
+        match dose.cvx.0 {
+            94 => 0, // Prefer MMRV (lower is higher priority)
+            21 => 1, // Single antigen Varicella
             _ => 2,
-        },
-        _ => 0,
+        }
     }
 }
 ```
@@ -379,7 +380,7 @@ The raw case JSON wins over the case label if the wording and dates disagree.
     - Read Java series-selection rules and supporting-data YAML.
     - Then inspect Rust `group_selection`, `custom_switch_hook`, and `custom_dose_number_hook`.
 - Same-day duplicate issues:
-    - Check engine same-day priority handling before editing the vaccine-group module.
+    - Check the vaccine group's `EvaluationPolicy` same-day hooks before changing generic engine logic.
 
 For already-ported groups, check selection and overrides before changing `schedules.rs`. Many parity defects come from post-processing semantics rather than schedule-table definitions.
 

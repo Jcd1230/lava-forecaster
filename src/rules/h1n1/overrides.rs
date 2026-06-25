@@ -1,6 +1,7 @@
 use crate::date_utils::SmallVec;
 use crate::engine::CandidateForecastsExt;
 use crate::engine::EvaluationContext;
+use crate::engine::ValidDoseRef;
 use crate::models::{
     Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus, VaccineGroupForecast,
 };
@@ -30,7 +31,7 @@ pub fn h1n1_custom_evaluation_hook(
 
 pub fn h1n1_custom_forecast_hook(
     _patient: &Patient,
-    _valid_doses: &[(NaiveDate, usize)],
+    _valid_doses: &[ValidDoseRef],
     _evaluations: &[crate::models::DoseEvaluation],
     _history: &[Dose],
     eval_date: NaiveDate,

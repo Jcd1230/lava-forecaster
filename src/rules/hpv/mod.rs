@@ -1,5 +1,5 @@
-pub mod schedules;
 pub mod overrides;
+pub mod schedules;
 
 use crate::rules::VaccineGroupDefinition;
 
@@ -20,6 +20,6 @@ pub fn definition() -> VaccineGroupDefinition {
         custom_extra_dose_hook: None,
         custom_completion_hook: None,
         group_selection: Some(overrides::hpv_group_selection),
-        policy: None,
+        policy: Some(Box::new(overrides::HpvPolicy)),
     }
 }

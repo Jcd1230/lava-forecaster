@@ -4,6 +4,7 @@ use chrono::NaiveDate;
 
 use crate::date_utils::{SmallVec, compare_elapsed, TimePeriod};
 use crate::engine::EvaluationContext;
+use crate::engine::ValidDoseRef;
 use crate::models::{Cvx, Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus};
 
 const CHILD_PCV_CVX: &[u16] = &[cvx!("100"), cvx!("133"), cvx!("177"), cvx!("215"), cvx!("216"), cvx!("109"), cvx!("152"), cvx!("327")];
@@ -22,25 +23,19 @@ fn count_pcv_history_before_age(history: &[Dose], birth: NaiveDate, age: TimePer
         .count()
 }
 
-fn valid_adult_doses<'a>(valid_doses: &[(NaiveDate, usize)], history: &'a [Dose]) -> Vec<&'a Dose> {
+fn valid_adult_doses(valid_doses: &[ValidDoseRef]) -> Vec<ValidDoseRef> {
     valid_doses
         .iter()
-        .filter(|(_, dose_num)| *dose_num >= 6)
-        .filter_map(|(date, _)| {
-            history
-                .iter()
-                .find(|d| d.date == *date && (d.cvx.0 == cvx!("33") || is_pcv_cvx(d.cvx)))
-        })
+        .filter(|dose| dose.dose_number >= 6)
+        .copied()
+        .filter(|dose| dose.cvx.0 == cvx!("33") || is_pcv_cvx(dose.cvx))
         .collect()
 }
 
-fn has_valid_child_modern_pcv(valid_doses: &[(NaiveDate, usize)], history: &[Dose]) -> bool {
-    valid_doses.iter().any(|(date, dose_num)| {
-        *dose_num <= 5
-            && history
-                .iter()
-                .any(|d| d.date == *date && MODERN_PCV_CVX.contains(&d.cvx.0))
-    })
+fn has_valid_child_modern_pcv(valid_doses: &[ValidDoseRef]) -> bool {
+    valid_doses
+        .iter()
+        .any(|dose| dose.dose_number <= 5 && MODERN_PCV_CVX.contains(&dose.cvx.0))
 }
 
 fn child_pcv_complete(
@@ -93,15 +88,15 @@ pub fn pneumococcal_custom_completion_hook(ctx: &EvaluationContext) -> bool {
         // A child who has not completed the childhood PCV catch-up requirements
         // remains in the high-risk conditional path.
         let valid_pcv_doses: Vec<NaiveDate> = ctx.valid_doses.iter()
-            .filter(|(d, _)| ctx.history.iter().any(|h| h.date == *d && is_pcv_cvx(h.cvx)))
-            .map(|(d, _)| *d)
+            .filter(|dose| is_pcv_cvx(dose.cvx))
+            .map(|dose| dose.date)
             .collect();
-        return child_pcv_complete(birth, &valid_pcv_doses, has_valid_child_modern_pcv(ctx.valid_doses, ctx.history));
+        return child_pcv_complete(birth, &valid_pcv_doses, has_valid_child_modern_pcv(ctx.valid_doses));
     }
 
     let valid_pcv_doses: Vec<NaiveDate> = ctx.valid_doses.iter()
-        .filter(|(d, _)| ctx.history.iter().any(|h| h.date == *d && is_pcv_cvx(h.cvx)))
-        .map(|(d, _)| *d)
+        .filter(|dose| is_pcv_cvx(dose.cvx))
+        .map(|dose| dose.date)
         .collect();
     
     if valid_pcv_doses.is_empty() { return false; }
@@ -209,7 +204,7 @@ pub fn pneumococcal_custom_extra_dose_hook(
     // that component; later products remain ordinary extra doses.
     if age_lt(birth, dose.date, crate::time_period!("5y"))
         && MODERN_PCV_CVX.contains(&dose.cvx.0)
-        && !has_valid_child_modern_pcv(ctx.valid_doses, ctx.history)
+        && !has_valid_child_modern_pcv(ctx.valid_doses)
     {
         return Some((DoseStatus::Valid, SmallVec::new()));
     }
@@ -219,19 +214,19 @@ pub fn pneumococcal_custom_extra_dose_hook(
 
 pub fn pneumococcal_custom_forecast_hook(
     patient: &Patient,
-    valid_doses: &[(NaiveDate, usize)],
+    valid_doses: &[ValidDoseRef],
     _evaluations: &[crate::models::DoseEvaluation],
     history: &[Dose],
     eval_date: NaiveDate,
     forecast: &mut SeriesForecast,
 ) {
     let birth = patient.birth_date;
-    let adult_valid = valid_adult_doses(valid_doses, history);
-    let has_valid_child_modern_pcv = has_valid_child_modern_pcv(valid_doses, history);
+    let adult_valid = valid_adult_doses(valid_doses);
+    let has_valid_child_modern_pcv = has_valid_child_modern_pcv(valid_doses);
     
     let valid_pcv_doses: Vec<NaiveDate> = valid_doses.iter()
-        .filter(|(d, _)| history.iter().any(|h| h.date == *d && is_pcv_cvx(h.cvx)))
-        .map(|(d, _)| *d)
+        .filter(|dose| is_pcv_cvx(dose.cvx))
+        .map(|dose| dose.date)
         .collect();
     
     let pcv_complete = child_pcv_complete(birth, &valid_pcv_doses, has_valid_child_modern_pcv);
@@ -277,10 +272,11 @@ pub fn pneumococcal_custom_forecast_hook(
         if let Some(first_valid) = valid_pcv_doses.first().copied() {
             let valid_count = valid_pcv_doses.len();
             let first_is_before_12m = age_lt(birth, first_valid, crate::time_period!("12m"));
+            let first_valid_ref = valid_doses
+                .iter()
+                .find(|dose| dose.date == first_valid && is_pcv_cvx(dose.cvx));
             let first_is_late_old_pcv = age_ge(birth, first_valid, crate::time_period!("24m"))
-                && history
-                    .iter()
-                    .any(|d| d.date == first_valid && !MODERN_PCV_CVX.contains(&d.cvx.0));
+                && first_valid_ref.is_some_and(|dose| !MODERN_PCV_CVX.contains(&dose.cvx.0));
 
             if valid_count == 1 && first_is_before_12m {
                 let date_24m = crate::time_period!("24m").add_to(birth);
@@ -342,7 +338,7 @@ impl crate::engine::EvaluationPolicy for PneumococcalPolicy {
     fn custom_forecast_hook(
         &self,
         patient: &Patient,
-        valid_doses: &[(NaiveDate, usize)],
+        valid_doses: &[ValidDoseRef],
     _evaluations: &[crate::models::DoseEvaluation],
         history: &[Dose],
         eval_date: NaiveDate,

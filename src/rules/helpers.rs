@@ -1,6 +1,6 @@
-use chrono::NaiveDate;
-use crate::models::Dose;
 use crate::date_utils::{compare_elapsed, TimePeriod};
+use crate::models::Dose;
+use chrono::NaiveDate;
 
 /// Clamps an optional date to be at least the specified minimum date.
 /// If the date is None, it is set to Some(min_date).

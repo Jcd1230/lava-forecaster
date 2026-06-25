@@ -1,12 +1,31 @@
 use crate::date_utils::{add_years_unchecked, SmallVec, TimePeriod};
 use crate::engine::CandidateForecastsExt;
 use crate::engine::EvaluationContext;
+use crate::engine::ValidDoseRef;
 use crate::models::{
     Cvx, Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus,
     VaccineGroupForecast,
 };
 use chrono::NaiveDate;
 use lava_cvx_macro::cvx;
+
+pub struct HpvPolicy;
+
+impl crate::engine::EvaluationPolicy for HpvPolicy {
+    fn same_day_priority(
+        &self,
+        dose: &Dose,
+        _context: &crate::engine::SameDayPriorityContext,
+    ) -> i32 {
+        match dose.cvx.0 {
+            118 => 0,
+            62 => 1,
+            137 => 2,
+            165 => 3,
+            _ => 0,
+        }
+    }
+}
 
 fn is_hpv_cvx(cvx: Cvx) -> bool {
     matches!(cvx.0, cvx!("62") | cvx!("118") | cvx!("137") | cvx!("165"))
@@ -236,8 +255,8 @@ pub fn hpv_custom_evaluation_hook(
         // For shots on or after 12/16/2016: abs_min 1->3 is 5m-4d (~147 days)
         if series_name == "HPV_3_DOSE_SERIES" && target_dose_idx == 3 {
             if ctx.valid_doses.len() >= 2 {
-                let dose_1_date = ctx.valid_doses[0].0;
-                let dose_2_date = ctx.valid_doses[1].0;
+                let dose_1_date = ctx.valid_doses[0].date;
+                let dose_2_date = ctx.valid_doses[1].date;
                 let cutoff_2016 = NaiveDate::from_ymd_opt(2016, 12, 16).unwrap();
                 let abs_min_1_3 = if dose.date < cutoff_2016 {
                     crate::time_period!("16w-4d") // Pre-2016: 108 days
@@ -262,7 +281,7 @@ pub fn hpv_custom_evaluation_hook(
 
 pub fn hpv_custom_forecast_hook(
     patient: &Patient,
-    valid_doses: &[(NaiveDate, usize)],
+    valid_doses: &[ValidDoseRef],
     _evaluations: &[crate::models::DoseEvaluation],
     _history: &[Dose],
     eval_date: NaiveDate,
@@ -303,7 +322,7 @@ pub fn hpv_custom_forecast_hook(
         return;
     }
 
-    let first_valid_date = valid_doses[0].0;
+    let first_valid_date = valid_doses[0].date;
     let started_at_or_after_15 = first_valid_date >= age_15;
 
     let sim_results = simulate_hpv_evaluations(patient, _history, &forecast.series_name);
@@ -353,7 +372,7 @@ pub fn hpv_custom_forecast_hook(
     }
 
     if valid_doses.len() >= 2 {
-        let second_valid_date = valid_doses[1].0;
+        let second_valid_date = valid_doses[1].date;
         let earliest_from_dose_1 = add_interval(first_valid_date, crate::time_period!("5m"));
         let earliest_from_latest = add_interval(latest_hpv_dose_date, crate::time_period!("12w"));
         let earliest = earliest_from_dose_1.max(earliest_from_latest);

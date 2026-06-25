@@ -25,10 +25,7 @@ pub enum ForecasterError {
     FlatbufferError(String),
 
     /// A test DSL file could not be parsed.
-    TestDslError {
-        line: usize,
-        detail: String,
-    },
+    TestDslError { line: usize, detail: String },
 }
 
 impl fmt::Display for ForecasterError {

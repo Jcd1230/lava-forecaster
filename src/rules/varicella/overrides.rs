@@ -1,12 +1,52 @@
 use crate::date_utils::SmallVec;
-use lava_cvx_macro::cvx;
-use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
-use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus};
-use crate::rules::helpers::{clamp_date_at_least, interval_days_between, age_ge};
+use crate::engine::ValidDoseRef;
+use crate::models::{
+    Cvx, Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus,
+};
+use crate::rules::helpers::{age_ge, clamp_date_at_least, interval_days_between};
+use chrono::NaiveDate;
+use lava_cvx_macro::cvx;
+
+pub struct VaricellaPolicy;
+
+impl crate::engine::EvaluationPolicy for VaricellaPolicy {
+    fn same_day_priority(
+        &self,
+        dose: &Dose,
+        _context: &crate::engine::SameDayPriorityContext,
+    ) -> i32 {
+        match dose.cvx.0 {
+            94 => 0,
+            21 => 1,
+            _ => 2,
+        }
+    }
+}
 
 fn is_live_virus(cvx: Cvx) -> bool {
-    const LIVE_VIRUS: &[u16] = &[cvx!("03"), cvx!("04"), cvx!("05"), cvx!("06"), cvx!("07"), cvx!("21"), cvx!("37"), cvx!("38"), cvx!("75"), cvx!("94"), cvx!("105"), cvx!("111"), cvx!("121"), cvx!("125"), cvx!("149"), cvx!("151"), cvx!("183"), cvx!("184"), cvx!("325"), cvx!("333")];
+    const LIVE_VIRUS: &[u16] = &[
+        cvx!("03"),
+        cvx!("04"),
+        cvx!("05"),
+        cvx!("06"),
+        cvx!("07"),
+        cvx!("21"),
+        cvx!("37"),
+        cvx!("38"),
+        cvx!("75"),
+        cvx!("94"),
+        cvx!("105"),
+        cvx!("111"),
+        cvx!("121"),
+        cvx!("125"),
+        cvx!("149"),
+        cvx!("151"),
+        cvx!("183"),
+        cvx!("184"),
+        cvx!("325"),
+        cvx!("333"),
+    ];
     LIVE_VIRUS.contains(&cvx.0)
 }
 
@@ -31,8 +71,9 @@ pub fn varicella_custom_evaluation_hook(
         // 1. Absolute Minimum Interval 1->2 Override if administered at >= 13 years of age
         if target_dose_idx == 2 {
             if age_ge(birth_date, dose.date, crate::time_period!("13y")) {
-                if let Some((prev_date, _)) = ctx.valid_doses.last() {
-                    let interval_days = interval_days_between(*prev_date, dose.date);
+                if let Some(prev) = ctx.valid_doses.last() {
+                    let prev_date = prev.date;
+                    let interval_days = interval_days_between(prev_date, dose.date);
                     if interval_days >= 24 {
                         reasons.retain(|r| *r != EvaluationReason::BelowMinimumInterval);
                         if reasons.is_empty() {
@@ -47,7 +88,8 @@ pub fn varicella_custom_evaluation_hook(
         if is_live_virus(dose.cvx) {
             for prev in ctx.history {
                 if prev.date < dose.date && is_live_virus(prev.cvx) {
-                    let is_both_varicella = is_varicella_group(dose.cvx) && is_varicella_group(prev.cvx);
+                    let is_both_varicella =
+                        is_varicella_group(dose.cvx) && is_varicella_group(prev.cvx);
                     let required_days = if is_both_varicella {
                         if dose.cvx.0 == cvx!("94") || prev.cvx.0 == cvx!("94") {
                             28
@@ -72,7 +114,7 @@ pub fn varicella_custom_evaluation_hook(
 
 pub fn varicella_custom_forecast_hook(
     patient: &Patient,
-    valid_doses: &[(NaiveDate, usize)],
+    valid_doses: &[ValidDoseRef],
     _evaluations: &[crate::models::DoseEvaluation],
     history: &[Dose],
     eval_date: NaiveDate,
@@ -105,7 +147,7 @@ pub fn varicella_custom_forecast_hook(
     // 2. Patient age >= 13 years interval overrides
     if forecast.status != SeriesStatus::Complete && valid_doses.len() == 1 {
         if age_ge(patient.birth_date, eval_date, crate::time_period!("13y")) {
-            let dose1_date = valid_doses[0].0;
+            let dose1_date = valid_doses[0].date;
             let override_date = dose1_date + chrono::Duration::days(28);
 
             forecast.status = forecast.status.with_earliest_date(Some(override_date));
@@ -115,7 +157,8 @@ pub fn varicella_custom_forecast_hook(
 
     // 3. Live Virus Forecast Spacing
     if forecast.status != SeriesStatus::Complete {
-        let last_live_virus = history.iter()
+        let last_live_virus = history
+            .iter()
             .filter(|d| is_live_virus(d.cvx))
             .map(|d| d.date)
             .max();

@@ -1,8 +1,8 @@
 use crate::rules::VaccineGroupDefinition;
 use crate::schedule::CompiledSeries;
 
-pub mod schedules;
 pub mod overrides;
+pub mod schedules;
 
 pub fn definition() -> VaccineGroupDefinition {
     VaccineGroupDefinition {
@@ -22,7 +22,7 @@ pub fn definition() -> VaccineGroupDefinition {
         custom_extra_dose_hook: None,
         custom_completion_hook: None,
         group_selection: Some(overrides::influenza_group_selection),
-        policy: None,
+        policy: Some(Box::new(overrides::InfluenzaPolicy)),
     }
 }
 

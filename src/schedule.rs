@@ -104,7 +104,7 @@ impl CompiledSeriesBuilder {
     pub fn build(self) -> CompiledSeries {
         let code = self.code.unwrap_or(self.name);
         let vaccine_group = self.vaccine_group.expect("vaccine_group is required");
-        
+
         // Sort doses and intervals to ensure they are in correct order
         let mut doses = self.doses;
         doses.sort_by_key(|d| d.dose_number);

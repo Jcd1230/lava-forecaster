@@ -1,4 +1,4 @@
-use lava_forecaster::engine::is_eval_ignored;
+use lava_forecaster::engine::default_is_evaluation_ignored;
 use lava_forecaster::models::{DoseEvaluation, DoseStatus, SeriesForecast};
 use std::collections::BTreeMap;
 
@@ -70,7 +70,7 @@ Per-Group Summary:"
 
 pub fn print_comparison_table(
     tc_name: &str,
-    group: &str,
+    _group: &str,
     rust_evals: &[DoseEvaluation],
     rust_fc: Option<&SeriesForecast>,
     exp_evals: &[DoseEvaluation],
@@ -107,7 +107,7 @@ Test Case: \x1b[92m{}\x1b[0m (PASS)",
                 .map(|n| n.to_string())
                 .unwrap_or_else(|| "-".to_string());
             if eval.status == DoseStatus::Invalid {
-                let ignored = is_eval_ignored(group, eval.cvx, eval.dose_date, eval.status, None);
+                let ignored = default_is_evaluation_ignored(eval);
                 let tag = if ignored { "Ignored" } else { "Not Ignored" };
                 format!("{:?} ({}) #{}", eval.status, tag, dose_num)
             } else {

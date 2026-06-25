@@ -69,9 +69,11 @@ pub fn evaluate_patient_all_groups(
                     custom_extra_dose_hook: ruleset.custom_extra_dose_hook,
                     custom_completion_hook: ruleset.custom_completion_hook,
                 };
-                let policy_ref: &dyn crate::engine::EvaluationPolicy =
-                    ruleset.policy.as_deref().unwrap_or(&legacy_policy);
-                engine.policy = Some(policy_ref);
+                let combined_policy = crate::rules::CombinedEvaluationPolicy {
+                    policy: ruleset.policy.as_deref(),
+                    legacy: legacy_policy,
+                };
+                engine.policy = Some(&combined_policy);
 
                 let forecast =
                     engine.evaluate_patient(patient, history, eval_date, &ruleset.series);
@@ -103,9 +105,11 @@ pub fn evaluate_patient_all_groups(
                     custom_extra_dose_hook: ruleset.custom_extra_dose_hook,
                     custom_completion_hook: ruleset.custom_completion_hook,
                 };
-                let policy_ref: &dyn crate::engine::EvaluationPolicy =
-                    ruleset.policy.as_deref().unwrap_or(&legacy_policy);
-                engine.policy = Some(policy_ref);
+                let combined_policy = crate::rules::CombinedEvaluationPolicy {
+                    policy: ruleset.policy.as_deref(),
+                    legacy: legacy_policy,
+                };
+                engine.policy = Some(&combined_policy);
 
                 let forecast =
                     engine.evaluate_patient(patient, history, eval_date, &ruleset.series);

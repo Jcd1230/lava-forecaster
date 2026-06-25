@@ -1,6 +1,7 @@
 use crate::date_utils::SmallVec;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
+use crate::engine::ValidDoseRef;
 use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus};
 
 pub fn cholera_custom_evaluation_hook(
@@ -15,7 +16,7 @@ pub fn cholera_custom_evaluation_hook(
 
 pub fn cholera_custom_forecast_hook(
     patient: &Patient,
-    valid_doses: &[(NaiveDate, usize)],
+    valid_doses: &[ValidDoseRef],
     _evaluations: &[crate::models::DoseEvaluation],
     _history: &[Dose],
     eval_date: NaiveDate,

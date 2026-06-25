@@ -1,11 +1,13 @@
+use crate::date_utils::{add_years_unchecked, SmallVec};
 use crate::engine::CandidateForecastsExt;
-use lava_cvx_macro::cvx;
-use crate::date_utils::{SmallVec, add_years_unchecked};
 use crate::engine::EvaluationContext;
-use crate::models::{Cvx, 
-    Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus, VaccineGroupForecast,
+use crate::engine::ValidDoseRef;
+use crate::models::{
+    Cvx, Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus,
+    VaccineGroupForecast,
 };
 use chrono::NaiveDate;
+use lava_cvx_macro::cvx;
 
 const DUPLICATE_POLICY_CHANGE_DATE: (i32, u32, u32) = (2024, 10, 25);
 
@@ -16,6 +18,26 @@ fn policy_change_date() -> NaiveDate {
         DUPLICATE_POLICY_CHANGE_DATE.2,
     )
     .unwrap()
+}
+
+pub struct MenBPolicy;
+
+impl crate::engine::EvaluationPolicy for MenBPolicy {
+    fn same_day_priority(
+        &self,
+        dose: &Dose,
+        _context: &crate::engine::SameDayPriorityContext,
+    ) -> i32 {
+        if dose.date < policy_change_date() {
+            match dose.cvx.0 {
+                163 | 328 => 0,
+                162 | 316 => 1,
+                _ => 2,
+            }
+        } else {
+            0
+        }
+    }
 }
 
 fn is_4c(cvx: Cvx) -> bool {
@@ -97,8 +119,7 @@ fn latest_family(history: &[Dose]) -> Option<&'static str> {
 fn has_mixed_brand_same_day(dose: &Dose, history: &[Dose]) -> bool {
     history.iter().any(|other| {
         other.date == dose.date
-            && ((is_4c(dose.cvx) && is_fhbp(other.cvx))
-                || (is_fhbp(dose.cvx) && is_4c(other.cvx)))
+            && ((is_4c(dose.cvx) && is_fhbp(other.cvx)) || (is_fhbp(dose.cvx) && is_4c(other.cvx)))
     })
 }
 
@@ -153,11 +174,12 @@ pub fn menb_custom_evaluation_hook(
     }
 
     if series_name == "MEN_B_4_C_2_DOSE_SERIES" && target_dose_idx == 2 && is_4c(dose.cvx) {
-        if let Some((dose1_date, _)) = ctx.valid_doses.first() {
+        if let Some(dose1) = ctx.valid_doses.first() {
+            let dose1_date = dose1.date;
             let threshold = if dose.date >= policy_change {
-                crate::time_period!("6m-4d").add_to(*dose1_date)
+                crate::time_period!("6m-4d").add_to(dose1_date)
             } else {
-                crate::time_period!("1m-4d").add_to(*dose1_date)
+                crate::time_period!("1m-4d").add_to(dose1_date)
             };
 
             if dose.date < threshold {
@@ -173,11 +195,14 @@ pub fn menb_custom_evaluation_hook(
         return;
     }
 
-    if matches!(series_name, "MEN_B_4_C_3_DOSE_SERIES" | "MEN_BF_HBP_3_DOSE_SERIES")
-        && target_dose_idx == 3
+    if matches!(
+        series_name,
+        "MEN_B_4_C_3_DOSE_SERIES" | "MEN_BF_HBP_3_DOSE_SERIES"
+    ) && target_dose_idx == 3
     {
-        if let Some((dose1_date, _)) = ctx.valid_doses.first() {
-            let threshold = crate::time_period!("6m-4d").add_to(*dose1_date);
+        if let Some(dose1) = ctx.valid_doses.first() {
+            let dose1_date = dose1.date;
+            let threshold = crate::time_period!("6m-4d").add_to(dose1_date);
             if dose.date >= threshold {
                 *status = DoseStatus::Valid;
                 reasons.retain(|reason| *reason != EvaluationReason::BelowMinimumInterval);
@@ -188,7 +213,7 @@ pub fn menb_custom_evaluation_hook(
 
 pub fn menb_custom_forecast_hook(
     patient: &Patient,
-    valid_doses: &[(NaiveDate, usize)],
+    valid_doses: &[ValidDoseRef],
     _evaluations: &[crate::models::DoseEvaluation],
     history: &[Dose],
     eval_date: NaiveDate,
@@ -226,18 +251,29 @@ pub fn menb_custom_forecast_hook(
     }
 
     if forecast.series_name == "MEN_B_4_C_2_DOSE_SERIES" {
-        if let Some((dose1_date, _)) = valid_doses.first() {
-            if *dose1_date >= policy_change_date() {
-                let anchor = crate::time_period!("6m").add_to(*dose1_date);
-                forecast.status = forecast.status.with_earliest_date(Some(forecast.status.earliest_date().map_or(anchor, |date| date.max(anchor))));
-                forecast.status = forecast.status.with_recommended_date(Some(forecast.status.recommended_date().map_or(anchor, |date| date.max(anchor))));
+        if let Some(dose1) = valid_doses.first() {
+            let dose1_date = dose1.date;
+            if dose1_date >= policy_change_date() {
+                let anchor = crate::time_period!("6m").add_to(dose1_date);
+                forecast.status = forecast.status.with_earliest_date(Some(
+                    forecast
+                        .status
+                        .earliest_date()
+                        .map_or(anchor, |date| date.max(anchor)),
+                ));
+                forecast.status = forecast.status.with_recommended_date(Some(
+                    forecast
+                        .status
+                        .recommended_date()
+                        .map_or(anchor, |date| date.max(anchor)),
+                ));
             } else {
                 let last_4c_shot = history
                     .iter()
                     .filter(|dose| is_4c(dose.cvx))
                     .map(|dose| dose.date)
                     .max()
-                    .unwrap_or(*dose1_date);
+                    .unwrap_or(dose1_date);
                 let anchor = crate::time_period!("1m").add_to(last_4c_shot);
                 forecast.status = forecast.status.with_earliest_date(Some(anchor));
                 forecast.status = forecast.status.with_recommended_date(Some(anchor));
@@ -245,11 +281,25 @@ pub fn menb_custom_forecast_hook(
         }
     }
 
-    if matches!(forecast.series_name.as_ref(), "MEN_B_4_C_3_DOSE_SERIES" | "MEN_BF_HBP_3_DOSE_SERIES") {
-        if let Some((dose1_date, _)) = valid_doses.first() {
-            let anchor = crate::time_period!("6m").add_to(*dose1_date);
-            forecast.status = forecast.status.with_earliest_date(Some(forecast.status.earliest_date().map_or(anchor, |date| date.max(anchor))));
-            forecast.status = forecast.status.with_recommended_date(Some(forecast.status.recommended_date().map_or(anchor, |date| date.max(anchor))));
+    if matches!(
+        forecast.series_name.as_ref(),
+        "MEN_B_4_C_3_DOSE_SERIES" | "MEN_BF_HBP_3_DOSE_SERIES"
+    ) {
+        if let Some(dose1) = valid_doses.first() {
+            let dose1_date = dose1.date;
+            let anchor = crate::time_period!("6m").add_to(dose1_date);
+            forecast.status = forecast.status.with_earliest_date(Some(
+                forecast
+                    .status
+                    .earliest_date()
+                    .map_or(anchor, |date| date.max(anchor)),
+            ));
+            forecast.status = forecast.status.with_recommended_date(Some(
+                forecast
+                    .status
+                    .recommended_date()
+                    .map_or(anchor, |date| date.max(anchor)),
+            ));
         }
     }
 

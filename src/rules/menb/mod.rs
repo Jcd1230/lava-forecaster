@@ -23,7 +23,7 @@ pub fn definition() -> VaccineGroupDefinition {
         custom_extra_dose_hook: None,
         custom_completion_hook: None,
         group_selection: Some(overrides::menb_group_selection),
-        policy: None,
+        policy: Some(Box::new(overrides::MenBPolicy)),
     }
 }
 

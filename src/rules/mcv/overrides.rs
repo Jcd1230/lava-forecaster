@@ -1,6 +1,7 @@
 use lava_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
+use crate::engine::ValidDoseRef;
 use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus};
 use crate::date_utils::{SmallVec, TimePeriod, add_years_unchecked};
 
@@ -15,8 +16,9 @@ fn get_vaccine_min_age(cvx: Cvx) -> Option<TimePeriod> {
 
 pub fn mcv_completion_condition(ctx: &EvaluationContext) -> bool {
     if ctx.valid_doses.len() == 1 {
-        let (dose1_date, dose1_idx) = ctx.valid_doses[0];
-        if dose1_idx == 1 {
+        let dose1 = ctx.valid_doses[0];
+        if dose1.dose_number == 1 {
+            let dose1_date = dose1.date;
             let age_16 = add_years_unchecked(ctx.patient.birth_date, 16);
             let age_19 = add_years_unchecked(ctx.patient.birth_date, 19);
             if dose1_date >= age_16 && dose1_date < age_19 {
@@ -64,7 +66,7 @@ pub fn mcv_custom_evaluation_hook(
         let age_22 = add_years_unchecked(birth_date, 22);
         if dose.date >= age_22 {
             let age_19 = add_years_unchecked(birth_date, 19);
-            let valid_before_19 = ctx.valid_doses.iter().filter(|(dt, _)| *dt < age_19).count();
+            let valid_before_19 = ctx.valid_doses.iter().filter(|dose| dose.date < age_19).count();
             if valid_before_19 < 2 {
                 *status = DoseStatus::Accepted;
                 reasons.clear();
@@ -77,7 +79,7 @@ pub fn mcv_custom_evaluation_hook(
 
 pub fn mcv_custom_forecast_hook(
     patient: &Patient,
-    valid_doses: &[(NaiveDate, usize)],
+    valid_doses: &[ValidDoseRef],
     _evaluations: &[crate::models::DoseEvaluation],
     _history: &[Dose],
     eval_date: NaiveDate,

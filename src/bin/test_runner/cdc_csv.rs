@@ -1,5 +1,5 @@
 use crate::java_client::query_rust_rest_service;
-use crate::ui::{print_summary, record_summary_result, SummaryCounts};
+use crate::ui::{SummaryCounts, print_summary, record_summary_result};
 use chrono::NaiveDate;
 use csv::ReaderBuilder;
 use lava_forecaster::{

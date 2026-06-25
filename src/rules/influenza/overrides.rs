@@ -1,14 +1,48 @@
 use crate::date_utils::SmallVec;
 use crate::engine::CandidateForecastsExt;
-use lava_cvx_macro::cvx;
-use chrono::{Datelike, NaiveDate};
 use crate::engine::EvaluationContext;
-use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast, DoseEvaluation};
+use crate::engine::ValidDoseRef;
+use crate::models::{
+    Dose, DoseEvaluation, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus,
+    VaccineGroupForecast,
+};
+use chrono::{Datelike, NaiveDate};
+use lava_cvx_macro::cvx;
+use std::cmp::Ordering;
 
 pub struct SeasonDates {
     pub start: NaiveDate,
     pub end: NaiveDate,
     pub name: &'static str,
+}
+
+pub struct InfluenzaPolicy;
+
+impl crate::engine::EvaluationPolicy for InfluenzaPolicy {
+    fn same_day_priority(
+        &self,
+        dose: &Dose,
+        _context: &crate::engine::SameDayPriorityContext,
+    ) -> i32 {
+        let is_disallowed = matches!(dose.cvx.0, 194 | 200 | 201 | 202 | 231 | 331 | 337);
+        let is_nos = matches!(dose.cvx.0, 88 | 151);
+        if is_disallowed {
+            100
+        } else if is_nos {
+            90
+        } else {
+            20
+        }
+    }
+
+    fn compare_same_day_source_order(
+        &self,
+        left: (usize, &Dose),
+        right: (usize, &Dose),
+        _context: &crate::engine::SameDayPriorityContext,
+    ) -> Option<Ordering> {
+        Some(right.0.cmp(&left.0))
+    }
 }
 
 pub fn get_active_season(eval_date: NaiveDate) -> SeasonDates {
@@ -78,9 +112,16 @@ fn is_ice_unsupported_influenza_cvx(cvx_code: u16) -> bool {
         cvx_code,
         // ICE treats these seasonal influenza products as not usable in the
         // supported US influenza schedules represented by this group.
-        cvx!("144") | cvx!("161") | cvx!("166") |
-        cvx!("194") | cvx!("200") | cvx!("201") | cvx!("202") |
-        cvx!("231") | cvx!("331") | cvx!("337")
+        cvx!("144")
+            | cvx!("161")
+            | cvx!("166")
+            | cvx!("194")
+            | cvx!("200")
+            | cvx!("201")
+            | cvx!("202")
+            | cvx!("231")
+            | cvx!("331")
+            | cvx!("337")
     )
 }
 
@@ -119,7 +160,7 @@ pub fn influenza_custom_evaluation_hook(
 
 pub fn influenza_custom_forecast_hook(
     patient: &Patient,
-    _valid_doses: &[(NaiveDate, usize)],
+    _valid_doses: &[ValidDoseRef],
     _evaluations: &[crate::models::DoseEvaluation],
     history: &[Dose],
     eval_date: NaiveDate,
@@ -127,8 +168,12 @@ pub fn influenza_custom_forecast_hook(
 ) {
     let active_season = get_active_season(eval_date);
     let evals = evaluate_history_seasonally(patient, history);
-    let season_valid_count = evals.iter()
-        .filter(|e| e.status == DoseStatus::Valid && get_active_season(e.dose_date).name == active_season.name)
+    let season_valid_count = evals
+        .iter()
+        .filter(|e| {
+            e.status == DoseStatus::Valid
+                && get_active_season(e.dose_date).name == active_season.name
+        })
         .count();
     let is_1_dose = is_1_dose_season(patient, history, active_season.start);
     let needed = if is_1_dose { 1 } else { 2 };
@@ -140,7 +185,9 @@ pub fn influenza_custom_forecast_hook(
 
         if let Some(last) = history.iter().max_by_key(|d| d.date) {
             let interval_date = last.date + chrono::Duration::days(28);
-            if interval_date > recommended { recommended = interval_date; }
+            if interval_date > recommended {
+                recommended = interval_date;
+            }
         }
 
         // ICE's process-results output leaves earliest_date blank once the
@@ -168,7 +215,7 @@ pub fn influenza_custom_forecast_hook(
     let last_dose = history.iter().max_by_key(|d| d.date);
     if let Some(last) = last_dose {
         let interval_date = last.date + chrono::Duration::days(28);
-        
+
         if interval_date > recommended {
             recommended = interval_date;
         }
@@ -185,8 +232,13 @@ pub fn influenza_custom_forecast_hook(
     forecast.status = forecast.status.with_recommended_date(Some(recommended));
 }
 
-fn count_valid_prior_doses(history: &[Dose], patient: &Patient, active_season_start: NaiveDate) -> usize {
-    let mut eligible_doses: Vec<NaiveDate> = history.iter()
+fn count_valid_prior_doses(
+    history: &[Dose],
+    patient: &Patient,
+    active_season_start: NaiveDate,
+) -> usize {
+    let mut eligible_doses: Vec<NaiveDate> = history
+        .iter()
         .filter(|d| d.date < active_season_start)
         .filter(|d| !is_ice_unsupported_influenza_cvx(d.cvx.0))
         .filter(|d| {
@@ -196,10 +248,10 @@ fn count_valid_prior_doses(history: &[Dose], patient: &Patient, active_season_st
         })
         .map(|d| d.date)
         .collect();
-    
+
     eligible_doses.sort();
     eligible_doses.dedup();
-    
+
     let mut valid_count = 0;
     let mut last_valid_date: Option<NaiveDate> = None;
     for date in eligible_doses {
@@ -229,7 +281,8 @@ fn is_1_dose_season(patient: &Patient, history: &[Dose], season_start: NaiveDate
 
 fn evaluate_history_seasonally(patient: &Patient, history: &[Dose]) -> Vec<DoseEvaluation> {
     let mut evaluations = Vec::new();
-    let mut valid_doses_by_season: std::collections::HashMap<String, Vec<NaiveDate>> = std::collections::HashMap::new();
+    let mut valid_doses_by_season: std::collections::HashMap<String, Vec<NaiveDate>> =
+        std::collections::HashMap::new();
 
     let mut sorted_history = history.to_vec();
     sorted_history.sort_by_key(|d| d.date);
@@ -263,11 +316,12 @@ fn evaluate_history_seasonally(patient: &Patient, history: &[Dose]) -> Vec<DoseE
                 }
 
                 if status == DoseStatus::Valid {
-                    let last_prior_dose_date = evaluations.iter()
+                    let last_prior_dose_date = evaluations
+                        .iter()
                         .filter(|e| {
-                            e.dose_date < dose.date &&
-                            get_active_season(e.dose_date).name == active_season.name &&
-                            e.status != DoseStatus::Invalid
+                            e.dose_date < dose.date
+                                && get_active_season(e.dose_date).name == active_season.name
+                                && e.status != DoseStatus::Invalid
                         })
                         .map(|e| e.dose_date)
                         .last();
@@ -289,7 +343,9 @@ fn evaluate_history_seasonally(patient: &Patient, history: &[Dose]) -> Vec<DoseE
             if season_valid_count >= max_allowed {
                 status = DoseStatus::Accepted;
             } else {
-                let season_valid_doses = valid_doses_by_season.entry(season_key.to_string()).or_insert_with(Vec::new);
+                let season_valid_doses = valid_doses_by_season
+                    .entry(season_key.to_string())
+                    .or_insert_with(Vec::new);
                 season_valid_doses.push(dose.date);
             }
         }
@@ -299,7 +355,12 @@ fn evaluate_history_seasonally(patient: &Patient, history: &[Dose]) -> Vec<DoseE
             cvx: dose.cvx.clone(),
             status,
             reasons,
-            dose_number: Some(valid_doses_by_season.get(season_key).map_or(1, |v| v.len()).max(1)),
+            dose_number: Some(
+                valid_doses_by_season
+                    .get(season_key)
+                    .map_or(1, |v| v.len())
+                    .max(1),
+            ),
             sources: std::collections::HashMap::new(),
         });
     }
@@ -314,8 +375,12 @@ pub fn influenza_group_selection(
 ) -> &'static str {
     let active_season = get_active_season(eval_date);
     let use_1_dose = is_1_dose_season(patient, history, active_season.start);
-    
-    let selected_series_name = if use_1_dose { "INFLUENZA_1_DOSE_SERIES" } else { "INFLUENZA_2_DOSE_SERIES" };
+
+    let selected_series_name = if use_1_dose {
+        "INFLUENZA_1_DOSE_SERIES"
+    } else {
+        "INFLUENZA_2_DOSE_SERIES"
+    };
 
     if let Some(forecast) = candidate_forecasts.get_forecast_mut(selected_series_name) {
         forecast.evaluations = evaluate_history_seasonally(patient, history).into();

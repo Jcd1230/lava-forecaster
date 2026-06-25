@@ -50,7 +50,7 @@ Date         | CVX  | Rust Evaluation              | Expected Evaluation        
 2016-05-06   | 178  | Invalid (Ignored) #2         | Invalid (Ignored) #2         | OK
 ```
 
-The `(Ignored)` / `(Not Ignored)` tag is determined by `is_eval_ignored()` in the engine, which accounts for group-specific rules (e.g., bivalent OPV CVX 178/179 and post-April-2016 CVX 182 shots in the POLIO group are always ignored regardless of evaluation status).
+The `(Ignored)` / `(Not Ignored)` tag is determined by the shared default ignored-evaluation helper. Group-specific ignored-dose rules live in each vaccine group's `EvaluationPolicy`.
 
 ---
 

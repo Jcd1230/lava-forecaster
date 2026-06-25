@@ -1,5 +1,5 @@
-use lava_cvx_macro::cvx;
 use crate::schedule::CompiledSeries;
+use lava_cvx_macro::cvx;
 
 pub fn rotavirus_2_dose_series() -> CompiledSeries {
     let allowed_cvx = &[cvx!("119")];
@@ -8,7 +8,6 @@ pub fn rotavirus_2_dose_series() -> CompiledSeries {
         .code("ROTAVIRUS_2_DOSE_SERIES")
         .vaccine_group("ROTAVIRUS")
         .num_doses(2)
-
         .dose(1, |d| {
             d.abs_min_age(crate::time_period!("38d"))
                 .min_age(crate::time_period!("42d"))
@@ -38,7 +37,6 @@ pub fn rotavirus_3_dose_series() -> CompiledSeries {
         .code("ROTAVIRUS_3_DOSE_SERIES")
         .vaccine_group("ROTAVIRUS")
         .num_doses(3)
-
         .dose(1, |d| {
             d.abs_min_age(crate::time_period!("38d"))
                 .min_age(crate::time_period!("42d"))

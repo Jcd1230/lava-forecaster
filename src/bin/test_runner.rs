@@ -1,9 +1,9 @@
 use clap::Parser;
-use rayon::prelude::*;
 use lava_forecaster::{
     evaluate_patient_all_groups,
     models::{DoseStatus, ExpectedResults, SeriesForecast, UnifiedTestCase},
 };
+use rayon::prelude::*;
 use std::collections::{BTreeMap, HashMap};
 use std::fs;
 use std::path::Path;
@@ -34,8 +34,8 @@ use java_client::{
     is_contraindicated, is_group_supported_by_java, is_immune, parse_legacy_xml,
     query_java_service, query_rust_rest_service,
 };
-use summary_report::{build_case_summary, summarize_file, write_run_summary, RunSummaryReport};
-use ui::{print_comparison_table, print_summary, record_summary_result, SummaryCounts};
+use summary_report::{RunSummaryReport, build_case_summary, summarize_file, write_run_summary};
+use ui::{SummaryCounts, print_comparison_table, print_summary, record_summary_result};
 
 #[derive(Parser, Debug)]
 #[command(name = "test_runner", about = "LAVA Forecaster Test Runner", version)]
@@ -298,8 +298,11 @@ fn main() {
 
             let all_loaded_cases =
                 load_cases_from_source(&cases_path).unwrap_or_else(|err| panic!("{}", err));
-            let test_cases =
-                filter_cases(all_loaded_cases, filter_group.as_deref(), filter_case.as_deref());
+            let test_cases = filter_cases(
+                all_loaded_cases,
+                filter_group.as_deref(),
+                filter_case.as_deref(),
+            );
 
             println!("Matched {} case(s)", test_cases.len());
             for tc in test_cases {
@@ -332,14 +335,7 @@ fn main() {
             output_db,
         } => {
             match fuzzer::run_fuzz(
-                &client,
-                count,
-                fuzz_seed,
-                group,
-                &compare,
-                shrink,
-                bulk,
-                output_db,
+                &client, count, fuzz_seed, group, &compare, shrink, bulk, output_db,
             ) {
                 Ok(_) => std::process::exit(0),
                 Err(e) => {
@@ -448,8 +444,11 @@ fn main() {
 
             let all_loaded_cases =
                 load_cases_from_source(&cases_path).unwrap_or_else(|err| panic!("{}", err));
-            let test_cases =
-                filter_cases(all_loaded_cases, filter_group.as_deref(), filter_case.as_deref());
+            let test_cases = filter_cases(
+                all_loaded_cases,
+                filter_group.as_deref(),
+                filter_case.as_deref(),
+            );
 
             let mut java_expected_map = HashMap::new();
             if let Some(ref j_url) = compare_java_url {
@@ -472,7 +471,10 @@ fn main() {
                                 }
                             }
                             Err(e) => {
-                                println!("Java bulk query failed: {}. Falling back to individual requests.", e);
+                                println!(
+                                    "Java bulk query failed: {}. Falling back to individual requests.",
+                                    e
+                                );
                                 for &tc in chunk {
                                     let name = tc.name.clone();
                                     let ind_res = get_java_expected_results(&client, j_url, tc);
@@ -758,7 +760,10 @@ fn main() {
             for outcome in outcomes {
                 total += 1;
                 if summary_only && total % 5000 == 0 {
-                    println!("Progress: {} / {} cases processed...", total, total_cases_count);
+                    println!(
+                        "Progress: {} / {} cases processed...",
+                        total, total_cases_count
+                    );
                 }
 
                 // Print trace decisions if trace mode is enabled
@@ -782,11 +787,15 @@ fn main() {
                         &outcome.group,
                         &outcome.rust_evals,
                         outcome.rust_fc.as_ref(),
-                        outcome.expected_results
+                        outcome
+                            .expected_results
                             .as_ref()
                             .map(|e| e.evaluations.as_slice())
                             .unwrap_or(&[]),
-                        outcome.expected_results.as_ref().and_then(|e| e.forecasts.first()),
+                        outcome
+                            .expected_results
+                            .as_ref()
+                            .and_then(|e| e.forecasts.first()),
                         &outcome.errors,
                     );
                 } else if !outcome.is_ok {
@@ -807,14 +816,17 @@ fn main() {
                     failed_details.push((outcome.name.clone(), outcome.errors.clone()));
                 }
 
-                if let (Some(report), Some(case_summary)) = (&mut run_summary, outcome.case_summary) {
+                if let (Some(report), Some(case_summary)) = (&mut run_summary, outcome.case_summary)
+                {
                     report.record_case(case_summary);
                 }
             }
 
             if total == 0 && (filter_group.is_some() || filter_case.is_some()) {
                 println!("No test cases matched the provided filters.");
-                println!("Hint: use `test_runner inspect <path> [--group GROUP] --list-cases` to inspect available case names.");
+                println!(
+                    "Hint: use `test_runner inspect <path> [--group GROUP] --list-cases` to inspect available case names."
+                );
             }
 
             print_summary(
@@ -948,7 +960,10 @@ fn main() {
                                 }
                             }
                             Err(e) => {
-                                println!("Java bulk query failed: {}. Falling back to individual requests.", e);
+                                println!(
+                                    "Java bulk query failed: {}. Falling back to individual requests.",
+                                    e
+                                );
                                 for &tc in chunk {
                                     let name = tc.name.clone();
                                     let ind_res = get_java_expected_results(&client, j_url, tc);
@@ -973,7 +988,10 @@ fn main() {
             for (mut tc, old_path) in test_cases {
                 total += 1;
                 if summary_only && total % 5000 == 0 {
-                    println!("Progress: {} / {} cases processed...", total, total_cases_count);
+                    println!(
+                        "Progress: {} / {} cases processed...",
+                        total, total_cases_count
+                    );
                 }
 
                 let (rust_evals, rust_fc) = if let Some(ref r_url) = rest_url {

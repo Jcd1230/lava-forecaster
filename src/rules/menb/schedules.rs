@@ -1,5 +1,5 @@
-use lava_cvx_macro::cvx;
 use crate::schedule::CompiledSeries;
+use lava_cvx_macro::cvx;
 
 pub fn men_b_4c_2_dose_series() -> CompiledSeries {
     let allowed_cvx = &[cvx!("163"), cvx!("328")];

@@ -1,14 +1,12 @@
-pub mod schedules;
 pub mod overrides;
+pub mod schedules;
 
 use crate::rules::VaccineGroupDefinition;
 
 pub fn definition() -> VaccineGroupDefinition {
     VaccineGroupDefinition {
         group_name: "VARICELLA",
-        series: vec![
-            schedules::varicella_2_dose_series(),
-        ],
+        series: vec![schedules::varicella_2_dose_series()],
         param_overrides: Vec::new(),
         completion_rules: Vec::new(),
         rec_overrides: Vec::new(),
@@ -19,6 +17,6 @@ pub fn definition() -> VaccineGroupDefinition {
         custom_extra_dose_hook: None,
         custom_completion_hook: None,
         group_selection: None,
-        policy: None,
+        policy: Some(Box::new(overrides::VaricellaPolicy)),
     }
 }

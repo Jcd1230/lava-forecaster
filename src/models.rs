@@ -1,6 +1,6 @@
+use crate::date_utils::SmallVec;
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
-use crate::date_utils::SmallVec;
 use std::collections::HashMap;
 
 #[macro_export]
@@ -27,8 +27,12 @@ pub enum Gender {
 pub struct Cvx(pub u16);
 
 impl Cvx {
-    pub fn new(n: u16) -> Self { Self(n) }
-    pub fn as_u16(self) -> u16 { self.0 }
+    pub fn new(n: u16) -> Self {
+        Self(n)
+    }
+    pub fn as_u16(self) -> u16 {
+        self.0
+    }
 
     // Named constants for commonly used CVX codes to eliminate magic numbers
     pub const MMR: u16 = 3;
@@ -118,7 +122,6 @@ pub struct Contraindication {
     pub cvx: Option<Cvx>,
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Patient {
     pub birth_date: NaiveDate,
@@ -192,7 +195,9 @@ impl EvaluationReason {
             Self::DuplicateShotSameDay => "DuplicateShotSameDay",
             Self::MissingAntigen => "MissingAntigen",
             Self::BoosterDose => "BoosterDose",
-            Self::VaccineNotCountedBasedOnMostRecentVaccineGiven => "VaccineNotCountedBasedOnMostRecentVaccineGiven",
+            Self::VaccineNotCountedBasedOnMostRecentVaccineGiven => {
+                "VaccineNotCountedBasedOnMostRecentVaccineGiven"
+            }
             Self::OutsideRoutineSeries => "OutsideRoutineSeries",
             Self::InsufficientAntigen => "InsufficientAntigen",
             Self::VaccineNotLicensedForMales => "VaccineNotLicensedForMales",
@@ -266,7 +271,10 @@ impl SeriesStatus {
     }
 
     pub fn recommended_date(&self) -> Option<NaiveDate> {
-        if let Self::NotComplete { recommended_date, .. } = self {
+        if let Self::NotComplete {
+            recommended_date, ..
+        } = self
+        {
             *recommended_date
         } else {
             None
@@ -290,32 +298,76 @@ impl SeriesStatus {
     }
 
     pub fn with_earliest_date(self, date: Option<NaiveDate>) -> Self {
-        if let Self::NotComplete { recommended_date, overdue_date, latest_date, .. } = self {
-            Self::NotComplete { earliest_date: date, recommended_date, overdue_date, latest_date }
+        if let Self::NotComplete {
+            recommended_date,
+            overdue_date,
+            latest_date,
+            ..
+        } = self
+        {
+            Self::NotComplete {
+                earliest_date: date,
+                recommended_date,
+                overdue_date,
+                latest_date,
+            }
         } else {
             self
         }
     }
 
     pub fn with_recommended_date(self, date: Option<NaiveDate>) -> Self {
-        if let Self::NotComplete { earliest_date, overdue_date, latest_date, .. } = self {
-            Self::NotComplete { earliest_date, recommended_date: date, overdue_date, latest_date }
+        if let Self::NotComplete {
+            earliest_date,
+            overdue_date,
+            latest_date,
+            ..
+        } = self
+        {
+            Self::NotComplete {
+                earliest_date,
+                recommended_date: date,
+                overdue_date,
+                latest_date,
+            }
         } else {
             self
         }
     }
 
     pub fn with_overdue_date(self, date: Option<NaiveDate>) -> Self {
-        if let Self::NotComplete { earliest_date, recommended_date, latest_date, .. } = self {
-            Self::NotComplete { earliest_date, recommended_date, overdue_date: date, latest_date }
+        if let Self::NotComplete {
+            earliest_date,
+            recommended_date,
+            latest_date,
+            ..
+        } = self
+        {
+            Self::NotComplete {
+                earliest_date,
+                recommended_date,
+                overdue_date: date,
+                latest_date,
+            }
         } else {
             self
         }
     }
 
     pub fn with_latest_date(self, date: Option<NaiveDate>) -> Self {
-        if let Self::NotComplete { earliest_date, recommended_date, overdue_date, .. } = self {
-            Self::NotComplete { earliest_date, recommended_date, overdue_date, latest_date: date }
+        if let Self::NotComplete {
+            earliest_date,
+            recommended_date,
+            overdue_date,
+            ..
+        } = self
+        {
+            Self::NotComplete {
+                earliest_date,
+                recommended_date,
+                overdue_date,
+                latest_date: date,
+            }
         } else {
             self
         }
@@ -330,7 +382,10 @@ impl SeriesStatus {
     }
 
     pub fn recommended_date_mut(&mut self) -> Option<&mut Option<NaiveDate>> {
-        if let Self::NotComplete { recommended_date, .. } = self {
+        if let Self::NotComplete {
+            recommended_date, ..
+        } = self
+        {
             Some(recommended_date)
         } else {
             None
@@ -493,4 +548,3 @@ pub struct UnifiedTestCase {
     pub execution_date: NaiveDate,
     pub expected: Option<ExpectedResults>,
 }
-

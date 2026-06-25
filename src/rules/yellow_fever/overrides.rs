@@ -1,5 +1,6 @@
 use crate::date_utils::SmallVec;
 use crate::engine::EvaluationContext;
+use crate::engine::ValidDoseRef;
 use crate::models::{Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus};
 use chrono::NaiveDate;
 
@@ -15,7 +16,7 @@ pub fn yellow_fever_custom_evaluation_hook(
 
 pub fn yellow_fever_custom_forecast_hook(
     patient: &Patient,
-    _valid_doses: &[(NaiveDate, usize)],
+    _valid_doses: &[ValidDoseRef],
     _evaluations: &[crate::models::DoseEvaluation],
     _history: &[Dose],
     eval_date: NaiveDate,

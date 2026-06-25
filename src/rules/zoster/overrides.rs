@@ -2,6 +2,7 @@ use crate::date_utils::SmallVec;
 use lava_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
+use crate::engine::ValidDoseRef;
 use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast};
 use crate::rules::helpers::{clamp_date_at_least, interval_days_between};
 
@@ -84,7 +85,7 @@ pub fn zoster_custom_evaluation_hook(
 
 pub fn zoster_custom_forecast_hook(
     patient: &Patient,
-    valid_doses: &[(NaiveDate, usize)],
+    valid_doses: &[ValidDoseRef],
     _evaluations: &[crate::models::DoseEvaluation],
     history: &[Dose],
     _eval_date: NaiveDate,

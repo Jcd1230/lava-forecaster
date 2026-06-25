@@ -1,5 +1,5 @@
-use chrono::NaiveDate;
 use crate::models::{Cvx, Dose, Patient, VaccineGroupForecast};
+use chrono::NaiveDate;
 
 pub fn post_process_all_groups(
     _patient: &Patient,
@@ -18,7 +18,11 @@ pub fn post_process_all_groups(
     if yf_complete {
         let last_yf_dose = history
             .iter()
-            .filter(|d| d.cvx.0 == Cvx::YELLOW_FEVER || d.cvx.0 == Cvx::YELLOW_FEVER_UNSPECIFIED || d.cvx.0 == Cvx::YELLOW_FEVER_UNKNOWN)
+            .filter(|d| {
+                d.cvx.0 == Cvx::YELLOW_FEVER
+                    || d.cvx.0 == Cvx::YELLOW_FEVER_UNSPECIFIED
+                    || d.cvx.0 == Cvx::YELLOW_FEVER_UNKNOWN
+            })
             .map(|d| d.date)
             .max();
 

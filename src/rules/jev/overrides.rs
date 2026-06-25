@@ -1,6 +1,7 @@
 use crate::engine::CandidateForecastsExt;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
+use crate::engine::ValidDoseRef;
 use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
 use crate::date_utils::{SmallVec, add_years_unchecked};
 
@@ -18,8 +19,9 @@ pub fn jev_custom_evaluation_hook(
 
             if series_name == "JEVC_RISK_2_DOSE_SERIES" {
                 if dose.date >= age_18 && dose.date < age_66 {
-                    if let Some((prev_date, _)) = ctx.valid_doses.last() {
-                        let days = (dose.date - *prev_date).num_days();
+                    if let Some(prev) = ctx.valid_doses.last() {
+                        let prev_date = prev.date;
+                        let days = (dose.date - prev_date).num_days();
                         if days >= 7 {
                             *status = DoseStatus::Valid;
                             reasons.retain(|r| *r != EvaluationReason::BelowMinimumInterval);
@@ -28,8 +30,9 @@ pub fn jev_custom_evaluation_hook(
                 }
             } else if series_name == "JEVC_RISK_2_DOSE_ACCELERATED_SERIES" {
                 if dose.date >= age_66 {
-                    if let Some((prev_date, _)) = ctx.valid_doses.last() {
-                        let days = (dose.date - *prev_date).num_days();
+                    if let Some(prev) = ctx.valid_doses.last() {
+                        let prev_date = prev.date;
+                        let days = (dose.date - prev_date).num_days();
                         if days < 24 {
                             *status = DoseStatus::Invalid;
                             if !reasons.contains(&EvaluationReason::BelowMinimumInterval) {
@@ -45,7 +48,7 @@ pub fn jev_custom_evaluation_hook(
 
 pub fn jev_custom_forecast_hook(
     patient: &Patient,
-    valid_doses: &[(NaiveDate, usize)],
+    valid_doses: &[ValidDoseRef],
     _evaluations: &[crate::models::DoseEvaluation],
     _history: &[Dose],
     eval_date: NaiveDate,
@@ -89,7 +92,7 @@ pub fn jev_custom_forecast_hook(
         }
 
         if forecast.series_name == "JEVC_RISK_2_DOSE_ACCELERATED_SERIES" {
-            let prev_dose_date = valid_doses[0].0;
+            let prev_dose_date = valid_doses[0].date;
             let age_66_minus_7d = crate::time_period!("66y-7d").add_to(patient.birth_date);
             
             if prev_dose_date >= age_66_minus_7d {

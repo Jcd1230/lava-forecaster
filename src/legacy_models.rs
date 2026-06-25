@@ -1,9 +1,11 @@
-use serde::Deserialize;
+use crate::models::{
+    Contraindication, Cvx, DiseaseImmunity, Dose, ForecastRequest, Gender, Patient,
+};
+use base64::{engine::general_purpose::STANDARD, Engine as _};
 use chrono::NaiveDate;
-use base64::{Engine as _, engine::general_purpose::STANDARD};
 use quick_xml::events::Event;
 use quick_xml::reader::Reader;
-use crate::models::{Patient, Gender, Dose, ForecastRequest, Cvx, DiseaseImmunity, Contraindication};
+use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub struct LegacyInteractionId {
@@ -39,7 +41,10 @@ pub struct LegacyEvaluateRequest {
 }
 
 fn parse_xml_date(ds: &str) -> Result<NaiveDate, crate::errors::ForecasterError> {
-    let clean: String = ds.chars().filter(|c| c.is_ascii_digit() || *c == '-').collect();
+    let clean: String = ds
+        .chars()
+        .filter(|c| c.is_ascii_digit() || *c == '-')
+        .collect();
     if clean.contains('-') {
         if clean.len() >= 10 {
             Ok(NaiveDate::parse_from_str(&clean[0..10], "%Y-%m-%d")?)
@@ -76,28 +81,62 @@ fn map_observation(
     let date = date.unwrap_or(dob);
 
     if is_immunity {
-        let disease = if focus_str.contains("HEP_B") || focus_str.contains("27836007") || focus_str.contains("22322")
-            || focus_str == "070.30" || focus_str == "B19.10" || focus_str.contains("271511000") || focus_str.contains("161467007") {
+        let disease = if focus_str.contains("HEP_B")
+            || focus_str.contains("27836007")
+            || focus_str.contains("22322")
+            || focus_str == "070.30"
+            || focus_str == "B19.10"
+            || focus_str.contains("271511000")
+            || focus_str.contains("161467007")
+        {
             "HepB"
-        } else if focus_str.contains("VARICELLA") || focus_str.contains("38907003") || focus_str.contains("15410")
-            || focus_str == "052.9" || focus_str == "B01.9" || focus_str.contains("371113008") || focus_str.contains("161719005") {
+        } else if focus_str.contains("VARICELLA")
+            || focus_str.contains("38907003")
+            || focus_str.contains("15410")
+            || focus_str == "052.9"
+            || focus_str == "B01.9"
+            || focus_str.contains("371113008")
+            || focus_str.contains("161719005")
+        {
             "Varicella"
-        } else if focus_str.contains("MEASLES") || focus_str.contains("14189004")
-            || focus_str == "055.9" || focus_str == "B05.9" || focus_str.contains("371111005") || focus_str.contains("161278002") {
+        } else if focus_str.contains("MEASLES")
+            || focus_str.contains("14189004")
+            || focus_str == "055.9"
+            || focus_str == "B05.9"
+            || focus_str.contains("371111005")
+            || focus_str.contains("161278002")
+        {
             "Measles"
-        } else if focus_str.contains("MUMPS") || focus_str.contains("36989005")
-            || focus_str == "072.9" || focus_str == "B26.9" || focus_str.contains("371112003") {
+        } else if focus_str.contains("MUMPS")
+            || focus_str.contains("36989005")
+            || focus_str == "072.9"
+            || focus_str == "B26.9"
+            || focus_str.contains("371112003")
+        {
             "Mumps"
-        } else if focus_str.contains("RUBELLA") || focus_str.contains("36653000")
-            || focus_str == "056.9" || focus_str == "B06.9" || focus_str.contains("278968001") || focus_str.contains("161280008") {
+        } else if focus_str.contains("RUBELLA")
+            || focus_str.contains("36653000")
+            || focus_str == "056.9"
+            || focus_str == "B06.9"
+            || focus_str.contains("278968001")
+            || focus_str.contains("161280008")
+        {
             "Rubella"
-        } else if focus_str.contains("HEP_A") || focus_str.contains("40468003")
-            || focus_str == "070.1" || focus_str == "B15.9" || focus_str.contains("278971009") || focus_str.contains("161466003") {
+        } else if focus_str.contains("HEP_A")
+            || focus_str.contains("40468003")
+            || focus_str == "070.1"
+            || focus_str == "B15.9"
+            || focus_str.contains("278971009")
+            || focus_str.contains("161466003")
+        {
             "HepA"
         } else {
             focus_str
         };
-        let reason = interpretations.first().cloned().unwrap_or_else(|| "PROOF_OF_IMMUNITY".to_string());
+        let reason = interpretations
+            .first()
+            .cloned()
+            .unwrap_or_else(|| "PROOF_OF_IMMUNITY".to_string());
         Some(EitherObservation::Immunity(DiseaseImmunity {
             disease: disease.to_string(),
             date,
@@ -110,7 +149,11 @@ fn map_observation(
         } else {
             focus_str
         };
-        let reason = interpretations.first().or(value.as_ref()).cloned().unwrap_or_else(|| "CONTRAINDICATION".to_string());
+        let reason = interpretations
+            .first()
+            .or(value.as_ref())
+            .cloned()
+            .unwrap_or_else(|| "CONTRAINDICATION".to_string());
         Some(EitherObservation::Contraindication(Contraindication {
             date,
             target: target.to_string(),
@@ -177,7 +220,9 @@ pub fn parse_vmr_xml(xml: &str) -> Result<(Patient, Vec<Dose>), crate::errors::F
                             let attr = attr?;
                             match attr.key.as_ref() {
                                 b"low" => low = Some(std::str::from_utf8(&attr.value)?.to_string()),
-                                b"high" => high = Some(std::str::from_utf8(&attr.value)?.to_string()),
+                                b"high" => {
+                                    high = Some(std::str::from_utf8(&attr.value)?.to_string())
+                                }
                                 _ => {}
                             }
                         }
@@ -213,7 +258,8 @@ pub fn parse_vmr_xml(xml: &str) -> Result<(Patient, Vec<Dose>), crate::errors::F
                         for attr in e.attributes() {
                             let attr = attr?;
                             if attr.key.as_ref() == b"code" {
-                                obs_interpretations.push(std::str::from_utf8(&attr.value)?.to_string());
+                                obs_interpretations
+                                    .push(std::str::from_utf8(&attr.value)?.to_string());
                             }
                         }
                     } else if tag == b"observationEventTime" {
@@ -288,7 +334,8 @@ pub fn parse_vmr_xml(xml: &str) -> Result<(Patient, Vec<Dose>), crate::errors::F
                         for attr in e.attributes() {
                             let attr = attr?;
                             if attr.key.as_ref() == b"code" {
-                                obs_interpretations.push(std::str::from_utf8(&attr.value)?.to_string());
+                                obs_interpretations
+                                    .push(std::str::from_utf8(&attr.value)?.to_string());
                             }
                         }
                     }
@@ -322,12 +369,23 @@ pub fn parse_vmr_xml(xml: &str) -> Result<(Patient, Vec<Dose>), crate::errors::F
                 if tag == b"substanceAdministrationEvent" {
                     in_event = false;
                     if let (Some(date), Some(cvx)) = (current_date, current_cvx.take()) {
-                        doses.push(Dose { date, cvx, is_valid: current_is_valid });
+                        doses.push(Dose {
+                            date,
+                            cvx,
+                            is_valid: current_is_valid,
+                        });
                     }
                 } else if tag == b"observationResult" {
                     in_obs = false;
-                    let dob_fallback = birth_date.unwrap_or_else(|| NaiveDate::from_ymd_opt(1970, 1, 1).unwrap());
-                    if let Some(mapped) = map_observation(obs_focus.take(), obs_value.take(), &obs_interpretations, obs_date.take(), dob_fallback) {
+                    let dob_fallback =
+                        birth_date.unwrap_or_else(|| NaiveDate::from_ymd_opt(1970, 1, 1).unwrap());
+                    if let Some(mapped) = map_observation(
+                        obs_focus.take(),
+                        obs_value.take(),
+                        &obs_interpretations,
+                        obs_date.take(),
+                        dob_fallback,
+                    ) {
                         match mapped {
                             EitherObservation::Immunity(imm) => immunities.push(imm),
                             EitherObservation::Contraindication(c) => contraindications.push(c),
@@ -358,22 +416,33 @@ impl LegacyEvaluateRequest {
     /// Translates the legacy REST payload into the internal ForecastRequest.
     pub fn translate(self) -> Result<ForecastRequest, crate::errors::ForecasterError> {
         // 1. Determine execution date (specifiedTime or submissionTime fallback)
-        let eval_timestamp_ms = self.specified_time
-            .or_else(|| self.interaction_id.as_ref().and_then(|id| id.submission_time))
+        let eval_timestamp_ms = self
+            .specified_time
+            .or_else(|| {
+                self.interaction_id
+                    .as_ref()
+                    .and_then(|id| id.submission_time)
+            })
             .ok_or("Missing evaluation execution date (specifiedTime or submissionTime)")?;
-        
+
         let eval_secs = eval_timestamp_ms / 1000;
         let eval_date = chrono::DateTime::from_timestamp(eval_secs, 0)
             .ok_or("Invalid evaluation execution date timestamp")?
             .date_naive();
 
         // 2. Locate base64 encoded XML payload
-        let dri = self.evaluation_request.data_requirement_item_data.first()
+        let dri = self
+            .evaluation_request
+            .data_requirement_item_data
+            .first()
             .ok_or("Missing dataRequirementItemData item")?;
-        
-        let b64_payload = dri.data.base64_encoded_payload.first()
+
+        let b64_payload = dri
+            .data
+            .base64_encoded_payload
+            .first()
             .ok_or("Missing base64EncodedPayload string")?;
-        
+
         // Remove whitespace/newlines from base64 string
         let clean_b64: String = b64_payload.chars().filter(|c| !c.is_whitespace()).collect();
         let xml_bytes = STANDARD.decode(clean_b64)?;

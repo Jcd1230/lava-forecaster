@@ -2,6 +2,7 @@ use crate::engine::CandidateForecastsExt;
 use lava_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
+use crate::engine::ValidDoseRef;
 use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
 use crate::date_utils::{SmallVec, compare_elapsed};
 use crate::rules::helpers::{age_ge, age_lt};
@@ -16,15 +17,15 @@ pub fn is_omp_cvx(cvx: Cvx) -> bool {
     OMP_CVX.contains(&cvx.0)
 }
 
-fn count_valid_doses_before(valid_doses: &[(NaiveDate, usize)], cutoff: NaiveDate) -> usize {
-    valid_doses.iter().filter(|(date, _)| *date < cutoff).count()
+fn count_valid_doses_before(valid_doses: &[ValidDoseRef], cutoff: NaiveDate) -> usize {
+    valid_doses.iter().filter(|dose| dose.date < cutoff).count()
 }
 
-fn effective_dose_number_before(valid_doses: &[(NaiveDate, usize)], cutoff: NaiveDate) -> usize {
+fn effective_dose_number_before(valid_doses: &[ValidDoseRef], cutoff: NaiveDate) -> usize {
     valid_doses
         .iter()
-        .filter(|(date, _)| *date < cutoff)
-        .map(|(_, dose_number)| *dose_number)
+        .filter(|dose| dose.date < cutoff)
+        .map(|dose| dose.dose_number)
         .max()
         .unwrap_or(0)
 }
@@ -51,7 +52,7 @@ pub fn hib_custom_dose_number_hook(
     }
 
     let count_hib_before_12m = ctx.valid_doses.iter()
-        .filter(|(date, _)| compare_elapsed(birth, *date, &tp_12m) == std::cmp::Ordering::Less)
+        .filter(|dose| compare_elapsed(birth, dose.date, &tp_12m) == std::cmp::Ordering::Less)
         .count();
 
     // Check age ranges:
@@ -72,7 +73,7 @@ pub fn hib_custom_dose_number_hook(
     } else if age_ge(birth, ref_date, crate::time_period!("12m-28d")) {
         let prior_hib_count = ctx.valid_doses.len();
         if prior_hib_count == 1 {
-            let prior_dose_lt_7m = compare_elapsed(birth, ctx.valid_doses[0].0, &tp_7m) == std::cmp::Ordering::Less;
+            let prior_dose_lt_7m = compare_elapsed(birth, ctx.valid_doses[0].date, &tp_7m) == std::cmp::Ordering::Less;
             if prior_dose_lt_7m {
                 if target_dose_idx < 3 {
                     target_dose_idx = 3;
@@ -153,7 +154,7 @@ pub fn hib_custom_evaluation_hook(
 
 pub fn hib_custom_forecast_hook(
     patient: &Patient,
-    valid_doses: &[(NaiveDate, usize)],
+    valid_doses: &[ValidDoseRef],
     _evaluations: &[crate::models::DoseEvaluation],
     history: &[Dose],
     eval_date: NaiveDate,
@@ -201,7 +202,7 @@ pub fn hib_custom_forecast_hook(
                 1
             }
         } else {
-            valid_doses.iter().map(|(_, dose_number)| *dose_number).max().unwrap_or(0) + 1
+            valid_doses.iter().map(|dose| dose.dose_number).max().unwrap_or(0) + 1
         };
 
         let count_valid_before_7m = count_valid_doses_before(valid_doses, date_7m);
@@ -236,7 +237,7 @@ pub fn hib_custom_forecast_hook(
 
     let last_dose = history.iter().max_by_key(|d| d.date);
     if let Some(ld) = last_dose {
-        let is_valid = valid_doses.iter().any(|(date, _)| *date == ld.date);
+        let is_valid = valid_doses.iter().any(|dose| dose.date == ld.date);
         if !is_valid {
             // Re-calculate target dose number (should match hook logic)
             let current_target = valid_doses.len() + 1;
@@ -323,12 +324,11 @@ pub fn hib_custom_switch_hook(
                 }
                 if ctx.valid_doses.len() == 1 {
                     let first_valid = ctx.valid_doses[0];
-                    let first_dose = ctx.history.iter().find(|d| d.date == first_valid.0);
-                    if let Some(fd) = first_dose {
-                        if is_omp_cvx(fd.cvx) && age_lt(ctx.patient.birth_date, fd.date, crate::time_period!("7m")) {
-                            if age_lt(ctx.patient.birth_date, dose.date, crate::time_period!("12m")) {
-                                return Some("HIB_OMP_SERIES");
-                            }
+                    if is_omp_cvx(first_valid.cvx)
+                        && age_lt(ctx.patient.birth_date, first_valid.date, crate::time_period!("7m"))
+                    {
+                        if age_lt(ctx.patient.birth_date, dose.date, crate::time_period!("12m")) {
+                            return Some("HIB_OMP_SERIES");
                         }
                     }
                 }
@@ -427,7 +427,7 @@ impl crate::engine::EvaluationPolicy for HibPolicy {
     fn custom_forecast_hook(
         &self,
         patient: &Patient,
-        valid_doses: &[(NaiveDate, usize)],
+        valid_doses: &[ValidDoseRef],
     _evaluations: &[crate::models::DoseEvaluation],
         history: &[Dose],
         eval_date: NaiveDate,

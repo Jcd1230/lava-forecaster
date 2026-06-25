@@ -6,7 +6,17 @@ use crate::models::{
 use crate::schedule::{CompiledDoseInterval, CompiledSeries};
 use crate::set_field;
 use chrono::NaiveDate;
-use std::cmp::max;
+use std::cmp::{max, Ordering};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ValidDoseRef {
+    pub date: NaiveDate,
+    pub dose_number: usize,
+    pub cvx: Cvx,
+    pub original_index: usize,
+    pub sorted_index: usize,
+    pub evaluation_index: usize,
+}
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct DecisionTrace {
@@ -73,18 +83,28 @@ macro_rules! trace_decision {
 pub struct EvaluationContext<'a> {
     pub patient: &'a Patient,
     pub history: &'a [Dose],
-    pub valid_doses: &'a [(NaiveDate, usize)],
+    pub valid_doses: &'a [ValidDoseRef],
     pub current_dose: Option<&'a Dose>,
     pub target_dose_number: usize,
     pub eval_date: NaiveDate,
     pub active_series_name: &'a str,
 }
 
+pub struct SameDayPriorityContext<'a> {
+    pub patient: &'a Patient,
+    pub history: &'a [Dose],
+    pub first_relevant_date: Option<NaiveDate>,
+}
+
+pub fn default_is_evaluation_ignored(evaluation: &DoseEvaluation) -> bool {
+    evaluation.status == DoseStatus::Ignored || evaluation.status == DoseStatus::Accepted
+}
+
 impl<'a> EvaluationContext<'a> {
     pub fn new(
         patient: &'a Patient,
         history: &'a [Dose],
-        valid_doses: &'a [(NaiveDate, usize)],
+        valid_doses: &'a [ValidDoseRef],
         current_dose: Option<&'a Dose>,
         target_dose_number: usize,
         eval_date: NaiveDate,
@@ -106,17 +126,14 @@ impl<'a> EvaluationContext<'a> {
         let cutoff = tp.add_to(self.patient.birth_date);
         self.valid_doses
             .iter()
-            .filter(|(date, _)| *date < cutoff)
+            .filter(|dose| dose.date < cutoff)
             .count()
     }
 
     /// Checks if a specific CVX code was administered but is not in the valid doses
     pub fn has_invalid_cvx(&self, cvx: Cvx) -> bool {
         let has_cvx = self.history.iter().any(|d| d.cvx == cvx);
-        let valid_has_cvx = self
-            .valid_doses
-            .iter()
-            .any(|(date, _)| self.history.iter().any(|d| d.cvx == cvx && d.date == *date));
+        let valid_has_cvx = self.valid_doses.iter().any(|dose| dose.cvx == cvx);
         has_cvx && !valid_has_cvx
     }
 
@@ -133,7 +150,7 @@ impl<'a> EvaluationContext<'a> {
 pub type RuleCondition = fn(&EvaluationContext) -> bool;
 pub type CustomForecastHook = fn(
     patient: &Patient,
-    valid_doses: &[(NaiveDate, usize)],
+    valid_doses: &[ValidDoseRef],
     evaluations: &[DoseEvaluation],
     history: &[Dose],
     eval_date: NaiveDate,
@@ -217,10 +234,31 @@ pub struct RecommendationOverrideRule {
 }
 
 pub trait EvaluationPolicy: Send + Sync {
+    fn same_day_priority(&self, _dose: &Dose, _context: &SameDayPriorityContext) -> i32 {
+        0
+    }
+
+    fn compare_same_day_source_order(
+        &self,
+        _left: (usize, &Dose),
+        _right: (usize, &Dose),
+        _context: &SameDayPriorityContext,
+    ) -> Option<Ordering> {
+        None
+    }
+
+    fn is_evaluation_ignored(
+        &self,
+        evaluation: &DoseEvaluation,
+        _context: &EvaluationContext,
+    ) -> bool {
+        default_is_evaluation_ignored(evaluation)
+    }
+
     fn custom_forecast_hook(
         &self,
         _patient: &Patient,
-        _valid_doses: &[(NaiveDate, usize)],
+        _valid_doses: &[ValidDoseRef],
         _evaluations: &[DoseEvaluation],
         _history: &[Dose],
         _eval_date: NaiveDate,
@@ -309,6 +347,16 @@ impl<'a> EvaluationEngine<'a> {
         }
     }
 
+    fn is_evaluation_ignored(
+        &self,
+        evaluation: &DoseEvaluation,
+        context: &EvaluationContext,
+    ) -> bool {
+        self.policy
+            .map(|policy| policy.is_evaluation_ignored(evaluation, context))
+            .unwrap_or_else(|| default_is_evaluation_ignored(evaluation))
+    }
+
     pub fn evaluate_patient(
         &self,
         patient: &Patient,
@@ -336,43 +384,36 @@ impl<'a> EvaluationEngine<'a> {
             }
         }
         let first_relevant_date = sorted_history.iter().map(|(_, dose)| dose.date).min();
+        let same_day_context = SameDayPriorityContext {
+            patient,
+            history,
+            first_relevant_date,
+        };
 
         sorted_history.sort_by(|a, b| {
             if a.1.date != b.1.date {
                 a.1.date.cmp(&b.1.date)
             } else {
-                let group = &self.series.vaccine_group;
-                let dtp_preserve_196_source_order = *group == "DTP"
-                    && should_preserve_dtp_196_source_order(first_relevant_date, a.1.date)
-                    && (a.1.cvx.0 == 196 || b.1.cvx.0 == 196);
-                let prio_a = get_same_day_priority(
-                    group,
-                    a.1.cvx,
-                    patient.birth_date,
-                    a.1.date,
-                    dtp_preserve_196_source_order,
-                );
-                let prio_b = get_same_day_priority(
-                    group,
-                    b.1.cvx,
-                    patient.birth_date,
-                    b.1.date,
-                    dtp_preserve_196_source_order,
-                );
+                let prio_a = self
+                    .policy
+                    .map(|policy| policy.same_day_priority(&a.1, &same_day_context))
+                    .unwrap_or(0);
+                let prio_b = self
+                    .policy
+                    .map(|policy| policy.same_day_priority(&b.1, &same_day_context))
+                    .unwrap_or(0);
                 if prio_a != prio_b {
                     prio_a.cmp(&prio_b)
-                } else if *group == "DTP" && a.1.cvx == b.1.cvx {
-                    let dtp_same_date_has_cvx_115 =
-                        history.iter().any(|d| d.date == a.1.date && d.cvx.0 == 115);
-                    if a.1.cvx.0 == 198 && !dtp_same_date_has_cvx_115 {
-                        a.0.cmp(&b.0)
-                    } else {
-                        b.0.cmp(&a.0) // Later original index comes first
-                    }
-                } else if *group == "INFLUENZA" {
-                    b.0.cmp(&a.0) // Later original index comes first
                 } else {
-                    std::cmp::Ordering::Equal
+                    self.policy
+                        .and_then(|policy| {
+                            policy.compare_same_day_source_order(
+                                (a.0, &a.1),
+                                (b.0, &b.1),
+                                &same_day_context,
+                            )
+                        })
+                        .unwrap_or(Ordering::Equal)
                 }
             }
         });
@@ -385,7 +426,7 @@ impl<'a> EvaluationEngine<'a> {
         let mut evaluations = SmallVec::<[DoseEvaluation; 8]>::new();
         let mut eval_target_dose_numbers = SmallVec::<[usize; 8]>::new();
         let mut evaluation_orig_indices = SmallVec::<[usize; 8]>::new();
-        let mut valid_doses = SmallVec::<[(NaiveDate, usize); 32]>::new();
+        let mut valid_doses = SmallVec::<[ValidDoseRef; 32]>::new();
         let mut is_completed = false;
         let mut active_series: &'a CompiledSeries = self.series;
 
@@ -394,12 +435,19 @@ impl<'a> EvaluationEngine<'a> {
         while i < sorted_history.len() {
             let dose = &sorted_history[i].1;
             let mut target_dose_idx =
-                valid_doses.iter().map(|(_, num)| *num).max().unwrap_or(0) + 1;
+                valid_doses.iter().map(|d| d.dose_number).max().unwrap_or(0) + 1;
 
             if let Some(valid_override) = dose.is_valid {
                 let output_dose_number = std::cmp::min(target_dose_idx, valid_doses.len() + 1);
                 let (status, reason) = if valid_override {
-                    valid_doses.push((dose.date, target_dose_idx));
+                    valid_doses.push(ValidDoseRef {
+                        date: dose.date,
+                        dose_number: target_dose_idx,
+                        cvx: dose.cvx,
+                        original_index: sorted_history[i].0,
+                        sorted_index: i,
+                        evaluation_index: evaluations.len(),
+                    });
                     (DoseStatus::Valid, EvaluationReason::DoseOverrideValid)
                 } else {
                     (DoseStatus::Invalid, EvaluationReason::DoseOverrideInvalid)
@@ -525,7 +573,14 @@ impl<'a> EvaluationEngine<'a> {
                     std::cmp::min(target_dose_idx, valid_doses.len() + 1)
                 };
                 if dup_status == DoseStatus::Valid {
-                    valid_doses.push((dose.date, target_dose_idx));
+                    valid_doses.push(ValidDoseRef {
+                        date: dose.date,
+                        dose_number: target_dose_idx,
+                        cvx: dose.cvx,
+                        original_index: sorted_history[i].0,
+                        sorted_index: i,
+                        evaluation_index: evaluations.len(),
+                    });
                 }
                 evaluations.push(DoseEvaluation {
                     dose_date: dose.date,
@@ -601,7 +656,14 @@ impl<'a> EvaluationEngine<'a> {
                         let output_dose_number =
                             std::cmp::min(target_dose_idx, valid_doses.len() + 1);
                         if status == DoseStatus::Valid {
-                            valid_doses.push((dose.date, target_dose_idx));
+                            valid_doses.push(ValidDoseRef {
+                                date: dose.date,
+                                dose_number: target_dose_idx,
+                                cvx: dose.cvx,
+                                original_index: sorted_history[i].0,
+                                sorted_index: i,
+                                evaluation_index: evaluations.len(),
+                            });
                         }
                         evaluations.push(DoseEvaluation {
                             dose_date: dose.date,
@@ -635,6 +697,15 @@ impl<'a> EvaluationEngine<'a> {
 
             // Look up dose parameters
             let mut dose_rule = active_series.doses[target_dose_idx - 1].clone();
+            let ignored_context = EvaluationContext::new(
+                patient,
+                history,
+                &valid_doses,
+                Some(dose),
+                target_dose_idx,
+                eval_date,
+                &active_series.name,
+            );
             let mut applicable_intervals: SmallVec<[CompiledDoseInterval; 4]> = if target_dose_idx
                 > 1
             {
@@ -650,13 +721,7 @@ impl<'a> EvaluationEngine<'a> {
                         .zip(&eval_target_dose_numbers)
                         .any(|(e, t_num)| {
                             *t_num == target_dose_idx
-                                && !is_eval_ignored(
-                                    active_series.vaccine_group,
-                                    e.cvx,
-                                    e.dose_date,
-                                    e.status,
-                                    Some(patient.birth_date),
-                                )
+                                && !self.is_evaluation_ignored(e, &ignored_context)
                         });
                 if has_same_dose_prev {
                     if let Some(int) = active_series
@@ -678,15 +743,9 @@ impl<'a> EvaluationEngine<'a> {
                 }
                 intervals
             } else {
-                let has_prev_non_ignored_eval = evaluations.iter().any(|e| {
-                    !is_eval_ignored(
-                        active_series.vaccine_group,
-                        e.cvx,
-                        e.dose_date,
-                        e.status,
-                        Some(patient.birth_date),
-                    )
-                });
+                let has_prev_non_ignored_eval = evaluations
+                    .iter()
+                    .any(|e| !self.is_evaluation_ignored(e, &ignored_context));
                 if has_prev_non_ignored_eval {
                     active_series
                         .intervals
@@ -780,14 +839,7 @@ impl<'a> EvaluationEngine<'a> {
                         .iter()
                         .zip(&eval_target_dose_numbers)
                         .filter(|&(e, t_num)| {
-                            *t_num == int_rule.from_dose
-                                && !is_eval_ignored(
-                                    active_series.vaccine_group,
-                                    e.cvx,
-                                    e.dose_date,
-                                    e.status,
-                                    Some(patient.birth_date),
-                                )
+                            *t_num == int_rule.from_dose && !self.is_evaluation_ignored(e, &ctx)
                         })
                         .max_by_key(|&(e, _)| (e.status == DoseStatus::Valid, e.dose_date))
                         .map(|(e, _)| e.dose_date);
@@ -800,13 +852,7 @@ impl<'a> EvaluationEngine<'a> {
                                     *t_num == target_dose_idx
                                         && e.status == DoseStatus::Invalid
                                         && e.dose_date < dose.date
-                                        && !is_eval_ignored(
-                                            active_series.vaccine_group,
-                                            e.cvx,
-                                            e.dose_date,
-                                            e.status,
-                                            Some(patient.birth_date),
-                                        )
+                                        && !self.is_evaluation_ignored(e, &ctx)
                                 })
                                 .map(|(e, _)| e.dose_date)
                                 .max()
@@ -823,7 +869,17 @@ impl<'a> EvaluationEngine<'a> {
                         let interval_ok = prev_date == dose.date
                             || compare_elapsed(prev_date, dose.date, abs_min_int)
                                 != std::cmp::Ordering::Less;
-                        trace_decision!("interval_check", "Dose {} cvx {} interval check from dose {}: date={} prev_date={} abs_min_interval={:?} ok={}", target_dose_idx, dose.cvx, int_rule.from_dose, dose.date, prev_date, abs_min_int, interval_ok);
+                        trace_decision!(
+                            "interval_check",
+                            "Dose {} cvx {} interval check from dose {}: date={} prev_date={} abs_min_interval={:?} ok={}",
+                            target_dose_idx,
+                            dose.cvx,
+                            int_rule.from_dose,
+                            dose.date,
+                            prev_date,
+                            abs_min_int,
+                            interval_ok
+                        );
                         if !interval_ok {
                             is_valid = false;
                             if !reasons.contains(&EvaluationReason::BelowMinimumInterval) {
@@ -831,7 +887,13 @@ impl<'a> EvaluationEngine<'a> {
                             }
                         }
                     } else {
-                        trace_decision!("interval_check", "Dose {} cvx {} interval check from dose {}: no previous non-ignored dose found", target_dose_idx, dose.cvx, int_rule.from_dose);
+                        trace_decision!(
+                            "interval_check",
+                            "Dose {} cvx {} interval check from dose {}: no previous non-ignored dose found",
+                            target_dose_idx,
+                            dose.cvx,
+                            int_rule.from_dose
+                        );
                     }
                 }
             }
@@ -854,14 +916,29 @@ impl<'a> EvaluationEngine<'a> {
                     &mut status,
                 );
                 if status != prev_status || reasons.len() != prev_reasons_len {
-                    trace_decision!("custom_evaluation_hook", "Custom evaluation hook triggered for series={}: mutated status from {:?} to {:?} (reasons count: {} -> {})", active_series.name, prev_status, status, prev_reasons_len, reasons.len());
+                    trace_decision!(
+                        "custom_evaluation_hook",
+                        "Custom evaluation hook triggered for series={}: mutated status from {:?} to {:?} (reasons count: {} -> {})",
+                        active_series.name,
+                        prev_status,
+                        status,
+                        prev_reasons_len,
+                        reasons.len()
+                    );
                 }
             }
 
             let output_dose_number = std::cmp::min(target_dose_idx, valid_doses.len() + 1);
 
             if status == DoseStatus::Valid {
-                valid_doses.push((dose.date, target_dose_idx));
+                valid_doses.push(ValidDoseRef {
+                    date: dose.date,
+                    dose_number: target_dose_idx,
+                    cvx: dose.cvx,
+                    original_index: sorted_history[i].0,
+                    sorted_index: i,
+                    evaluation_index: evaluations.len(),
+                });
             }
 
             evaluations.push(DoseEvaluation {
@@ -899,7 +976,7 @@ impl<'a> EvaluationEngine<'a> {
             } else {
                 valid_doses
                     .iter()
-                    .any(|(_, num)| *num == active_series.num_doses)
+                    .any(|dose| dose.dose_number == active_series.num_doses)
             };
             if series_completed {
                 is_completed = true;
@@ -989,7 +1066,7 @@ impl<'a> EvaluationEngine<'a> {
         &self,
         patient: &Patient,
         history: &[Dose],
-        valid_doses: &[(NaiveDate, usize)],
+        valid_doses: &[ValidDoseRef],
         evaluations: &[DoseEvaluation],
         _satisfied_count: usize,
         is_completed: bool,
@@ -1045,7 +1122,12 @@ impl<'a> EvaluationEngine<'a> {
             }
             f
         } else {
-            let mut next_dose_idx = valid_doses.iter().map(|(_, num)| *num).max().unwrap_or(0) + 1;
+            let mut next_dose_idx = valid_doses
+                .iter()
+                .map(|dose| dose.dose_number)
+                .max()
+                .unwrap_or(0)
+                + 1;
             if let Some(policy) = self.policy {
                 let ctx = EvaluationContext::new(
                     patient,
@@ -1094,7 +1176,12 @@ impl<'a> EvaluationEngine<'a> {
                         reasons: crate::reasons!["NOT_COMPLETE"],
                         sources: std::collections::HashMap::new(),
                     };
-                    trace_decision!("forecast_not_completed_awaiting_custom_hook", "Next dose idx {} > num_doses {} but custom completion hook exists; delegating to custom forecast hook", next_dose_idx, active_series.num_doses);
+                    trace_decision!(
+                        "forecast_not_completed_awaiting_custom_hook",
+                        "Next dose idx {} > num_doses {} but custom completion hook exists; delegating to custom forecast hook",
+                        next_dose_idx,
+                        active_series.num_doses
+                    );
                     if let Some(policy) = self.policy {
                         policy.custom_forecast_hook(
                             patient,
@@ -1216,8 +1303,8 @@ impl<'a> EvaluationEngine<'a> {
                 let get_dose_date = |dose_num: usize| -> Option<NaiveDate> {
                     valid_doses
                         .iter()
-                        .find(|(_, num)| *num == dose_num)
-                        .map(|(date, _)| *date)
+                        .find(|dose| dose.dose_number == dose_num)
+                        .map(|dose| dose.date)
                 };
 
                 let min_int_date = applicable_intervals
@@ -1353,7 +1440,14 @@ impl<'a> EvaluationEngine<'a> {
                     let clamp_date = max_age.add_to(patient.birth_date);
                     if eval_date >= clamp_date {
                         if !matches!(f.status, SeriesStatus::Complete) {
-                            trace_decision!("forecast_max_age_clamp", "Max age clamp triggered: eval_date={:?} >= max_age_date={:?}, shifting status from {:?} to {:?}", eval_date, clamp_date, f.status, status);
+                            trace_decision!(
+                                "forecast_max_age_clamp",
+                                "Max age clamp triggered: eval_date={:?} >= max_age_date={:?}, shifting status from {:?} to {:?}",
+                                eval_date,
+                                clamp_date,
+                                f.status,
+                                status
+                            );
                             set_field!(f, status, status.clone());
                             f.status = f.status.with_earliest_date(None);
                             f.status = f.status.with_recommended_date(None);
@@ -1436,125 +1530,6 @@ impl<'a> EvaluationEngine<'a> {
 
         forecast
     }
-}
-
-fn get_same_day_priority(
-    group: &str,
-    cvx: Cvx,
-    birth_date: NaiveDate,
-    dose_date: NaiveDate,
-    dtp_preserve_196_source_order: bool,
-) -> i32 {
-    let cvx_code = cvx.0;
-    match group {
-        "MMR" => match cvx_code {
-            94 => 0,
-            3 => 1,
-            4 | 5 => 2,
-            _ => 3,
-        },
-        "POLIO" => match cvx_code {
-            2 | 182 => 1,
-            _ => 0,
-        },
-        "HEP_A" => {
-            let age_19 = crate::date_utils::add_years_unchecked(birth_date, 19);
-            if dose_date >= age_19 {
-                if cvx_code == 52 {
-                    0
-                } else {
-                    1
-                }
-            } else {
-                if cvx_code == 52 {
-                    1
-                } else {
-                    0
-                }
-            }
-        }
-        "VARICELLA" => match cvx_code {
-            94 => 0,
-            21 => 1,
-            _ => 2,
-        },
-        "DTP" => match cvx_code {
-            196 if dtp_preserve_196_source_order => 0, // observed no-prior-dose exception
-            196 => 1,
-            9 | 28 | 113 | 138 | 139 | 195 => 1, // DT/Td
-            _ => 0,                              // Pertussis-containing DTP/DTaP/Tdap
-        },
-        "HEP_B" => match cvx_code {
-            104 | 110 | 146 => 0,
-            _ => 1,
-        },
-        "MENB" => {
-            let policy_change = NaiveDate::from_ymd_opt(2024, 10, 25).unwrap();
-            if dose_date < policy_change {
-                match cvx_code {
-                    163 | 328 => 0,
-                    162 | 316 => 1,
-                    _ => 2,
-                }
-            } else {
-                0
-            }
-        }
-        "ROTAVIRUS" => {
-            let policy_change = NaiveDate::from_ymd_opt(2000, 1, 1).unwrap();
-            if dose_date >= policy_change {
-                match cvx_code {
-                    119 => 1,
-                    74 => 2,
-                    122 => 3,
-                    _ => 0,
-                }
-            } else {
-                match cvx_code {
-                    74 => 0,
-                    119 => 2,
-                    122 => 3,
-                    _ => 1,
-                }
-            }
-        }
-        "MPOX" => match cvx_code {
-            206 => 0,
-            75 | 105 => 1,
-            325 => 2,
-            _ => 3,
-        },
-        "HPV" => match cvx_code {
-            118 => 0, // Cervarix (female-only) — lowest priority
-            62 => 1,  // Gardasil
-            137 => 2, // Gardasil (Shire)
-            165 => 3, // Gardasil 9 — highest priority
-            _ => 0,
-        },
-        "INFLUENZA" => {
-            let is_disallowed = matches!(cvx_code, 194 | 200 | 201 | 202 | 231 | 331 | 337);
-            let is_nos = matches!(cvx_code, 88 | 151);
-            if is_disallowed {
-                100
-            } else if is_nos {
-                90
-            } else {
-                20
-            }
-        }
-        "RSV" => match cvx_code {
-            304 | 314 | 315 => 1,
-            _ => 0,
-        },
-        _ => 0,
-    }
-}
-
-fn should_preserve_dtp_196_source_order(
-    first_relevant_date: Option<NaiveDate>,
-    dose_date: NaiveDate,
-) -> bool {
-    first_relevant_date == Some(dose_date)
 }
 
 fn is_patient_immune_to_group(
@@ -1687,41 +1662,4 @@ fn is_dose_contraindicated(
         }
         false
     })
-}
-
-pub fn is_eval_ignored(
-    group: &str,
-    cvx: Cvx,
-    date: NaiveDate,
-    status: DoseStatus,
-    birth_date: Option<NaiveDate>,
-) -> bool {
-    if status == DoseStatus::Ignored || status == DoseStatus::Accepted {
-        return true;
-    }
-    if group == "POLIO" {
-        let is_cvx_178_179 = cvx.0 == 178 || cvx.0 == 179;
-        let is_cvx_182_after_2016 =
-            cvx.0 == 182 && date >= NaiveDate::from_ymd_opt(2016, 4, 1).unwrap();
-        if is_cvx_178_179 || is_cvx_182_after_2016 {
-            return true;
-        }
-    }
-    if group == "DTP" {
-        // Td (CVX 09, 113, 138, 139, 196) under 7 years - 4 days
-        let is_td = cvx.0 == 9 || cvx.0 == 113 || cvx.0 == 138 || cvx.0 == 139 || cvx.0 == 196;
-        // Tdap CVX 115 under 7 years - 4 days. CVX 198 can be a valid
-        // child-series DTaP-containing dose and should still anchor intervals.
-        let is_tdap = cvx.0 == 115;
-        if is_td || is_tdap {
-            if let Some(birth) = birth_date {
-                let age_7_minus_4d =
-                    crate::date_utils::add_years_unchecked(birth, 7) - chrono::Duration::days(4);
-                if date < age_7_minus_4d {
-                    return true;
-                }
-            }
-        }
-    }
-    false
 }

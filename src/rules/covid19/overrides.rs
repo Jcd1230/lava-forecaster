@@ -3,6 +3,7 @@ use lava_cvx_macro::cvx;
 use chrono::NaiveDate;
 use crate::date_utils::{SmallVec, add_years_unchecked, add_months_unchecked, compare_elapsed, TimePeriod};
 use crate::engine::EvaluationContext;
+use crate::engine::ValidDoseRef;
 use crate::models::{Cvx, 
     Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus,
     VaccineGroupForecast, DoseEvaluation,
@@ -439,7 +440,7 @@ pub fn covid19_custom_evaluation_hook(
 
 pub fn covid19_custom_forecast_hook(
     patient: &Patient,
-    _valid_doses: &[(NaiveDate, usize)],
+    _valid_doses: &[ValidDoseRef],
     _evaluations: &[crate::models::DoseEvaluation],
     history: &[Dose],
     eval_date: NaiveDate,

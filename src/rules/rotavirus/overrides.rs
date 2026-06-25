@@ -1,11 +1,39 @@
 use crate::date_utils::SmallVec;
 use crate::engine::CandidateForecastsExt;
 use crate::engine::EvaluationContext;
+use crate::engine::ValidDoseRef;
 use crate::models::{
     Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus, VaccineGroupForecast,
 };
 use chrono::NaiveDate;
 use lava_cvx_macro::cvx;
+
+pub struct RotavirusPolicy;
+
+impl crate::engine::EvaluationPolicy for RotavirusPolicy {
+    fn same_day_priority(
+        &self,
+        dose: &Dose,
+        _context: &crate::engine::SameDayPriorityContext,
+    ) -> i32 {
+        let policy_change = NaiveDate::from_ymd_opt(2000, 1, 1).unwrap();
+        if dose.date >= policy_change {
+            match dose.cvx.0 {
+                119 => 1,
+                74 => 2,
+                122 => 3,
+                _ => 0,
+            }
+        } else {
+            match dose.cvx.0 {
+                74 => 0,
+                119 => 2,
+                122 => 3,
+                _ => 1,
+            }
+        }
+    }
+}
 
 pub fn rotavirus_custom_evaluation_hook(
     _series_name: &str,
@@ -39,13 +67,7 @@ pub fn rotavirus_custom_evaluation_hook(
         let prior_valid_rv1_count = ctx
             .valid_doses
             .iter()
-            .filter(|(valid_date, _)| {
-                *valid_date < dose.date
-                    && ctx
-                        .history
-                        .iter()
-                        .any(|h| h.date == *valid_date && h.cvx.0 == cvx!("119"))
-            })
+            .filter(|valid_dose| valid_dose.date < dose.date && valid_dose.cvx.0 == cvx!("119"))
             .count();
 
         if prior_valid_rv1_count >= 2 {
@@ -57,7 +79,7 @@ pub fn rotavirus_custom_evaluation_hook(
 
 pub fn rotavirus_custom_forecast_hook(
     patient: &Patient,
-    valid_doses: &[(NaiveDate, usize)],
+    valid_doses: &[ValidDoseRef],
     evaluations: &[crate::models::DoseEvaluation],
     _history: &[Dose],
     eval_date: NaiveDate,
@@ -171,7 +193,7 @@ pub fn rotavirus_custom_completion_hook(ctx: &EvaluationContext) -> bool {
     };
     ctx.valid_doses
         .iter()
-        .any(|(_, dose_number)| *dose_number == required)
+        .any(|dose| dose.dose_number == required)
 }
 
 pub fn rotavirus_group_selection(
