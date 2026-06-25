@@ -55,7 +55,7 @@ pub fn evaluate_patient_all_groups(
     for ruleset in rules::get_all_groups() {
         if let Some(group_selection) = ruleset.group_selection {
             let mut candidate_forecasts =
-                SmallVec::<[(&'static str, VaccineGroupForecast); 6]>::new();
+                SmallVec::<[(&'static str, VaccineGroupForecast); 4]>::new();
             for series in &ruleset.series {
                 let mut engine = engine::EvaluationEngine::new(series);
                 engine.param_overrides = &ruleset.param_overrides;
