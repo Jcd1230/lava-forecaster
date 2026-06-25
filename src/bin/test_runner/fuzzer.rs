@@ -57,7 +57,7 @@ impl SimpleRng {
 pub fn get_cvx_codes_for_group(group: &str) -> Vec<u16> {
     let mut cvxs = Vec::new();
     for g in get_all_groups() {
-        if g.group_name.to_uppercase() == group.to_uppercase() {
+        if g.group_name.eq_ignore_ascii_case(group) {
             for s in &g.series {
                 for d in &s.doses {
                     for &c in d.allowed_cvx {
@@ -110,7 +110,7 @@ pub fn generate_guided_case(
         let rust_results = evaluate_patient_all_groups(&patient, &history, current_eval_date);
         let rust_group = rust_results
             .iter()
-            .find(|rg| rg.vaccine_group.to_uppercase() == target_group.to_uppercase());
+            .find(|rg| rg.vaccine_group.eq_ignore_ascii_case(target_group));
 
         let mut possible_dates = Vec::new();
         if let Some(rg) = rust_group {
@@ -176,31 +176,35 @@ pub fn generate_guided_case(
             case_index
         ),
         group: target_group.to_string(),
-        focus_code: match target_group.to_uppercase().as_str() {
-            "POLIO" => "400".to_string(),
-            "HEP_A" => "810".to_string(),
-            "MMR" => "500".to_string(),
-            "VARICELLA" => "600".to_string(),
-            "ZOSTER" => "620".to_string(),
-            "DTP" => "200".to_string(),
-            "HEP_B" => "100".to_string(),
-            "HPV" => "840".to_string(),
-            "HIB" => "300".to_string(),
-            "PNEUMOCOCCAL" => "750".to_string(),
-            "MCV" => "830".to_string(),
-            "MENB" => "835".to_string(),
-            "ROTAVIRUS" => "820".to_string(),
-            "INFLUENZA" => "800".to_string(),
-            "COVID19" => "850".to_string(),
-            "RSV" => "875".to_string(),
-            "MPOX" => "860".to_string(),
-            "H1N1" => "890".to_string(),
-            _ => "000".to_string(),
-        },
+        focus_code: focus_code_for_group(target_group).to_string(),
         patient,
         history,
         execution_date,
         expected: None,
+    }
+}
+
+fn focus_code_for_group(group: &str) -> &'static str {
+    match group {
+        _ if group.eq_ignore_ascii_case("POLIO") => "400",
+        _ if group.eq_ignore_ascii_case("HEP_A") => "810",
+        _ if group.eq_ignore_ascii_case("MMR") => "500",
+        _ if group.eq_ignore_ascii_case("VARICELLA") => "600",
+        _ if group.eq_ignore_ascii_case("ZOSTER") => "620",
+        _ if group.eq_ignore_ascii_case("DTP") => "200",
+        _ if group.eq_ignore_ascii_case("HEP_B") => "100",
+        _ if group.eq_ignore_ascii_case("HPV") => "840",
+        _ if group.eq_ignore_ascii_case("HIB") => "300",
+        _ if group.eq_ignore_ascii_case("PNEUMOCOCCAL") => "750",
+        _ if group.eq_ignore_ascii_case("MCV") => "830",
+        _ if group.eq_ignore_ascii_case("MENB") => "835",
+        _ if group.eq_ignore_ascii_case("ROTAVIRUS") => "820",
+        _ if group.eq_ignore_ascii_case("INFLUENZA") => "800",
+        _ if group.eq_ignore_ascii_case("COVID19") => "850",
+        _ if group.eq_ignore_ascii_case("RSV") => "875",
+        _ if group.eq_ignore_ascii_case("MPOX") => "860",
+        _ if group.eq_ignore_ascii_case("H1N1") => "890",
+        _ => "000",
     }
 }
 
@@ -301,7 +305,7 @@ pub fn shrink_case(client: &Client, java_url: &str, mut tc: UnifiedTestCase) -> 
         );
         let rust_group = rust_results
             .iter()
-            .find(|rg| rg.vaccine_group.to_uppercase() == shrunked_tc.group.to_uppercase());
+            .find(|rg| rg.vaccine_group.eq_ignore_ascii_case(&shrunked_tc.group));
         let (rust_evals, rust_fc) = match rust_group {
             Some(rg) => (rg.evaluations.to_vec(), rg.forecasts.first().cloned()),
             None => (Vec::new(), None),
@@ -412,7 +416,7 @@ pub fn run_fuzz(
             let res = evaluate_patient_all_groups(&tc.patient, &tc.history, tc.execution_date);
             let rust_group = res
                 .iter()
-                .find(|rg| rg.vaccine_group.to_uppercase() == tc.group.to_uppercase());
+                .find(|rg| rg.vaccine_group.eq_ignore_ascii_case(&tc.group));
             let (rust_evals, rust_fc) = match rust_group {
                 Some(rg) => (rg.evaluations.to_vec(), rg.forecasts.first().cloned()),
                 None => (Vec::new(), None),
