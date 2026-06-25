@@ -75,6 +75,7 @@ pub fn get_cvx_codes_for_group(group: &str) -> Vec<u16> {
 pub fn generate_guided_case(
     rng: &mut SimpleRng,
     target_group: &str,
+    allowed_cvxs: &[u16],
     case_index: usize,
     seed: u64,
 ) -> UnifiedTestCase {
@@ -96,7 +97,6 @@ pub fn generate_guided_case(
         contraindications: Vec::new(),
     };
 
-    let allowed_cvxs = get_cvx_codes_for_group(target_group);
     if allowed_cvxs.is_empty() {
         panic!("No allowed CVX codes found for group {}", target_group);
     }
@@ -150,7 +150,7 @@ pub fn generate_guided_case(
         } else {
             next_dose_date
         };
-        let cvx_val = *rng.choose(&allowed_cvxs);
+        let cvx_val = *rng.choose(allowed_cvxs);
 
         history.push(Dose {
             date: next_dose_date,
@@ -391,6 +391,15 @@ pub fn run_fuzz(
     if supported_groups.is_empty() {
         return Err("No supported vaccine groups found".to_string());
     }
+    let cvx_cache_groups: Vec<String> = group_opt
+        .iter()
+        .cloned()
+        .chain(supported_groups.iter().cloned())
+        .collect();
+    let allowed_cvxs_by_group: BTreeMap<String, Vec<u16>> = cvx_cache_groups
+        .iter()
+        .map(|group| (group.clone(), get_cvx_codes_for_group(group)))
+        .collect();
 
     let mut passed = 0;
     let mut failed = 0;
@@ -407,7 +416,11 @@ pub fn run_fuzz(
                 Some(g) => g.clone(),
                 None => rng.choose(&supported_groups).clone(),
             };
-            let tc = generate_guided_case(&mut rng, &target_group, i + j, seed);
+            let allowed_cvxs = allowed_cvxs_by_group
+                .get(&target_group)
+                .map(Vec::as_slice)
+                .unwrap_or(&[]);
+            let tc = generate_guided_case(&mut rng, &target_group, allowed_cvxs, i + j, seed);
             chunk_cases.push(tc);
         }
 
