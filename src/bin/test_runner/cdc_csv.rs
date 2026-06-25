@@ -523,7 +523,6 @@ pub fn run_cdc_csv_mode(
     rest_url: Option<String>,
     verbose: bool,
 ) {
-    let filter_group = filter_group.map(|g| g.to_uppercase());
     let cases = load_cdc_csv_cases(csv_path).unwrap_or_else(|err| panic!("{}", err));
 
     let mut total = 0;
@@ -535,7 +534,7 @@ pub fn run_cdc_csv_mode(
     for cdc_case in cases {
         let tc = &cdc_case.unified_case;
         if let Some(ref fg) = filter_group {
-            if tc.group.to_uppercase() != *fg {
+            if !tc.group.eq_ignore_ascii_case(fg) {
                 continue;
             }
         }

@@ -253,7 +253,7 @@ fn main() {
             count,
             list_cases,
         } => {
-            let filter_group = group.map(|g| g.to_uppercase());
+            let filter_group = group;
             let filter_case = case;
 
             let all_loaded_cases =
@@ -293,7 +293,7 @@ fn main() {
             group,
             case,
         } => {
-            let filter_group = group.map(|g| g.to_uppercase());
+            let filter_group = group;
             let filter_case = case;
 
             let all_loaded_cases =
@@ -331,12 +331,11 @@ fn main() {
             bulk,
             output_db,
         } => {
-            let filter_group = group.map(|g| g.to_uppercase());
             match fuzzer::run_fuzz(
                 &client,
                 count,
                 fuzz_seed,
-                filter_group,
+                group,
                 &compare,
                 shrink,
                 bulk,
@@ -432,7 +431,7 @@ fn main() {
             summary,
             summary_only,
         } => {
-            let filter_group = group.map(|g| g.to_uppercase());
+            let filter_group = group;
             let filter_case = case;
             let compare_java_url = compare;
             let trace_mode = trace;
@@ -863,7 +862,7 @@ fn main() {
         } => {
             let source_path = source;
             let target_path = target;
-            let filter_group = group.map(|g| g.to_uppercase());
+            let filter_group = group;
             let filter_case = case;
             let compare_java_url = compare;
             let trace_mode = trace;
@@ -915,7 +914,7 @@ fn main() {
             let mut test_cases = Vec::new();
             for (tc, path) in loaded_cases_with_paths {
                 if let Some(ref fg) = filter_group {
-                    if tc.group.to_uppercase() != *fg {
+                    if !tc.group.eq_ignore_ascii_case(fg) {
                         continue;
                     }
                 }
@@ -1286,7 +1285,7 @@ fn filter_cases(
         .into_iter()
         .filter(|tc| {
             if let Some(fg) = filter_group {
-                if tc.group.to_uppercase() != fg {
+                if !tc.group.eq_ignore_ascii_case(fg) {
                     return false;
                 }
             }

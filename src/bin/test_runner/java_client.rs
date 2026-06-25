@@ -848,8 +848,11 @@ pub fn get_java_expected_results_bulk(
 }
 
 pub fn is_group_supported_by_java(group: &str) -> bool {
-    let g = group.to_uppercase();
-    g != "CHOLERA" && g != "JEV" && g != "TYPHOID" && g != "YELLOW_FEVER" && g != "YELLOWFEVER"
+    !group.eq_ignore_ascii_case("CHOLERA")
+        && !group.eq_ignore_ascii_case("JEV")
+        && !group.eq_ignore_ascii_case("TYPHOID")
+        && !group.eq_ignore_ascii_case("YELLOW_FEVER")
+        && !group.eq_ignore_ascii_case("YELLOWFEVER")
 }
 
 pub fn query_rust_rest_service(
