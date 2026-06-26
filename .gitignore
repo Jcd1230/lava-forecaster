@@ -18,6 +18,7 @@ planning/
 tmp/
 tests/relative/tmp/
 tests/cases/
+tests/*.ltp
 
 # Local VCS & Agent Directories
 .jj/

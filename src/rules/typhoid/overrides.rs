@@ -35,13 +35,10 @@ pub fn typhoid_custom_forecast_hook(
     forecast: &mut SeriesForecast,
 ) {
     if forecast.status == SeriesStatus::Complete {
-        forecast.status = SeriesStatus::Complete;
-        forecast.reasons =
-            crate::forecast_reasons!["COMPLETE_HIGH_RISK", "TYPHOID_NOT_ROUTINE_SEE_ACIP",];
-        forecast.status = forecast.status.with_earliest_date(None);
-        forecast.status = forecast.status.with_recommended_date(None);
-        forecast.status = forecast.status.with_overdue_date(None);
-        forecast.status = forecast.status.with_latest_date(None);
+        forecast.mark_complete(crate::forecast_reasons![
+            "COMPLETE_HIGH_RISK",
+            "TYPHOID_NOT_ROUTINE_SEE_ACIP",
+        ]);
         return;
     }
 
@@ -51,19 +48,12 @@ pub fn typhoid_custom_forecast_hook(
     let is_under_2y = eval_date < age_2y_date;
 
     if is_under_2y {
-        forecast.status = SeriesStatus::NotRecommended;
-        forecast.reasons = crate::forecast_reasons!["TYPHOID_NOT_ROUTINE_SEE_ACIP"];
-        forecast.status = forecast.status.with_earliest_date(None);
-        forecast.status = forecast.status.with_recommended_date(None);
-        forecast.status = forecast.status.with_overdue_date(None);
-        forecast.status = forecast.status.with_latest_date(None);
+        forecast.mark_not_recommended(crate::forecast_reasons!["TYPHOID_NOT_ROUTINE_SEE_ACIP"]);
     } else {
         // >= 2 years old and not complete
-        forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = crate::forecast_reasons!["HIGH_RISK", "TYPHOID_NOT_ROUTINE_SEE_ACIP",];
-        forecast.status = forecast.status.with_earliest_date(None);
-        forecast.status = forecast.status.with_recommended_date(None);
-        forecast.status = forecast.status.with_overdue_date(None);
-        forecast.status = forecast.status.with_latest_date(None);
+        forecast.mark_conditionally_recommended(crate::forecast_reasons![
+            "HIGH_RISK",
+            "TYPHOID_NOT_ROUTINE_SEE_ACIP",
+        ]);
     }
 }

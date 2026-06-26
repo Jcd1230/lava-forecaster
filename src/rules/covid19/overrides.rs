@@ -663,8 +663,7 @@ pub fn covid19_custom_forecast_hook(
                 forecast.status = forecast.status.with_latest_date(None);
                 forecast.reasons = crate::forecast_reasons!["COMPLETE_HIGH_RISK"];
             } else if current_season_valid_doses.len() == 1 {
-                forecast.status = SeriesStatus::default();
-                forecast.reasons = crate::forecast_reasons!["NOT_COMPLETE"];
+                forecast.mark_not_complete(crate::forecast_reasons!["NOT_COMPLETE"]);
 
                 let anchor_dose = last_current_season_dose.unwrap();
                 let earliest = anchor_dose.date + chrono::Duration::days(28);
@@ -679,8 +678,7 @@ pub fn covid19_custom_forecast_hook(
                 forecast.status = forecast.status.with_latest_date(None);
             } else {
                 // 0 current season doses
-                forecast.status = SeriesStatus::default();
-                forecast.reasons = crate::forecast_reasons!["NOT_COMPLETE"];
+                forecast.mark_not_complete(crate::forecast_reasons!["NOT_COMPLETE"]);
 
                 if let Some(last_dose) = last_current_season_dose {
                     let earliest = last_dose.date + chrono::Duration::days(28);
@@ -809,8 +807,7 @@ pub fn covid19_custom_forecast_hook(
             forecast.status = forecast.status.with_latest_date(None);
             forecast.reasons = crate::forecast_reasons!["COMPLETE_HIGH_RISK"];
         } else if current_season_valid_doses.len() == 1 {
-            forecast.status = SeriesStatus::default();
-            forecast.reasons = crate::forecast_reasons!["NOT_COMPLETE"];
+            forecast.mark_not_complete(crate::forecast_reasons!["NOT_COMPLETE"]);
 
             let anchor_dose = last_current_season_dose.unwrap();
             let earliest = anchor_dose.date + chrono::Duration::days(56);
@@ -822,8 +819,7 @@ pub fn covid19_custom_forecast_hook(
             forecast.status = forecast.status.with_latest_date(None);
         } else {
             // 0 current season doses
-            forecast.status = SeriesStatus::default();
-            forecast.reasons = crate::forecast_reasons!["NOT_COMPLETE"];
+            forecast.mark_not_complete(crate::forecast_reasons!["NOT_COMPLETE"]);
 
             if let Some(last_dose) = last_current_season_dose {
                 let earliest = last_dose.date + chrono::Duration::days(56);

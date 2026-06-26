@@ -519,6 +519,42 @@ pub struct SeriesForecast {
     pub sources: HashMap<&'static str, String>,
 }
 
+impl SeriesForecast {
+    pub fn clear_dates(&mut self) {
+        self.status = self.status.with_earliest_date(None);
+        self.status = self.status.with_recommended_date(None);
+        self.status = self.status.with_overdue_date(None);
+        self.status = self.status.with_latest_date(None);
+    }
+
+    pub fn set_reasons(&mut self, reasons: SmallVec<[ForecastReason; 2]>) {
+        self.reasons = reasons;
+    }
+
+    pub fn mark_complete(&mut self, reasons: SmallVec<[ForecastReason; 2]>) {
+        self.status = SeriesStatus::Complete;
+        self.reasons = reasons;
+        self.clear_dates();
+    }
+
+    pub fn mark_not_complete(&mut self, reasons: SmallVec<[ForecastReason; 2]>) {
+        self.status = SeriesStatus::default();
+        self.reasons = reasons;
+    }
+
+    pub fn mark_not_recommended(&mut self, reasons: SmallVec<[ForecastReason; 2]>) {
+        self.status = SeriesStatus::NotRecommended;
+        self.reasons = reasons;
+        self.clear_dates();
+    }
+
+    pub fn mark_conditionally_recommended(&mut self, reasons: SmallVec<[ForecastReason; 2]>) {
+        self.status = SeriesStatus::ConditionallyRecommended;
+        self.reasons = reasons;
+        self.clear_dates();
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 struct FlatSeriesForecast {
     pub series_name: std::borrow::Cow<'static, str>,

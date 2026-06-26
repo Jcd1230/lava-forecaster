@@ -93,24 +93,14 @@ pub fn mcv_custom_forecast_hook(
 ) {
     // 1. If patient has completed the series, forecast is Complete / COMPLETE_HIGH_RISK
     if forecast.status == SeriesStatus::Complete {
-        forecast.status = SeriesStatus::Complete;
-        forecast.reasons = crate::forecast_reasons!["COMPLETE_HIGH_RISK"];
-        forecast.status = forecast.status.with_earliest_date(None);
-        forecast.status = forecast.status.with_recommended_date(None);
-        forecast.status = forecast.status.with_overdue_date(None);
-        forecast.status = forecast.status.with_latest_date(None);
+        forecast.mark_complete(crate::forecast_reasons!["COMPLETE_HIGH_RISK"]);
         return;
     }
 
     // 2. If patient is >= 19 years and did NOT complete the series before 19 years of age, Recommendation is Conditional/HIGH_RISK
     let age_19 = add_years_unchecked(patient.birth_date, 19);
     if eval_date >= age_19 {
-        forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = crate::forecast_reasons!["HIGH_RISK"];
-        forecast.status = forecast.status.with_earliest_date(None);
-        forecast.status = forecast.status.with_recommended_date(None);
-        forecast.status = forecast.status.with_overdue_date(None);
-        forecast.status = forecast.status.with_latest_date(None);
+        forecast.mark_conditionally_recommended(crate::forecast_reasons!["HIGH_RISK"]);
         return;
     }
 

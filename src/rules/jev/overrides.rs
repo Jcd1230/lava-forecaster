@@ -58,30 +58,25 @@ pub fn jev_custom_forecast_hook(
     forecast: &mut SeriesForecast,
 ) {
     if forecast.status == SeriesStatus::Complete {
-        forecast.status = SeriesStatus::Complete;
-        forecast.reasons =
-            crate::forecast_reasons!["COMPLETE_HIGH_RISK", "JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP",];
-        forecast.status = forecast.status.with_earliest_date(None);
-        forecast.status = forecast.status.with_recommended_date(None);
-        forecast.status = forecast.status.with_overdue_date(None);
-        forecast.status = forecast.status.with_latest_date(None);
+        forecast.mark_complete(crate::forecast_reasons![
+            "COMPLETE_HIGH_RISK",
+            "JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP",
+        ]);
         return;
     }
 
     if valid_doses.is_empty() {
         let age_2m = crate::time_period!("2m").add_to(patient.birth_date);
         if eval_date < age_2m {
-            forecast.status = SeriesStatus::NotRecommended;
-            forecast.reasons = crate::forecast_reasons!["JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP"];
+            forecast.mark_not_recommended(crate::forecast_reasons![
+                "JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP"
+            ]);
         } else {
-            forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons =
-                crate::forecast_reasons!["HIGH_RISK", "JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP",];
+            forecast.mark_conditionally_recommended(crate::forecast_reasons![
+                "HIGH_RISK",
+                "JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP",
+            ]);
         }
-        forecast.status = forecast.status.with_earliest_date(None);
-        forecast.status = forecast.status.with_recommended_date(None);
-        forecast.status = forecast.status.with_overdue_date(None);
-        forecast.status = forecast.status.with_latest_date(None);
         return;
     }
 

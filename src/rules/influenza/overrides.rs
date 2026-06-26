@@ -179,7 +179,7 @@ pub fn influenza_custom_forecast_hook(
     let needed = if is_1_dose { 1 } else { 2 };
 
     if forecast.status == SeriesStatus::Complete && season_valid_count >= needed {
-        forecast.status = SeriesStatus::default();
+        forecast.mark_not_complete(crate::forecast_reasons!["NOT_COMPLETE"]);
         let next_season_start = active_season.end + chrono::Duration::days(1);
         let mut recommended = next_season_start;
 
@@ -197,7 +197,6 @@ pub fn influenza_custom_forecast_hook(
         forecast.status = forecast.status.with_recommended_date(Some(recommended));
         forecast.status = forecast.status.with_overdue_date(None);
         forecast.status = forecast.status.with_latest_date(None);
-        forecast.reasons = crate::forecast_reasons!["NOT_COMPLETE"];
         return;
     }
 
@@ -207,8 +206,7 @@ pub fn influenza_custom_forecast_hook(
 
     // Reset status to NotComplete if the current season still needs more doses
     if season_valid_count < needed {
-        forecast.status = SeriesStatus::default();
-        forecast.reasons = crate::forecast_reasons!["NOT_COMPLETE"];
+        forecast.mark_not_complete(crate::forecast_reasons!["NOT_COMPLETE"]);
     }
 
     // Apply 28-day interval from last dose
