@@ -1,4 +1,4 @@
-use crate::date_utils::{compare_elapsed, TimePeriod};
+use crate::date_utils::{TimePeriod, compare_elapsed};
 use crate::models::Dose;
 use chrono::NaiveDate;
 

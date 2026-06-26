@@ -1,9 +1,12 @@
+use crate::date_utils::{SmallVec, add_years_unchecked};
 use crate::engine::CandidateForecastsExt;
-use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::engine::ValidDoseRef;
-use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus, VaccineGroupForecast};
-use crate::date_utils::{SmallVec, add_years_unchecked};
+use crate::models::{
+    Dose, DoseStatus, EvaluationReason, ForecastReason, Patient, SeriesForecast, SeriesStatus,
+    VaccineGroupForecast,
+};
+use chrono::NaiveDate;
 
 pub fn jev_custom_evaluation_hook(
     series_name: &str,
@@ -56,10 +59,8 @@ pub fn jev_custom_forecast_hook(
 ) {
     if forecast.status == SeriesStatus::Complete {
         forecast.status = SeriesStatus::Complete;
-        forecast.reasons = crate::reasons![
-            "COMPLETE_HIGH_RISK",
-            "JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP",
-        ];
+        forecast.reasons =
+            crate::forecast_reasons!["COMPLETE_HIGH_RISK", "JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP",];
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);
         forecast.status = forecast.status.with_overdue_date(None);
@@ -71,13 +72,11 @@ pub fn jev_custom_forecast_hook(
         let age_2m = crate::time_period!("2m").add_to(patient.birth_date);
         if eval_date < age_2m {
             forecast.status = SeriesStatus::NotRecommended;
-            forecast.reasons = crate::reasons!["JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP"];
+            forecast.reasons = crate::forecast_reasons!["JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP"];
         } else {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons = crate::reasons![
-                "HIGH_RISK",
-                "JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP",
-            ];
+            forecast.reasons =
+                crate::forecast_reasons!["HIGH_RISK", "JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP",];
         }
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);
@@ -87,20 +86,31 @@ pub fn jev_custom_forecast_hook(
     }
 
     if valid_doses.len() == 1 {
-        if !forecast.reasons.iter().any(|r| r.as_ref() == "JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP") {
-            forecast.reasons.push("JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP".into());
+        if !forecast
+            .reasons
+            .iter()
+            .any(|r| *r == ForecastReason::JeNotRoutineAccel18To65SeeAcip)
+        {
+            forecast
+                .reasons
+                .push(ForecastReason::JeNotRoutineAccel18To65SeeAcip);
         }
 
         if forecast.series_name == "JEVC_RISK_2_DOSE_ACCELERATED_SERIES" {
             let prev_dose_date = valid_doses[0].date;
             let age_66_minus_7d = crate::time_period!("66y-7d").add_to(patient.birth_date);
-            
+
             if prev_dose_date >= age_66_minus_7d {
                 forecast.status = forecast.status.with_overdue_date(None);
             }
 
             let age_66 = add_years_unchecked(patient.birth_date, 66);
-            if forecast.status.recommended_date().map(|d| d >= age_66).unwrap_or(false) {
+            if forecast
+                .status
+                .recommended_date()
+                .map(|d| d >= age_66)
+                .unwrap_or(false)
+            {
                 let new_date = prev_dose_date + chrono::Duration::days(28);
                 forecast.status = forecast.status.with_earliest_date(Some(new_date));
                 forecast.status = forecast.status.with_recommended_date(Some(new_date));
@@ -116,15 +126,17 @@ pub fn jev_group_selection(
     eval_date: NaiveDate,
     candidate_forecasts: &mut [(&'static str, VaccineGroupForecast)],
 ) -> &'static str {
-    let first_valid_dose_date = candidate_forecasts.get_forecast("JEVC_RISK_2_DOSE_SERIES")
+    let first_valid_dose_date = candidate_forecasts
+        .get_forecast("JEVC_RISK_2_DOSE_SERIES")
         .and_then(|f| {
-            f.evaluations.iter()
+            f.evaluations
+                .iter()
                 .find(|e| e.status == DoseStatus::Valid && e.dose_number == Some(1))
                 .map(|e| e.dose_date)
         });
 
     let age_at_reference = first_valid_dose_date.unwrap_or(eval_date);
-    
+
     let tp_18y_minus_4d = crate::time_period!("18y-4d");
     let age_18_minus_4d = tp_18y_minus_4d.add_to(patient.birth_date);
     let age_66 = add_years_unchecked(patient.birth_date, 66);

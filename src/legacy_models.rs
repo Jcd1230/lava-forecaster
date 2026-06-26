@@ -1,7 +1,7 @@
 use crate::models::{
     Contraindication, Cvx, DiseaseImmunity, Dose, ForecastRequest, Gender, Patient,
 };
-use base64::{engine::general_purpose::STANDARD, Engine as _};
+use base64::{Engine as _, engine::general_purpose::STANDARD};
 use chrono::NaiveDate;
 use quick_xml::events::Event;
 use quick_xml::reader::Reader;

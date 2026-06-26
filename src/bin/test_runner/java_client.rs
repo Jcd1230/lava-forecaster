@@ -1,7 +1,7 @@
 use chrono::NaiveDate;
 use lava_forecaster::models::{
-    Cvx, Dose, DoseEvaluation, DoseStatus, EvaluationReason, ExpectedResults, Gender, Patient,
-    SeriesForecast, SeriesStatus, UnifiedTestCase,
+    Cvx, Dose, DoseEvaluation, DoseStatus, EvaluationReason, ExpectedResults, ForecastReason,
+    Gender, Patient, SeriesForecast, SeriesStatus, UnifiedTestCase,
 };
 
 pub fn generate_xml_payload(patient: &Patient, history: &[Dose]) -> String {
@@ -242,6 +242,11 @@ pub fn map_legacy_status(legacy_status: &str, reasons: &[String]) -> SeriesStatu
         return SeriesStatus::default();
     }
     SeriesStatus::default()
+}
+
+fn parse_forecast_reason(reason: &str) -> ForecastReason {
+    ForecastReason::from_str(reason)
+        .unwrap_or_else(|| panic!("unknown forecast reason from Java output: {}", reason))
 }
 
 pub fn is_immune(patient: &Patient, group: &str, eval_date: NaiveDate) -> bool {
@@ -668,7 +673,10 @@ pub fn parse_legacy_xml(xml_content: &str, focus_code: &str) -> ExpectedResults 
                             } else {
                                 legacy_status
                             },
-                            reasons: prop_reasons.iter().map(|r| r.clone().into()).collect(),
+                            reasons: prop_reasons
+                                .iter()
+                                .map(|reason| parse_forecast_reason(reason))
+                                .collect(),
                             sources: std::collections::HashMap::new(),
                         });
                     }

@@ -24,7 +24,7 @@ pub fn yellow_fever_custom_forecast_hook(
 ) {
     if forecast.status == SeriesStatus::Complete {
         forecast.status = SeriesStatus::Complete;
-        forecast.reasons = crate::reasons![
+        forecast.reasons = crate::forecast_reasons![
             "COMPLETE_HIGH_RISK",
             "YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP",
         ];
@@ -47,14 +47,14 @@ pub fn yellow_fever_custom_forecast_hook(
 
     if is_under_6m {
         forecast.status = SeriesStatus::NotRecommended;
-        forecast.reasons = crate::reasons!["YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP"];
+        forecast.reasons = crate::forecast_reasons!["YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP"];
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);
         forecast.status = forecast.status.with_overdue_date(None);
         forecast.status = forecast.status.with_latest_date(None);
     } else if is_under_9m {
         forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = crate::reasons![
+        forecast.reasons = crate::forecast_reasons![
             "BELOW_REC_AGE_SERIES",
             "HIGH_RISK",
             "YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP",
@@ -66,10 +66,8 @@ pub fn yellow_fever_custom_forecast_hook(
     } else {
         // >= 9 months old and incomplete
         forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = crate::reasons![
-            "HIGH_RISK",
-            "YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP",
-        ];
+        forecast.reasons =
+            crate::forecast_reasons!["HIGH_RISK", "YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP",];
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);
         forecast.status = forecast.status.with_overdue_date(None);

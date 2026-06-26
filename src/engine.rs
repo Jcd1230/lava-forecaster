@@ -1,4 +1,4 @@
-use crate::date_utils::{compare_elapsed, SmallVec, TimePeriod};
+use crate::date_utils::{SmallVec, TimePeriod, compare_elapsed};
 use crate::models::{
     Cvx, Dose, DoseEvaluation, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus,
     VaccineGroupForecast,
@@ -6,7 +6,7 @@ use crate::models::{
 use crate::schedule::{CompiledDoseInterval, CompiledSeries};
 use crate::set_field;
 use chrono::NaiveDate;
-use std::cmp::{max, Ordering};
+use std::cmp::{Ordering, max};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ValidDoseRef {
@@ -1077,7 +1077,7 @@ impl<'a> EvaluationEngine<'a> {
             let mut f = SeriesForecast {
                 series_name: active_series.name.into(),
                 status: SeriesStatus::NotRecommended,
-                reasons: crate::reasons!["CONTRAINDICATION"],
+                reasons: crate::forecast_reasons!["CONTRAINDICATION"],
                 sources: std::collections::HashMap::new(),
             };
             trace_decision!(
@@ -1102,7 +1102,7 @@ impl<'a> EvaluationEngine<'a> {
             let mut f = SeriesForecast {
                 series_name: active_series.name.into(),
                 status: SeriesStatus::Complete,
-                reasons: crate::reasons!["COMPLETE"],
+                reasons: crate::forecast_reasons!["COMPLETE"],
                 sources: std::collections::HashMap::new(),
             };
             trace_decision!(
@@ -1173,7 +1173,7 @@ impl<'a> EvaluationEngine<'a> {
                     let mut f = SeriesForecast {
                         series_name: active_series.name.into(),
                         status: SeriesStatus::default(),
-                        reasons: crate::reasons!["NOT_COMPLETE"],
+                        reasons: crate::forecast_reasons!["NOT_COMPLETE"],
                         sources: std::collections::HashMap::new(),
                     };
                     trace_decision!(
@@ -1197,7 +1197,7 @@ impl<'a> EvaluationEngine<'a> {
                 let mut f = SeriesForecast {
                     series_name: active_series.name.into(),
                     status: SeriesStatus::Complete,
-                    reasons: crate::reasons!["COMPLETE"],
+                    reasons: crate::forecast_reasons!["COMPLETE"],
                     sources: std::collections::HashMap::new(),
                 };
                 trace_decision!(
@@ -1431,7 +1431,7 @@ impl<'a> EvaluationEngine<'a> {
                         overdue_date,
                         latest_date: None,
                     },
-                    reasons: crate::reasons!["NOT_COMPLETE"],
+                    reasons: crate::forecast_reasons!["NOT_COMPLETE"],
                     sources: std::collections::HashMap::new(),
                 };
 
@@ -1453,7 +1453,7 @@ impl<'a> EvaluationEngine<'a> {
                             f.status = f.status.with_recommended_date(None);
                             f.status = f.status.with_overdue_date(None);
                             f.status = f.status.with_latest_date(None);
-                            f.reasons = crate::reasons!["MAX_AGE_EXCEEDED"];
+                            f.reasons = crate::forecast_reasons!["MAX_AGE_EXCEEDED"];
                         }
                     }
                 }

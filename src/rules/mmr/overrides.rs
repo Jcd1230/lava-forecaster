@@ -201,7 +201,7 @@ pub fn mmr_custom_forecast_hook(
 
     if is_completed || is_adult_complete || forecast.status == SeriesStatus::Complete {
         forecast.status = SeriesStatus::Complete;
-        forecast.reasons = crate::reasons!["COMPLETE_HIGH_RISK"];
+        forecast.reasons = crate::forecast_reasons!["COMPLETE_HIGH_RISK"];
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);
         forecast.status = forecast.status.with_overdue_date(None);
@@ -209,7 +209,7 @@ pub fn mmr_custom_forecast_hook(
     } else {
         if patient.birth_date < pre_1957 {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons = crate::reasons!["CONDITIONAL"];
+            forecast.reasons = crate::forecast_reasons!["CONDITIONAL"];
             forecast.status = forecast.status.with_earliest_date(None);
             forecast.status = forecast.status.with_recommended_date(None);
             forecast.status = forecast.status.with_overdue_date(None);

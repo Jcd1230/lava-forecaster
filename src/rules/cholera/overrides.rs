@@ -1,8 +1,10 @@
 use crate::date_utils::SmallVec;
-use chrono::NaiveDate;
 use crate::engine::EvaluationContext;
 use crate::engine::ValidDoseRef;
-use crate::models::{Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus};
+use crate::models::{
+    Dose, DoseStatus, EvaluationReason, ForecastReason, Patient, SeriesForecast, SeriesStatus,
+};
+use chrono::NaiveDate;
 
 pub fn cholera_custom_evaluation_hook(
     _series_name: &str,
@@ -23,7 +25,7 @@ pub fn cholera_custom_forecast_hook(
     forecast: &mut SeriesForecast,
 ) {
     if forecast.status == SeriesStatus::Complete {
-        forecast.reasons = crate::reasons!["COMPLETE"];
+        forecast.reasons = crate::forecast_reasons!["COMPLETE"];
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);
         forecast.status = forecast.status.with_overdue_date(None);
@@ -43,7 +45,7 @@ pub fn cholera_custom_forecast_hook(
 
     if is_under_2y {
         forecast.status = SeriesStatus::NotRecommended;
-        forecast.reasons = crate::reasons!["CHOLERA_NOT_ROUTINE_SEE_ACIP"];
+        forecast.reasons = crate::forecast_reasons!["CHOLERA_NOT_ROUTINE_SEE_ACIP"];
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);
         forecast.status = forecast.status.with_overdue_date(None);
@@ -51,34 +53,41 @@ pub fn cholera_custom_forecast_hook(
     } else if is_under_65y {
         if valid_doses.is_empty() {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons = crate::reasons![
-                "HIGH_RISK",
-                "CHOLERA_NOT_ROUTINE_SEE_ACIP",
-            ];
+            forecast.reasons =
+                crate::forecast_reasons!["HIGH_RISK", "CHOLERA_NOT_ROUTINE_SEE_ACIP",];
             forecast.status = forecast.status.with_earliest_date(None);
             forecast.status = forecast.status.with_recommended_date(None);
             forecast.status = forecast.status.with_overdue_date(None);
             forecast.status = forecast.status.with_latest_date(None);
         } else {
-            if !forecast.reasons.iter().any(|r| r == "CHOLERA_NOT_ROUTINE_SEE_ACIP") {
-                forecast.reasons.push("CHOLERA_NOT_ROUTINE_SEE_ACIP".into());
+            if !forecast
+                .reasons
+                .iter()
+                .any(|r| *r == ForecastReason::CholeraNotRoutineSeeAcip)
+            {
+                forecast
+                    .reasons
+                    .push(ForecastReason::CholeraNotRoutineSeeAcip);
             }
         }
     } else {
         // >= 65 years old
         if valid_doses.is_empty() {
             forecast.status = SeriesStatus::NotRecommended;
-            forecast.reasons = crate::reasons![
-                "TOO_OLD",
-                "CHOLERA_NOT_ROUTINE_SEE_ACIP",
-            ];
+            forecast.reasons = crate::forecast_reasons!["TOO_OLD", "CHOLERA_NOT_ROUTINE_SEE_ACIP",];
             forecast.status = forecast.status.with_earliest_date(None);
             forecast.status = forecast.status.with_recommended_date(None);
             forecast.status = forecast.status.with_overdue_date(None);
             forecast.status = forecast.status.with_latest_date(None);
         } else {
-            if !forecast.reasons.iter().any(|r| r == "CHOLERA_NOT_ROUTINE_SEE_ACIP") {
-                forecast.reasons.push("CHOLERA_NOT_ROUTINE_SEE_ACIP".into());
+            if !forecast
+                .reasons
+                .iter()
+                .any(|r| *r == ForecastReason::CholeraNotRoutineSeeAcip)
+            {
+                forecast
+                    .reasons
+                    .push(ForecastReason::CholeraNotRoutineSeeAcip);
             }
         }
     }

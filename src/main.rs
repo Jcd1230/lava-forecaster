@@ -426,7 +426,7 @@ async fn evaluate_bulk_flatbuffers_handler(
 
                 let mut reason_offsets = Vec::with_capacity(fc.reasons.len());
                 for r in fc.reasons.iter() {
-                    reason_offsets.push(get_or_create_string!(r));
+                    reason_offsets.push(get_or_create_string!(r.as_str()));
                 }
                 let reasons_vec = builder.create_vector(&reason_offsets);
 

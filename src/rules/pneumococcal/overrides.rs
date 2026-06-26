@@ -1,18 +1,46 @@
 use crate::rules::helpers::{age_ge, age_lt};
-use lava_cvx_macro::cvx;
 use chrono::NaiveDate;
+use lava_cvx_macro::cvx;
 
-use crate::date_utils::{SmallVec, compare_elapsed, TimePeriod};
+use crate::date_utils::{SmallVec, TimePeriod, compare_elapsed};
 use crate::engine::EvaluationContext;
 use crate::engine::ValidDoseRef;
-use crate::models::{Cvx, Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus};
+use crate::models::{
+    Cvx, Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus,
+};
 
-const CHILD_PCV_CVX: &[u16] = &[cvx!("100"), cvx!("133"), cvx!("177"), cvx!("215"), cvx!("216"), cvx!("109"), cvx!("152"), cvx!("327")];
-const MODERN_PCV_CVX: &[u16] = &[cvx!("133"), cvx!("152"), cvx!("177"), cvx!("215"), cvx!("216"), cvx!("327")];
+const CHILD_PCV_CVX: &[u16] = &[
+    cvx!("100"),
+    cvx!("133"),
+    cvx!("177"),
+    cvx!("215"),
+    cvx!("216"),
+    cvx!("109"),
+    cvx!("152"),
+    cvx!("327"),
+];
+const MODERN_PCV_CVX: &[u16] = &[
+    cvx!("133"),
+    cvx!("152"),
+    cvx!("177"),
+    cvx!("215"),
+    cvx!("216"),
+    cvx!("327"),
+];
 const ADULT_COMPLETE_PCV_CVX: &[u16] = &[cvx!("216"), cvx!("327")];
 
 fn is_pcv_cvx(cvx: Cvx) -> bool {
-    matches!(cvx.0, cvx!("100") | cvx!("109") | cvx!("133") | cvx!("152") | cvx!("177") | cvx!("215") | cvx!("216") | cvx!("327"))
+    matches!(
+        cvx.0,
+        cvx!("100")
+            | cvx!("109")
+            | cvx!("133")
+            | cvx!("152")
+            | cvx!("177")
+            | cvx!("215")
+            | cvx!("216")
+            | cvx!("327")
+    )
 }
 
 fn count_pcv_history_before_age(history: &[Dose], birth: NaiveDate, age: TimePeriod) -> usize {
@@ -82,28 +110,40 @@ pub fn pneumococcal_custom_dose_number_hook(_series_name: &str, ctx: &Evaluation
 pub fn pneumococcal_custom_completion_hook(ctx: &EvaluationContext) -> bool {
     let birth = ctx.patient.birth_date;
     let ref_date = ctx.eval_date;
-    
-    if age_ge(birth, ref_date, crate::time_period!("5y")) && age_lt(birth, ref_date, crate::time_period!("19y")) {
+
+    if age_ge(birth, ref_date, crate::time_period!("5y"))
+        && age_lt(birth, ref_date, crate::time_period!("19y"))
+    {
         // ICE does not automatically close pneumococcal forecasting at age 5.
         // A child who has not completed the childhood PCV catch-up requirements
         // remains in the high-risk conditional path.
-        let valid_pcv_doses: Vec<NaiveDate> = ctx.valid_doses.iter()
+        let valid_pcv_doses: Vec<NaiveDate> = ctx
+            .valid_doses
+            .iter()
             .filter(|dose| is_pcv_cvx(dose.cvx))
             .map(|dose| dose.date)
             .collect();
-        return child_pcv_complete(birth, &valid_pcv_doses, has_valid_child_modern_pcv(ctx.valid_doses));
+        return child_pcv_complete(
+            birth,
+            &valid_pcv_doses,
+            has_valid_child_modern_pcv(ctx.valid_doses),
+        );
     }
 
-    let valid_pcv_doses: Vec<NaiveDate> = ctx.valid_doses.iter()
+    let valid_pcv_doses: Vec<NaiveDate> = ctx
+        .valid_doses
+        .iter()
         .filter(|dose| is_pcv_cvx(dose.cvx))
         .map(|dose| dose.date)
         .collect();
-    
-    if valid_pcv_doses.is_empty() { return false; }
-    
+
+    if valid_pcv_doses.is_empty() {
+        return false;
+    }
+
     let first_dose_date = valid_pcv_doses[0];
     let num_doses = valid_pcv_doses.len();
-    
+
     if age_ge(birth, first_dose_date, crate::time_period!("24m")) {
         return num_doses >= 1;
     }
@@ -113,7 +153,7 @@ pub fn pneumococcal_custom_completion_hook(ctx: &EvaluationContext) -> bool {
     if age_ge(birth, first_dose_date, crate::time_period!("7m")) {
         return num_doses >= 3;
     }
-    
+
     num_doses >= 4
 }
 
@@ -159,7 +199,8 @@ pub fn pneumococcal_custom_evaluation_hook(
         }
 
         if target_dose_idx == 4 && age_lt(birth, dose.date, crate::time_period!("1y-4d")) {
-            let pcv_before_7m = count_pcv_history_before_age(ctx.history, birth, crate::time_period!("7m"));
+            let pcv_before_7m =
+                count_pcv_history_before_age(ctx.history, birth, crate::time_period!("7m"));
             if pcv_before_7m == 0 {
                 *status = DoseStatus::Invalid;
                 if !reasons.contains(&EvaluationReason::BelowMinimumAgeFinalDose) {
@@ -223,50 +264,67 @@ pub fn pneumococcal_custom_forecast_hook(
     let birth = patient.birth_date;
     let adult_valid = valid_adult_doses(valid_doses);
     let has_valid_child_modern_pcv = has_valid_child_modern_pcv(valid_doses);
-    
-    let valid_pcv_doses: Vec<NaiveDate> = valid_doses.iter()
+
+    let valid_pcv_doses: Vec<NaiveDate> = valid_doses
+        .iter()
         .filter(|dose| is_pcv_cvx(dose.cvx))
         .map(|dose| dose.date)
         .collect();
-    
+
     let pcv_complete = child_pcv_complete(birth, &valid_pcv_doses, has_valid_child_modern_pcv);
 
-    if adult_valid.iter().any(|d| ADULT_COMPLETE_PCV_CVX.contains(&d.cvx.0) && age_ge(birth, d.date, crate::time_period!("19y"))) {
+    if adult_valid.iter().any(|d| {
+        ADULT_COMPLETE_PCV_CVX.contains(&d.cvx.0)
+            && age_ge(birth, d.date, crate::time_period!("19y"))
+    }) {
         forecast.status = SeriesStatus::Complete;
         return;
     }
 
-    if age_ge(birth, eval_date, crate::time_period!("19y")) && age_lt(birth, eval_date, crate::time_period!("50y")) {
+    if age_ge(birth, eval_date, crate::time_period!("19y"))
+        && age_lt(birth, eval_date, crate::time_period!("50y"))
+    {
         forecast.status = SeriesStatus::ConditionallyRecommended;
         return;
     }
 
-    if age_ge(birth, eval_date, crate::time_period!("5y")) && age_lt(birth, eval_date, crate::time_period!("19y")) {
+    if age_ge(birth, eval_date, crate::time_period!("5y"))
+        && age_lt(birth, eval_date, crate::time_period!("19y"))
+    {
         if pcv_complete {
             forecast.status = SeriesStatus::Complete;
-            forecast.reasons = crate::reasons!["COMPLETE_HIGH_RISK"];
+            forecast.reasons = crate::forecast_reasons!["COMPLETE_HIGH_RISK"];
         } else {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons = crate::reasons!["HIGH_RISK"];
+            forecast.reasons = crate::forecast_reasons!["HIGH_RISK"];
         }
         return;
     }
 
-    if age_ge(birth, eval_date, crate::time_period!("2y-4d")) && age_lt(birth, eval_date, crate::time_period!("5y")) {
-        let has_high_risk_product = history.iter().any(|d| matches!(d.cvx.0, cvx!("327") | cvx!("216")));
+    if age_ge(birth, eval_date, crate::time_period!("2y-4d"))
+        && age_lt(birth, eval_date, crate::time_period!("5y"))
+    {
+        let has_high_risk_product = history
+            .iter()
+            .any(|d| matches!(d.cvx.0, cvx!("327") | cvx!("216")));
         if pcv_complete && has_high_risk_product {
             forecast.status = SeriesStatus::Complete;
-            forecast.reasons = crate::reasons!["COMPLETE_HIGH_RISK"];
+            forecast.reasons = crate::forecast_reasons!["COMPLETE_HIGH_RISK"];
             return;
         }
     }
 
-    if pcv_complete && age_lt(birth, eval_date, crate::time_period!("5y")) && has_valid_child_modern_pcv {
+    if pcv_complete
+        && age_lt(birth, eval_date, crate::time_period!("5y"))
+        && has_valid_child_modern_pcv
+    {
         forecast.status = SeriesStatus::Complete;
         return;
     }
 
-    if forecast.status == SeriesStatus::Complete { return; }
+    if forecast.status == SeriesStatus::Complete {
+        return;
+    }
 
     if age_lt(birth, eval_date, crate::time_period!("5y")) {
         if let Some(first_valid) = valid_pcv_doses.first().copied() {
@@ -295,31 +353,44 @@ pub fn pneumococcal_custom_forecast_hook(
     }
 
     if forecast.status.recommended_date().is_none() {
-        let ref_date = if age_ge(birth, eval_date, crate::time_period!("24m")) { crate::time_period!("2y").add_to(birth) } 
-        else if age_ge(birth, eval_date, crate::time_period!("12m")) { crate::time_period!("1y").add_to(birth) } 
-        else if age_ge(birth, eval_date, crate::time_period!("7m")) { crate::time_period!("7m").add_to(birth) } 
-        else { eval_date };
+        let ref_date = if age_ge(birth, eval_date, crate::time_period!("24m")) {
+            crate::time_period!("2y").add_to(birth)
+        } else if age_ge(birth, eval_date, crate::time_period!("12m")) {
+            crate::time_period!("1y").add_to(birth)
+        } else if age_ge(birth, eval_date, crate::time_period!("7m")) {
+            crate::time_period!("7m").add_to(birth)
+        } else {
+            eval_date
+        };
         forecast.status = forecast.status.with_recommended_date(Some(ref_date));
     }
 
     if let Some(recommended) = forecast.status.recommended_date() {
-        if forecast.status.earliest_date().map_or(true, |e| e > recommended) {
+        if forecast
+            .status
+            .earliest_date()
+            .map_or(true, |e| e > recommended)
+        {
             forecast.status = forecast.status.with_earliest_date(Some(recommended));
         }
     }
-    
+
     // Final Clamp and Alignment for children
     if age_lt(birth, eval_date, crate::time_period!("19y")) {
         let date_2y = crate::time_period!("2y").add_to(birth);
         let date_1y = crate::time_period!("1y").add_to(birth);
         let date_7m = crate::time_period!("7m").add_to(birth);
-        
+
         if valid_pcv_doses.is_empty() {
-            if age_ge(birth, eval_date, crate::time_period!("24m")) { clamp_forecast(forecast, date_2y); } 
-            else if age_ge(birth, eval_date, crate::time_period!("12m")) { clamp_forecast(forecast, date_1y); } 
-            else if age_ge(birth, eval_date, crate::time_period!("7m")) { clamp_forecast(forecast, date_7m); }
+            if age_ge(birth, eval_date, crate::time_period!("24m")) {
+                clamp_forecast(forecast, date_2y);
+            } else if age_ge(birth, eval_date, crate::time_period!("12m")) {
+                clamp_forecast(forecast, date_1y);
+            } else if age_ge(birth, eval_date, crate::time_period!("7m")) {
+                clamp_forecast(forecast, date_7m);
+            }
         }
-        
+
         if let Some(rec) = forecast.status.recommended_date() {
             forecast.status = forecast.status.with_overdue_date(Some(rec));
         }
@@ -339,12 +410,19 @@ impl crate::engine::EvaluationPolicy for PneumococcalPolicy {
         &self,
         patient: &Patient,
         valid_doses: &[ValidDoseRef],
-    _evaluations: &[crate::models::DoseEvaluation],
+        _evaluations: &[crate::models::DoseEvaluation],
         history: &[Dose],
         eval_date: NaiveDate,
         forecast: &mut SeriesForecast,
     ) {
-        pneumococcal_custom_forecast_hook(patient, valid_doses, _evaluations, history, eval_date, forecast)
+        pneumococcal_custom_forecast_hook(
+            patient,
+            valid_doses,
+            _evaluations,
+            history,
+            eval_date,
+            forecast,
+        )
     }
 
     fn custom_evaluation_hook(
@@ -358,11 +436,7 @@ impl crate::engine::EvaluationPolicy for PneumococcalPolicy {
         pneumococcal_custom_evaluation_hook(series_name, target_dose_idx, ctx, reasons, status)
     }
 
-    fn custom_dose_number_hook(
-        &self,
-        series_name: &str,
-        ctx: &EvaluationContext,
-    ) -> Option<usize> {
+    fn custom_dose_number_hook(&self, series_name: &str, ctx: &EvaluationContext) -> Option<usize> {
         Some(pneumococcal_custom_dose_number_hook(series_name, ctx))
     }
 
@@ -378,7 +452,11 @@ impl crate::engine::EvaluationPolicy for PneumococcalPolicy {
         Some(pneumococcal_custom_completion_hook(ctx))
     }
 
-    fn ignore_evaluation_for_maximum_date(&self, patient: &Patient, eval: &crate::models::DoseEvaluation) -> bool {
+    fn ignore_evaluation_for_maximum_date(
+        &self,
+        patient: &Patient,
+        eval: &crate::models::DoseEvaluation,
+    ) -> bool {
         eval.cvx.0 == cvx!("33")
             && compare_elapsed(
                 patient.birth_date,

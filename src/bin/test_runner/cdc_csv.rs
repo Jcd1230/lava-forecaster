@@ -191,7 +191,7 @@ pub fn map_rust_series_status_to_cdc(forecast: &SeriesForecast) -> &'static str 
             if forecast
                 .reasons
                 .iter()
-                .any(|reason| reason.as_ref() == "MAX_AGE_EXCEEDED")
+                .any(|reason| *reason == lava_forecaster::models::ForecastReason::MaxAgeExceeded)
             {
                 "Aged out"
             } else {

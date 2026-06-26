@@ -211,6 +211,106 @@ impl EvaluationReason {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ForecastReason {
+    Contraindication,
+    Complete,
+    CompleteHighRisk,
+    Conditional,
+    NotComplete,
+    HighRisk,
+    NotSupported,
+    DueNow,
+    DueInFuture,
+    BoosterDose,
+    SupplementalText,
+    AdministerTdapOrTd,
+    AdministerPcv20OrPcv21,
+    AdministerPcv15Pcv20OrPcv21,
+    AdministerCovid19BivalentVaccine,
+    OtherVaccineProductPossible,
+    TooOld,
+    TooOldToInitiate,
+    MaxAgeExceeded,
+    CholeraNotRoutineSeeAcip,
+    VacGroupNoLongerRec,
+    JeNotRoutineAccel18To65SeeAcip,
+    BelowMinimumAgeHighRiskSeries,
+    ClinicalPatientDiscretion,
+    TyphoidNotRoutineSeeAcip,
+    BelowRecAgeSeries,
+    YellowFeverLiveMinIntervalsSeeAcip,
+}
+
+impl ForecastReason {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Contraindication => "CONTRAINDICATION",
+            Self::Complete => "COMPLETE",
+            Self::CompleteHighRisk => "COMPLETE_HIGH_RISK",
+            Self::Conditional => "CONDITIONAL",
+            Self::NotComplete => "NOT_COMPLETE",
+            Self::HighRisk => "HIGH_RISK",
+            Self::NotSupported => "NOT_SUPPORTED",
+            Self::DueNow => "DUE_NOW",
+            Self::DueInFuture => "DUE_IN_FUTURE",
+            Self::BoosterDose => "BOOSTER_DOSE",
+            Self::SupplementalText => "SUPPLEMENTAL_TEXT",
+            Self::AdministerTdapOrTd => "ADMINISTER_TDAP_OR_TD",
+            Self::AdministerPcv20OrPcv21 => "ADMINISTER_PCV20_OR_PCV21",
+            Self::AdministerPcv15Pcv20OrPcv21 => "ADMINISTER_PCV15_PCV20_OR_PCV21",
+            Self::AdministerCovid19BivalentVaccine => "ADMINISTER_COVID19_BIVALENT_VACCINE",
+            Self::OtherVaccineProductPossible => "OTHER_VACCINE_PRODUCT_POSSIBLE",
+            Self::TooOld => "TOO_OLD",
+            Self::TooOldToInitiate => "TOO_OLD_TO_INITIATE",
+            Self::MaxAgeExceeded => "MAX_AGE_EXCEEDED",
+            Self::CholeraNotRoutineSeeAcip => "CHOLERA_NOT_ROUTINE_SEE_ACIP",
+            Self::VacGroupNoLongerRec => "VAC_GROUP_NO_LONGER_REC",
+            Self::JeNotRoutineAccel18To65SeeAcip => "JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP",
+            Self::BelowMinimumAgeHighRiskSeries => "BELOW_MINIMUM_AGE_HIGH_RISK_SERIES",
+            Self::ClinicalPatientDiscretion => "CLINICAL_PATIENT_DISCRETION",
+            Self::TyphoidNotRoutineSeeAcip => "TYPHOID_NOT_ROUTINE_SEE_ACIP",
+            Self::BelowRecAgeSeries => "BELOW_REC_AGE_SERIES",
+            Self::YellowFeverLiveMinIntervalsSeeAcip => "YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP",
+        }
+    }
+
+    pub fn from_str(value: &str) -> Option<Self> {
+        match value {
+            "CONTRAINDICATION" => Some(Self::Contraindication),
+            "COMPLETE" => Some(Self::Complete),
+            "COMPLETE_HIGH_RISK" => Some(Self::CompleteHighRisk),
+            "CONDITIONAL" => Some(Self::Conditional),
+            "NOT_COMPLETE" => Some(Self::NotComplete),
+            "HIGH_RISK" => Some(Self::HighRisk),
+            "NOT_SUPPORTED" => Some(Self::NotSupported),
+            "DUE_NOW" => Some(Self::DueNow),
+            "DUE_IN_FUTURE" => Some(Self::DueInFuture),
+            "BOOSTER_DOSE" => Some(Self::BoosterDose),
+            "SUPPLEMENTAL_TEXT" => Some(Self::SupplementalText),
+            "ADMINISTER_TDAP_OR_TD" => Some(Self::AdministerTdapOrTd),
+            "ADMINISTER_PCV20_OR_PCV21" => Some(Self::AdministerPcv20OrPcv21),
+            "ADMINISTER_PCV15_PCV20_OR_PCV21" => Some(Self::AdministerPcv15Pcv20OrPcv21),
+            "ADMINISTER_COVID19_BIVALENT_VACCINE" => Some(Self::AdministerCovid19BivalentVaccine),
+            "OTHER_VACCINE_PRODUCT_POSSIBLE" => Some(Self::OtherVaccineProductPossible),
+            "TOO_OLD" => Some(Self::TooOld),
+            "TOO_OLD_TO_INITIATE" => Some(Self::TooOldToInitiate),
+            "MAX_AGE_EXCEEDED" => Some(Self::MaxAgeExceeded),
+            "CHOLERA_NOT_ROUTINE_SEE_ACIP" => Some(Self::CholeraNotRoutineSeeAcip),
+            "VAC_GROUP_NO_LONGER_REC" => Some(Self::VacGroupNoLongerRec),
+            "JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP" => Some(Self::JeNotRoutineAccel18To65SeeAcip),
+            "BELOW_MINIMUM_AGE_HIGH_RISK_SERIES" => Some(Self::BelowMinimumAgeHighRiskSeries),
+            "CLINICAL_PATIENT_DISCRETION" => Some(Self::ClinicalPatientDiscretion),
+            "TYPHOID_NOT_ROUTINE_SEE_ACIP" => Some(Self::TyphoidNotRoutineSeeAcip),
+            "BELOW_REC_AGE_SERIES" => Some(Self::BelowRecAgeSeries),
+            "YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP" => {
+                Some(Self::YellowFeverLiveMinIntervalsSeeAcip)
+            }
+            _ => None,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DoseEvaluation {
     pub dose_date: NaiveDate,
@@ -414,7 +514,7 @@ impl SeriesStatus {
 pub struct SeriesForecast {
     pub series_name: std::borrow::Cow<'static, str>,
     pub status: SeriesStatus,
-    pub reasons: SmallVec<[std::borrow::Cow<'static, str>; 2]>,
+    pub reasons: SmallVec<[ForecastReason; 2]>,
     #[serde(skip)]
     pub sources: HashMap<&'static str, String>,
 }
@@ -453,7 +553,11 @@ impl From<SeriesForecast> for FlatSeriesForecast {
             overdue_date: f.status.overdue_date(),
             latest_date: f.status.latest_date(),
             status,
-            reasons: f.reasons,
+            reasons: f
+                .reasons
+                .into_iter()
+                .map(|reason| std::borrow::Cow::Borrowed(reason.as_str()))
+                .collect(),
         }
     }
 }
@@ -474,7 +578,15 @@ impl From<FlatSeriesForecast> for SeriesForecast {
         Self {
             series_name: f.series_name,
             status,
-            reasons: f.reasons,
+            reasons: f
+                .reasons
+                .into_iter()
+                .map(|reason| {
+                    ForecastReason::from_str(reason.as_ref()).unwrap_or_else(|| {
+                        panic!("unknown forecast reason in serialized data: {}", reason)
+                    })
+                })
+                .collect(),
             sources: std::collections::HashMap::new(),
         }
     }

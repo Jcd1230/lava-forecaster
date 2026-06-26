@@ -523,7 +523,13 @@ pub fn make_immunization_recommendation(
                 let reasons_text = if fc.reasons.is_empty() {
                     None
                 } else {
-                    Some(fc.reasons.join(", "))
+                    Some(
+                        fc.reasons
+                            .iter()
+                            .map(|reason| reason.as_str())
+                            .collect::<Vec<_>>()
+                            .join(", "),
+                    )
                 };
 
                 RecommendationItem {

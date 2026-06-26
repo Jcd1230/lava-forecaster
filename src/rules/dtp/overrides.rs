@@ -1,6 +1,6 @@
-use crate::date_utils::{add_months_unchecked, add_years_unchecked, SmallVec};
+use crate::date_utils::{SmallVec, add_months_unchecked, add_years_unchecked};
 use crate::engine::ValidDoseRef;
-use crate::engine::{default_is_evaluation_ignored, EvaluationContext, SameDayPriorityContext};
+use crate::engine::{EvaluationContext, SameDayPriorityContext, default_is_evaluation_ignored};
 use crate::models::{
     Cvx, Dose, DoseEvaluation, DoseStatus, EvaluationReason, Patient, SeriesForecast,
     VaccineGroupForecast,
@@ -389,7 +389,7 @@ pub fn dtp_custom_forecast_hook(
 
     if forecast.status == crate::models::SeriesStatus::Complete {
         forecast.status = crate::models::SeriesStatus::default();
-        forecast.reasons = crate::reasons!["NOT_COMPLETE"];
+        forecast.reasons = crate::forecast_reasons!["NOT_COMPLETE"];
 
         if has_valid_tdap_ge_10 || has_valid_dtp_ge_10 {
             // Decennial booster needed

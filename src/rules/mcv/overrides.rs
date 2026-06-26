@@ -1,9 +1,11 @@
-use lava_cvx_macro::cvx;
-use chrono::NaiveDate;
+use crate::date_utils::{SmallVec, TimePeriod, add_years_unchecked};
 use crate::engine::EvaluationContext;
 use crate::engine::ValidDoseRef;
-use crate::models::{Cvx, Patient, Dose, DoseStatus, EvaluationReason, SeriesForecast, SeriesStatus};
-use crate::date_utils::{SmallVec, TimePeriod, add_years_unchecked};
+use crate::models::{
+    Cvx, Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus,
+};
+use chrono::NaiveDate;
+use lava_cvx_macro::cvx;
 
 fn get_vaccine_min_age(cvx: Cvx) -> Option<TimePeriod> {
     match cvx.0 {
@@ -66,7 +68,11 @@ pub fn mcv_custom_evaluation_hook(
         let age_22 = add_years_unchecked(birth_date, 22);
         if dose.date >= age_22 {
             let age_19 = add_years_unchecked(birth_date, 19);
-            let valid_before_19 = ctx.valid_doses.iter().filter(|dose| dose.date < age_19).count();
+            let valid_before_19 = ctx
+                .valid_doses
+                .iter()
+                .filter(|dose| dose.date < age_19)
+                .count();
             if valid_before_19 < 2 {
                 *status = DoseStatus::Accepted;
                 reasons.clear();
@@ -88,7 +94,7 @@ pub fn mcv_custom_forecast_hook(
     // 1. If patient has completed the series, forecast is Complete / COMPLETE_HIGH_RISK
     if forecast.status == SeriesStatus::Complete {
         forecast.status = SeriesStatus::Complete;
-        forecast.reasons = crate::reasons!["COMPLETE_HIGH_RISK"];
+        forecast.reasons = crate::forecast_reasons!["COMPLETE_HIGH_RISK"];
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);
         forecast.status = forecast.status.with_overdue_date(None);
@@ -100,7 +106,7 @@ pub fn mcv_custom_forecast_hook(
     let age_19 = add_years_unchecked(patient.birth_date, 19);
     if eval_date >= age_19 {
         forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = crate::reasons!["HIGH_RISK"];
+        forecast.reasons = crate::forecast_reasons!["HIGH_RISK"];
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);
         forecast.status = forecast.status.with_overdue_date(None);

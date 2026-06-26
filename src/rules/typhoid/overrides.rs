@@ -1,9 +1,9 @@
 use crate::date_utils::SmallVec;
-use lava_cvx_macro::cvx;
 use crate::engine::EvaluationContext;
 use crate::engine::ValidDoseRef;
 use crate::models::{Dose, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus};
 use chrono::NaiveDate;
+use lava_cvx_macro::cvx;
 
 pub fn typhoid_custom_evaluation_hook(
     _series_name: &str,
@@ -36,10 +36,8 @@ pub fn typhoid_custom_forecast_hook(
 ) {
     if forecast.status == SeriesStatus::Complete {
         forecast.status = SeriesStatus::Complete;
-        forecast.reasons = crate::reasons![
-            "COMPLETE_HIGH_RISK",
-            "TYPHOID_NOT_ROUTINE_SEE_ACIP",
-        ];
+        forecast.reasons =
+            crate::forecast_reasons!["COMPLETE_HIGH_RISK", "TYPHOID_NOT_ROUTINE_SEE_ACIP",];
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);
         forecast.status = forecast.status.with_overdue_date(None);
@@ -54,7 +52,7 @@ pub fn typhoid_custom_forecast_hook(
 
     if is_under_2y {
         forecast.status = SeriesStatus::NotRecommended;
-        forecast.reasons = crate::reasons!["TYPHOID_NOT_ROUTINE_SEE_ACIP"];
+        forecast.reasons = crate::forecast_reasons!["TYPHOID_NOT_ROUTINE_SEE_ACIP"];
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);
         forecast.status = forecast.status.with_overdue_date(None);
@@ -62,10 +60,7 @@ pub fn typhoid_custom_forecast_hook(
     } else {
         // >= 2 years old and not complete
         forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = crate::reasons![
-            "HIGH_RISK",
-            "TYPHOID_NOT_ROUTINE_SEE_ACIP",
-        ];
+        forecast.reasons = crate::forecast_reasons!["HIGH_RISK", "TYPHOID_NOT_ROUTINE_SEE_ACIP",];
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);
         forecast.status = forecast.status.with_overdue_date(None);

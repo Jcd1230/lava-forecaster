@@ -1,4 +1,4 @@
-use crate::date_utils::{add_months_unchecked, add_years_unchecked, SmallVec};
+use crate::date_utils::{SmallVec, add_months_unchecked, add_years_unchecked};
 use crate::engine::CandidateForecastsExt;
 use crate::engine::EvaluationContext;
 use crate::engine::ValidDoseRef;
@@ -702,7 +702,7 @@ pub fn hep_b_group_selection(
             }
             for f in forecast.forecasts.iter_mut() {
                 f.status = SeriesStatus::Complete;
-                f.reasons = crate::reasons!["COMPLETE"];
+                f.reasons = crate::forecast_reasons!["COMPLETE"];
                 f.status = f.status.with_earliest_date(None);
                 f.status = f.status.with_recommended_date(None);
                 f.status = f.status.with_overdue_date(None);

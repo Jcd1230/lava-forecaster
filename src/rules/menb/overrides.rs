@@ -1,4 +1,4 @@
-use crate::date_utils::{add_years_unchecked, SmallVec};
+use crate::date_utils::{SmallVec, add_years_unchecked};
 use crate::engine::CandidateForecastsExt;
 use crate::engine::EvaluationContext;
 use crate::engine::ValidDoseRef;
@@ -220,7 +220,7 @@ pub fn menb_custom_forecast_hook(
     forecast: &mut SeriesForecast,
 ) {
     if forecast.status == SeriesStatus::Complete {
-        forecast.reasons = crate::reasons!["COMPLETE"];
+        forecast.reasons = crate::forecast_reasons!["COMPLETE"];
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);
         forecast.status = forecast.status.with_overdue_date(None);
@@ -232,16 +232,16 @@ pub fn menb_custom_forecast_hook(
         let age_10 = add_years_unchecked(patient.birth_date, 10);
         if eval_date < age_10 {
             forecast.status = SeriesStatus::NotRecommended;
-            forecast.reasons = crate::reasons!["BELOW_MINIMUM_AGE_HIGH_RISK_SERIES"];
+            forecast.reasons = crate::forecast_reasons!["BELOW_MINIMUM_AGE_HIGH_RISK_SERIES"];
         } else if eval_date < add_years_unchecked(patient.birth_date, 16) {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons = crate::reasons!["HIGH_RISK"];
+            forecast.reasons = crate::forecast_reasons!["HIGH_RISK"];
         } else if eval_date < add_years_unchecked(patient.birth_date, 24) {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons = crate::reasons!["CLINICAL_PATIENT_DISCRETION"];
+            forecast.reasons = crate::forecast_reasons!["CLINICAL_PATIENT_DISCRETION"];
         } else {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons = crate::reasons!["HIGH_RISK"];
+            forecast.reasons = crate::forecast_reasons!["HIGH_RISK"];
         }
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);

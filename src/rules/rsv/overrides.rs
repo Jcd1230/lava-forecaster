@@ -1,5 +1,5 @@
 use crate::date_utils::{
-    add_months_unchecked, add_years_unchecked, compare_elapsed, SmallVec, TimePeriod,
+    SmallVec, TimePeriod, add_months_unchecked, add_years_unchecked, compare_elapsed,
 };
 use crate::engine::EvaluationContext;
 use crate::engine::ValidDoseRef;
@@ -226,7 +226,7 @@ pub fn rsv_custom_forecast_hook(
     );
     if eval_date < support_start {
         forecast.status = SeriesStatus::NotRecommended;
-        forecast.reasons = crate::reasons!["NOT_SUPPORTED"];
+        forecast.reasons = crate::forecast_reasons!["NOT_SUPPORTED"];
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);
         forecast.status = forecast.status.with_overdue_date(None);
@@ -243,14 +243,14 @@ pub fn rsv_custom_forecast_hook(
         if forecast.series_name == "RSV_INFANT_SERIES" {
             if age_lt(patient.birth_date, eval_date, crate::time_period!("20m")) {
                 forecast.status = SeriesStatus::Complete;
-                forecast.reasons = crate::reasons!["COMPLETE_HIGH_RISK"];
+                forecast.reasons = crate::forecast_reasons!["COMPLETE_HIGH_RISK"];
             } else {
                 forecast.status = SeriesStatus::Complete;
-                forecast.reasons = crate::reasons!["COMPLETE"];
+                forecast.reasons = crate::forecast_reasons!["COMPLETE"];
             }
         } else {
             forecast.status = SeriesStatus::Complete;
-            forecast.reasons = crate::reasons!["COMPLETE"];
+            forecast.reasons = crate::forecast_reasons!["COMPLETE"];
         }
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);
@@ -264,7 +264,7 @@ pub fn rsv_custom_forecast_hook(
             && age_lt(patient.birth_date, eval_date, crate::time_period!("20m"))
         {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons = crate::reasons!["HIGH_RISK"];
+            forecast.reasons = crate::forecast_reasons!["HIGH_RISK"];
             forecast.status = forecast.status.with_earliest_date(None);
             forecast.status = forecast.status.with_recommended_date(None);
             forecast.status = forecast.status.with_overdue_date(None);
@@ -286,7 +286,7 @@ pub fn rsv_custom_forecast_hook(
             crate::time_period!("20m"),
         ) {
             forecast.status = SeriesStatus::ConditionallyRecommended;
-            forecast.reasons = crate::reasons!["HIGH_RISK"];
+            forecast.reasons = crate::forecast_reasons!["HIGH_RISK"];
             forecast.status = forecast.status.with_earliest_date(None);
             forecast.status = forecast.status.with_recommended_date(None);
             forecast.status = forecast.status.with_overdue_date(None);
@@ -295,7 +295,7 @@ pub fn rsv_custom_forecast_hook(
         }
 
         forecast.status = SeriesStatus::default();
-        forecast.reasons = crate::reasons!["NOT_COMPLETE"];
+        forecast.reasons = crate::forecast_reasons!["NOT_COMPLETE"];
         forecast.status = forecast
             .status
             .with_earliest_date(Some(recommendation_date));
@@ -311,7 +311,7 @@ pub fn rsv_custom_forecast_hook(
         && age_lt(patient.birth_date, eval_date, crate::time_period!("75y"))
     {
         forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = crate::reasons!["HIGH_RISK"];
+        forecast.reasons = crate::forecast_reasons!["HIGH_RISK"];
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);
         forecast.status = forecast.status.with_overdue_date(None);
@@ -322,7 +322,7 @@ pub fn rsv_custom_forecast_hook(
     let age_75 = add_years_unchecked(patient.birth_date, 75);
     let adult_recommendation_date = age_75.max(date(2024, 6, 26));
     forecast.status = SeriesStatus::default();
-    forecast.reasons = crate::reasons!["NOT_COMPLETE"];
+    forecast.reasons = crate::forecast_reasons!["NOT_COMPLETE"];
     forecast.status = forecast
         .status
         .with_earliest_date(Some(adult_recommendation_date));

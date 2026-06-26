@@ -137,7 +137,7 @@ pub fn mpox_custom_forecast_hook(
     forecast: &mut SeriesForecast,
 ) {
     if forecast.status == SeriesStatus::Complete {
-        forecast.reasons = crate::reasons!["COMPLETE_HIGH_RISK"];
+        forecast.reasons = crate::forecast_reasons!["COMPLETE_HIGH_RISK"];
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);
         forecast.status = forecast.status.with_overdue_date(None);
@@ -147,7 +147,7 @@ pub fn mpox_custom_forecast_hook(
 
     if valid_doses.is_empty() {
         forecast.status = SeriesStatus::ConditionallyRecommended;
-        forecast.reasons = crate::reasons!["HIGH_RISK"];
+        forecast.reasons = crate::forecast_reasons!["HIGH_RISK"];
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);
         forecast.status = forecast.status.with_overdue_date(None);

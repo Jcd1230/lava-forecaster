@@ -16,6 +16,106 @@ macro_rules! reasons {
     };
 }
 
+#[macro_export]
+macro_rules! forecast_reason {
+    ("CONTRAINDICATION") => {
+        $crate::models::ForecastReason::Contraindication
+    };
+    ("COMPLETE") => {
+        $crate::models::ForecastReason::Complete
+    };
+    ("COMPLETE_HIGH_RISK") => {
+        $crate::models::ForecastReason::CompleteHighRisk
+    };
+    ("CONDITIONAL") => {
+        $crate::models::ForecastReason::Conditional
+    };
+    ("NOT_COMPLETE") => {
+        $crate::models::ForecastReason::NotComplete
+    };
+    ("HIGH_RISK") => {
+        $crate::models::ForecastReason::HighRisk
+    };
+    ("NOT_SUPPORTED") => {
+        $crate::models::ForecastReason::NotSupported
+    };
+    ("DUE_NOW") => {
+        $crate::models::ForecastReason::DueNow
+    };
+    ("DUE_IN_FUTURE") => {
+        $crate::models::ForecastReason::DueInFuture
+    };
+    ("BOOSTER_DOSE") => {
+        $crate::models::ForecastReason::BoosterDose
+    };
+    ("SUPPLEMENTAL_TEXT") => {
+        $crate::models::ForecastReason::SupplementalText
+    };
+    ("ADMINISTER_TDAP_OR_TD") => {
+        $crate::models::ForecastReason::AdministerTdapOrTd
+    };
+    ("ADMINISTER_PCV20_OR_PCV21") => {
+        $crate::models::ForecastReason::AdministerPcv20OrPcv21
+    };
+    ("ADMINISTER_PCV15_PCV20_OR_PCV21") => {
+        $crate::models::ForecastReason::AdministerPcv15Pcv20OrPcv21
+    };
+    ("ADMINISTER_COVID19_BIVALENT_VACCINE") => {
+        $crate::models::ForecastReason::AdministerCovid19BivalentVaccine
+    };
+    ("OTHER_VACCINE_PRODUCT_POSSIBLE") => {
+        $crate::models::ForecastReason::OtherVaccineProductPossible
+    };
+    ("TOO_OLD") => {
+        $crate::models::ForecastReason::TooOld
+    };
+    ("TOO_OLD_TO_INITIATE") => {
+        $crate::models::ForecastReason::TooOldToInitiate
+    };
+    ("MAX_AGE_EXCEEDED") => {
+        $crate::models::ForecastReason::MaxAgeExceeded
+    };
+    ("CHOLERA_NOT_ROUTINE_SEE_ACIP") => {
+        $crate::models::ForecastReason::CholeraNotRoutineSeeAcip
+    };
+    ("VAC_GROUP_NO_LONGER_REC") => {
+        $crate::models::ForecastReason::VacGroupNoLongerRec
+    };
+    ("JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP") => {
+        $crate::models::ForecastReason::JeNotRoutineAccel18To65SeeAcip
+    };
+    ("BELOW_MINIMUM_AGE_HIGH_RISK_SERIES") => {
+        $crate::models::ForecastReason::BelowMinimumAgeHighRiskSeries
+    };
+    ("CLINICAL_PATIENT_DISCRETION") => {
+        $crate::models::ForecastReason::ClinicalPatientDiscretion
+    };
+    ("TYPHOID_NOT_ROUTINE_SEE_ACIP") => {
+        $crate::models::ForecastReason::TyphoidNotRoutineSeeAcip
+    };
+    ("BELOW_REC_AGE_SERIES") => {
+        $crate::models::ForecastReason::BelowRecAgeSeries
+    };
+    ("YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP") => {
+        $crate::models::ForecastReason::YellowFeverLiveMinIntervalsSeeAcip
+    };
+    ($unknown:literal) => {
+        compile_error!(concat!("unknown forecast reason: ", $unknown))
+    };
+}
+
+#[macro_export]
+macro_rules! forecast_reasons {
+    [] => {
+        $crate::date_utils::SmallVec::new()
+    };
+    [$($reason:tt),* $(,)?] => {
+        smallvec::smallvec![
+            $($crate::forecast_reason!($reason)),*
+        ]
+    };
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DurationUnit {
     Days,

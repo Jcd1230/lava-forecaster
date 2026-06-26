@@ -101,7 +101,7 @@ pub fn rotavirus_custom_forecast_hook(
 
         if !actually_complete && eval_date > date_8m {
             forecast.status = SeriesStatus::NotRecommended;
-            forecast.reasons = crate::reasons!["TOO_OLD"];
+            forecast.reasons = crate::forecast_reasons!["TOO_OLD"];
             forecast.status = forecast.status.with_earliest_date(None);
             forecast.status = forecast.status.with_recommended_date(None);
             forecast.status = forecast.status.with_overdue_date(None);
@@ -109,7 +109,7 @@ pub fn rotavirus_custom_forecast_hook(
             return;
         }
 
-        forecast.reasons = crate::reasons!["COMPLETE"];
+        forecast.reasons = crate::forecast_reasons!["COMPLETE"];
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);
         forecast.status = forecast.status.with_overdue_date(None);
@@ -129,7 +129,7 @@ pub fn rotavirus_custom_forecast_hook(
 
     if is_currently_gt_8m || is_rec_gt_8m {
         forecast.status = SeriesStatus::NotRecommended;
-        forecast.reasons = crate::reasons!["TOO_OLD"];
+        forecast.reasons = crate::forecast_reasons!["TOO_OLD"];
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);
         forecast.status = forecast.status.with_overdue_date(None);
@@ -142,7 +142,7 @@ pub fn rotavirus_custom_forecast_hook(
     let date_105d = tp_105d.add_to(birth);
     if eval_date >= date_105d && valid_doses.is_empty() {
         forecast.status = SeriesStatus::NotRecommended;
-        forecast.reasons = crate::reasons!["TOO_OLD_TO_INITIATE"];
+        forecast.reasons = crate::forecast_reasons!["TOO_OLD_TO_INITIATE"];
         forecast.status = forecast.status.with_earliest_date(None);
         forecast.status = forecast.status.with_recommended_date(None);
         forecast.status = forecast.status.with_overdue_date(None);
