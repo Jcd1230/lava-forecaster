@@ -46,3 +46,4 @@ cargo_check_warnings*.txt
 # Local package
 vendor
 dist
+/.workspace-agent-mcp/
