@@ -86,6 +86,20 @@ fn is_aug2025_series_cvx(series_name: &str, cvx: Cvx) -> bool {
     }
 }
 
+fn is_aug2025_current_formulation(cvx: Cvx) -> bool {
+    matches!(
+        cvx.0,
+        cvx!("213")
+            | cvx!("308")
+            | cvx!("309")
+            | cvx!("310")
+            | cvx!("311")
+            | cvx!("312")
+            | cvx!("313")
+            | cvx!("334")
+    )
+}
+
 fn age_ge(birth_date: NaiveDate, date_to_check: NaiveDate, age: TimePeriod) -> bool {
     compare_elapsed(birth_date, date_to_check, &age) != std::cmp::Ordering::Less
 }
@@ -694,6 +708,14 @@ pub fn covid19_custom_forecast_hook(
     let last_invalid_current_season_is_non_series = last_invalid_current_season_eval
         .map(is_non_series_current_invalid)
         .unwrap_or(false);
+    let last_invalid_current_season_is_old_product = last_invalid_current_season_eval
+        .and_then(|eval| {
+            history
+                .iter()
+                .find(|dose| dose.date == eval.dose_date && dose.cvx == eval.cvx)
+        })
+        .map(|dose| !is_aug2025_current_formulation(dose.cvx))
+        .unwrap_or(false);
     let current_season_non_series_invalid_count = evaluations
         .iter()
         .filter(|e| {
@@ -884,6 +906,7 @@ pub fn covid19_custom_forecast_hook(
 
             if let Some(invalid_eval) = last_invalid_current_season_eval {
                 let due = if last_invalid_current_season_is_non_series
+                    && last_invalid_current_season_is_old_product
                     && current_season_non_series_invalid_count >= 2
                 {
                     (invalid_eval.dose_date + chrono::Duration::days(56))
@@ -959,6 +982,7 @@ pub fn covid19_custom_forecast_hook(
 
             if let Some(invalid_eval) = last_invalid_current_season_eval {
                 let due = if last_invalid_current_season_is_non_series
+                    && last_invalid_current_season_is_old_product
                     && current_season_non_series_invalid_count >= 2
                 {
                     (invalid_eval.dose_date + chrono::Duration::days(56))
