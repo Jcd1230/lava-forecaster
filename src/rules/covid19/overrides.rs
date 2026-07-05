@@ -66,6 +66,26 @@ fn is_supported_covid_cvx(cvx: Cvx) -> bool {
     )
 }
 
+fn is_aug2025_series_cvx(series_name: &str, cvx: Cvx) -> bool {
+    match series_name {
+        "COVID_19_AUG_2025_GTE_65_SERIES" => matches!(
+            cvx.0,
+            cvx!("213") | cvx!("309") | cvx!("312") | cvx!("313") | cvx!("334")
+        ),
+        "COVID_19_AUG_2025_LT_2_SERIES" | "COVID_19_AUG_2025_2_Y_TO_64_Y_SERIES" => matches!(
+            cvx.0,
+            cvx!("213")
+                | cvx!("309")
+                | cvx!("310")
+                | cvx!("311")
+                | cvx!("312")
+                | cvx!("313")
+                | cvx!("334")
+        ),
+        _ => true,
+    }
+}
+
 fn age_ge(birth_date: NaiveDate, date_to_check: NaiveDate, age: TimePeriod) -> bool {
     compare_elapsed(birth_date, date_to_check, &age) != std::cmp::Ordering::Less
 }
@@ -604,6 +624,26 @@ pub fn covid19_custom_forecast_hook(
     let active_series_name = &forecast.series_name;
     let evaluations = evaluate_doses_seasonally(patient, history, active_series_name);
 
+    if eval_date < season_start() {
+        let active_season_start = get_season_start_date(get_covid_season(eval_date));
+        forecast.mark_not_complete(crate::forecast_reasons!["NOT_COMPLETE"]);
+        forecast.status = forecast
+            .status
+            .with_earliest_date(Some(active_season_start));
+        forecast.status = forecast
+            .status
+            .with_recommended_date(Some(active_season_start));
+        forecast.status = forecast
+            .status
+            .with_overdue_date(if eval_date >= active_season_start {
+                Some(active_season_start)
+            } else {
+                None
+            });
+        forecast.status = forecast.status.with_latest_date(None);
+        return;
+    }
+
     let current_season_valid_doses: Vec<&DoseEvaluation> = evaluations
         .iter()
         .filter(|e| {
@@ -644,6 +684,24 @@ pub fn covid19_custom_forecast_hook(
                 && get_covid_season(e.dose_date) == "COVID_19_AUG_2025_SEASON"
         })
         .max_by_key(|e| e.dose_date);
+    let is_non_series_current_invalid = |eval: &DoseEvaluation| {
+        history
+            .iter()
+            .find(|dose| dose.date == eval.dose_date && dose.cvx == eval.cvx)
+            .map(|dose| !is_aug2025_series_cvx(active_series_name, dose.cvx))
+            .unwrap_or(false)
+    };
+    let last_invalid_current_season_is_non_series = last_invalid_current_season_eval
+        .map(is_non_series_current_invalid)
+        .unwrap_or(false);
+    let current_season_non_series_invalid_count = evaluations
+        .iter()
+        .filter(|e| {
+            e.status == DoseStatus::Invalid
+                && get_covid_season(e.dose_date) == "COVID_19_AUG_2025_SEASON"
+                && is_non_series_current_invalid(e)
+        })
+        .count();
 
     let age_6m = crate::time_period!("6m").add_to(patient.birth_date);
     let age_2y = add_years_unchecked(patient.birth_date, 2);
@@ -821,7 +879,18 @@ pub fn covid19_custom_forecast_hook(
             }
 
             if let Some(invalid_eval) = last_invalid_current_season_eval {
-                let due = invalid_eval.dose_date.max(season_start()).max(age_2y);
+                let due = if last_invalid_current_season_is_non_series
+                    && current_season_non_series_invalid_count >= 2
+                {
+                    let calculated = invalid_eval.dose_date + chrono::Duration::days(56);
+                    if calculated > eval_date {
+                        calculated.max(season_start()).max(age_2y)
+                    } else {
+                        invalid_eval.dose_date.max(season_start()).max(age_2y)
+                    }
+                } else {
+                    invalid_eval.dose_date.max(season_start()).max(age_2y)
+                };
                 forecast.status = forecast.status.with_earliest_date(Some(due));
                 forecast.status = forecast.status.with_recommended_date(Some(due));
             } else if let Some(last_dose) = last_current_season_dose {
@@ -888,7 +957,18 @@ pub fn covid19_custom_forecast_hook(
             forecast.mark_not_complete(crate::forecast_reasons!["NOT_COMPLETE"]);
 
             if let Some(invalid_eval) = last_invalid_current_season_eval {
-                let due = invalid_eval.dose_date.max(season_start()).max(age_65y);
+                let due = if last_invalid_current_season_is_non_series
+                    && current_season_non_series_invalid_count >= 2
+                {
+                    let calculated = invalid_eval.dose_date + chrono::Duration::days(56);
+                    if calculated > eval_date {
+                        calculated.max(season_start()).max(age_65y)
+                    } else {
+                        invalid_eval.dose_date.max(season_start()).max(age_65y)
+                    }
+                } else {
+                    invalid_eval.dose_date.max(season_start()).max(age_65y)
+                };
                 forecast.status = forecast.status.with_earliest_date(Some(due));
                 forecast.status = forecast.status.with_recommended_date(Some(due));
             } else if let Some(last_dose) = last_current_season_dose {
