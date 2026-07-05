@@ -795,6 +795,10 @@ pub fn covid19_custom_forecast_hook(
                         (invalid_eval.dose_date + chrono::Duration::days(28))
                             .max(season_start())
                             .max(age_6m)
+                    } else if last_invalid_current_season_is_non_series {
+                        (invalid_eval.dose_date + chrono::Duration::days(28))
+                            .max(season_start())
+                            .max(age_6m)
                     } else {
                         invalid_eval.dose_date.max(season_start()).max(age_6m)
                     };
@@ -882,12 +886,9 @@ pub fn covid19_custom_forecast_hook(
                 let due = if last_invalid_current_season_is_non_series
                     && current_season_non_series_invalid_count >= 2
                 {
-                    let calculated = invalid_eval.dose_date + chrono::Duration::days(56);
-                    if calculated > eval_date {
-                        calculated.max(season_start()).max(age_2y)
-                    } else {
-                        invalid_eval.dose_date.max(season_start()).max(age_2y)
-                    }
+                    (invalid_eval.dose_date + chrono::Duration::days(56))
+                        .max(season_start())
+                        .max(age_2y)
                 } else {
                     invalid_eval.dose_date.max(season_start()).max(age_2y)
                 };
@@ -960,12 +961,9 @@ pub fn covid19_custom_forecast_hook(
                 let due = if last_invalid_current_season_is_non_series
                     && current_season_non_series_invalid_count >= 2
                 {
-                    let calculated = invalid_eval.dose_date + chrono::Duration::days(56);
-                    if calculated > eval_date {
-                        calculated.max(season_start()).max(age_65y)
-                    } else {
-                        invalid_eval.dose_date.max(season_start()).max(age_65y)
-                    }
+                    (invalid_eval.dose_date + chrono::Duration::days(56))
+                        .max(season_start())
+                        .max(age_65y)
                 } else {
                     invalid_eval.dose_date.max(season_start()).max(age_65y)
                 };
