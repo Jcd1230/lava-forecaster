@@ -256,7 +256,9 @@ pub fn evaluate_doses_seasonally(
                 auth_ok = false;
             }
             if dose.date >= NaiveDate::from_ymd_opt(2024, 8, 22).unwrap()
-                && (dose.cvx.0 == cvx!("308")
+                && ((dose.cvx.0 == cvx!("308")
+                    && (dose.date >= season_start()
+                        || age_ge(patient.birth_date, dose.date, crate::time_period!("5y"))))
                     || (matches!(dose.cvx.0, cvx!("310") | cvx!("311"))
                         && age_ge(patient.birth_date, dose.date, crate::time_period!("12y"))))
             {
