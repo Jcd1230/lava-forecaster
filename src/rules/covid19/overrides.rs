@@ -123,7 +123,10 @@ fn retry_due_from_last_invalid_attempt(
 }
 
 fn is_legacy_pediatric_product(cvx: Cvx) -> bool {
-    matches!(cvx.0, cvx!("219") | cvx!("228") | cvx!("302"))
+    matches!(
+        cvx.0,
+        cvx!("218") | cvx!("219") | cvx!("228") | cvx!("301") | cvx!("302")
+    )
 }
 
 fn dose_for_eval<'a>(history: &'a [Dose], eval: &DoseEvaluation) -> Option<&'a Dose> {
@@ -964,11 +967,17 @@ pub fn covid19_custom_forecast_hook(
             if let Some(invalid_eval) = last_invalid_current_season_eval {
                 let due = if last_invalid_current_season_is_non_series
                     && last_invalid_current_season_is_old_product
-                    && current_season_non_series_invalid_count >= 2
                 {
-                    invalid_old_product_retry_due(history, invalid_eval, 56)
-                        .max(season_start())
-                        .max(age_2y)
+                    let last_is_legacy_pediatric = dose_for_eval(history, invalid_eval)
+                        .map(|dose| is_legacy_pediatric_product(dose.cvx))
+                        .unwrap_or(false);
+                    if current_season_non_series_invalid_count >= 2 || !last_is_legacy_pediatric {
+                        invalid_old_product_retry_due(history, invalid_eval, 56)
+                    } else {
+                        invalid_eval.dose_date
+                    }
+                    .max(season_start())
+                    .max(age_2y)
                 } else {
                     invalid_eval.dose_date.max(season_start()).max(age_2y)
                 };
@@ -1040,11 +1049,17 @@ pub fn covid19_custom_forecast_hook(
             if let Some(invalid_eval) = last_invalid_current_season_eval {
                 let due = if last_invalid_current_season_is_non_series
                     && last_invalid_current_season_is_old_product
-                    && current_season_non_series_invalid_count >= 2
                 {
-                    invalid_old_product_retry_due(history, invalid_eval, 56)
-                        .max(season_start())
-                        .max(age_65y)
+                    let last_is_legacy_pediatric = dose_for_eval(history, invalid_eval)
+                        .map(|dose| is_legacy_pediatric_product(dose.cvx))
+                        .unwrap_or(false);
+                    if current_season_non_series_invalid_count >= 2 || !last_is_legacy_pediatric {
+                        invalid_old_product_retry_due(history, invalid_eval, 56)
+                    } else {
+                        invalid_eval.dose_date
+                    }
+                    .max(season_start())
+                    .max(age_65y)
                 } else {
                     invalid_eval.dose_date.max(season_start()).max(age_65y)
                 };
