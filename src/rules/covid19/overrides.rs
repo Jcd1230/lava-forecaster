@@ -100,6 +100,53 @@ fn is_aug2025_current_formulation(cvx: Cvx) -> bool {
     )
 }
 
+fn retry_due_from_last_invalid_attempt(
+    history: &[Dose],
+    invalid_eval: &DoseEvaluation,
+    interval_days: i64,
+) -> NaiveDate {
+    let interval = chrono::Duration::days(interval_days);
+    let prior_anchor = history
+        .iter()
+        .filter(|dose| {
+            is_supported_covid_cvx(dose.cvx)
+                && get_covid_season(dose.date) == "COVID_19_AUG_2025_SEASON"
+                && dose.date < invalid_eval.dose_date
+        })
+        .map(|dose| dose.date)
+        .max();
+
+    match prior_anchor {
+        Some(prior_date) => invalid_eval.dose_date.max(prior_date + interval),
+        None => invalid_eval.dose_date + interval,
+    }
+}
+
+fn is_legacy_pediatric_product(cvx: Cvx) -> bool {
+    matches!(cvx.0, cvx!("219") | cvx!("228") | cvx!("302"))
+}
+
+fn dose_for_eval<'a>(history: &'a [Dose], eval: &DoseEvaluation) -> Option<&'a Dose> {
+    history
+        .iter()
+        .find(|dose| dose.date == eval.dose_date && dose.cvx == eval.cvx)
+}
+
+fn invalid_old_product_retry_due(
+    history: &[Dose],
+    invalid_eval: &DoseEvaluation,
+    interval_days: i64,
+) -> NaiveDate {
+    if dose_for_eval(history, invalid_eval)
+        .map(|dose| is_legacy_pediatric_product(dose.cvx))
+        .unwrap_or(false)
+    {
+        retry_due_from_last_invalid_attempt(history, invalid_eval, interval_days)
+    } else {
+        invalid_eval.dose_date + chrono::Duration::days(interval_days)
+    }
+}
+
 fn age_ge(birth_date: NaiveDate, date_to_check: NaiveDate, age: TimePeriod) -> bool {
     compare_elapsed(birth_date, date_to_check, &age) != std::cmp::Ordering::Less
 }
@@ -911,7 +958,7 @@ pub fn covid19_custom_forecast_hook(
                     && last_invalid_current_season_is_old_product
                     && current_season_non_series_invalid_count >= 2
                 {
-                    (invalid_eval.dose_date + chrono::Duration::days(56))
+                    invalid_old_product_retry_due(history, invalid_eval, 56)
                         .max(season_start())
                         .max(age_2y)
                 } else {
@@ -987,7 +1034,7 @@ pub fn covid19_custom_forecast_hook(
                     && last_invalid_current_season_is_old_product
                     && current_season_non_series_invalid_count >= 2
                 {
-                    (invalid_eval.dose_date + chrono::Duration::days(56))
+                    invalid_old_product_retry_due(history, invalid_eval, 56)
                         .max(season_start())
                         .max(age_65y)
                 } else {
