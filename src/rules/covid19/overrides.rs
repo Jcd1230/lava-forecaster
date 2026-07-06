@@ -423,9 +423,17 @@ pub fn evaluate_doses_seasonally(
                 let prior_valid_doses: Vec<&DoseEvaluation> = evaluations
                     .iter()
                     .filter(|e: &&DoseEvaluation| {
-                        e.status != DoseStatus::Invalid
-                            || (!e.reasons.contains(&EvaluationReason::PriorToDOB)
-                                && !e.reasons.contains(&EvaluationReason::DuplicateShotSameDay))
+                        if e.status != DoseStatus::Invalid {
+                            return true;
+                        }
+                        if e.reasons.contains(&EvaluationReason::PriorToDOB)
+                            || e.reasons.contains(&EvaluationReason::DuplicateShotSameDay)
+                        {
+                            return false;
+                        }
+                        !(active_series_name != "COVID_19_AUG_2025_LT_2_SERIES"
+                            && get_covid_season(e.dose_date) == "COVID_19_AUG_2025_SEASON"
+                            && !is_aug2025_series_cvx(active_series_name, e.cvx))
                     })
                     .collect();
 
