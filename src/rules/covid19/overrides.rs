@@ -635,11 +635,15 @@ pub fn evaluate_doses_seasonally(
             3
         };
         if status == DoseStatus::Valid && dose_number > cap {
-            status = DoseStatus::Accepted;
-            reasons.clear();
-            if let Some(season_valid_doses) = valid_doses_by_season.get_mut(season_key) {
-                if season_valid_doses.last() == Some(&dose.date) {
-                    season_valid_doses.pop();
+            if dose.cvx.0 == cvx!("308") && season == "COVID_19_AUG_2024_SEASON" {
+                dose_number = 1;
+            } else {
+                status = DoseStatus::Accepted;
+                reasons.clear();
+                if let Some(season_valid_doses) = valid_doses_by_season.get_mut(season_key) {
+                    if season_valid_doses.last() == Some(&dose.date) {
+                        season_valid_doses.pop();
+                    }
                 }
             }
         } else if status == DoseStatus::Invalid
