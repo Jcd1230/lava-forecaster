@@ -1,7 +1,11 @@
 use crate::rules::VaccineGroupDefinition;
 use crate::schedule::CompiledSeries;
 
+pub mod policy;
+pub mod products;
 pub mod schedules;
+pub mod seasons;
+pub mod series;
 pub mod overrides;
 
 pub fn definition() -> VaccineGroupDefinition {
