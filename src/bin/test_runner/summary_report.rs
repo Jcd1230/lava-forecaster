@@ -6,6 +6,9 @@ use chrono::NaiveDate;
 use lava_forecaster::models::{
     DoseEvaluation, DoseStatus, ExpectedResults, SeriesForecast, UnifiedTestCase,
 };
+use lava_forecaster::rules::covid19::{
+    facts::normalize_covid_history, selection::select_aug2025_policy,
+};
 use serde::{Deserialize, Serialize};
 
 use crate::eval_match::pair_evaluations_by_occurrence;
@@ -66,6 +69,8 @@ pub struct CaseSummaryReport {
     pub has_same_day_doses: bool,
     pub evaluation_mismatches: Vec<EvaluationMismatchReport>,
     pub forecast_mismatches: Vec<ForecastMismatchReport>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub covid19_semantics: Option<Covid19SemanticReport>,
     pub errors: Vec<String>,
 }
 
@@ -86,6 +91,35 @@ pub struct ForecastMismatchReport {
     pub rust: Option<String>,
     pub expected: Option<String>,
     pub delta_days: Option<i64>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Covid19SemanticReport {
+    pub selected_policy: String,
+    pub selected_policy_ice_name: String,
+    pub policy_season: String,
+    pub policy_age_band: String,
+    pub policy_interval_anchor: String,
+    pub policy_forecast_anchor: String,
+    pub current_season_dose_count: usize,
+    pub supported_dose_count: usize,
+    pub dose_facts: Vec<Covid19DoseFactReport>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Covid19DoseFactReport {
+    pub date: NaiveDate,
+    pub cvx: u16,
+    pub season: String,
+    pub current_season: bool,
+    pub product_family: String,
+    pub relationship_to_selected_series: String,
+    pub supported_by_java_covid: bool,
+    pub age_at_dose_under_2_years: bool,
+    pub age_at_dose_under_5_years: bool,
+    pub age_at_dose_at_least_65_years: bool,
+    pub rust_status: Option<String>,
+    pub rust_target_dose: Option<usize>,
 }
 
 pub fn build_case_summary(
@@ -130,8 +164,66 @@ pub fn build_case_summary(
         has_same_day_doses,
         evaluation_mismatches,
         forecast_mismatches,
+        covid19_semantics: build_covid19_semantics(tc, rust_evals),
         errors: errors.to_vec(),
     }
+}
+
+fn build_covid19_semantics(
+    tc: &UnifiedTestCase,
+    rust_evals: &[DoseEvaluation],
+) -> Option<Covid19SemanticReport> {
+    if !tc.group.eq_ignore_ascii_case("COVID19") {
+        return None;
+    }
+
+    let facts = normalize_covid_history(&tc.patient, &tc.history);
+    let selected_policy = select_aug2025_policy(&tc.patient, tc.execution_date, &facts);
+    let current_season_dose_count = facts
+        .iter()
+        .filter(|fact| fact.season == selected_policy.season)
+        .count();
+    let supported_dose_count = facts
+        .iter()
+        .filter(|fact| fact.supported_by_java_covid)
+        .count();
+    let dose_facts = facts
+        .iter()
+        .map(|fact| {
+            let evaluation = rust_evals
+                .iter()
+                .find(|eval| eval.dose_date == fact.raw.date && eval.cvx == fact.raw.cvx);
+            Covid19DoseFactReport {
+                date: fact.raw.date,
+                cvx: fact.raw.cvx.0,
+                season: fact.season.ice_key().to_string(),
+                current_season: fact.season == selected_policy.season,
+                product_family: format!("{:?}", fact.product.family),
+                relationship_to_selected_series: format!(
+                    "{:?}",
+                    fact.relationship_to(selected_policy)
+                ),
+                supported_by_java_covid: fact.supported_by_java_covid,
+                age_at_dose_under_2_years: fact.age_at_dose.under_2_years,
+                age_at_dose_under_5_years: fact.age_at_dose.under_5_years,
+                age_at_dose_at_least_65_years: fact.age_at_dose.at_least_65_years,
+                rust_status: evaluation.map(|eval| format!("{:?}", eval.status)),
+                rust_target_dose: evaluation.and_then(|eval| eval.dose_number),
+            }
+        })
+        .collect();
+
+    Some(Covid19SemanticReport {
+        selected_policy: format!("{:?}", selected_policy.id),
+        selected_policy_ice_name: selected_policy.ice_name.to_string(),
+        policy_season: selected_policy.season.ice_key().to_string(),
+        policy_age_band: format!("{:?}", selected_policy.age_band),
+        policy_interval_anchor: format!("{:?}", selected_policy.intervals.anchor),
+        policy_forecast_anchor: format!("{:?}", selected_policy.forecast.anchor),
+        current_season_dose_count,
+        supported_dose_count,
+        dose_facts,
+    })
 }
 
 pub fn write_run_summary(path: &Path, report: &RunSummaryReport) -> Result<(), String> {
@@ -358,6 +450,12 @@ fn print_summary_report(report: &RunSummaryReport) {
     let mut cvx_transitions = BTreeMap::new();
     let mut forecast_fields = BTreeMap::new();
     let mut forecast_deltas = BTreeMap::new();
+    let mut covid_selected_policies = BTreeMap::new();
+    let mut covid_policy_case_shapes = BTreeMap::new();
+    let mut covid_forecast_anchors = BTreeMap::new();
+    let mut covid_dose_relationships = BTreeMap::new();
+    let mut covid_eval_transitions_by_policy = BTreeMap::new();
+    let mut covid_forecast_deltas_by_policy = BTreeMap::new();
     let mut same_day_failed_cases = 0usize;
     let mut same_day_eval_mismatches = 0usize;
 
@@ -377,6 +475,33 @@ fn print_summary_report(report: &RunSummaryReport) {
         };
         *case_shapes.entry(shape.to_string()).or_insert(0usize) += 1;
 
+        if let Some(covid) = &case.covid19_semantics {
+            *covid_selected_policies
+                .entry(covid.selected_policy.clone())
+                .or_insert(0usize) += 1;
+            *covid_policy_case_shapes
+                .entry(format!("{} / {}", covid.selected_policy, shape))
+                .or_insert(0usize) += 1;
+            *covid_forecast_anchors
+                .entry(format!(
+                    "{} / {}",
+                    covid.selected_policy, covid.policy_forecast_anchor
+                ))
+                .or_insert(0usize) += 1;
+            for fact in &covid.dose_facts {
+                *covid_dose_relationships
+                    .entry(format!(
+                        "{} / {} / CVX {} / {} / {}",
+                        covid.selected_policy,
+                        fact.relationship_to_selected_series,
+                        fact.cvx,
+                        fact.product_family,
+                        fact.season
+                    ))
+                    .or_insert(0usize) += 1;
+            }
+        }
+
         for mismatch in &case.evaluation_mismatches {
             if mismatch.same_day_count > 1 {
                 same_day_eval_mismatches += 1;
@@ -391,6 +516,11 @@ fn print_summary_report(report: &RunSummaryReport) {
                             .entry(format!("CVX {} {}", cvx, transition))
                             .or_insert(0usize) += 1;
                     }
+                    if let Some(covid) = &case.covid19_semantics {
+                        *covid_eval_transitions_by_policy
+                            .entry(format!("{} / {}", covid.selected_policy, transition))
+                            .or_insert(0usize) += 1;
+                    }
                 }
             }
         }
@@ -400,7 +530,18 @@ fn print_summary_report(report: &RunSummaryReport) {
                 .entry(mismatch.field.clone())
                 .or_insert(0usize) += 1;
             if let Some(delta) = mismatch.delta_days {
-                *forecast_deltas.entry(format_delta(delta)).or_insert(0usize) += 1;
+                let formatted_delta = format_delta(delta);
+                *forecast_deltas
+                    .entry(formatted_delta.clone())
+                    .or_insert(0usize) += 1;
+                if let Some(covid) = &case.covid19_semantics {
+                    *covid_forecast_deltas_by_policy
+                        .entry(format!(
+                            "{} / {} / {}",
+                            covid.selected_policy, mismatch.field, formatted_delta
+                        ))
+                        .or_insert(0usize) += 1;
+                }
             }
         }
     }
@@ -411,6 +552,21 @@ fn print_summary_report(report: &RunSummaryReport) {
     print_count_section("CVX status transitions", &cvx_transitions);
     print_count_section("Forecast fields", &forecast_fields);
     print_count_section("Forecast date deltas", &forecast_deltas);
+    print_count_section("COVID selected policies", &covid_selected_policies);
+    print_count_section("COVID policy case shapes", &covid_policy_case_shapes);
+    print_count_section("COVID forecast anchors", &covid_forecast_anchors);
+    print_count_section(
+        "COVID dose relationship occurrences",
+        &covid_dose_relationships,
+    );
+    print_count_section(
+        "COVID evaluation transitions by policy",
+        &covid_eval_transitions_by_policy,
+    );
+    print_count_section(
+        "COVID forecast deltas by policy",
+        &covid_forecast_deltas_by_policy,
+    );
 
     println!();
     println!("Same-day:");
