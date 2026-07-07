@@ -6,9 +6,7 @@ use chrono::NaiveDate;
 use lava_forecaster::models::{
     DoseEvaluation, DoseStatus, ExpectedResults, SeriesForecast, UnifiedTestCase,
 };
-use lava_forecaster::rules::covid19::{
-    facts::normalize_covid_history, selection::select_aug2025_policy,
-};
+use lava_forecaster::rules::covid19::state::CovidEvaluatedState;
 use serde::{Deserialize, Serialize};
 
 use crate::eval_match::pair_evaluations_by_occurrence;
@@ -177,22 +175,18 @@ fn build_covid19_semantics(
         return None;
     }
 
-    let facts = normalize_covid_history(&tc.patient, &tc.history);
-    let selected_policy = select_aug2025_policy(&tc.patient, tc.execution_date, &facts);
-    let current_season_dose_count = facts
-        .iter()
-        .filter(|fact| fact.season == selected_policy.season)
-        .count();
-    let supported_dose_count = facts
-        .iter()
-        .filter(|fact| fact.supported_by_java_covid)
-        .count();
-    let dose_facts = facts
+    let state = CovidEvaluatedState::from_aug2025_policy(
+        &tc.patient,
+        &tc.history,
+        tc.execution_date,
+        rust_evals,
+    );
+    let selected_policy = state.selected_series;
+    let dose_facts = state
+        .dose_facts
         .iter()
         .map(|fact| {
-            let evaluation = rust_evals
-                .iter()
-                .find(|eval| eval.dose_date == fact.raw.date && eval.cvx == fact.raw.cvx);
+            let evaluation = state.evaluation_for_fact(fact);
             Covid19DoseFactReport {
                 date: fact.raw.date,
                 cvx: fact.raw.cvx.0,
@@ -201,7 +195,7 @@ fn build_covid19_semantics(
                 product_family: format!("{:?}", fact.product.family),
                 relationship_to_selected_series: format!(
                     "{:?}",
-                    fact.relationship_to(selected_policy)
+                    state.relationship_for_fact(*fact)
                 ),
                 supported_by_java_covid: fact.supported_by_java_covid,
                 age_at_dose_under_2_years: fact.age_at_dose.under_2_years,
@@ -220,8 +214,8 @@ fn build_covid19_semantics(
         policy_age_band: format!("{:?}", selected_policy.age_band),
         policy_interval_anchor: format!("{:?}", selected_policy.intervals.anchor),
         policy_forecast_anchor: format!("{:?}", selected_policy.forecast.anchor),
-        current_season_dose_count,
-        supported_dose_count,
+        current_season_dose_count: state.current_season_dose_count(),
+        supported_dose_count: state.supported_dose_count(),
         dose_facts,
     })
 }

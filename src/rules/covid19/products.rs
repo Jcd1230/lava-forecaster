@@ -56,8 +56,14 @@ impl CovidProductInfo {
 
 pub fn covid_product_info(cvx_code: Cvx) -> CovidProductInfo {
     match cvx_code.0 {
-        cvx!("207") | cvx!("208") | cvx!("217") | cvx!("218") | cvx!("219")
-        | cvx!("300") | cvx!("301") | cvx!("302") => CovidProductInfo::supported(
+        cvx!("207")
+        | cvx!("208")
+        | cvx!("217")
+        | cvx!("218")
+        | cvx!("219")
+        | cvx!("300")
+        | cvx!("301")
+        | cvx!("302") => CovidProductInfo::supported(
             CovidProductFamily::PfizerPediatric,
             CovidFormulationEra::Original,
         ),
@@ -81,21 +87,19 @@ pub fn covid_product_info(cvx_code: Cvx) -> CovidProductInfo {
             CovidProductFamily::ModernaAdult,
             CovidFormulationEra::Seasonal2025,
         ),
-        cvx!("211") => CovidProductInfo::supported(
-            CovidProductFamily::Novavax,
-            CovidFormulationEra::Original,
-        ),
-        cvx!("212") => CovidProductInfo::supported(
-            CovidProductFamily::Janssen,
-            CovidFormulationEra::Original,
-        ),
-        cvx!("213") => CovidProductInfo::supported(
-            CovidProductFamily::Unspecified,
+        cvx!("211") => {
+            CovidProductInfo::supported(CovidProductFamily::Novavax, CovidFormulationEra::Original)
+        }
+        cvx!("212") => {
+            CovidProductInfo::supported(CovidProductFamily::Janssen, CovidFormulationEra::Original)
+        }
+        cvx!("213") => {
+            CovidProductInfo::supported(CovidProductFamily::Unspecified, CovidFormulationEra::Other)
+        }
+        cvx!("221") | cvx!("228") | cvx!("502") | cvx!("519") => CovidProductInfo::supported(
+            CovidProductFamily::OtherSupported,
             CovidFormulationEra::Other,
         ),
-        cvx!("221") | cvx!("228") | cvx!("502") | cvx!("519") => {
-            CovidProductInfo::supported(CovidProductFamily::OtherSupported, CovidFormulationEra::Other)
-        }
         _ => CovidProductInfo::unsupported(),
     }
 }

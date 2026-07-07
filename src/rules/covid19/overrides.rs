@@ -1,5 +1,5 @@
 use crate::date_utils::{
-    add_months_unchecked, add_years_unchecked, compare_elapsed, SmallVec, TimePeriod,
+    SmallVec, TimePeriod, add_months_unchecked, add_years_unchecked, compare_elapsed,
 };
 use crate::engine::CandidateForecastsExt;
 use crate::engine::EvaluationContext;
@@ -201,21 +201,13 @@ fn get_min_interval_days(
 
     if season == "COVID_19_AUG_2025_SEASON" {
         if active_series_name == "COVID_19_AUG_2025_LT_2_SERIES" {
-            if is_same_brand_or_unspec {
-                17
-            } else {
-                24
-            }
+            if is_same_brand_or_unspec { 17 } else { 24 }
         } else {
             52
         }
     } else if season == "COVID_19_DEC_2020_SEASON" {
         if season_valid_doses_len == 1 {
-            if is_same_brand_or_unspec {
-                17
-            } else {
-                24
-            }
+            if is_same_brand_or_unspec { 17 } else { 24 }
         } else {
             52
         }
@@ -228,11 +220,7 @@ fn get_min_interval_days(
         );
         if season_valid_doses_len == 1 {
             if age_at_season_start == std::cmp::Ordering::Less {
-                if is_same_brand_or_unspec {
-                    17
-                } else {
-                    24
-                }
+                if is_same_brand_or_unspec { 17 } else { 24 }
             } else {
                 let is_novavax_or_unspec = |cvx: Cvx| is_novavax(cvx) || is_unspecified(cvx);
                 if is_novavax_or_unspec(prior_dose.cvx)

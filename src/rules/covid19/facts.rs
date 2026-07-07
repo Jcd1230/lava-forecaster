@@ -1,11 +1,10 @@
-
 #![allow(dead_code)]
 
 use crate::date_utils::compare_elapsed;
 use crate::models::{Dose, Patient};
 use crate::rules::covid19::policy::{CovidSeriesPolicy, CvxRelationship};
 use crate::rules::covid19::products::{
-    covid_product_info, is_aug2025_current_formulation, CovidProductInfo,
+    CovidProductInfo, covid_product_info, is_aug2025_current_formulation,
 };
 use crate::rules::covid19::seasons::CovidSeason;
 use chrono::NaiveDate;
@@ -62,14 +61,18 @@ impl<'a> CovidDoseFact<'a> {
         if selected.contains_cvx(self.raw.cvx) {
             return CvxRelationship::MemberOfSelectedSeries;
         }
-        if selected.season == CovidSeason::Aug2025 && !is_aug2025_current_formulation(self.raw.cvx) {
+        if selected.season == CovidSeason::Aug2025 && !is_aug2025_current_formulation(self.raw.cvx)
+        {
             return CvxRelationship::SupportedButOldProduct;
         }
         CvxRelationship::CovidButNotThisSeries
     }
 }
 
-pub fn normalize_covid_history<'a>(patient: &Patient, history: &'a [Dose]) -> Vec<CovidDoseFact<'a>> {
+pub fn normalize_covid_history<'a>(
+    patient: &Patient,
+    history: &'a [Dose],
+) -> Vec<CovidDoseFact<'a>> {
     history
         .iter()
         .map(|dose| CovidDoseFact::from_dose(patient, dose))

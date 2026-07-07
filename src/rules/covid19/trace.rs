@@ -1,10 +1,10 @@
 #![allow(dead_code)]
 
 use crate::models::{DoseEvaluation, Patient, SeriesForecast};
-use crate::rules::covid19::facts::{CovidAgeFacts, CovidDoseFact, normalize_covid_history};
+use crate::rules::covid19::facts::{CovidAgeFacts, CovidDoseFact};
 use crate::rules::covid19::policy::{CovidSeriesPolicy, CvxRelationship};
 use crate::rules::covid19::products::CovidProductFamily;
-use crate::rules::covid19::selection::select_aug2025_policy;
+use crate::rules::covid19::state::CovidEvaluatedState;
 use chrono::NaiveDate;
 use std::fmt::Write;
 
@@ -22,42 +22,51 @@ pub struct CovidTraceDose {
 }
 
 #[derive(Debug, Clone)]
-pub struct CovidTrace<'a> {
-    pub selected_series: &'a CovidSeriesPolicy,
+pub struct CovidTrace {
+    pub selected_series: &'static CovidSeriesPolicy,
     pub patient_age_at_eval: CovidAgeFacts,
     pub doses: Vec<CovidTraceDose>,
     pub forecast: Option<SeriesForecast>,
 }
 
-impl<'a> CovidTrace<'a> {
+impl CovidTrace {
     pub fn from_policy_inputs(
         patient: &Patient,
         eval_date: NaiveDate,
-        selected_series: &'a CovidSeriesPolicy,
+        selected_series: &'static CovidSeriesPolicy,
         facts: &[CovidDoseFact<'_>],
         evaluations: &[DoseEvaluation],
         forecast: Option<SeriesForecast>,
     ) -> Self {
-        let doses = facts
+        let state =
+            CovidEvaluatedState::from_selected_policy(selected_series, facts.to_vec(), evaluations);
+        Self::from_state(patient, eval_date, &state, forecast)
+    }
+
+    pub fn from_state(
+        patient: &Patient,
+        eval_date: NaiveDate,
+        state: &CovidEvaluatedState<'_>,
+        forecast: Option<SeriesForecast>,
+    ) -> Self {
+        let doses = state
+            .dose_facts
             .iter()
             .map(|fact| CovidTraceDose {
                 date: fact.raw.date,
                 cvx: fact.raw.cvx,
                 season: fact.season.ice_key(),
                 product_family: product_family_name(fact.product.family),
-                relationship: fact.relationship_to(selected_series),
+                relationship: state.relationship_for_fact(*fact),
                 supported_by_java_covid: fact.supported_by_java_covid,
                 age_at_dose: fact.age_at_dose,
                 age_at_season_start: fact.age_at_season_start,
-                evaluation: evaluations
-                    .iter()
-                    .find(|eval| eval.dose_date == fact.raw.date && eval.cvx == fact.raw.cvx)
-                    .cloned(),
+                evaluation: state.evaluation_for_fact(fact).cloned(),
             })
             .collect();
 
         Self {
-            selected_series,
+            selected_series: state.selected_series,
             patient_age_at_eval: CovidAgeFacts::at(patient, eval_date),
             doses,
             forecast,
@@ -197,19 +206,9 @@ pub fn format_aug2025_policy_trace(
     evaluations: &[DoseEvaluation],
     forecast: Option<&SeriesForecast>,
 ) -> String {
-    let facts = normalize_covid_history(patient, history);
-    let selected_policy = select_aug2025_policy(patient, eval_date, &facts);
-    CovidTrace::from_policy_inputs(
-        patient,
-        eval_date,
-        selected_policy,
-        &facts,
-        evaluations,
-        forecast.cloned(),
-    )
-    .format()
+    let state = CovidEvaluatedState::from_aug2025_policy(patient, history, eval_date, evaluations);
+    CovidTrace::from_state(patient, eval_date, &state, forecast.cloned()).format()
 }
-
 fn write_source_refs(out: &mut String, label: &str, refs: &[&str]) {
     if !refs.is_empty() {
         let _ = writeln!(out, "{} = {:?}", label, refs);

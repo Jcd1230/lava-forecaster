@@ -104,10 +104,7 @@ const SRC_SERIES_AUG2025_2_TO_64: IceSourceRefs = IceSourceRefs {
 };
 
 const SRC_SERIES_AUG2025_GTE65: IceSourceRefs = IceSourceRefs {
-    series_selection: &[
-        "SeriesSelection.drl:922-930",
-        "SeriesSelection.drl:959-986",
-    ],
+    series_selection: &["SeriesSelection.drl:922-930", "SeriesSelection.drl:959-986"],
     evaluation: &[
         "Evaluation^COVID19^Aug2025Season.dslr:31-235",
         "Evaluation^COVID19^Aug2025Season.dslr:205-235",
@@ -145,7 +142,10 @@ const SRC_SEP2023_AUG2024_UNDER5: IceSourceRefs = IceSourceRefs {
 };
 
 const SRC_SEP2023_AUG2024_GTE5: IceSourceRefs = IceSourceRefs {
-    series_selection: &["SeriesSelection.drl:997-1039", "SeriesSelection.drl:1055-1072"],
+    series_selection: &[
+        "SeriesSelection.drl:997-1039",
+        "SeriesSelection.drl:1055-1072",
+    ],
     evaluation: &["Evaluation^COVID19^Sep2023Season.dslr"],
     recommendation: &["Recommendation^COVID19^Sep2023Season.dslr"],
     yaml: &["covid_19_sep_2023_gte_5_series.yml"],
@@ -153,7 +153,10 @@ const SRC_SEP2023_AUG2024_GTE5: IceSourceRefs = IceSourceRefs {
 };
 
 const SRC_SEP2023_AUG2024_NOVAVAX: IceSourceRefs = IceSourceRefs {
-    series_selection: &["SeriesSelection.drl:997-1039", "SeriesSelection.drl:1077-1097"],
+    series_selection: &[
+        "SeriesSelection.drl:997-1039",
+        "SeriesSelection.drl:1077-1097",
+    ],
     evaluation: &["Evaluation^COVID19^Sep2023Season.dslr"],
     recommendation: &["Recommendation^COVID19^Sep2023Season.dslr"],
     yaml: &["covid_19_sep_2023_novavax_series.yml"],
@@ -172,7 +175,9 @@ pub const COVID_SERIES_POLICIES: &[CovidSeriesPolicy] = &[
         selection: SeriesSelectionPolicy::LegacyDefault,
         dose_identity: DoseIdentityPolicy::ChronologicalWithinCollapsedPriorLt5,
         overflow: OverflowPolicy::AcceptedKeepsDoseNumber,
-        intervals: IntervalPolicy::unspecified(IntervalAnchorPolicy::LastValidOrAcceptedHistoricalDose),
+        intervals: IntervalPolicy::unspecified(
+            IntervalAnchorPolicy::LastValidOrAcceptedHistoricalDose,
+        ),
         evaluation: EvaluationPolicy::LegacyCovid,
         forecast: ForecastPolicy::legacy(ForecastAnchorPolicy::SeasonStart),
         sources: IceSourceRefs::empty(),
@@ -236,7 +241,9 @@ pub const COVID_SERIES_POLICIES: &[CovidSeriesPolicy] = &[
         selection: SeriesSelectionPolicy::Gte5,
         dose_identity: DoseIdentityPolicy::SeasonLocal,
         overflow: OverflowPolicy::AcceptedKeepsDoseNumber,
-        intervals: IntervalPolicy::unspecified(IntervalAnchorPolicy::LastValidOrAcceptedHistoricalDose),
+        intervals: IntervalPolicy::unspecified(
+            IntervalAnchorPolicy::LastValidOrAcceptedHistoricalDose,
+        ),
         evaluation: EvaluationPolicy::Sep2023OrAug2024Gte5,
         forecast: ForecastPolicy::legacy(ForecastAnchorPolicy::SeasonStart),
         sources: SRC_SEP2023_AUG2024_GTE5,
@@ -316,7 +323,9 @@ pub const COVID_SERIES_POLICIES: &[CovidSeriesPolicy] = &[
         selection: SeriesSelectionPolicy::Gte5,
         dose_identity: DoseIdentityPolicy::SeasonLocal,
         overflow: OverflowPolicy::AcceptedKeepsDoseNumber,
-        intervals: IntervalPolicy::unspecified(IntervalAnchorPolicy::LastValidOrAcceptedHistoricalDose),
+        intervals: IntervalPolicy::unspecified(
+            IntervalAnchorPolicy::LastValidOrAcceptedHistoricalDose,
+        ),
         evaluation: EvaluationPolicy::Sep2023OrAug2024Gte5,
         forecast: ForecastPolicy::legacy(ForecastAnchorPolicy::SeasonStart),
         sources: SRC_SEP2023_AUG2024_GTE5,
@@ -391,7 +400,9 @@ pub fn policy_by_id(id: CovidSeriesId) -> Option<&'static CovidSeriesPolicy> {
     COVID_SERIES_POLICIES.iter().find(|policy| policy.id == id)
 }
 
-pub fn policies_for_season(season: CovidSeason) -> impl Iterator<Item = &'static CovidSeriesPolicy> {
+pub fn policies_for_season(
+    season: CovidSeason,
+) -> impl Iterator<Item = &'static CovidSeriesPolicy> {
     COVID_SERIES_POLICIES
         .iter()
         .filter(move |policy| policy.season == season)

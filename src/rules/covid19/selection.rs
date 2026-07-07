@@ -21,8 +21,7 @@ pub fn select_aug2025_policy(
     }
 
     if should_select_aug2025_gte65(patient, eval_date, facts) {
-        return policy_by_id(CovidSeriesId::Aug2025Age65Plus)
-            .expect("Aug2025 65+ policy missing");
+        return policy_by_id(CovidSeriesId::Aug2025Age65Plus).expect("Aug2025 65+ policy missing");
     }
 
     policy_by_id(CovidSeriesId::Aug2025Age2To64).expect("Aug2025 2-64 policy missing")
