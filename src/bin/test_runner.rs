@@ -1,7 +1,7 @@
 use clap::Parser;
 use lava_forecaster::{
     evaluate_patient_all_groups,
-    models::{DoseStatus, ExpectedResults, SeriesForecast, UnifiedTestCase},
+    models::{DoseEvaluation, DoseStatus, ExpectedResults, SeriesForecast, UnifiedTestCase},
 };
 use rayon::prelude::*;
 use std::collections::{BTreeMap, HashMap};
@@ -169,7 +169,7 @@ enum Commands {
         /// Print detailed side-by-side evaluation tables for all cases
         #[arg(long, short)]
         verbose: bool,
-        /// Print a step-by-step decision trace to stdout for ran cases
+        /// Print a step-by-step decision trace to stdout; COVID19 also prints normalized policy facts
         #[arg(long, aliases = ["explain"])]
         trace: bool,
         /// Write structured mismatch summary JSON to this path
@@ -207,7 +207,7 @@ enum Commands {
         /// Print detailed side-by-side evaluation tables for all cases
         #[arg(long, short)]
         verbose: bool,
-        /// Print a step-by-step decision trace to stdout for ran cases
+        /// Print a step-by-step decision trace to stdout; COVID19 also prints normalized policy facts
         #[arg(long, aliases = ["explain"])]
         trace: bool,
         /// Print only the final summary and omit individual case failures/details
@@ -495,6 +495,7 @@ fn main() {
                 rust_fc: Option<SeriesForecast>,
                 expected_results: Option<ExpectedResults>,
                 traces: Vec<lava_forecaster::engine::DecisionTrace>,
+                covid_trace: Option<String>,
                 case_summary: Option<crate::summary_report::CaseSummaryReport>,
             }
 
@@ -539,6 +540,7 @@ fn main() {
                                     rust_fc: None,
                                     expected_results: None,
                                     traces: Vec::new(),
+                                    covid_trace: None,
                                     case_summary: Some(case_summary),
                                 };
                             }
@@ -564,6 +566,13 @@ fn main() {
                         };
                         (rust_evals, rust_fc, traces)
                     };
+
+                    let covid_trace = build_covid_policy_trace(
+                        tc,
+                        &rust_evals,
+                        rust_fc.as_ref(),
+                        trace_mode,
+                    );
 
                     let expected_results = if compare_java_url.is_some()
                         && is_group_supported_by_java(&tc.group)
@@ -591,6 +600,7 @@ fn main() {
                                     rust_fc,
                                     expected_results: None,
                                     traces: Vec::new(),
+                                    covid_trace,
                                     case_summary: Some(case_summary),
                                 };
                             }
@@ -614,6 +624,7 @@ fn main() {
                                     rust_fc,
                                     expected_results: None,
                                     traces: Vec::new(),
+                                    covid_trace,
                                     case_summary: Some(case_summary),
                                 };
                             }
@@ -745,6 +756,7 @@ fn main() {
                         rust_fc,
                         expected_results,
                         traces,
+                        covid_trace,
                         case_summary: Some(case_summary),
                     }
                 })
@@ -779,6 +791,12 @@ fn main() {
                         );
                     }
                     println!("=== End Trace ===");
+                }
+
+                if let Some(covid_trace) = &outcome.covid_trace {
+                    println!("\n=== COVID Policy Trace for: {} ===", outcome.name);
+                    print!("{}", covid_trace);
+                    println!("=== End COVID Policy Trace ===");
                 }
 
                 if verbose {
@@ -1077,6 +1095,14 @@ fn main() {
                     }
                 }
 
+                if let Some(covid_trace) =
+                    build_covid_policy_trace(&tc, &rust_evals, rust_fc.as_ref(), trace_mode)
+                {
+                    println!("\n=== COVID Policy Trace for: {} ===", tc.name);
+                    print!("{}", covid_trace);
+                    println!("=== End COVID Policy Trace ===");
+                }
+
                 let mut is_ok = true;
                 let mut errors = Vec::new();
 
@@ -1292,6 +1318,27 @@ fn main() {
             }
         }
     }
+}
+
+fn build_covid_policy_trace(
+    tc: &UnifiedTestCase,
+    rust_evals: &[DoseEvaluation],
+    rust_fc: Option<&SeriesForecast>,
+    trace_mode: bool,
+) -> Option<String> {
+    if !trace_mode || !tc.group.eq_ignore_ascii_case("COVID19") {
+        return None;
+    }
+
+    Some(
+        lava_forecaster::rules::covid19::trace::format_aug2025_policy_trace(
+            &tc.patient,
+            &tc.history,
+            tc.execution_date,
+            rust_evals,
+            rust_fc,
+        ),
+    )
 }
 
 fn filter_cases(
