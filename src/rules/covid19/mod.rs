@@ -2,6 +2,7 @@ use crate::rules::VaccineGroupDefinition;
 use crate::schedule::CompiledSeries;
 
 pub mod facts;
+pub mod forecasting;
 pub mod overrides;
 pub mod policy;
 pub mod products;

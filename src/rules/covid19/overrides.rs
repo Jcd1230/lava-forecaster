@@ -8,6 +8,8 @@ use crate::models::{
     Cvx, Dose, DoseEvaluation, DoseStatus, EvaluationReason, Patient, SeriesForecast, SeriesStatus,
     VaccineGroupForecast,
 };
+use crate::rules::covid19::forecasting::apply_aug2025_age_2_to_64_no_history_forecast;
+use crate::rules::covid19::state::CovidEvaluatedState;
 use chrono::NaiveDate;
 use lava_cvx_macro::cvx;
 use std::collections::HashMap;
@@ -710,6 +712,8 @@ pub fn covid19_custom_forecast_hook(
         return;
     }
 
+    let policy_state =
+        CovidEvaluatedState::from_aug2025_policy(patient, history, eval_date, &evaluations);
     let current_season_valid_doses: Vec<&DoseEvaluation> = evaluations
         .iter()
         .filter(|e| {
@@ -1015,6 +1019,7 @@ pub fn covid19_custom_forecast_hook(
                 .recommended_date()
                 .map(|d| d.max(season_start()).max(age_6m)),
         );
+        apply_aug2025_age_2_to_64_no_history_forecast(&policy_state, forecast);
     } else if active_series_name == "COVID_19_AUG_2025_GTE_65_SERIES" {
         if current_season_valid_doses.len() >= 2 {
             forecast.status = SeriesStatus::Complete;
