@@ -6,6 +6,7 @@ pub mod policy;
 pub mod products;
 pub mod schedules;
 pub mod seasons;
+pub mod selection;
 pub mod series;
 pub mod trace;
 pub mod overrides;
