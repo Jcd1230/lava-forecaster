@@ -73,3 +73,18 @@ jobs:
             lava-forecaster-wasm-nodejs.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  upload-source-bundle:
+    needs: create-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build Source Bundle
+        run: ./scripts/bundle_source.sh
+      - name: Upload Source Bundle
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/lava-forecaster-source-bundle.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
