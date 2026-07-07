@@ -22,6 +22,79 @@ Full suite:      3243 / 4834
 
 The remaining failures are increasingly difficult to fix with local patches because the Rust implementation collapses several Java ICE concepts into a small number of ad hoc buckets inside `src/rules/covid19/overrides.rs`.
 
+## Implementation status as of scaffolding commits
+
+The first behavior-neutral implementation passes have already been completed after this plan was written.
+
+Committed scaffolding:
+
+```text
+lpsvtxnq 7acdfe9f Add COVID policy model scaffolding
+sqtpsyyz ff0c3571 Add COVID dose fact and trace scaffolding
+tvozvuyp 3287f9ee Add COVID Aug 2025 selection scaffolding
+```
+
+Current COVID files:
+
+```text
+src/rules/covid19/facts.rs
+src/rules/covid19/mod.rs
+src/rules/covid19/overrides.rs
+src/rules/covid19/policy.rs
+src/rules/covid19/products.rs
+src/rules/covid19/schedules.rs
+src/rules/covid19/seasons.rs
+src/rules/covid19/selection.rs
+src/rules/covid19/series.rs
+src/rules/covid19/trace.rs
+```
+
+Implemented so far:
+
+- `seasons.rs`: `CovidSeason` plus Java ICE season boundaries and ICE key conversion.
+- `products.rs`: `CovidProductFamily`, formulation-era classification, Java-supported COVID CVX classification, Aug 2025 current-formulation helper, and legacy pediatric product helper.
+- `policy.rs`: core COVID policy model, including `CovidSeriesId`, `CovidSeriesPolicy`, dose identity, overflow, interval anchor, forecast anchor, evaluation, forecast, and source-reference enums/structs.
+- `series.rs`: initial `COVID_SERIES_POLICIES` table with Dec 2020, Sep 2023, Aug 2024, and Aug 2025 policy entries, CVX member sets, max-dose hints, source references, and notes.
+- `facts.rs`: normalized `CovidDoseFact` and `CovidAgeFacts` helpers, plus relationship calculation against a selected series.
+- `trace.rs`: trace data structures that can be built from selected policy, normalized facts, evaluations, and optional forecast.
+- `selection.rs`: behavior-neutral Aug 2025 selection helper mirroring the main Java `SeriesSelection.drl` branches for LT2, 2-64, and 65+.
+
+Validation after each scaffolding commit remained behavior-neutral:
+
+```text
+COVID suite:     327 / 479
+COVID fuzz-bank: 5228 / 8815
+Full suite:      3243 / 4834
+```
+
+Important: these modules are currently mostly scaffolding. Production COVID behavior still primarily runs through `src/rules/covid19/overrides.rs` and `src/rules/covid19/schedules.rs`. The next agent should not re-add these types; it should begin wiring them into a low-risk trace/classification path or migrate one small behavior branch.
+
+## Recommended next handoff target
+
+The next best step is to make the scaffolding useful for parity work without changing forecast/evaluation behavior.
+
+Recommended target:
+
+1. Add a focused COVID trace/debug pathway that can print the normalized facts and selected Aug 2025 policy for a single case.
+2. Prefer wiring this through an existing verbose/debug/test-runner pathway if available.
+3. Keep normal test output and behavior unchanged.
+4. Validate that COVID suite, COVID fuzz-bank, and full suite remain unchanged.
+
+A good first trace target is not to replace Java parity logic, but to let an agent see facts like this for a failing case:
+
+```text
+selected_policy = Aug2025Age2To64
+Dose 2025-08-27 CVX 310:
+  season = COVID_19_AUG_2025_SEASON
+  product_family = PfizerPediatric
+  relationship_to_selected_series = CovidButNotThisSeries
+  supported_by_java_covid = true
+  age_at_dose.under_2_years = false
+```
+
+After trace support exists, use it to bucket remaining failures by semantic cause rather than raw date/status deltas.
+
+
 Examples of concepts currently entangled in `overrides.rs`:
 
 - COVID season classification.
