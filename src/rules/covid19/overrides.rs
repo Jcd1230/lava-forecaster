@@ -701,13 +701,7 @@ pub fn covid19_custom_forecast_hook(
         forecast.status = forecast
             .status
             .with_recommended_date(Some(active_season_start));
-        forecast.status = forecast
-            .status
-            .with_overdue_date(if eval_date >= active_season_start {
-                Some(active_season_start)
-            } else {
-                None
-            });
+        forecast.status = forecast.status.with_overdue_date(None);
         forecast.status = forecast.status.with_latest_date(None);
         return;
     }
