@@ -100,7 +100,27 @@ pub struct Covid19SemanticReport {
     pub policy_interval_anchor: String,
     pub policy_forecast_anchor: String,
     pub current_season_dose_count: usize,
+    #[serde(default)]
+    pub current_season_supported_dose_count: usize,
+    #[serde(default)]
+    pub current_season_valid_dose_count: usize,
+    #[serde(default)]
+    pub current_season_invalid_nonseries_dose_count: usize,
     pub supported_dose_count: usize,
+    #[serde(default)]
+    pub relationship_shape: String,
+    #[serde(default)]
+    pub current_season_relationship_shape: String,
+    #[serde(default)]
+    pub current_season_status_shape: String,
+    #[serde(default)]
+    pub latest_not_ignored_covid_shot: Option<String>,
+    #[serde(default)]
+    pub latest_valid_current_season_shot: Option<String>,
+    #[serde(default)]
+    pub latest_invalid_current_season_nonseries_shot: Option<String>,
+    #[serde(default)]
+    pub latest_invalid_forecast_anchor_shot: Option<String>,
     pub dose_facts: Vec<Covid19DoseFactReport>,
 }
 
@@ -215,9 +235,120 @@ fn build_covid19_semantics(
         policy_interval_anchor: format!("{:?}", selected_policy.intervals.anchor),
         policy_forecast_anchor: format!("{:?}", selected_policy.forecast.anchor),
         current_season_dose_count: state.current_season_dose_count(),
+        current_season_supported_dose_count: current_season_supported_dose_count(&state),
+        current_season_valid_dose_count: state.current_season_valid_dose_count(),
+        current_season_invalid_nonseries_dose_count: current_season_invalid_nonseries_dose_count(
+            &state,
+        ),
         supported_dose_count: state.supported_dose_count(),
+        relationship_shape: relationship_shape(&state, false),
+        current_season_relationship_shape: relationship_shape(&state, true),
+        current_season_status_shape: status_shape(&state, true),
+        latest_not_ignored_covid_shot: fact_anchor_label(
+            &state,
+            state.latest_not_ignored_covid_shot,
+        ),
+        latest_valid_current_season_shot: fact_anchor_label(
+            &state,
+            state.latest_valid_current_season_shot,
+        ),
+        latest_invalid_current_season_nonseries_shot: fact_anchor_label(
+            &state,
+            state.latest_invalid_current_season_nonseries_shot,
+        ),
+        latest_invalid_forecast_anchor_shot: fact_anchor_label(
+            &state,
+            state.latest_invalid_forecast_anchor_shot,
+        ),
         dose_facts,
     })
+}
+
+fn current_season_supported_dose_count(state: &CovidEvaluatedState<'_>) -> usize {
+    state
+        .dose_facts
+        .iter()
+        .filter(|fact| fact.season == state.selected_series.season)
+        .filter(|fact| fact.supported_by_java_covid)
+        .count()
+}
+
+fn current_season_invalid_nonseries_dose_count(state: &CovidEvaluatedState<'_>) -> usize {
+    state
+        .dose_facts
+        .iter()
+        .filter(|fact| fact.season == state.selected_series.season)
+        .filter(|fact| {
+            state
+                .evaluation_for_fact(fact)
+                .map(|eval| eval.status == DoseStatus::Invalid)
+                .unwrap_or(false)
+        })
+        .filter(|fact| {
+            format!("{:?}", state.relationship_for_fact(**fact)) != "MemberOfSelectedSeries"
+        })
+        .count()
+}
+
+fn relationship_shape(state: &CovidEvaluatedState<'_>, current_season_only: bool) -> String {
+    let mut counts = BTreeMap::new();
+    for fact in &state.dose_facts {
+        if current_season_only && fact.season != state.selected_series.season {
+            continue;
+        }
+        let relationship = state.relationship_for_fact(*fact);
+        *counts
+            .entry(format!("{:?}", relationship))
+            .or_insert(0usize) += 1;
+    }
+    compact_count_shape(&counts)
+}
+
+fn status_shape(state: &CovidEvaluatedState<'_>, current_season_only: bool) -> String {
+    let mut counts = BTreeMap::new();
+    for fact in &state.dose_facts {
+        if current_season_only && fact.season != state.selected_series.season {
+            continue;
+        }
+        let status = state
+            .evaluation_for_fact(fact)
+            .map(|eval| format!("{:?}", eval.status))
+            .unwrap_or_else(|| "NoRustEval".to_string());
+        *counts.entry(status).or_insert(0usize) += 1;
+    }
+    compact_count_shape(&counts)
+}
+
+fn compact_count_shape(counts: &BTreeMap<String, usize>) -> String {
+    if counts.is_empty() {
+        return "none".to_string();
+    }
+    counts
+        .iter()
+        .map(|(label, count)| format!("{}={}", label, count))
+        .collect::<Vec<_>>()
+        .join(",")
+}
+
+fn fact_anchor_label(state: &CovidEvaluatedState<'_>, index: Option<usize>) -> Option<String> {
+    let index = index?;
+    let fact = state.dose_facts.get(index)?;
+    let evaluation = state.evaluation_for_fact(fact);
+    Some(format!(
+        "{} CVX {} {} {:?} {:?} {} dose{}",
+        fact.raw.date,
+        fact.raw.cvx.0,
+        fact.season.ice_key(),
+        fact.product.family,
+        state.relationship_for_fact(*fact),
+        evaluation
+            .map(|eval| format!("{:?}", eval.status))
+            .unwrap_or_else(|| "NoRustEval".to_string()),
+        evaluation
+            .and_then(|eval| eval.dose_number)
+            .map(|dose| dose.to_string())
+            .unwrap_or_else(|| "?".to_string())
+    ))
 }
 
 pub fn write_run_summary(path: &Path, report: &RunSummaryReport) -> Result<(), String> {
@@ -448,6 +579,11 @@ fn print_summary_report(report: &RunSummaryReport) {
     let mut covid_policy_case_shapes = BTreeMap::new();
     let mut covid_forecast_anchors = BTreeMap::new();
     let mut covid_dose_relationships = BTreeMap::new();
+    let mut covid_policy_fact_shapes = BTreeMap::new();
+    let mut covid_current_season_relationship_shapes = BTreeMap::new();
+    let mut covid_current_season_status_shapes = BTreeMap::new();
+    let mut covid_latest_not_ignored_anchors = BTreeMap::new();
+    let mut covid_latest_invalid_forecast_anchors = BTreeMap::new();
     let mut covid_eval_transitions_by_policy = BTreeMap::new();
     let mut covid_forecast_deltas_by_policy = BTreeMap::new();
     let mut same_day_failed_cases = 0usize;
@@ -482,6 +618,39 @@ fn print_summary_report(report: &RunSummaryReport) {
                     covid.selected_policy, covid.policy_forecast_anchor
                 ))
                 .or_insert(0usize) += 1;
+            *covid_policy_fact_shapes
+                .entry(format!(
+                    "{} / facts={} / current={} / current_supported={} / current_valid={} / current_invalid_nonseries={}",
+                    covid.selected_policy,
+                    covid.dose_facts.len(),
+                    covid.current_season_dose_count,
+                    covid.current_season_supported_dose_count,
+                    covid.current_season_valid_dose_count,
+                    covid.current_season_invalid_nonseries_dose_count,
+                ))
+                .or_insert(0usize) += 1;
+            *covid_current_season_relationship_shapes
+                .entry(format!(
+                    "{} / {}",
+                    covid.selected_policy, covid.current_season_relationship_shape
+                ))
+                .or_insert(0usize) += 1;
+            *covid_current_season_status_shapes
+                .entry(format!(
+                    "{} / {}",
+                    covid.selected_policy, covid.current_season_status_shape
+                ))
+                .or_insert(0usize) += 1;
+            if let Some(anchor) = &covid.latest_not_ignored_covid_shot {
+                *covid_latest_not_ignored_anchors
+                    .entry(format!("{} / {}", covid.selected_policy, anchor))
+                    .or_insert(0usize) += 1;
+            }
+            if let Some(anchor) = &covid.latest_invalid_forecast_anchor_shot {
+                *covid_latest_invalid_forecast_anchors
+                    .entry(format!("{} / {}", covid.selected_policy, anchor))
+                    .or_insert(0usize) += 1;
+            }
             for fact in &covid.dose_facts {
                 *covid_dose_relationships
                     .entry(format!(
@@ -549,6 +718,23 @@ fn print_summary_report(report: &RunSummaryReport) {
     print_count_section("COVID selected policies", &covid_selected_policies);
     print_count_section("COVID policy case shapes", &covid_policy_case_shapes);
     print_count_section("COVID forecast anchors", &covid_forecast_anchors);
+    print_count_section("COVID policy fact shapes", &covid_policy_fact_shapes);
+    print_count_section(
+        "COVID current-season relationship shapes",
+        &covid_current_season_relationship_shapes,
+    );
+    print_count_section(
+        "COVID current-season status shapes",
+        &covid_current_season_status_shapes,
+    );
+    print_count_section(
+        "COVID latest non-ignored anchors",
+        &covid_latest_not_ignored_anchors,
+    );
+    print_count_section(
+        "COVID latest invalid forecast anchors",
+        &covid_latest_invalid_forecast_anchors,
+    );
     print_count_section(
         "COVID dose relationship occurrences",
         &covid_dose_relationships,
