@@ -6,7 +6,7 @@ use chrono::NaiveDate;
 use lava_forecaster::models::{
     DoseEvaluation, DoseStatus, ExpectedResults, SeriesForecast, UnifiedTestCase,
 };
-use lava_forecaster::rules::covid19::state::CovidEvaluatedState;
+use lava_forecaster::rules::covid19::{seasons::CovidSeason, state::CovidEvaluatedState};
 use serde::{Deserialize, Serialize};
 
 use crate::eval_match::pair_evaluations_by_occurrence;
@@ -96,6 +96,16 @@ pub struct Covid19SemanticReport {
     pub selected_policy: String,
     pub selected_policy_ice_name: String,
     pub policy_season: String,
+    #[serde(default)]
+    pub execution_date: Option<NaiveDate>,
+    #[serde(default)]
+    pub execution_season: String,
+    #[serde(default)]
+    pub policy_matches_execution_season: bool,
+    #[serde(default)]
+    pub rust_forecast_series_name: Option<String>,
+    #[serde(default)]
+    pub expected_forecast_series_name: Option<String>,
     pub policy_age_band: String,
     pub policy_interval_anchor: String,
     pub policy_forecast_anchor: String,
@@ -156,6 +166,7 @@ pub fn build_case_summary(
     let same_day_counts = same_day_counts(tc);
     let has_same_day_doses = same_day_counts.values().any(|count| *count > 1);
 
+    let expected_fc = expected.and_then(|expected| expected.forecasts.first());
     let (evaluation_mismatches, forecast_mismatches) = if passed {
         (Vec::new(), Vec::new())
     } else if let Some(expected) = expected {
@@ -182,7 +193,7 @@ pub fn build_case_summary(
         has_same_day_doses,
         evaluation_mismatches,
         forecast_mismatches,
-        covid19_semantics: build_covid19_semantics(tc, rust_evals),
+        covid19_semantics: build_covid19_semantics(tc, rust_evals, rust_fc, expected_fc),
         errors: errors.to_vec(),
     }
 }
@@ -190,6 +201,8 @@ pub fn build_case_summary(
 fn build_covid19_semantics(
     tc: &UnifiedTestCase,
     rust_evals: &[DoseEvaluation],
+    rust_fc: Option<&SeriesForecast>,
+    expected_fc: Option<&SeriesForecast>,
 ) -> Option<Covid19SemanticReport> {
     if !tc.group.eq_ignore_ascii_case("COVID19") {
         return None;
@@ -226,11 +239,17 @@ fn build_covid19_semantics(
             }
         })
         .collect();
+    let execution_season = CovidSeason::for_date(tc.execution_date);
 
     Some(Covid19SemanticReport {
         selected_policy: format!("{:?}", selected_policy.id),
         selected_policy_ice_name: selected_policy.ice_name.to_string(),
         policy_season: selected_policy.season.ice_key().to_string(),
+        execution_date: Some(tc.execution_date),
+        execution_season: execution_season.ice_key().to_string(),
+        policy_matches_execution_season: selected_policy.season == execution_season,
+        rust_forecast_series_name: rust_fc.map(|forecast| forecast.series_name.to_string()),
+        expected_forecast_series_name: expected_fc.map(|forecast| forecast.series_name.to_string()),
         policy_age_band: format!("{:?}", selected_policy.age_band),
         policy_interval_anchor: format!("{:?}", selected_policy.intervals.anchor),
         policy_forecast_anchor: format!("{:?}", selected_policy.forecast.anchor),
@@ -578,6 +597,8 @@ fn print_summary_report(report: &RunSummaryReport) {
     let mut covid_selected_policies = BTreeMap::new();
     let mut covid_policy_case_shapes = BTreeMap::new();
     let mut covid_forecast_anchors = BTreeMap::new();
+    let mut covid_execution_seasons = BTreeMap::new();
+    let mut covid_forecast_series_shapes = BTreeMap::new();
     let mut covid_dose_relationships = BTreeMap::new();
     let mut covid_policy_fact_shapes = BTreeMap::new();
     let mut covid_current_season_relationship_shapes = BTreeMap::new();
@@ -611,6 +632,25 @@ fn print_summary_report(report: &RunSummaryReport) {
                 .or_insert(0usize) += 1;
             *covid_policy_case_shapes
                 .entry(format!("{} / {}", covid.selected_policy, shape))
+                .or_insert(0usize) += 1;
+            *covid_execution_seasons
+                .entry(format!(
+                    "{} / exec={} / policy_matches_exec={}",
+                    covid.selected_policy,
+                    covid.execution_season,
+                    covid.policy_matches_execution_season,
+                ))
+                .or_insert(0usize) += 1;
+            *covid_forecast_series_shapes
+                .entry(format!(
+                    "{} / rust={} / expected={}",
+                    covid.selected_policy,
+                    covid.rust_forecast_series_name.as_deref().unwrap_or("none"),
+                    covid
+                        .expected_forecast_series_name
+                        .as_deref()
+                        .unwrap_or("none"),
+                ))
                 .or_insert(0usize) += 1;
             *covid_forecast_anchors
                 .entry(format!(
@@ -717,6 +757,11 @@ fn print_summary_report(report: &RunSummaryReport) {
     print_count_section("Forecast date deltas", &forecast_deltas);
     print_count_section("COVID selected policies", &covid_selected_policies);
     print_count_section("COVID policy case shapes", &covid_policy_case_shapes);
+    print_count_section("COVID execution seasons", &covid_execution_seasons);
+    print_count_section(
+        "COVID forecast series shapes",
+        &covid_forecast_series_shapes,
+    );
     print_count_section("COVID forecast anchors", &covid_forecast_anchors);
     print_count_section("COVID policy fact shapes", &covid_policy_fact_shapes);
     print_count_section(
